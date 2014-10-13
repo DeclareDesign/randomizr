@@ -1,0 +1,9 @@
+Package: randomizr
+Title: Easy to use tools for common forms of random assignment
+Version: 0.1
+Authors@R: "Alexander Coppock <ac3242@columbia.edu>[aut, cre]" 
+Description: This package generates random assignments for common experimental designs:     simple, complete, and blocked.
+Depends:
+    R (>= 3.1.0)
+License: Go to town.
+LazyData: true
