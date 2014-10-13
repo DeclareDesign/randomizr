@@ -14,7 +14,7 @@ simple_ra(N, prob)
 This function assigns N units to treatment with probability p.  It is a wrapper for rbinom.
 }
 \examples{
-Z <- simple_ra(N=100, m=50)
+Z <- simple_ra(N=100, prob=0.5)
 table(Z)
 }
 \keyword{assignment}

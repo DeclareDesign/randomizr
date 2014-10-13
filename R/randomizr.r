@@ -1,4 +1,4 @@
-# randomisr
+# randomizr
 
 #' Complete Random Assignment
 #'
@@ -23,7 +23,7 @@ return(assign)
 #' @keywords random assignment
 #' @export
 #' @examples
-#' Z <- simple_ra(N=100, m=50)
+#' Z <- simple_ra(N=100, prob=0.5)
 #' table(Z)
 simple_ra <- function(N, prob){
 assign <- rbinom(n=N,size=1,prob=prob)
