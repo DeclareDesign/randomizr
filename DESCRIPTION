@@ -3,8 +3,8 @@ Title: Easy to use tools for common forms of random assignment
 Version: 0.2
 Authors@R: "Alexander Coppock <ac3242@columbia.edu>[aut, cre]"
 Description: This package generates random assignments for common experimental
-    designs: simple, complete, and blocked.
+    designs: simple, complete, blocked, and clustered.
 Depends:
     R (>= 3.1.0)
-License: Go to town.
+License: GPL-3
 LazyData: true

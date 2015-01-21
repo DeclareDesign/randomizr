@@ -30,7 +30,8 @@ table(Z)
 Z <- complete_ra(N=100, m=50)
 table(Z)
 
-Z <- complete_ra(N=100, m_each = c(30, 70), condition_names = c("control", "treatment"))
+Z <- complete_ra(N=100, m_each = c(30, 70),
+                 condition_names = c("control", "treatment"))
 table(Z)
 
 # Multi-arm Designs
@@ -40,7 +41,8 @@ table(Z)
 Z <- complete_ra(N=100, m_each=c(30, 30, 40))
 table(Z)
 
-Z <- complete_ra(N=100, m_each=c(30, 30, 40), condition_names=c("control", "placebo", "treatment"))
+Z <- complete_ra(N=100, m_each=c(30, 30, 40),
+                 condition_names=c("control", "placebo", "treatment"))
 table(Z)
 
 Z <- complete_ra(N=100, condition_names=c("control", "placebo", "treatment"))

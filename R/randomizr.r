@@ -19,7 +19,8 @@
 #' Z <- complete_ra(N=100, m=50)
 #' table(Z)
 #' 
-#' Z <- complete_ra(N=100, m_each = c(30, 70), condition_names = c("control", "treatment"))
+#' Z <- complete_ra(N=100, m_each = c(30, 70), 
+#'                  condition_names = c("control", "treatment"))
 #' table(Z)
 #' 
 #' # Multi-arm Designs
@@ -29,7 +30,8 @@
 #' Z <- complete_ra(N=100, m_each=c(30, 30, 40))
 #' table(Z)
 #' 
-#' Z <- complete_ra(N=100, m_each=c(30, 30, 40), condition_names=c("control", "placebo", "treatment"))
+#' Z <- complete_ra(N=100, m_each=c(30, 30, 40), 
+#'                  condition_names=c("control", "placebo", "treatment"))
 #' table(Z)
 #' 
 #' Z <- complete_ra(N=100, condition_names=c("control", "placebo", "treatment"))
@@ -111,7 +113,8 @@ complete_ra <- function(N,m=NULL, num_arms=NULL, m_each = NULL, condition_names 
 #' Z <- simple_ra(N=100, prob=0.5)
 #' table(Z)
 #' 
-#' Z <- simple_ra(N=100, prob_each = c(0.3, 0.7), condition_names = c("control", "treatment"))
+#' Z <- simple_ra(N=100, prob_each = c(0.3, 0.7), 
+#'                condition_names = c("control", "treatment"))
 #' table(Z)
 #' 
 #' # Multi-arm Designs
@@ -121,7 +124,8 @@ complete_ra <- function(N,m=NULL, num_arms=NULL, m_each = NULL, condition_names 
 #' Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4))
 #' table(Z)
 #' 
-#' Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4), condition_names=c("control", "placebo", "treatment"))
+#' Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4), 
+#'                condition_names=c("control", "placebo", "treatment"))
 #' table(Z)
 #' 
 #' Z <- simple_ra(N=100, condition_names=c("control", "placebo", "treatment"))
@@ -203,7 +207,8 @@ simple_ra <- function(N, prob=NULL, num_arms=NULL, prob_each=NULL, condition_nam
 #'                  c(30, 70),
 #'                  c(50, 150))
 #' 
-#' Z <- block_ra(block_var=block_var, block_m=block_m, condition_names=c("control", "treatment"))
+#' Z <- block_ra(block_var=block_var, block_m=block_m, 
+#'               condition_names=c("control", "treatment"))
 #' table(block_var, Z)
 #' 
 #' # Multi-arm Designs
@@ -216,7 +221,8 @@ simple_ra <- function(N, prob=NULL, num_arms=NULL, prob_each=NULL, condition_nam
 #' Z <- block_ra(block_var=block_var, block_m=block_m )
 #' table(block_var, Z)
 #' 
-#' Z <- block_ra(block_var=block_var, block_m=block_m, condition_names=c("control", "placebo", "treatment"))
+#' Z <- block_ra(block_var=block_var, block_m=block_m, 
+#'               condition_names=c("control", "placebo", "treatment"))
 #' table(block_var, Z)
 #' 
 #' Z <- block_ra(block_var=block_var, block_prob=c(.1, .1, .8))
@@ -297,7 +303,8 @@ block_ra <- function(block_var, num_arms= NULL, block_m=NULL, block_prob=NULL, c
 #' Z <- cluster_ra(clust_var=clust_var, m=13)
 #' table(Z, clust_var)
 #' 
-#' Z <- cluster_ra(clust_var=clust_var, m_each = c(10, 16), condition_names = c("control", "treatment"))
+#' Z <- cluster_ra(clust_var=clust_var, m_each = c(10, 16), 
+#'                 condition_names = c("control", "treatment"))
 #' table(Z, clust_var)
 #' 
 #' # Multi-arm Designs
@@ -307,10 +314,12 @@ block_ra <- function(block_var, num_arms= NULL, block_m=NULL, block_prob=NULL, c
 #' Z <- cluster_ra(clust_var=clust_var, m_each=c(7, 7, 12))
 #' table(Z, clust_var)
 #' 
-#' Z <- cluster_ra(clust_var=clust_var, m_each=c(7, 7, 12), condition_names=c("control", "placebo", "treatment"))
+#' Z <- cluster_ra(clust_var=clust_var, m_each=c(7, 7, 12), 
+#'                 condition_names=c("control", "placebo", "treatment"))
 #' table(Z, clust_var)
 #' 
-#' Z <- cluster_ra(clust_var=clust_var, condition_names=c("control", "placebo", "treatment"))
+#' Z <- cluster_ra(clust_var=clust_var, 
+#'                 condition_names=c("control", "placebo", "treatment"))
 #' table(Z, clust_var)
 cluster_ra <- function(clust_var, m=NULL, num_arms=NULL, m_each = NULL, condition_names = NULL){
   unique_clus <- unique(clust_var)

@@ -37,7 +37,8 @@ block_m <- rbind(c(10, 40),
                  c(30, 70),
                  c(50, 150))
 
-Z <- block_ra(block_var=block_var, block_m=block_m, condition_names=c("control", "treatment"))
+Z <- block_ra(block_var=block_var, block_m=block_m,
+              condition_names=c("control", "treatment"))
 table(block_var, Z)
 
 # Multi-arm Designs
@@ -50,7 +51,8 @@ block_m <- rbind(c(10, 20, 20),
 Z <- block_ra(block_var=block_var, block_m=block_m )
 table(block_var, Z)
 
-Z <- block_ra(block_var=block_var, block_m=block_m, condition_names=c("control", "placebo", "treatment"))
+Z <- block_ra(block_var=block_var, block_m=block_m,
+              condition_names=c("control", "placebo", "treatment"))
 table(block_var, Z)
 
 Z <- block_ra(block_var=block_var, block_prob=c(.1, .1, .8))

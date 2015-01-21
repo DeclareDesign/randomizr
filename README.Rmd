@@ -1,0 +1,36 @@
+---
+output:
+  md_document:
+    variant: markdown_github
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+randomizr is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process.  
+
+Installation from github is easy.  In r:
+
+```{r,eval=FALSE}
+install.packages("devtools")
+devtools::install_github("acoppock/randomizr")
+```
+
+There are four functions in randomizr: simple_ra(), complete_ra(), block_ra(), and cluster_ra(), corresponding to common experimental designs. 
+
+complete_ra() is the workhorse function that will be most appropriate for a large number of experimental situations: it assigns m of N units to treatment:
+
+```{r}
+library(randomizr)
+Z <- complete_ra(N=100, m=50)
+table(Z)
+```
+
+Happy randomizing!
