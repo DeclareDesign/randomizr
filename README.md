@@ -38,14 +38,14 @@ Z <- cluster_ra(clust_var=clust_var, m_each=c(7, 7, 12),
 table(Z, clust_var)
 #>            clust_var
 #> Z            a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u
-#>   control    0  0  0  0  5  6  0  8  0  0 11  0  0  0  0  0 17  0  0  0  0
-#>   placebo    1  0  3  0  0  0  0  0  9  0  0  0 13  0 15  0  0  0  0  0 21
-#>   treatment  0  2  0  4  0  0  7  0  0 10  0 12  0 14  0 16  0 18 19 20  0
+#>   control    0  0  0  4  0  0  0  0  0  0  0 12  0  0  0  0  0 18 19  0  0
+#>   placebo    0  2  3  0  5  0  7  0  0  0 11  0  0  0  0 16  0  0  0  0  0
+#>   treatment  1  0  0  0  0  6  0  8  9 10  0  0 13 14 15  0 17  0  0 20 21
 #>            clust_var
 #> Z            v  w  x  y  z
-#>   control    0  0 24 25  0
-#>   placebo   22  0  0  0  0
-#>   treatment  0 23  0  0 26
+#>   control   22  0 24  0 26
+#>   placebo    0 23  0  0  0
+#>   treatment  0  0  0 25  0
 ```
 
 Happy randomizing!
