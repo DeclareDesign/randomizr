@@ -324,7 +324,13 @@ block_ra <- function(block_var, num_arms= NULL, block_m=NULL, block_prob=NULL, c
 cluster_ra <- function(clust_var, m=NULL, num_arms=NULL, m_each = NULL, condition_names = NULL){
   unique_clus <- unique(clust_var)
   n_clus <- length(unique_clus)
-  z_clus <- complete_ra(N = n_clus, m = m, num_arms = num_arms, m_each = m_each, condition_names = condition_names)
-  merged <- merge(x = data.frame(clust_var), y = data.frame(clust_var=unique_clus, z_clus), by="clust_var")  
+  z_clus <- complete_ra(N = n_clus, m = m, num_arms = num_arms, m_each = m_each, 
+                        condition_names = condition_names)
+  merged <- merge(x = data.frame(clust_var, init_order = 1:length(clust_var)), 
+                  y = data.frame(clust_var=unique_clus, z_clus), by="clust_var")
+  merged <- merged[order(merged$init_order),]
   return(merged$z_clus)
 }
+
+
+
