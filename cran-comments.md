@@ -1,3 +1,6 @@
+## Update randomizr to version 0.2.1
+* small bug fix to cluster_ra()
+
 ## Test environments
 * local OS X install, R 3.1.2
 * win-builder (devel and release)
@@ -8,13 +11,14 @@ There were no ERRORs, or WARNINGs.
 There were 2 NOTES:
 
 * checking CRAN incoming feasibility ... NOTE
-  Maintainer: ‘"Alexander Coppock" <ac3242@columbia.edu>’
-  New submission
+Maintainer: ‘Alexander Coppock <ac3242@columbia.edu>’
 
-  This is indeed my first submission.
+I am unsure why this NOTE appears.  The first time I submitted this package, the note indicated that it was a new submission.
 
 * checking package dependencies ... NOTE
   No repository set, so cyclic dependency check skipped
+
+  This NOTE also appeared when I submitted version 0.2.0.
 
   This NOTE does not appear on win-builder devel or release, but only on my local OS X install.
 

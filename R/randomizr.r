@@ -7,6 +7,7 @@
 #' @param m if specified, a two-group design is assumed.  m is the total number of units to be assigned to treatment. Should only be specified for a two group design in which exactly m of N units to treatment. If not specified, half of the sample (N/2) will be assigned to treatment. Is null by default.
 #' @param num_arms the total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.
 #' @param m_each a numeric vector giving the size of each treatment group. Must sum to N. If unspecified, equally sized (rounded) groups will be assumed.
+#' @param prob_each a numeric giving the probability of assignment to each treatment arm. Must sum to 1.  Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.
 #' @param condition_names a character vector giving the names of the treatment groups.  If unspecified, the treatment groups will be names T1, T2, T3, etc.
 #' @keywords random assignment
 #' @export
@@ -37,19 +38,25 @@
 #' Z <- complete_ra(N=100, condition_names=c("control", "placebo", "treatment"))
 #' table(Z)
 #' 
-complete_ra <- function(N,m=NULL, num_arms=NULL, m_each = NULL, condition_names = NULL){
+complete_ra <- function(N,m=NULL, num_arms=NULL, m_each = NULL, prob_each=NULL, condition_names = NULL){
   
   if(!is.null(m) & !is.null(condition_names)){
     stop("Do not specify m and condition_names together. Use m_each and condition_names instead.")
   }
+  if(!is.null(prob_each) & !is.null(m_each)){
+    stop("Do not specify prob_each and m_each together. Use one or the other.")
+  }
   # Simple 2 group design, returns zeros and ones
-  if(is.null(m_each) & is.null(condition_names) & is.null(num_arms)){
+  if(is.null(m_each) & is.null(condition_names) & is.null(num_arms) & is.null(prob_each)){
     if(is.null(m)){
-      m <- round(N/2)
+      coin_flip <- rbinom(1,1,.5)
+      if(coin_flip==0) m <- floor(N/2)
+      if(coin_flip==1) m <- ceiling(N/2)
     }
     if(m >= N){
       stop("The number of units assigned to treatment (m) must be smaller than the total number of units (N)")
     }
+
     assign <- ifelse(1:N %in% sample(1:N,m),1,0)
     return(assign)
   }
@@ -62,20 +69,35 @@ complete_ra <- function(N,m=NULL, num_arms=NULL, m_each = NULL, condition_names 
   if(all(!is.null(condition_names), !is.null(m_each), length(m_each) != length(condition_names))){
     stop("The length of conditions_names must equal the length of m_each")
   }
+  if(all(!is.null(condition_names), !is.null(prob_each), length(prob_each) != length(condition_names))){
+    stop("The length of conditions_names must equal the length of prob_each")
+  }
   if(all(!is.null(m_each), !is.null(num_arms),length(m_each) != num_arms)){
     stop("The number of arms (n_arms) must equal the length of m_each")
+  }
+  if(all(!is.null(prob_each), !is.null(num_arms),length(prob_each) != num_arms)){
+    stop("The number of arms (n_arms) must equal the length of prob_each")
   }
   if(all(!is.null(condition_names), !is.null(num_arms), length(condition_names) != num_arms)){
     stop("The length of conditions_names must equal the number of arms (n_arms)")
   }
   
+  if(!is.null(prob_each)){
+    if(sum(prob_each)!=1){
+      stop("If specified, the sum of prob_each must equal 1")
+    }
+    m_each <- floor(N*prob_each)
+    remainder <- N - sum(m_each)
+    m_each <- m_each + complete_ra(N=length(prob_each), m= remainder)
+  } 
+  
   if(is.null(m_each)){
     if(is.null(num_arms)){
       num_arms <- length(condition_names)
     }
-    m_each <- rep(floor(N/num_arms), num_arms)
-    remainder = N - sum(m_each)
-    if(remainder != 0){m_each[1:remainder] <- m_each[1:remainder] + 1}
+    m_each <- rep(N%/%num_arms, num_arms)
+    remainder <-  N%%num_arms
+    m_each <- m_each + ifelse(1:num_arms %in% sample(1:num_arms,remainder),1,0)
   }
   
   if(is.null(num_arms)){
@@ -84,6 +106,11 @@ complete_ra <- function(N,m=NULL, num_arms=NULL, m_each = NULL, condition_names 
   
   if(is.null(condition_names)){
     condition_names <- paste0("T", 1:num_arms)
+  }
+  
+  if(N < num_arms){
+    assign <- sample(condition_names, N, replace=FALSE)
+    return(assign)
   }
   
   rand_order <- sample(1:N,replace = FALSE)
@@ -272,12 +299,13 @@ block_ra <- function(block_var, num_arms= NULL, block_m=NULL, block_prob=NULL, c
   }
   
   if(!is.null(block_prob)){
+    
     for(i in 1:length(blocks)){
       if(sum(block_prob)!=1){
         stop("block_prob must sum to 1.")
       }
       N_block <- sum(block_var==blocks[i])
-      assign[block_var==blocks[i]] <- complete_ra(N = N_block, m_each = round(N_block * block_prob), condition_names=condition_names)
+      assign[block_var==blocks[i]] <- complete_ra(N = N_block, prob_each = block_prob, condition_names=condition_names)
     }
     return(assign)
   }

@@ -1,0 +1,438 @@
+---
+title: "Design and Analysis of Experiments with Randomizr"
+author: "Alexander Coppock"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Design and Analysis of Experiments with Randomizr}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+`randomizr` is a small package for r that simplifies the design and analysis of randomized experiments.  In particular, it makes the random assignment **procedure** transparent, flexible, and most importantly reproduceable.  By the time that many experiments are written up and made public, the process by which some units recieved treatments is lost or imprecisely described. The `randomizr` package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.
+
+A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage.  First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a **cluster**. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of uncertainty will be overconfident.
+
+# A Hypothetical Experiment
+Throughout this vignette, we'll pretend we're conducting an experiment among the 592 individuals in the built-in `HairEyeColor` dataset. As we'll see, there are many ways to randomly assign subjects to treatments. We'll step through four common designs, each associated with one of the four `randomizr` functions: `simple_ra()`, `complete_ra()`, `block_ra()`, and `cluster_ra()`.
+
+## Setting up the experiment
+
+We first need to transform the dataset, which has each row describe a **type** of subject, to a new dataset in which each row describes an individual subject.
+
+```{r}
+# Load built-in dataset
+data(HairEyeColor)
+HairEyeColor <- data.frame(HairEyeColor)
+
+# Transform so each row is a subject
+# Columns describe subject's hair color, eye color, and gender
+hec <- HairEyeColor[rep(1:nrow(HairEyeColor),
+                        times = HairEyeColor$Freq), 1:3]
+
+N <- nrow(hec)
+
+# Fix the rownames
+rownames(hec) <- 1:N
+```
+
+Typically, researchers know some basic information about their subjects before deploying treatment. For example, they usually know how many subjects there are in the experimental sample (N), and they usually know some basic demographic information about each subject.
+
+Our new dataset has `r N` subjects. We have three pretreatment covariates, `Hair`, `Eye`, and `Sex`, which describe the hair color, eye color, and gender of each subject. 
+
+We now need to create simulated *potential outcomes*. We'll call the untreated outcome `Y0` and we'll call the treated outcome `Y1`. Imagine that in the absence of any intervention, the outcome (`Y0`) is correlated with out pretreatment covariates. Imagine further that the effectiveness of the program varies according to these covariates, i.e., the difference between `Y1` and `Y0` is correlated with the pretreatment covariates.
+
+If we were really running an experiment, we would only observe either `Y0` or `Y1` for each subject, but since we are simulating, we generate both. Our inferential target is the average treatment effect (ATE), which is defined as the average difference between `Y0` and `Y1`.
+
+```{r}
+# Set a seed for reproducability
+set.seed(343)
+
+# Create untreated and treated outcomes for all subjects
+hec <- within(hec,{
+  Y0 <- rnorm(n = N,mean = (2*as.numeric(Hair) + -4*as.numeric(Eye) + -6*as.numeric(Sex)), sd = 5)
+  Y1 <- Y0 + 6*as.numeric(Hair) + 4*as.numeric(Eye) + 2*as.numeric(Sex)
+})
+
+# Calculate true ATE
+with(hec, mean(Y1 - Y0))
+```
+
+We are now ready to allocate treatment assignments to subjects. Let's start by contrasting simple and complete random assignment.
+
+# Simple Random Assignment
+
+Simple random assignment assigns all subjects to treatment with an equal probability by flipping a (weighted) coin for each subject. The main trouble with simple random assignment is that the number of subjects assigned to treatment is itself a random number - depending on the random assignment, a different number of subjects might be assigned to each group.
+
+The `simple_ra()` function has one required argument `N`, the total number of subjects.  If no other arguments are specified, `simple_ra()` assumes a two-group design and a 0.50 probability of assignment.
+
+```{r}
+library(randomizr)
+Z <- simple_ra(N = N)
+table(Z)
+```
+
+To change the probability of assignment, specify the `prob` argument:
+
+```{r}
+Z <- simple_ra(N = N, prob = 0.30)
+table(Z)
+```
+
+If you specify `num_arms` without changing `prob_each`, `simple_ra()` will assume equal probabilities across all arms.
+
+```{r}
+Z <- simple_ra(N = N, num_arms = 3)
+table(Z)
+```
+
+You can also just specify the probabilites of your multiple arms. The probabilities must sum to 1. 
+
+```{r}
+Z <- simple_ra(N = N, prob_each = c(.2, .2, .6))
+table(Z)
+```
+
+You can also name your treatment arms.
+
+```{r}
+Z <- simple_ra(N = N, prob_each = c(.2, .2, .6),
+               condition_names=c("control", "placebo", "treatment"))
+table(Z)
+```
+
+# Complete Random Assignment
+Complete random assignment is very similar to simple random assignment, except that the researcher can specify *exactly* how many units are assigned to each condition. 
+
+The syntax for `complete_ra()` is very similar to that of `simple_ra()`.  The argument `m` is the number of units assigned to treatment in two-arm designs; it is analogous to `simple_ra()`'s `prob`.  Similarly, the argument `m_each` is analogous to `prob_each`.
+
+If you only specify `N`, `complete_ra()` assigns exactly half of the subjects to treatment.
+
+```{r}
+Z <- complete_ra(N = N)
+table(Z)
+```
+
+To change the number of units assigned, specify the `m` argument:
+
+```{r}
+Z <- complete_ra(N = N, m=200)
+table(Z)
+```
+
+If you specify multiple arms, `complete_ra()` will assign an equal (within rounding) number of units to treatment.
+
+```{r}
+Z <- complete_ra(N = N, num_arms = 3)
+table(Z)
+```
+
+You can also specify how many units should be assigned to each arm. The total of `m_each` must equal `N`. 
+
+```{r}
+Z <- complete_ra(N = N, m_each = c(100, 200, 292))
+table(Z)
+```
+
+You can also name your treatment arms.
+
+```{r}
+Z <- complete_ra(N = N, m_each = c(100, 200, 292),
+               condition_names=c("control", "placebo", "treatment"))
+table(Z)
+```
+
+## Simple and Complete Random Assignment Compared
+When should you use `simple_ra()` versus `complete_ra()`? Basically, if the number of units is known beforehand, `complete_ra()` is always preferred, for two reasons: 1. Researchers can plan exactly how many treatments will be deployed. 2. The standard errors associated with complete random assignment are generally smaller, increasing experimental power. See this guide on [EGAP](http://egap.org/) for more on [experimental power](http://egap.org/resources/guides/power/).
+
+Since you need to know `N` beforehand in order to use `simple_ra()`, it may seem like a useless function. Sometimes, however, the random assignment isn't directly in the researcher's control. For example, when deploying a survey exeriment on a platform like Qualtrics, simple random assignment is the only possibility due to the inflexibility of the built-in random assignment tools. When reconstructing the random assignment for analysis after the experiment has been conducted, `simple_ra()` provides a convenient way to do so.  
+
+To demonstrate how `complete_ra()` is superior to `simple_ra()`, let's conduct a small simulation with our `HairEyeColor` dataset.
+
+```{r}
+sims <- 1000
+
+# Set up empty vectors to collect results
+simple_ests <- rep(NA, sims)
+complete_ests <- rep(NA, sims)
+
+# Loop through simulation 2000 times
+for(i in 1:sims){
+  hec <- within(hec,{
+    
+    # Conduct both kinds of random assignment
+    Z_simple <- simple_ra(N = N)
+    Z_complete <- complete_ra(N = N)
+    
+    # Reveal observed potential outcomes
+    Y_simple <- Y1*Z_simple + Y0*(1-Z_simple)
+    Y_complete <- Y1*Z_complete + Y0*(1-Z_complete)
+    })
+  
+  # Estimate ATE under both models
+  fit_simple <- lm(Y_simple ~ Z_simple, data=hec)
+  fit_complete <- lm(Y_complete ~ Z_complete, data=hec)
+  
+  # Save the estimates
+  simple_ests[i] <- coef(fit_simple)[2]
+  complete_ests[i] <- coef(fit_complete)[2]
+}
+```
+
+The standard error of an estimate is defined as the standard deviation of the sampling distribution of the estimator. When standard errors are estimated (i.e., by using the `summary()` command on a model fit), they are estimated using some approximation.  This simulation allows us to measure the standard error directly, since the vectors `simple_ests` and `complete_ests` describe the sampling distribution of each design.
+
+```{r}
+sd(simple_ests)
+sd(complete_ests)
+```
+
+In this simulation complete random assignment led to a `r round((var(simple_ests) - var(complete_ests))/var(simple_ests) * 100, 2)`% decrease in sampling variability. This decrease was obtained with a small design tweak that costs the researcher essentially nothing.  
+
+# Block Random Assignment
+
+Block random assignment (sometimes known as stratified random assignment) is a powerful tool when used well. In this design, subjects are sorted into blocks (strata) according to their pre-treatment covariates, and then complete random assignment is conducted within each block.  For example, a researcher might block on gender, assigning exactly half of the men and exactly half of the women to treatment. 
+
+Why block?  The first reason is to signal to future readers that treatment effect heterogeneity may be of interest: is the treatment effect different for men versus women? Of course, such heterogeneity could be explored if complete random assignment had been used, but blocking on a covariate defends a researcher (somewhat) against claims of data dredging. The second reason is to increase precision. If the blocking variables are predicitive of the outcome (i.e., they are correlated with the outcome), then blocking may help to decrease sampling variability. It's important, however, not to overstate these advantages. The gains from a blocked design can often be realized through covariate adjustment alone.
+
+Blocking can also produce complications for estimation. Blocking can produce different probabilities of assignment for different subjects. This complication is typically addressed in one of two ways: "controlling for blocks" in a regression context, or inverse probabilitity weights (IPW), in which units are weighted by the inverse of the probability that the unit is in the condition that it is in.  
+
+The only required argument to `block_ra()` is `block_var`, which is a vector of length `N` that describes which block a unit belongs to. `block_var` can be a factor, character, or numeric variable. If no other arguments are specified, `block_ra()` assigns an approximately equal proportion of each block to treatment. 
+
+```{r}
+Z <- block_ra(block_var = hec$Hair)
+table(Z, hec$Hair)
+```
+
+
+For multiple treatment arms, use the `num_arms` argument, with or without the `condition_names` argument
+
+```{r}
+Z <- block_ra(block_var = hec$Hair, num_arms=3)
+table(Z, hec$Hair)
+Z <- block_ra(block_var = hec$Hair, condition_names=c("Control", "Placebo", "Treatment"))
+table(Z, hec$Hair)
+```
+
+`block_ra()` provides a number of ways to adjust the number of subjects assigned to each conditions. The `block_prob` argument describes what proportion of each block should be assigned to treatment arm. Note of course, that `block_ra()` still uses complete random assignment within each block; the appropriate number of units to assign to treatment within each block is automatically determined.
+
+```{r}
+Z <- block_ra(block_var = hec$Hair,block_prob = c(.3, .7))
+table(Z, hec$Hair)
+```
+
+For finer control, use the `block_m` argument, which takes a matrix with as many rows as there are blocks, and as many columns as there are treatment conditions.  Remember that the rows are in the same order as `sort(unique(block_var))`, a command that is good to run before constructing a `block_m` matrix. 
+
+```{r}
+sort(unique(hec$Hair))
+block_m <- cbind(c(78, 186, 51, 87),c(30, 100, 20, 40))
+block_m
+Z <- block_ra(block_var = hec$Hair,block_m=block_m, condition_names = c(0, 1))
+table(Z, hec$Hair)
+```
+
+In the example above, the different blocks have different probabilities of assignment to treatment. In this case, people with Black hair have a 30/108 = 27.8% chance of being treated, those with Brown hair have 100/286 = 35.0% change, etc. Left unadressed, this discrepancy could bias treatment effects. There are two ways to address this problem: "control for blocks" or IPW.
+
+The following code snippet shows how to use either the "control for blocks" approach or the IPW approach.  A note for scrupulous readers: the estimands of these two approaches are subtly different from one another.  The "control for blocks" approach estimates the average **block-level** treatment effect. The IPW approach estimates the average **individual-level** treatment effect. They can be different. Since the average block-level treatment effect is not what most people have in mind when thinking about causal effects, analysts using this approach should present both.
+
+```{r}
+hec <- within(hec,{
+  Z_blocked <- block_ra(block_var = hec$Hair,block_m=block_m, condition_names = c(0, 1))
+  Y_blocked <- Y1*(Z_blocked) + Y0*(1-Z_blocked)
+  prob_Z <- rep(NA)
+  prob_Z[Hair %in% c("Black")] <- 30/108
+  prob_Z[Hair %in% c("Brown")] <- 100/286
+  prob_Z[Hair %in% c("Red")] <- 20/71
+  prob_Z[Hair %in% c("Blond")] <- 40/127
+  IPW_weights <- 1/(prob_Z*Z_blocked + (1 - prob_Z)*(1-Z_blocked))
+})
+
+fit_control_for_blocks <- lm(Y_blocked ~ Z_blocked + Hair, data=hec)
+fit_IPW <- lm(Y_blocked ~ Z_blocked, weights=IPW_weights, data=hec)
+```
+
+How to create blocks? In the `HairEyeColor` dataset, we could make blocks for each unique combination of hair color, eye color, and sex using `dplyr`'s `id` function:
+
+```{r}
+suppressMessages(library(dplyr))
+block_id <- id(hec[,c("Hair", "Eye", "Sex")])
+block_var <- paste0("block_", sprintf("%02d", block_id))
+table(block_var)
+```
+
+The smallest of these is block_08 -- it only contains two units. Blocks should not contain fewer units than the number of treatment arms, so if we make blocks in this way, we can only use a two-arm design.
+
+```{r}
+Z_blocked <- block_ra(block_var = block_var)
+head(table(block_var, Z_blocked))
+```
+
+An alternative is to use the `blockTools` package, which constructs matched pairs, trios, quartets, etc. from pretreatment covariates. 
+
+```{r}
+library(blockTools)
+
+# BlockTools requires that all variables be numeric
+numeric_mat <- model.matrix(~Hair+Eye+Sex, data=hec)[,-1]
+
+# BlockTools also requres an id variable
+df_forBT <- data.frame(id_var = 1:nrow(numeric_mat), numeric_mat)
+
+# Conducting the actual blocking: let's make trios
+out <- block(df_forBT, n.tr = 3, id.vars = "id_var", 
+             block.vars = colnames(df_forBT)[-1])
+
+# Extact the block_ids
+hec$block_id <- createBlockIDs(out, df_forBT, id.var = "id_var")
+
+# Conduct actual random assignment with randomizr
+Z_blocked <- block_ra(block_var = hec$block_id, num_arms = 3)
+head(table(hec$block_id, Z_blocked))
+```
+
+A note for `blockTools` users: that package also has an assignment function.  My preference is to extract the blocking variable, then conduct the assignment with `block_ra()`, so that fewer steps are required to reconstruct the random assignment or generate new random assignments for a randomization inference procedure.
+
+# Clustered assignment
+
+Clustered assignment is unfortunate.If a researcher can avoid assigning subjects to treatments by cluster, she should. Sometimes, clustered assignment is unavoidable. Some common situations include:
+
+1. Housemates in households: whole households are assigned to treatment or control
+2. Students in classrooms: whole classrooms are assigned to treatment or control
+3. Residents in towns or villages: whole communities are assigned to treatment or control
+
+Clustered assignment decreases the effective sample size of an experiment. In the extreme case when outcomes are perfectly correlated with clusters, the experiment has an effective sample size equal to the number of clusters. When outcomes are perfectly uncorrelated with clusters, the effective sample size is equal to the number of subjects. Almost all cluster-assigned experiments fall somewhere in the middle of these two extremes. 
+
+The only required argument for the `cluster_ra()` function is the `clust_var` argument, which is a vector of length `N` that indicates which cluster each subject belongs to. Let's pretend that for some reason, we have to assign treatments according to the unique combinations of hair color, eye color, and gender. For this, we'll use `dplyr`'s `id()` function again.
+
+```{r}
+clust_id <- id(hec[,c("Hair", "Eye", "Sex")])
+clust_var <- paste0("clust_", sprintf("%02d", clust_id))
+
+Z_clust <- cluster_ra(clust_var = clust_var)
+head(table(clust_var, Z_clust))
+```
+
+This shows that each cluster is either assigned to treatment or control. No two units within the same cluster are assigned to different conditions.
+
+As with all functions in `randomizr`, you can specify multiple treatment arms in a variety of ways:
+
+```{r}
+Z_clust <- cluster_ra(clust_var=clust_var, num_arms=3)
+head(table(clust_var, Z_clust))
+```
+
+... or using `condition_names`
+
+```{r}
+Z_clust <- cluster_ra(clust_var=clust_var, 
+                      condition_names=c("Control", "Placebo", "Treatment"))
+head(table(clust_var, Z_clust))
+```
+
+... or using `m_each`, which describes how many clusters should be assigned to each condition.  `m_each` must sum to the number of clusters.
+
+```{r}
+Z_clust <- cluster_ra(clust_var=clust_var, m_each=c(5, 15, 12))
+head(table(clust_var, Z_clust))
+```
+
+# Combining functions for complicated designs
+
+There are designs that are too complicated to wrap up in a general-purpose function.  For those designs, combining `randomizr` functions together can be a useful way to reduce the complexity.
+
+Suppose that we have clusters that are themselves grouped into blocks. Each cluster is put in a block with another cluster of a similar size. There are 32 clusters in the `HairEyeColor` dataset grouped into 16 blocks.
+
+```{r}
+# Create cluster variable
+clust_id <- id(hec[,c("Hair", "Eye", "Sex")])
+clust_var <- paste0("clust_", sprintf("%02d", clust_id))
+
+# Sort cluster names by increasing size
+cluster_names_by_size <- names(sort(table(clust_var)))
+
+# Create block variable
+block_var <- rep(NA, nrow(hec))
+for(i in 1:16){
+  block_var[clust_var %in% cluster_names_by_size[((2*i)-1):(2*i)]] <- 
+    paste0("block_", sprintf("%02d", i))
+}
+
+special_ra <- function(){
+  assign <- rep(NA, length(clust_var))
+  unique_blocks <- unique(block_var)
+  for(i in 1:length(unique_blocks)){
+    assign[block_var==unique_blocks[i]] <-
+      cluster_ra(clust_var[block_var==unique_blocks[i]])
+  }
+  return(assign)
+}
+ 
+Z_special <- special_ra()
+head(table(clust_var, Z_special))
+head(table(block_var, Z_special))
+```
+
+
+# Best practices
+
+## Random assignment procedure = Random assignment **function**
+
+Random assignment procedures are often described as a series of steps that are manually carried out be the researcher. In order to make this procedure reproducible, these steps need to be translated into a **function** that returns a different random assignment each time it is called.
+
+For example, consider the following procedure for randomly allocating school vouchers.
+
+1. Every eligible student's names is put on a list
+2. Each name is assigned a random number
+3. Balls with the numbers associated with all students are put in an urn.
+4. Then the urn is "shuffled" 
+5. Students names are drawn one by one from the urn until all slots are given out.
+6. If one sibling in a family wins, all other siblings automatically win too.
+
+If we write such a procedure into a function, it might look like this:
+
+```{r}
+# 400 families have 1 child in the lottery, 100 families have 2
+family_id <- c(sprintf("%03d", 1:500), sprintf("%03d", 1:100))
+
+school_ra <- function(m){
+  N <- length(family_id)
+  random_number <- sample(1:N, replace=FALSE)
+  Z <- rep(0, N)
+  i <- 1
+  while(sum(Z) <m){
+    Z[family_id==family_id[random_number[i]]] <- 1
+    i <- i + 1
+  }
+  return(Z)
+}
+
+Z <- school_ra(200)
+table(Z)
+```
+
+This assignment procedure is complicated by the sibling rule, which has two effects: first, students are cluster-assigned by family, and second, the probability of assignment varies student to student. Obviously, families who have two children in the lottery have a higher probability of winning the lottery because they effectively have two "tickets." There may be better ways of running this assignment procedure (for example, with `cluster_ra()`), but the purpose of this example is to show how complicated *real-world* procedures can be written up in a simple function. With this function, the random assignment procedure can be reproduced exactly, the complicated probabilities of assignment can be caluculated, and the analysis is greatly simplified.
+
+## Check probabilities of assignment directly
+
+For many designs, the probability of assignment to treatment can be calculated analytically.  For example, in a completely randomized design with 200 units, 60 of which are assigned to treatment, the probability is exactly 0.30 for all units. However, in more complicated designs (such as the schools example described above), analytic probabilities are difficult to calculate. In such a situation, an easy way to obtain the probabilities of assignment is through simulation.  
+
+1. Call your random assignment function an approximately infinite number of times (about 10,000 for most purposes).
+2. Count how often each unit is assigned to each treatment arm.
+
+```{r}
+Z_matrix <- replicate(1000, school_ra(200))
+plot(rowMeans(Z_matrix))
+```
+
+This plot shows that the students who have a sibling in the lottery have a higher probability of assignment. The more simulations, the more precise the estimate of the probability of assignment.
+
+## Save your random assignment
+Whenever you conduct a random assignment for use in an experiment, save it! At a minimum, the random assignment should be saved with an id variable in a csv.
+
+```{r,eval=FALSE}
+hec <- within(hec,{
+  Z_blocked <- complete_ra(N = N, m_each = c(100, 200, 292),
+               condition_names=c("control", "placebo", "treatment"))
+  id_var <- 1:nrow(hec)
+})
+write.csv(hec[,c("id_var", "Z_blocked")], file="MyRandomAssignment.csv")
+```

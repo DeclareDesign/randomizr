@@ -5,7 +5,7 @@
 \title{Complete Random Assignment}
 \usage{
 complete_ra(N, m = NULL, num_arms = NULL, m_each = NULL,
-  condition_names = NULL)
+  prob_each = NULL, condition_names = NULL)
 }
 \arguments{
 \item{N}{the total number of units in the experimental sample.}
@@ -15,6 +15,8 @@ complete_ra(N, m = NULL, num_arms = NULL, m_each = NULL,
 \item{num_arms}{the total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.}
 
 \item{m_each}{a numeric vector giving the size of each treatment group. Must sum to N. If unspecified, equally sized (rounded) groups will be assumed.}
+
+\item{prob_each}{a numeric giving the probability of assignment to each treatment arm. Must sum to 1.  Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.}
 
 \item{condition_names}{a character vector giving the names of the treatment groups.  If unspecified, the treatment groups will be names T1, T2, T3, etc.}
 }
