@@ -3,3 +3,5 @@
 ^README\.Rmd$
 ^README-.*\.png$
 ^cran-comments\.md$
+^R/randomizr_tests\.r$
+^R/randomizr_execute\.r$

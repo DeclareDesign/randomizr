@@ -3,4 +3,6 @@
 export(block_ra)
 export(cluster_ra)
 export(complete_ra)
+export(condition_probs)
+export(design_probs)
 export(simple_ra)

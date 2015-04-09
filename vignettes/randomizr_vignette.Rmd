@@ -232,18 +232,16 @@ table(Z, hec$Hair)
 
 In the example above, the different blocks have different probabilities of assignment to treatment. In this case, people with Black hair have a 30/108 = 27.8% chance of being treated, those with Brown hair have 100/286 = 35.0% change, etc. Left unadressed, this discrepancy could bias treatment effects. There are two ways to address this problem: "control for blocks" or IPW.
 
-The following code snippet shows how to use either the "control for blocks" approach or the IPW approach.  A note for scrupulous readers: the estimands of these two approaches are subtly different from one another.  The "control for blocks" approach estimates the average **block-level** treatment effect. The IPW approach estimates the average **individual-level** treatment effect. They can be different. Since the average block-level treatment effect is not what most people have in mind when thinking about causal effects, analysts using this approach should present both.
+The following code snippet shows how to use either the "control for blocks" approach or the IPW approach.  A note for scrupulous readers: the estimands of these two approaches are subtly different from one another.  The "control for blocks" approach estimates the average **block-level** treatment effect. The IPW approach estimates the average **individual-level** treatment effect. They can be different. Since the average block-level treatment effect is not what most people have in mind when thinking about causal effects, analysts using this approach should present both.  The `condition_probs()` function used to calculate the probabilities of assignment is explained below.
 
 ```{r}
 hec <- within(hec,{
   Z_blocked <- block_ra(block_var = hec$Hair,block_m=block_m, condition_names = c(0, 1))
   Y_blocked <- Y1*(Z_blocked) + Y0*(1-Z_blocked)
-  prob_Z <- rep(NA)
-  prob_Z[Hair %in% c("Black")] <- 30/108
-  prob_Z[Hair %in% c("Brown")] <- 100/286
-  prob_Z[Hair %in% c("Red")] <- 20/71
-  prob_Z[Hair %in% c("Blond")] <- 40/127
-  IPW_weights <- 1/(prob_Z*Z_blocked + (1 - prob_Z)*(1-Z_blocked))
+  cond_prob <- condition_probs(Z = Z_blocked,
+                               block_var = hec$Hair,block_m=block_m,
+                               condition_names = c(0, 1), design = "block")
+  IPW_weights <- 1/(cond_prob)
 })
 
 fit_control_for_blocks <- lm(Y_blocked ~ Z_blocked + Hair, data=hec)
@@ -333,6 +331,39 @@ head(table(clust_var, Z_clust))
 ```{r}
 Z_clust <- cluster_ra(clust_var=clust_var, m_each=c(5, 15, 12))
 head(table(clust_var, Z_clust))
+```
+
+# Calculating probabilities of assignment
+
+All four random assignment functions in `randomizr` assign units to treatment with known (if sometimes complicated) probabilities.  The `design_probs()` and `condition_probs()` functions calculate these probabilities according to the parameters of your experimental design.
+
+Let's take a look at the block random assignment we used before.
+
+```{r}
+block_m <- cbind(c(78, 186, 51, 87),c(30, 100, 20, 40))
+Z <- block_ra(block_var = hec$Hair,block_m=block_m, condition_names = c(0, 1))
+table(Z, hec$Hair)
+```
+
+In order to calculate the probabilities of assignment, we call the `design_probs()` function with the same exact arguments as we used for the `block_ra()` call.
+
+```{r}
+prob_mat <- design_probs(block_var = hec$Hair,block_m=block_m, 
+                         condition_names = c(0, 1),
+                         design="block")
+head(prob_mat)
+```
+
+The `prob_mat` objects has `N` rows and as many columns as there are treatment conditions, in this case 2.
+
+In order to use inverse-probability weights, we need to know the probability of each unit being in the **condition that it is in**.  For each unit, we need to pick the appropriate probability. This bookkeeping is handled automatically by the `condition_probs()` function, which works just like `design_probs()` except that you also have to give it the observed random assignment.
+
+```{r}
+cond_prob <- condition_probs(Z = Z,
+                         block_var = hec$Hair,block_m=block_m, 
+                         condition_names = c(0, 1),
+                         design="block")
+table(cond_prob, Z)
 ```
 
 # Combining functions for complicated designs

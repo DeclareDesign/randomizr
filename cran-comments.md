@@ -1,5 +1,6 @@
-## Update randomizr to version 0.2.1
+## Update randomizr to version 0.2.2
 * small bug fix to cluster_ra()
+* small improvements to block_ra() and complete_ra()
 
 ## Test environments
 * local OS X install, R 3.1.2
