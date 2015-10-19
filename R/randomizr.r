@@ -213,7 +213,7 @@ simple_ra <- function(N, prob=NULL, num_arms=NULL, prob_each=NULL, condition_nam
 #' This function assigns a fixed number of units within each block to treatment.
 #' @param block_var A vector of length N that includes the blocking variable
 #' @param num_arms the total number of treatment arms. If unspecified, will be determined from the number of columns of block_m or the length of condition_names.
-#' @param block_m A matrix whose number of rows is equal to the number of blocks and whose number of columns is equal to the number of treatment arms. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var). The columns should be in the order of condition_names, if specified.
+#' @param block_m A matrix of arm sizes whose number of rows is equal to the number of blocks and whose number of columns is equal to the number of treatment arms. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var). The columns should be in the order of condition_names, if specified.
 #' @param block_prob A vector whose length is equal to the number of treatment assignments. When specified, block_prob assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. block_prob must sum to 1.
 #' @param condition_names a character vector giving the names of the treatment groups.  If unspecified, the treatment groups will be names T1, T2, T3, etc.
 #' @keywords random assignment
