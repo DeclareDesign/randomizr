@@ -213,10 +213,10 @@ Z <- block_ra(block_var = hec$Hair, condition_names=c("Control", "Placebo", "Tre
 table(Z, hec$Hair)
 ```
 
-`block_ra()` provides a number of ways to adjust the number of subjects assigned to each conditions. The `block_prob` argument describes what proportion of each block should be assigned to treatment arm. Note of course, that `block_ra()` still uses complete random assignment within each block; the appropriate number of units to assign to treatment within each block is automatically determined.
+`block_ra()` provides a number of ways to adjust the number of subjects assigned to each conditions. The `prob_each` argument describes what proportion of each block should be assigned to treatment arm. Note of course, that `block_ra()` still uses complete random assignment within each block; the appropriate number of units to assign to treatment within each block is automatically determined.
 
 ```{r}
-Z <- block_ra(block_var = hec$Hair,block_prob = c(.3, .7))
+Z <- block_ra(block_var = hec$Hair,prob_each = c(.3, .7))
 table(Z, hec$Hair)
 ```
 
