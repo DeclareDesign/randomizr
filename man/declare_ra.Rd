@@ -30,13 +30,76 @@ declare_ra(N = NULL, prob = NULL, num_arms = NULL, prob_each = NULL,
 \item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc.}
 
 \item{simple}{A logical indicating if simple random assignment is intended. Is FALSE by default.}
-
-\item{prob_each}{A numeric vector whose length is equal to the number of treatment conditions. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.}
 }
 \value{
-A random assignment declaration.
+A random assignment declaration
 }
 \description{
 Declare a random assignment procedure.
+}
+\examples{
+
+# The declare_ra function is used in three ways:
+
+# 1. To obtain some basic facts about a randomization:
+declaration <- declare_ra(N=100, m_each=c(30, 30, 40))
+declaration
+
+# 2. To conduct a random assignment:
+
+Z <- conduct_ra(declaration)
+table(Z)
+
+# 3. To obtain observed condition probabilities
+
+probs <- obtain_condition_probabilities(declaration, Z)
+table(probs, Z)
+
+# Simple Random Assignment Declarations
+
+declare_ra(N=100, simple = TRUE)
+declare_ra(N=100, prob = .4, simple = TRUE)
+declare_ra(N=100, prob_each=c(0.3, 0.3, 0.4), 
+           condition_names=c("control", "placebo", "treatment"), simple=TRUE)
+
+# Complete Random Assignment Declarations
+ 
+declare_ra(N=100)  
+declare_ra(N=100, m_each = c(30, 70), 
+           condition_names = c("control", "treatment"))
+declare_ra(N=100, m_each=c(30, 30, 40))
+  
+  
+# Block Random Assignment Declarations 
+
+block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
+
+block_m <- rbind(c(10, 40),
+                 c(30, 70),
+                 c(50, 150))
+declare_ra(block_var=block_var, block_m=block_m)
+
+
+# Cluster Random Assignment Declarations
+
+clust_var <- rep(letters, times=1:26)
+declare_ra(clust_var=clust_var)
+declare_ra(clust_var=clust_var, m_each=c(7, 7, 12))
+
+# Blocked and Clustered Random Assignment Declarations 
+
+clust_var <- rep(letters, times=1:26)
+block_var <- rep(NA, length(clust_var))
+block_var[clust_var \%in\% letters[1:5]] <- "block_1"
+block_var[clust_var \%in\% letters[6:10]] <- "block_2"
+block_var[clust_var \%in\% letters[11:15]] <- "block_3"
+block_var[clust_var \%in\% letters[16:20]] <- "block_4"
+block_var[clust_var \%in\% letters[21:26]] <- "block_5"
+
+table(block_var, clust_var)
+
+declare_ra(clust_var = clust_var, block_var = block_var)
+declare_ra(clust_var = clust_var, block_var = block_var, prob_each = c(.2, .5, .3))
+  
 }
 

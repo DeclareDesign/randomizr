@@ -355,9 +355,14 @@ cluster_ra_probabilities <- function(clust_var, m=NULL, num_arms = NULL, m_each 
 #' block_var[clust_var %in% letters[21:26]] <- "block_5"
 #' 
 #' 
-#' block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var)
-#' block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, num_arms = 3)
-#' block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, prob_each = c(.2, .5, .3))
+#' block_and_cluster_ra_probabilities(clust_var = clust_var, 
+#'                                    block_var = block_var)
+#' block_and_cluster_ra_probabilities(clust_var = clust_var, 
+#'                                    block_var = block_var, 
+#'                                    num_arms = 3)
+#' block_and_cluster_ra_probabilities(clust_var = clust_var, 
+#'                                    block_var = block_var, 
+#'                                    prob_each = c(.2, .5, .3))
 #' 
 #' block_m <- rbind(c(2, 3),
 #'                  c(1, 4),

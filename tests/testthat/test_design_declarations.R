@@ -264,4 +264,3 @@ Z <- conduct_ra(declaration)
 obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
-

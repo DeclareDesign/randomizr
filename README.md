@@ -14,9 +14,9 @@ install.packages("devtools")
 devtools::install_github("acoppock/randomizr")
 ```
 
-There are four functions in randomizr: simple\_ra(), complete\_ra(), block\_ra(), and cluster\_ra(), corresponding to common experimental designs.
+There are five main functions in randomizr: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`, which correspond to common experimental designs.
 
-complete\_ra() is the workhorse function that will be most appropriate for a large number of experimental situations: it assigns m of N units to treatment:
+`complete_ra()` is the workhorse function that will be most appropriate for a large number of experimental situations: it assigns m of N units to treatment:
 
 ``` r
 library(randomizr)
@@ -38,13 +38,13 @@ Z <- cluster_ra(clust_var=clust_var, m_each=c(7, 7, 12),
 table(Z, clust_var)
 #>            clust_var
 #> Z            a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u
-#>   control    0  0  0  4  0  0  0  0  0  0  0 12  0  0  0  0  0 18 19  0  0
-#>   placebo    0  2  3  0  5  0  7  0  0  0 11  0  0  0  0 16  0  0  0  0  0
-#>   treatment  1  0  0  0  0  6  0  8  9 10  0  0 13 14 15  0 17  0  0 20 21
+#>   control    0  2  0  0  5  0  0  0  0  0  0 12  0  0  0  0  0  0  0 20  0
+#>   placebo    1  0  0  4  0  0  7  8  0 10  0  0  0  0  0  0 17  0  0  0  0
+#>   treatment  0  0  3  0  0  6  0  0  9  0 11  0 13 14 15 16  0 18 19  0 21
 #>            clust_var
 #> Z            v  w  x  y  z
-#>   control   22  0 24  0 26
-#>   placebo    0 23  0  0  0
+#>   control   22 23  0  0 26
+#>   placebo    0  0 24  0  0
 #>   treatment  0  0  0 25  0
 ```
 
