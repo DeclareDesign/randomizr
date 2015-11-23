@@ -18,7 +18,7 @@ cluster_ra(clust_var, m = NULL, num_arms = NULL, m_each = NULL,
 
 \item{prob_each}{A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.}
 
-\item{condition_names}{A character vector giving the names of the treatment groups.  If unspecified, the treatment groups will be names T1, T2, T3, etc.}
+\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc.}
 }
 \description{
 This function conducts complete random assignment by cluster.Clusters are collections of units that are assigned to a treatment together.

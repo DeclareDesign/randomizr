@@ -25,6 +25,22 @@ complete_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatm
 complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))
 
 
+# Simple Designs ----------------------------------------------------------
+
+context("Simple Random Assignments")
+
+# Two Group Designs
+simple_ra_probabilities(N=100)
+simple_ra_probabilities(N=100, prob=0.5)
+simple_ra_probabilities(N=100, prob_each = c(0.3, 0.7), 
+               condition_names = c("control", "treatment"))
+# Multi-arm Designs
+simple_ra_probabilities(N=100, num_arms=3)
+simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4))
+simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4), 
+               condition_names=c("control", "placebo", "treatment"))
+simple_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
+
 
 # Blocked Designs ---------------------------------------------------------
 

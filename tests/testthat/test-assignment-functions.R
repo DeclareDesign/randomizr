@@ -50,6 +50,32 @@ expect_true(all(table(Z) %in% c(33, 34)))
 expect_less_than(sum(replicate(1000, complete_ra(1))), 600)
 expect_more_than(sum(replicate(1000, complete_ra(1))), 400)
 
+context("Simple Random Assignments")
+
+# Two Group Designs
+Z <- simple_ra(N=100)
+table(Z)
+
+Z <- simple_ra(N=100, prob=0.5)
+table(Z)
+
+Z <- simple_ra(N=100, prob_each = c(0.3, 0.7), 
+               condition_names = c("control", "treatment"))
+table(Z)
+
+# Multi-arm Designs
+Z <- simple_ra(N=100, num_arms=3)
+table(Z)
+
+Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4))
+table(Z)
+
+Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4), 
+               condition_names=c("control", "placebo", "treatment"))
+table(Z)
+
+Z <- simple_ra(N=100, condition_names=c("control", "placebo", "treatment"))
+table(Z)
 
 context("Block Random Assignments")
 

@@ -6,32 +6,32 @@
 \usage{
 declare_ra(N = NULL, prob = NULL, num_arms = NULL, prob_each = NULL,
   m = NULL, m_each = NULL, block_var = NULL, block_m = NULL,
-  clust_var = NULL, condition_names = NULL, ra_type = "complete")
+  clust_var = NULL, condition_names = NULL, simple = FALSE)
 }
 \arguments{
 \item{N}{The total number of units in the experimental sample.}
 
 \item{prob}{If specified, a two-group design is assumed. prob is the probability of assignment to treatment.}
 
-\item{num_arms}{}
+\item{num_arms}{The total number of treatment arms. If unspecified, num_arms will be determined from the length of m_each or condition_names.}
 
-\item{prob_each}{}
+\item{prob_each}{A numeric giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.}
 
-\item{m}{}
+\item{m}{If specified, a two-group design is assumed. m is the total number of units to be assigned to treatment. Should only be specified for a two group design in which exactly m of N units are assigned to treatment. If not specified, half of the sample (N/2) will be assigned to treatment (if N is odd, m will be set to either floor(N/2) or ceiling(N/2) with equal probability. m is NULL by default.}
 
-\item{m_each}{}
+\item{m_each}{A numeric vector giving the size of each treatment group. Must sum to N. If unspecified, equally sized (rounded) groups will be assumed.}
 
-\item{block_var}{}
+\item{block_var}{A vector of length N indicating which block each unit belongs to.}
 
-\item{block_m}{}
+\item{block_m}{A matrix of arm sizes whose number of rows is equal to the number of blocks and whose number of columns is equal to the number of treatment arms. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var). The columns should be in the order of condition_names, if specified.}
 
-\item{clust_var}{}
+\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
 
-\item{condition_names}{}
+\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc.}
 
-\item{ra_type}{}
+\item{simple}{A logical indicating if simple random assignment is intended. Is FALSE by default.}
 
-\item{prob_each}{}
+\item{prob_each}{A vector whose length is equal to the number of treatment conditions. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.}
 }
 \value{
 A random assignment declaration.

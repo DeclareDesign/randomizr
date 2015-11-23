@@ -1,3 +1,48 @@
+#' Probabilties of assignment: Simple Random Assignment
+#'
+#' @param N the total number of units in the experimental sample (required).
+#' @param prob If specified, a two-group design is assumed. prob is the probability of assignment to treatment. Within rounding, N*prob subjects will be assigned to treatment.
+#' @param num_arms The total number of treatment arms. If unspecified, num_arms will be determined from the length of m_each or condition_names.
+#' @param prob_each A numeric giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.
+#' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc. An execption is a two-group design in which N only or N and m are specified, in which the condition names are 0 and 1.
+#'
+#' @return A matrix of probabilities of assignment.
+#' @export
+simple_ra_probabilities <- function(N, prob = NULL, num_arms = NULL, prob_each = NULL, condition_names = NULL){
+  
+  # Setup: obtain number of arms and condition_names
+  
+  if(is.null(num_arms)){
+    num_arms <- 2
+    if(!is.null(prob_each)){num_arms <- length(prob_each)}
+    if(!is.null(condition_names)){num_arms <- length(condition_names)}
+  }
+  
+  if(is.null(condition_names)){
+    if(num_arms==2){
+      condition_names = c(0,1)
+    }else{
+      condition_names <- paste0("T", 1:num_arms)    
+    }
+  }
+  if(is.null(prob) & is.null(prob_each)){
+    prob_each <- rep(1/num_arms, num_arms)
+  }
+  if(!is.null(prob)){
+    condition_probabilities <- c(1-prob, prob)
+  }
+  if(!is.null(prob_each)){
+    condition_probabilities <- prob_each
+  }
+  
+  # Build prob_mat
+  prob_mat <- matrix(rep(condition_probabilities, N), 
+                     byrow=TRUE, ncol=length(condition_probabilities), 
+                     dimnames = list(NULL,  paste0("prob_",condition_names)))
+  return(prob_mat)
+  
+}
+
 #' Probabilties of assignment: Complete Random Assignment
 #'
 #' @param N the total number of units in the experimental sample (required).
@@ -46,7 +91,7 @@ complete_ra_probabilities <- function(N, m = NULL, prob = NULL, num_arms = NULL,
       m_ceiling <- ceiling(N/2)
     }
     
-    if(is.null(m)){
+    if(!is.null(prob)){
       m_floor <- floor(N*prob)
       m_ceiling <- ceiling(N*prob)
     }
