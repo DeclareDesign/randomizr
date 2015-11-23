@@ -10,16 +10,19 @@ simple_ra(N, prob = NULL, num_arms = NULL, prob_each = NULL,
 \arguments{
 \item{N}{The total number of units in the experimental sample.}
 
-\item{prob}{If specified, a two-group design is assumed. prob is the probability of assignment to treatment.}
+\item{prob}{The probability of assignment to treatment. If specified, a two-group design is assumed.}
 
 \item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the length of prob_each or condition_names.}
 
 \item{prob_each}{A numeric vector giving probabilites of assignment to each treatment group. Must sum to 1. If unspecified, equal probabilities will be assumed.}
 
-\item{condition_names}{A character vector giving the names of the treatment groups.  If unspecified, the treatment groups will be names T1, T2, T3, etc.}
+\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.}
+}
+\value{
+A vector of length N that indicates the treatment condition of each unit.
 }
 \description{
-This function conducts simple random assignment, a procedure in which units are assigned to treatment conditions with a known probability, but the number of units assigned to any condition might vary from one randomization to the next.  This function can accomodate any number of treatment arms.
+This function conducts simple random assignment, a procedure in which units are assigned to treatment conditions with a known probability, but the number of units assigned to any condition might vary from one randomization to the next.
 }
 \examples{
 # Two Group Designs
@@ -48,6 +51,4 @@ table(Z)
 Z <- simple_ra(N=100, condition_names=c("control", "placebo", "treatment"))
 table(Z)
 }
-\keyword{assignment}
-\keyword{random}
 

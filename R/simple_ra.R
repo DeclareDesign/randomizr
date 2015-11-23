@@ -1,12 +1,12 @@
 #' Simple Random Assignment
 #'
-#' This function conducts simple random assignment, a procedure in which units are assigned to treatment conditions with a known probability, but the number of units assigned to any condition might vary from one randomization to the next.  This function can accomodate any number of treatment arms.
+#' This function conducts simple random assignment, a procedure in which units are assigned to treatment conditions with a known probability, but the number of units assigned to any condition might vary from one randomization to the next. 
 #' @param N The total number of units in the experimental sample.
-#' @param prob If specified, a two-group design is assumed. prob is the probability of assignment to treatment.
+#' @param prob The probability of assignment to treatment. If specified, a two-group design is assumed.
 #' @param num_arms The total number of treatment arms. If unspecified, will be determined from the length of prob_each or condition_names.
 #' @param prob_each A numeric vector giving probabilites of assignment to each treatment group. Must sum to 1. If unspecified, equal probabilities will be assumed.
-#' @param condition_names A character vector giving the names of the treatment groups.  If unspecified, the treatment groups will be names T1, T2, T3, etc.
-#' @keywords random assignment
+#' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.
+#' @return A vector of length N that indicates the treatment condition of each unit.
 #' @export
 #' @examples
 #' # Two Group Designs

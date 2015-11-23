@@ -21,9 +21,34 @@ block_and_cluster_ra_probabilities(clust_var, block_var, num_arms = NULL,
 \item{condition_names}{A character vector giving the names of the treatment conditions. If unspecified, the treatment conditions. will be named T1, T2, T3, etc.}
 }
 \value{
-A matrix of probabilities of assignment.
+A matrix of probabilities of assignment
 }
 \description{
 Probabilties of assignment: Blocked and Clustered Random Assignment
+}
+\examples{
+
+clust_var <- rep(letters, times=1:26)
+block_var <- rep(NA, length(clust_var))
+block_var[clust_var \%in\% letters[1:5]] <- "block_1"
+block_var[clust_var \%in\% letters[6:10]] <- "block_2"
+block_var[clust_var \%in\% letters[11:15]] <- "block_3"
+block_var[clust_var \%in\% letters[16:20]] <- "block_4"
+block_var[clust_var \%in\% letters[21:26]] <- "block_5"
+
+
+block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var)
+block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, num_arms = 3)
+block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, prob_each = c(.2, .5, .3))
+
+block_m <- rbind(c(2, 3),
+                 c(1, 4),
+                 c(3, 2),
+                 c(2, 3),
+                 c(5, 1))
+
+block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, block_m = block_m)
+
+
 }
 

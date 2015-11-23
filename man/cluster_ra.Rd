@@ -10,7 +10,7 @@ cluster_ra(clust_var, m = NULL, num_arms = NULL, m_each = NULL,
 \arguments{
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
 
-\item{m}{The total number clusters to be treated. Should only be specified for a two group design in which exactly m of N clusters is assigned to treatment. If not specified, half of the clusters will be assigned to treatment. Is NULL by default.}
+\item{m}{The total number clusters to be treated. Should only be specified for a two group design in which exactly m of N clusters are assigned to treatment. If not specified, half of the clusters will be assigned to treatment. Is NULL by default.}
 
 \item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.}
 
@@ -18,10 +18,13 @@ cluster_ra(clust_var, m = NULL, num_arms = NULL, m_each = NULL,
 
 \item{prob_each}{A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.}
 
-\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc.}
+\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.}
+}
+\value{
+A vector of length N that indicates the treatment condition of each unit.
 }
 \description{
-This function conducts complete random assignment by cluster.Clusters are collections of units that are assigned to a treatment together.
+Random assignment where groups of units are assigned together (as a cluster) to treatment conditions. This function conducts complete random assignment at the cluster level.
 }
 \examples{
 # Two Group Designs
@@ -52,6 +55,4 @@ Z <- cluster_ra(clust_var=clust_var,
                 condition_names=c("control", "placebo", "treatment"))
 table(Z, clust_var)
 }
-\keyword{assignment}
-\keyword{random}
 

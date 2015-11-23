@@ -10,18 +10,50 @@ block_ra_probabilities(block_var, num_arms = NULL, block_m = NULL,
 \arguments{
 \item{block_var}{A vector of length N indicating which block each unit belongs to.}
 
-\item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m or the length of condition_names.}
+\item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m, the length of prob_each, or the length of condition_names.}
 
 \item{block_m}{A matrix of arm sizes whose number of rows is equal to the number of blocks and whose number of columns is equal to the number of treatment arms. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var). The columns should be in the order of condition_names, if specified.}
 
-\item{prob_each}{A vector whose length is equal to the number of treatment conditions. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.}
+\item{prob_each}{A numeric vector whose length is equal to the number of treatment conditions. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.}
 
 \item{condition_names}{A character vector giving the names of the treatment conditions. If unspecified, the treatment conditions. will be named T1, T2, T3, etc.}
 }
 \value{
-A matrix of probabilities of assignment.
+A matrix of probabilities of assignment
 }
 \description{
 Probabilties of assignment: Block Random Assignment
+}
+\examples{
+
+block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
+block_ra_probabilities(block_var=block_var)
+
+block_m <- rbind(c(25, 25),
+                 c(50, 50),
+                 c(100, 100))
+
+block_ra_probabilities(block_var=block_var, block_m=block_m)
+
+block_m <- rbind(c(10, 40),
+                 c(30, 70),
+                 c(50, 150))
+
+block_ra_probabilities(block_var=block_var, block_m=block_m, 
+                       condition_names=c("control", "treatment"))
+
+block_ra_probabilities(block_var=block_var, num_arms=3)
+
+block_m <- rbind(c(10, 20, 20),
+                 c(30, 50, 20),
+                 c(50, 75, 75))
+block_ra_probabilities(block_var = block_var, block_m = block_m)
+
+block_ra_probabilities(block_var=block_var, block_m=block_m, 
+                       condition_names=c("control", "placebo", "treatment"))
+
+block_ra_probabilities(block_var=block_var, prob_each=c(.1, .1, .8))
+
+
 }
 

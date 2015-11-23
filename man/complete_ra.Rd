@@ -8,25 +8,25 @@ complete_ra(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL,
   prob_each = NULL, condition_names = NULL)
 }
 \arguments{
-\item{N}{the total number of units in the experimental sample (required).}
+\item{N}{The total number of units in the experimental sample (required).}
 
-\item{m}{If specified, a two-group design is assumed. m is the total number of units to be assigned to treatment. Should only be specified for a two group design in which exactly m of N units are assigned to treatment. If not specified, half of the sample (N/2) will be assigned to treatment (if N is odd, m will be set to either floor(N/2) or ceiling(N/2) with equal probability. m is NULL by default.}
+\item{m}{If specified, a two-group design is assumed. m is the total number of units to be assigned to treatment. Should only be specified for a two group design in which exactly m of N units are assigned to treatment. If not specified (and no other arguments are specified), half of the sample (N/2) will be assigned to treatment (if N is odd, m will be set to either floor(N/2) or ceiling(N/2) with equal probability). m is NULL by default.}
 
 \item{prob}{If specified, a two-group design is assumed. prob is the probability of assignment to treatment. Within rounding, N*prob subjects will be assigned to treatment.}
 
-\item{num_arms}{The total number of treatment arms. If unspecified, num_arms will be determined from the length of m_each or condition_names.}
+\item{num_arms}{The total number of treatment arms. If unspecified, num_arms will be determined from the length of m_each, prob_each, or condition_names.}
 
 \item{m_each}{A numeric vector giving the size of each treatment group. Must sum to N. If unspecified, equally sized (rounded) groups will be assumed.}
 
-\item{prob_each}{A numeric giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.}
+\item{prob_each}{A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.}
 
-\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc. An execption is a two-group design in which N only or N and m are specified, in which the condition names are 0 and 1.}
+\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc. An execption is a two-group design in which N only or N and m are specified, in which the condition names default to 0 and 1.}
 }
 \value{
 A vector of length N that indicates the treatment condition of each unit.
 }
 \description{
-This function conducts complete random assignment, a procedure in which a pre-specified number of units is assigned to each treatment condition. This function can accomodate any number of treatment arms.
+Random assignment where a fixed number (within rounding) of units is assigned to treatment conditions. The canonical example of complete random assignment is a procedure in which exactly m of N units is assigned to treatment.
 }
 \examples{
 # Two Group Designs
@@ -56,6 +56,4 @@ Z <- complete_ra(N=100, condition_names=c("control", "placebo", "treatment"))
 table(Z)
 
 }
-\keyword{assignment}
-\keyword{random}
 

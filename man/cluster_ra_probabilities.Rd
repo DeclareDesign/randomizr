@@ -18,12 +18,38 @@ cluster_ra_probabilities(clust_var, m = NULL, num_arms = NULL,
 
 \item{prob_each}{A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.}
 
-\item{condition_names}{A character vector giving the names of the treatment groups.  If unspecified, the treatment groups will be names T1, T2, T3, etc.}
+\item{condition_names}{A character vector giving the names of the treatment groups.  If unspecified, the treatment groups will be named T1, T2, T3, etc.}
 }
 \value{
-A matrix of probabilities of assignment.
+A matrix of probabilities of assignment
 }
 \description{
 Probabilties of assignment: Cluster Random Assignment
+}
+\examples{
+
+# Two Group Designs
+clust_var <- rep(letters, times=1:26)
+cluster_ra_probabilities(clust_var=clust_var)
+
+cluster_ra_probabilities(clust_var=clust_var, m=10)
+
+cluster_ra_probabilities(clust_var=clust_var, m_each = c(9, 17), 
+                         condition_names = c("control", "treatment"))
+
+# Multi-arm Designs
+cluster_ra_probabilities(clust_var=clust_var, num_arms=3)
+cluster_ra_probabilities(clust_var=clust_var, m_each=c(7, 7, 12))
+
+cluster_ra_probabilities(clust_var=clust_var, m_each=c(7, 7, 12), 
+                         condition_names=c("control", "placebo", "treatment"))
+
+cluster_ra_probabilities(clust_var=clust_var, 
+                         condition_names=c("control", "placebo", "treatment"))
+
+cluster_ra_probabilities(clust_var=clust_var, prob_each = c(.1, .2, .7))
+
+
+
 }
 

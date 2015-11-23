@@ -1,12 +1,26 @@
 #' Probabilties of assignment: Simple Random Assignment
 #'
-#' @param N the total number of units in the experimental sample (required).
-#' @param prob If specified, a two-group design is assumed. prob is the probability of assignment to treatment. Within rounding, N*prob subjects will be assigned to treatment.
+#' @param N The total number of units in the experimental sample (required).
+#' @param prob The probability of assignment to treatment. If specified, a two-group design is assumed.
 #' @param num_arms The total number of treatment arms. If unspecified, num_arms will be determined from the length of m_each or condition_names.
 #' @param prob_each A numeric giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.
-#' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc. An execption is a two-group design in which N only or N and m are specified, in which the condition names are 0 and 1.
+#' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc. An execption is a two-group design in which N only or N and m are specified, in which the condition names are 0 and 1.
 #'
-#' @return A matrix of probabilities of assignment.
+#' @return A matrix of probabilities of assignment
+#' 
+#' @examples 
+#' # Two Group Designs
+#' simple_ra_probabilities(N=100)
+#' simple_ra_probabilities(N=100, prob=0.5)
+#' simple_ra_probabilities(N=100, prob_each = c(0.3, 0.7), 
+#'                         condition_names = c("control", "treatment"))
+#' # Multi-arm Designs
+#' simple_ra_probabilities(N=100, num_arms=3)
+#' simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4))
+#' simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4), 
+#'                         condition_names=c("control", "placebo", "treatment"))
+#' simple_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
+#' 
 #' @export
 simple_ra_probabilities <- function(N, prob = NULL, num_arms = NULL, prob_each = NULL, condition_names = NULL){
   
@@ -45,15 +59,35 @@ simple_ra_probabilities <- function(N, prob = NULL, num_arms = NULL, prob_each =
 
 #' Probabilties of assignment: Complete Random Assignment
 #'
-#' @param N the total number of units in the experimental sample (required).
+#' @param N The total number of units in the experimental sample (required).
 #' @param m If specified, a two-group design is assumed. m is the total number of units to be assigned to treatment. Should only be specified for a two group design in which exactly m of N units are assigned to treatment. If not specified, half of the sample (N/2) will be assigned to treatment (if N is odd, m will be set to either floor(N/2) or ceiling(N/2) with equal probability. m is NULL by default. 
-#' @param prob If specified, a two-group design is assumed. prob is the probability of assignment to treatment. Within rounding, N*prob subjects will be assigned to treatment.
-#' @param num_arms The total number of treatment arms. If unspecified, num_arms will be determined from the length of m_each or condition_names.
+#' @param prob The probability of assignment to treatment. If specified, a two-group design is assumed.
+#' @param num_arms The total number of treatment arms. If unspecified, num_arms will be determined from the length of m_each, prob_each, or condition_names.
 #' @param m_each A numeric vector giving the size of each treatment group. Must sum to N. If unspecified, equally sized (rounded) groups will be assumed.
 #' @param prob_each A numeric giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.
-#' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc. An execption is a two-group design in which N only or N and m are specified, in which the condition names are 0 and 1.
+#' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc. An execption is a two-group design in which N only or N and m are specified, in which the condition names are 0 and 1.
 #'
-#' @return A matrix of probabilities of assignment.
+#' @return A matrix of probabilities of assignment
+#' 
+#' @examples 
+#' # 2-arm designs
+#' complete_ra_probabilities(N=100)
+#' complete_ra_probabilities(N=100, m=50)
+#' complete_ra_probabilities(N=100, prob = .3)
+#' 
+#' complete_ra_probabilities(N=100, m_each = c(30, 70), 
+#'                           condition_names = c("control", "treatment"))
+#' 
+#' # Multi-arm Designs
+#' complete_ra_probabilities(N=100, num_arms=3)
+#' complete_ra_probabilities(N=100, m_each=c(30, 30, 40))
+#' 
+#' complete_ra_probabilities(N=100, m_each=c(30, 30, 40), 
+#'                           condition_names=c("control", "placebo", "treatment"))
+#' 
+#' complete_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
+#' complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))
+#' 
 #' @export
 complete_ra_probabilities <- function(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL, prob_each = NULL, condition_names = NULL){
   
@@ -144,12 +178,44 @@ complete_ra_probabilities <- function(N, m = NULL, prob = NULL, num_arms = NULL,
 #' Probabilties of assignment: Block Random Assignment
 #'
 #' @param block_var A vector of length N indicating which block each unit belongs to.
-#' @param num_arms The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m or the length of condition_names.
+#' @param num_arms The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m, the length of prob_each, or the length of condition_names.
 #' @param block_m A matrix of arm sizes whose number of rows is equal to the number of blocks and whose number of columns is equal to the number of treatment arms. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var). The columns should be in the order of condition_names, if specified.
-#' @param prob_each A vector whose length is equal to the number of treatment conditions. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.
+#' @param prob_each A numeric vector whose length is equal to the number of treatment conditions. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.
 #' @param condition_names A character vector giving the names of the treatment conditions. If unspecified, the treatment conditions. will be named T1, T2, T3, etc.
 #'
-#' @return A matrix of probabilities of assignment.
+#' @return A matrix of probabilities of assignment
+#' 
+#' @examples 
+#' 
+#' block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
+#' block_ra_probabilities(block_var=block_var)
+#' 
+#' block_m <- rbind(c(25, 25),
+#'                  c(50, 50),
+#'                  c(100, 100))
+#' 
+#' block_ra_probabilities(block_var=block_var, block_m=block_m)
+#' 
+#' block_m <- rbind(c(10, 40),
+#'                  c(30, 70),
+#'                  c(50, 150))
+#' 
+#' block_ra_probabilities(block_var=block_var, block_m=block_m, 
+#'                        condition_names=c("control", "treatment"))
+#' 
+#' block_ra_probabilities(block_var=block_var, num_arms=3)
+#' 
+#' block_m <- rbind(c(10, 20, 20),
+#'                  c(30, 50, 20),
+#'                  c(50, 75, 75))
+#' block_ra_probabilities(block_var = block_var, block_m = block_m)
+#' 
+#' block_ra_probabilities(block_var=block_var, block_m=block_m, 
+#'                        condition_names=c("control", "placebo", "treatment"))
+#' 
+#' block_ra_probabilities(block_var=block_var, prob_each=c(.1, .1, .8))
+#' 
+#' 
 #' @export
 block_ra_probabilities <- function(block_var, num_arms = NULL, block_m=NULL, prob_each = NULL, condition_names = NULL){
   
@@ -226,9 +292,34 @@ block_ra_probabilities <- function(block_var, num_arms = NULL, block_m=NULL, pro
 #' @param num_arms The total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.
 #' @param m_each A numeric vector giving the number of clusters to be assigned to each treatment group. Must sum to the total number of clusters. If unspecified, equally sized (rounded) groups will be assumed.
 #' @param prob_each A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.
-#' @param condition_names A character vector giving the names of the treatment groups.  If unspecified, the treatment groups will be names T1, T2, T3, etc. 
+#' @param condition_names A character vector giving the names of the treatment groups.  If unspecified, the treatment groups will be named T1, T2, T3, etc. 
 #'
-#' @return A matrix of probabilities of assignment.
+#' @return A matrix of probabilities of assignment
+#' 
+#' @examples 
+#' 
+#' # Two Group Designs
+#' clust_var <- rep(letters, times=1:26)
+#' cluster_ra_probabilities(clust_var=clust_var)
+#' 
+#' cluster_ra_probabilities(clust_var=clust_var, m=10)
+#' 
+#' cluster_ra_probabilities(clust_var=clust_var, m_each = c(9, 17), 
+#'                          condition_names = c("control", "treatment"))
+#' 
+#' # Multi-arm Designs
+#' cluster_ra_probabilities(clust_var=clust_var, num_arms=3)
+#' cluster_ra_probabilities(clust_var=clust_var, m_each=c(7, 7, 12))
+#' 
+#' cluster_ra_probabilities(clust_var=clust_var, m_each=c(7, 7, 12), 
+#'                          condition_names=c("control", "placebo", "treatment"))
+#' 
+#' cluster_ra_probabilities(clust_var=clust_var, 
+#'                          condition_names=c("control", "placebo", "treatment"))
+#' 
+#' cluster_ra_probabilities(clust_var=clust_var, prob_each = c(.1, .2, .7))
+#' 
+#' 
 #' 
 #' @export
 cluster_ra_probabilities <- function(clust_var, m=NULL, num_arms = NULL, m_each = NULL, prob_each = NULL, condition_names = NULL){
@@ -251,7 +342,32 @@ cluster_ra_probabilities <- function(clust_var, m=NULL, num_arms = NULL, m_each 
 #' @param prob_each A vector whose length is equal to the number of treatment assignments. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.
 #' @param condition_names A character vector giving the names of the treatment conditions. If unspecified, the treatment conditions. will be named T1, T2, T3, etc.
 #'
-#' @return A matrix of probabilities of assignment.
+#' @return A matrix of probabilities of assignment
+#' 
+#' @examples 
+#' 
+#' clust_var <- rep(letters, times=1:26)
+#' block_var <- rep(NA, length(clust_var))
+#' block_var[clust_var %in% letters[1:5]] <- "block_1"
+#' block_var[clust_var %in% letters[6:10]] <- "block_2"
+#' block_var[clust_var %in% letters[11:15]] <- "block_3"
+#' block_var[clust_var %in% letters[16:20]] <- "block_4"
+#' block_var[clust_var %in% letters[21:26]] <- "block_5"
+#' 
+#' 
+#' block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var)
+#' block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, num_arms = 3)
+#' block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, prob_each = c(.2, .5, .3))
+#' 
+#' block_m <- rbind(c(2, 3),
+#'                  c(1, 4),
+#'                  c(3, 2),
+#'                  c(2, 3),
+#'                  c(5, 1))
+#' 
+#' block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, block_m = block_m)
+#' 
+#' 
 #' @export
 block_and_cluster_ra_probabilities <- 
   function(clust_var, block_var, num_arms = NULL, block_m=NULL, prob_each=NULL, condition_names = NULL){
@@ -276,88 +392,5 @@ block_and_cluster_ra_probabilities <-
     return(prob_mat)
   }
 
-
-
-
-#' Calculate Probability of Observed Condition
-#'
-#' This function calculates the probability that each experimental unit is in the experimental condition that it is in.. You specify designs exactly as you do in `simple_ra()`, `complete_ra()`, `block_ra()` or `cluster_ra()`, adding only the `design` argument. 
-#' Especially when units have different probabilities of assignment, this function can be useful for calculating inverse probability weights.
-#' @param Z a random assignment generated by `randomizr`. Use the identical parameters when generating the assignment and calculating the probabilities.
-#' @param N the total number of units in the experimental sample
-#' @param prob if specified, a two-group design is assumed. prob is the probability of assignment to treatment.
-#' @param m if specified, a two-group design is assumed.  m is the total number of units to be assigned to treatment. Should only be specified for a two group design in which exactly m of N units to treatment. If not specified, half of the sample (N/2) will be assigned to treatment. Is null by default. In clustered designs, exactly m of N clusters is assigned to treatment. If not specified, half of the clusters will be assigned to treatment.
-#' @param m_each a numeric vector giving the size of each treatment group. Must sum to N. If unspecified, equally sized (rounded) groups will be assumed.
-#' @param prob_each a numeric giving the probability of assignment to each treatment arm. Must sum to 1.  Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.
-#' @param block_var A vector of length N that includes the blocking variable
-#' @param block_m A matrix whose number of rows is equal to the number of blocks and whose number of columns is equal to the number of treatment arms. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var). The columns should be in the order of condition_names, if specified.
-#' @param prob_each A vector whose length is equal to the number of treatment assignments. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.
-#' @param clust_var a vector of length N that describes which cluster each unit belongs to.
-#' @param num_arms the total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.
-#' @param condition_names a character vector giving the names of the treatment groups.  If unspecified, the treatment groups will be names T1, T2, T3, etc.
-#' @param design a string that specifies the design used.  Can only take the values "simple", "complete", "block", or "cluster".
-#' @param return_design a logical value that specifies whether a dataframe with Z, the probabilities of each condition, and the observed condition probability should be returned.  Defaults to FALSE.
-#' @keywords random assignment
-#' @export
-#' @examples
-# Simple designs
-#' N <- 100
-#' Z <- simple_ra(N)
-#' condition_probs(Z=Z, N=N, design = "simple")
-#' 
-#' Z <- simple_ra(N=N,prob_each = c(.1, .2, .7), condition_names = c("A", "B", "C"))
-#' condition_probs(Z=Z, N=N,prob_each = c(.1, .2, .7), condition_names = c("A", "B", "C"), 
-#'                design = "simple", return_design=TRUE)
-#' 
-#' # Complete designs
-#' N <- 100 
-#' Z <- complete_ra(N=N, m = 45)
-#' condition_probs(Z=Z, N=N, m = 45, design = "complete")
-#' 
-#' Z <- complete_ra(N=N, m_each = c(10, 20, 70))
-#' condition_probs(Z=Z, N=N, m_each = c(10, 20, 70), 
-#'              design = "complete", return_design=TRUE)
-#' 
-#' # Block designs
-#' 
-#' block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
-#' block_m <- rbind(c(30, 20),
-#'                  c(50, 50),
-#'                  c(100, 100))
-#' Z <- block_ra(block_var=block_var, block_m=block_m)                  
-#' condition_probs(Z=Z, block_var=block_var, block_m=block_m, design="block")
-#' 
-#' Z <- block_ra(block_var=block_var, prob_each=c(.1, .1, .8),
-#'                condition_names=c("control", "placebo", "treatment"))
-#' condition_probs(Z=Z, block_var=block_var, prob_each=c(.1, .1, .8),
-#'                condition_names=c("control", "placebo", "treatment"), 
-#'                design="block")
-#'                
-#' # Cluster designs
-#' 
-#' clust_var <- rep(letters, times=1:26)
-#' Z <- cluster_ra(clust_var=clust_var, m_each=c(7, 7, 12))
-#' condition_probs(Z=Z, clust_var=clust_var, m_each=c(7, 7, 12), 
-#' design="cluster", return_design=TRUE)
-condition_probs <- function(Z, N= NULL, prob=NULL, prob_each=NULL, 
-                            m = NULL, m_each = NULL,
-                            block_var = NULL, block_m = NULL,
-                            clust_var = NULL, 
-                            num_arms=NULL, condition_names = NULL, 
-                            design,return_design=FALSE){
-  probs_mat <- design_probs(N= N, prob=prob, prob_each=prob_each, 
-                            m = m, m_each = m_each,
-                            block_var = block_var, block_m = block_m,
-                            clust_var = clust_var, 
-                            num_arms = num_arms, condition_names = condition_names, design)
-  cond_Z <- cond_Z <- paste0("prob_", Z)
-  indicies <- sapply(colnames(probs_mat), FUN= x <- function(cond_name, cond_Z){cond_Z == cond_name}, cond_Z=cond_Z)
-  cond_probs <- as.vector(t(probs_mat))[as.vector(t(indicies))]
-  
-  if(return_design == TRUE){
-    return(data.frame(Z=Z, probs_mat, cond_probs=cond_probs))
-  }
-  return(cond_probs)
-}
 
 

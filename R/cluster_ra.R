@@ -1,13 +1,14 @@
 #' Cluster Random Assignment
 #'
-#' This function conducts complete random assignment by cluster.Clusters are collections of units that are assigned to a treatment together.
+#' Random assignment where groups of units are assigned together (as a cluster) to treatment conditions. This function conducts complete random assignment at the cluster level.
+#' 
 #' @param clust_var A vector of length N that indicates which cluster each unit belongs to.
-#' @param m The total number clusters to be treated. Should only be specified for a two group design in which exactly m of N clusters is assigned to treatment. If not specified, half of the clusters will be assigned to treatment. Is NULL by default. 
+#' @param m The total number clusters to be treated. Should only be specified for a two group design in which exactly m of N clusters are assigned to treatment. If not specified, half of the clusters will be assigned to treatment. Is NULL by default. 
 #' @param num_arms The total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.
 #' @param m_each A numeric vector giving the number of clusters to be assigned to each treatment group. Must sum to the total number of clusters. If unspecified, equally sized (rounded) groups will be assumed.
 #' @param prob_each A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.
-#' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc.
-#' @keywords random assignment
+#' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.
+#' @return A vector of length N that indicates the treatment condition of each unit.
 #' @export
 #' @examples
 #' # Two Group Designs

@@ -8,18 +8,21 @@ block_ra(block_var, num_arms = NULL, block_m = NULL, prob_each = NULL,
   condition_names = NULL)
 }
 \arguments{
-\item{block_var}{A vector of length N indicating which block each unit belongs to.}
+\item{block_var}{A vector of length N that indicates which block each unit belongs to.}
 
-\item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m or the length of condition_names.}
+\item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m, the length of prob_each, or the length of condition_names.}
 
-\item{block_m}{A matrix of arm sizes whose number of rows is equal to the number of blocks and whose number of columns is equal to the number of treatment arms. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var). The columns should be in the order of condition_names, if specified.}
+\item{block_m}{A matrix of arm sizes with blocks in the rows and treatment conditions in the columns. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.}
 
-\item{prob_each}{A vector whose length is equal to the number of treatment conditions. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.}
+\item{prob_each}{A numeric vector whose length is equal to the number of treatment conditions. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.}
 
-\item{condition_names}{A character vector giving the names of the treatment conditions. If unspecified, the treatment conditions. will be named T1, T2, T3, etc.}
+\item{condition_names}{A character vector giving the names of the treatment conditions. If unspecified, the treatment conditions will be named T1, T2, T3, etc.}
+}
+\value{
+A vector of length N that indicates the treatment condition of each unit.
 }
 \description{
-This function assigns a fixed number of units within each block to treatment.
+Random assignment where complete random assignment is employed within experimental blocks. For example, imagine that 50 of 100 men are assigned to treatment and 75 of 200 women are assigned to treatment.
 }
 \examples{
 block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
@@ -58,6 +61,4 @@ table(block_var, Z)
 Z <- block_ra(block_var=block_var, prob_each=c(.1, .1, .8))
 table(block_var, Z)
 }
-\keyword{assignment}
-\keyword{random}
 

@@ -8,20 +8,34 @@ simple_ra_probabilities(N, prob = NULL, num_arms = NULL, prob_each = NULL,
   condition_names = NULL)
 }
 \arguments{
-\item{N}{the total number of units in the experimental sample (required).}
+\item{N}{The total number of units in the experimental sample (required).}
 
-\item{prob}{If specified, a two-group design is assumed. prob is the probability of assignment to treatment. Within rounding, N*prob subjects will be assigned to treatment.}
+\item{prob}{The probability of assignment to treatment. If specified, a two-group design is assumed.}
 
 \item{num_arms}{The total number of treatment arms. If unspecified, num_arms will be determined from the length of m_each or condition_names.}
 
 \item{prob_each}{A numeric giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.}
 
-\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc. An execption is a two-group design in which N only or N and m are specified, in which the condition names are 0 and 1.}
+\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc. An execption is a two-group design in which N only or N and m are specified, in which the condition names are 0 and 1.}
 }
 \value{
-A matrix of probabilities of assignment.
+A matrix of probabilities of assignment
 }
 \description{
 Probabilties of assignment: Simple Random Assignment
+}
+\examples{
+# Two Group Designs
+simple_ra_probabilities(N=100)
+simple_ra_probabilities(N=100, prob=0.5)
+simple_ra_probabilities(N=100, prob_each = c(0.3, 0.7), 
+                        condition_names = c("control", "treatment"))
+# Multi-arm Designs
+simple_ra_probabilities(N=100, num_arms=3)
+simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4))
+simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4), 
+                        condition_names=c("control", "placebo", "treatment"))
+simple_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
+
 }
 
