@@ -11,6 +11,9 @@
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc. An execption is a two-group design in which N only or N and m are specified, in which the condition names default to 0 and 1.
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #' @export
+#' 
+#' @importFrom stats rbinom
+#' 
 #' @examples
 #' # Two Group Designs
 #'

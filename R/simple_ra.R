@@ -8,6 +8,9 @@
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #' @export
+#' 
+#' @importFrom stats rbinom
+#' 
 #' @examples
 #' # Two Group Designs
 #'
