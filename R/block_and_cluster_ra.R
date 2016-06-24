@@ -5,9 +5,12 @@
 #' @param clust_var A vector of length N that indicates which cluster each unit belongs to.
 #' @param block_var A vector of length N that indicates which block each unit belongs to.
 #' @param num_arms The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m, the length of prob_each, or the length of condition_names.
-#' @param block_m A matrix of arm sizes with blocks in the rows and treatment conditions in the columns. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var). The columns should be in the order of condition_names, if specified.
+#' @param block_m Deprecated. Use block_m_each instead.
 #' @param prob_each A vector whose length is equal to the number of treatment assignments. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.
 #' @param condition_names A character vector giving the names of the treatment conditions. If unspecified, the treatment conditions. will be named T1, T2, T3, etc.
+#' @param block_m_each A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of *clusters* (not units) to be assigned to each treatment arm. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.
+#' @param block_prob_each A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within block. Use only if the probabilities of assignment should vary by block. Each row of block_prob_each must sum to 1.
+#' @param remainder_draws Number of random remainder contigency tables to draw. Defaults to 100. You may need to increase in some cases.
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #' 
@@ -46,7 +49,10 @@
 #' table(Z, block_var)
 #' @export
 block_and_cluster_ra <- 
-  function(clust_var, block_var, num_arms = NULL, block_m=NULL, prob_each=NULL, condition_names = NULL) {
+  function(clust_var, block_var, num_arms= NULL, 
+           block_m=NULL, block_m_each = NULL, 
+           prob_each=NULL, block_prob_each = NULL, 
+           condition_names = NULL, remainder_draws = 100) {
     
     # confirm that all units within clusters are in the same block
     # is there a computationally faster way to confirm this (possible c++ loop?)
@@ -68,7 +74,9 @@ block_and_cluster_ra <-
     z_clust <- block_ra(block_var = clust_blocks, 
                         num_arms = num_arms,
                         block_m = block_m, 
+                        block_m_each = block_m_each,
                         prob_each = prob_each,
+                        block_prob_each = block_prob_each,
                         condition_names = condition_names)
     
     # Merge back up to the individual level, maintaining original ordering

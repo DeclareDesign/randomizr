@@ -5,16 +5,21 @@
 \title{Probabilties of assignment: Block Random Assignment}
 \usage{
 block_ra_probabilities(block_var, num_arms = NULL, block_m = NULL,
-  prob_each = NULL, condition_names = NULL)
+  block_m_each = NULL, prob_each = NULL, block_prob_each = NULL,
+  condition_names = NULL)
 }
 \arguments{
 \item{block_var}{A vector of length N indicating which block each unit belongs to.}
 
 \item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m, the length of prob_each, or the length of condition_names.}
 
-\item{block_m}{A matrix of arm sizes whose number of rows is equal to the number of blocks and whose number of columns is equal to the number of treatment arms. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var). The columns should be in the order of condition_names, if specified.}
+\item{block_m}{Deprecated. Use block_m_each instead.}
 
-\item{prob_each}{A numeric vector whose length is equal to the number of treatment conditions. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.}
+\item{block_m_each}{A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units to be assigned to each treatment arm. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.}
+
+\item{prob_each}{A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use block_m_each.}
+
+\item{block_prob_each}{A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within block. Use only if the probabilities of assignment should vary by block. Each row of block_prob_each must sum to 1.}
 
 \item{condition_names}{A character vector giving the names of the treatment conditions. If unspecified, the treatment conditions. will be named T1, T2, T3, etc.}
 }
@@ -29,27 +34,27 @@ Probabilties of assignment: Block Random Assignment
 block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
 block_ra_probabilities(block_var=block_var)
 
-block_m <- rbind(c(25, 25),
+block_m_each <- rbind(c(25, 25),
                  c(50, 50),
                  c(100, 100))
 
-block_ra_probabilities(block_var=block_var, block_m=block_m)
+block_ra_probabilities(block_var=block_var, block_m_each=block_m_each)
 
-block_m <- rbind(c(10, 40),
+block_m_each <- rbind(c(10, 40),
                  c(30, 70),
                  c(50, 150))
 
-block_ra_probabilities(block_var=block_var, block_m=block_m, 
+block_ra_probabilities(block_var=block_var, block_m_each=block_m_each, 
                        condition_names=c("control", "treatment"))
 
 block_ra_probabilities(block_var=block_var, num_arms=3)
 
-block_m <- rbind(c(10, 20, 20),
+block_m_each <- rbind(c(10, 20, 20),
                  c(30, 50, 20),
                  c(50, 75, 75))
-block_ra_probabilities(block_var = block_var, block_m = block_m)
+block_ra_probabilities(block_var = block_var, block_m_each = block_m_each)
 
-block_ra_probabilities(block_var=block_var, block_m=block_m, 
+block_ra_probabilities(block_var=block_var, block_m_each=block_m_each, 
                        condition_names=c("control", "placebo", "treatment"))
 
 block_ra_probabilities(block_var=block_var, prob_each=c(.1, .1, .8))

@@ -179,8 +179,10 @@ complete_ra_probabilities <- function(N, m = NULL, prob = NULL, num_arms = NULL,
 #'
 #' @param block_var A vector of length N indicating which block each unit belongs to.
 #' @param num_arms The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m, the length of prob_each, or the length of condition_names.
-#' @param block_m A matrix of arm sizes whose number of rows is equal to the number of blocks and whose number of columns is equal to the number of treatment arms. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var). The columns should be in the order of condition_names, if specified.
-#' @param prob_each A numeric vector whose length is equal to the number of treatment conditions. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.
+#' @param block_m_each A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units to be assigned to each treatment arm. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.
+#' @param block_m Deprecated. Use block_m_each instead.
+#' @param prob_each A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use block_m_each.
+#' @param block_prob_each A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within block. Use only if the probabilities of assignment should vary by block. Each row of block_prob_each must sum to 1.
 #' @param condition_names A character vector giving the names of the treatment conditions. If unspecified, the treatment conditions. will be named T1, T2, T3, etc.
 #'
 #' @return A matrix of probabilities of assignment
@@ -190,41 +192,54 @@ complete_ra_probabilities <- function(N, m = NULL, prob = NULL, num_arms = NULL,
 #' block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
 #' block_ra_probabilities(block_var=block_var)
 #' 
-#' block_m <- rbind(c(25, 25),
+#' block_m_each <- rbind(c(25, 25),
 #'                  c(50, 50),
 #'                  c(100, 100))
 #' 
-#' block_ra_probabilities(block_var=block_var, block_m=block_m)
+#' block_ra_probabilities(block_var=block_var, block_m_each=block_m_each)
 #' 
-#' block_m <- rbind(c(10, 40),
+#' block_m_each <- rbind(c(10, 40),
 #'                  c(30, 70),
 #'                  c(50, 150))
 #' 
-#' block_ra_probabilities(block_var=block_var, block_m=block_m, 
+#' block_ra_probabilities(block_var=block_var, block_m_each=block_m_each, 
 #'                        condition_names=c("control", "treatment"))
 #' 
 #' block_ra_probabilities(block_var=block_var, num_arms=3)
 #' 
-#' block_m <- rbind(c(10, 20, 20),
+#' block_m_each <- rbind(c(10, 20, 20),
 #'                  c(30, 50, 20),
 #'                  c(50, 75, 75))
-#' block_ra_probabilities(block_var = block_var, block_m = block_m)
+#' block_ra_probabilities(block_var = block_var, block_m_each = block_m_each)
 #' 
-#' block_ra_probabilities(block_var=block_var, block_m=block_m, 
+#' block_ra_probabilities(block_var=block_var, block_m_each=block_m_each, 
 #'                        condition_names=c("control", "placebo", "treatment"))
 #' 
 #' block_ra_probabilities(block_var=block_var, prob_each=c(.1, .1, .8))
 #' 
 #' 
 #' @export
-block_ra_probabilities <- function(block_var, num_arms = NULL, block_m=NULL, prob_each = NULL, condition_names = NULL){
+block_ra_probabilities <- function(block_var, 
+                                   num_arms = NULL, 
+                                   block_m=NULL, 
+                                   block_m_each = NULL,
+                                   prob_each = NULL, 
+                                   block_prob_each = NULL,
+                                   condition_names = NULL){
+  
+  if(!is.null(block_m)){
+    warning("Use of block_m is deprecated. Use block_m_each instead.")
+    if(!is.null(block_m_each)){
+      block_m_each <- block_m
+    }
+  }
   
   # Setup: obtain number of arms and condition_names
-  
   if(is.null(num_arms)){
     num_arms <- 2
-    if(!is.null(block_m)){num_arms <- dim(block_m)[2]}
+    if(!is.null(block_m_each)){num_arms <- ncol(block_m_each)}
     if(!is.null(prob_each)){num_arms <- length(prob_each)}
+    if(!is.null(block_prob_each)){num_arms <- ncol(block_prob_each)}
     if(!is.null(condition_names)){num_arms <- length(condition_names)}
   }
   
@@ -243,6 +258,7 @@ block_ra_probabilities <- function(block_var, num_arms = NULL, block_m=NULL, pro
                      dimnames = list(NULL,  paste0("prob_",condition_names)))
   
   # Case 1: Assume (approximately) equal probabilities for all blocks and conditions.
+  # This is possibly incorrect; will need to investigate.
   if(is.null(block_m) & is.null(prob_each) & is.null(prob_each)){
     for(i in 1:length(blocks)){
       N_block <- sum(block_var==blocks[i])
@@ -251,12 +267,12 @@ block_ra_probabilities <- function(block_var, num_arms = NULL, block_m=NULL, pro
     return(prob_mat)
   }
   
-  # Case 2: block_m is specified
-  if(!is.null(block_m)){
+  # Case 2: block_m_each is specified
+  if(!is.null(block_m_each)){
     for(i in 1:length(blocks)){
       N_block <- sum(block_var==blocks[i])
       prob_mat[block_var==blocks[i],] <- complete_ra_probabilities(N = N_block, 
-                                                                   m_each = block_m[i,], 
+                                                                   m_each = block_m_each[i,], 
                                                                    condition_names=condition_names)
     }
     return(prob_mat)
@@ -273,12 +289,12 @@ block_ra_probabilities <- function(block_var, num_arms = NULL, block_m=NULL, pro
     return(prob_mat)
   }
   
-  # Case 4: prob_each is specified
-  if(!is.null(prob_each)){
+  # Case 4: block_prob_each is specified
+  if(!is.null(block_prob_each)){
     for(i in 1:length(blocks)){
       N_block <- sum(block_var==blocks[i])
       prob_mat[block_var==blocks[i],] <- complete_ra_probabilities(N = N_block, 
-                                                                   prob_each = prob_each[i,], 
+                                                                   prob_each = block_prob_each[i,], 
                                                                    condition_names=condition_names)
     }
     return(prob_mat)
@@ -338,8 +354,11 @@ cluster_ra_probabilities <- function(clust_var, m=NULL, num_arms = NULL, m_each 
 #' @param clust_var A vector of length N that indicates which cluster each unit belongs to.
 #' @param block_var A vector of length N that indicates which block each unit belongs to.
 #' @param num_arms The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m or the length of condition_names. 
-#' @param block_m A matrix of arm sizes whose number of rows is equal to the number of blocks and whose number of columns is equal to the number of treatment arms. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var). The columns should be in the order of condition_names, if specified.
+#' @param block_m Deprecated. Use block_m_each instead.
 #' @param prob_each A vector whose length is equal to the number of treatment assignments. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.
+#' @param block_m_each A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of *clusters* (not units) to be assigned to each treatment arm. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.
+#' @param block_prob_each A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within block. Use only if the probabilities of assignment should vary by block. Each row of block_prob_each must sum to 1.
+
 #' @param condition_names A character vector giving the names of the treatment conditions. If unspecified, the treatment conditions. will be named T1, T2, T3, etc.
 #'
 #' @return A matrix of probabilities of assignment
@@ -370,12 +389,21 @@ cluster_ra_probabilities <- function(clust_var, m=NULL, num_arms = NULL, m_each 
 #'                  c(2, 3),
 #'                  c(5, 1))
 #' 
-#' block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, block_m = block_m)
+#' block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, block_m_each = block_m_each)
 #' 
 #' 
 #' @export
 block_and_cluster_ra_probabilities <- 
-  function(clust_var, block_var, num_arms = NULL, block_m=NULL, prob_each=NULL, condition_names = NULL){
+  function(clust_var, block_var, num_arms = NULL, block_m=NULL, block_m_each=NULL,
+           prob_each=NULL, block_prob_each = NULL, condition_names = NULL){
+    
+    if(!is.null(block_m)){
+      warning("Use of block_m is deprecated. Use block_m_each instead.")
+      if(!is.null(block_m_each)){
+        block_m_each <- block_m
+      }
+    }
+    
     unique_clus <- unique(clust_var)
     
     ## get the block for each cluster
@@ -386,8 +414,10 @@ block_and_cluster_ra_probabilities <-
     
     probs_clus <- block_ra_probabilities(block_var = clust_blocks, 
                                          block_m = block_m,
+                                         block_m_each = block_m_each,
                                          num_arms = num_arms,
                                          prob_each = prob_each,
+                                         block_prob_each = block_prob_each,
                                          condition_names = condition_names)
     
     merged <- merge(x = data.frame(clust_var, init_order = 1:length(clust_var)), 

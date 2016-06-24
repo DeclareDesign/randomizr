@@ -85,5 +85,6 @@ simple_ra <- function(N, prob=NULL, num_arms=NULL, prob_each=NULL, condition_nam
   }
   
   assign <- sample(x = condition_names, size = N, replace = TRUE, prob = prob_each)
+  assign <- factor(assign, levels = condition_names)
   return(assign) 
 }

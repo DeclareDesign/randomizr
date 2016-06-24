@@ -17,8 +17,7 @@ expect_error(complete_ra(100, prob_each = c(.2, .7)))
 Z <- complete_ra(N=100)
 expect_equal(sum(Z), 50)
 
-Z <- complete_ra(N=101, prob = .34)
-table(Z)
+Z <- complete_ra(N=101, prob = .34); table(Z)
 
 Z <- complete_ra(N=100, m=50)
 expect_equal(sum(Z), 50)
@@ -83,18 +82,21 @@ block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
 Z <- block_ra(block_var=block_var)
 table(block_var, Z)
 
-block_m <- rbind(c(25, 25),
+block_m_each <- rbind(c(25, 25),
                  c(50, 50),
                  c(100, 100))
 
-Z <- block_ra(block_var=block_var, block_m=block_m)
+Z <- block_ra(block_var=block_var, block_m_each=block_m_each)
 table(block_var, Z)
 
-block_m <- rbind(c(10, 40),
+expect_warning(block_ra(block_var=block_var, block_m=block_m_each))
+
+
+block_m_each <- rbind(c(10, 40),
                  c(30, 70),
                  c(50, 150))
 
-Z <- block_ra(block_var=block_var, block_m=block_m, 
+Z <- block_ra(block_var=block_var, block_m_each=block_m_each, 
               condition_names=c("control", "treatment"))
 table(block_var, Z)
 
@@ -102,13 +104,13 @@ table(block_var, Z)
 Z <- block_ra(block_var=block_var, num_arms=3)
 table(block_var, Z)
 
-block_m <- rbind(c(10, 20, 20),
+block_m_each <- rbind(c(10, 20, 20),
                  c(30, 50, 20),
                  c(50, 75, 75))
-Z <- block_ra(block_var=block_var, block_m=block_m )
+Z <- block_ra(block_var=block_var, block_m_each=block_m_each )
 table(block_var, Z)
 
-Z <- block_ra(block_var=block_var, block_m=block_m, 
+Z <- block_ra(block_var=block_var, block_m_each=block_m_each, 
               condition_names=c("control", "placebo", "treatment"))
 table(block_var, Z)
 
@@ -173,13 +175,13 @@ table(Z, block_var)
 Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, prob_each = c(.2, .5, .3))
 
 
-block_m <- rbind(c(2, 3),
+block_m_each <- rbind(c(2, 3),
                  c(1, 4),
                  c(3, 2),
                  c(2, 3),
                  c(5, 1))
 
-Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, block_m = block_m)
+Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, block_m_each = block_m_each)
 
 table(Z, clust_var)
 table(Z, block_var)

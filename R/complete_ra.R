@@ -147,5 +147,6 @@ complete_ra <- function(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL
   for (i in 1:num_arms){
     assign[rand_order[(sum(m_each[0:(i-1)]) +1):sum(m_each[0:i]) ]] <- condition_names[i]
   }
+  assign <- factor(assign, levels = condition_names)
   return(assign)
 }

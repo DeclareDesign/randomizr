@@ -18,10 +18,10 @@ This function is especially useful when units have different probabilties of ass
 
 # Conduct a block random assignment
 block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
-block_m <- rbind(c(10, 40),
+block_m_each <- rbind(c(10, 40),
                  c(30, 70),
                  c(50, 150))
-declaration <- declare_ra(block_var = block_var, block_m = block_m)
+declaration <- declare_ra(block_var = block_var, block_m_each = block_m_each)
 Z <- conduct_ra(ra_declaration = declaration)
 table(Z, block_var)
 

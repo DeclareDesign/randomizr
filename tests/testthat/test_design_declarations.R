@@ -1,6 +1,10 @@
 library(testthat)
 library(randomizr)
 
+context("Declarations: Complete Random Assignments")
+
+# Complete Random Assignments ----------------------------------------------
+
 declaration <- declare_ra(N=100)
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
@@ -54,7 +58,10 @@ obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
 
-# Simple designs ----------------------------------------------------------
+context("Declarations: Simple Random Assignments")
+
+# Simple Random Assignmetn ------------------------------------------------
+
 
 declaration <- declare_ra(N=100, simple = TRUE)
 table(declaration$ra_function())
@@ -101,6 +108,7 @@ obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
 
+context("Declarations: Block Random Assignments")
 # Blocked Designs ---------------------------------------------------------
 
 block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
@@ -109,27 +117,27 @@ declaration <- declare_ra(block_var=block_var)
 table(declaration$ra_function())
 declaration$probabilities_matrix
 
-block_m <- rbind(c(25, 25),
+block_m_each <- rbind(c(25, 25),
                  c(50, 50),
                  c(100, 100))
 
-declaration <- declare_ra(block_var=block_var, block_m=block_m)
+declaration <- declare_ra(block_var=block_var, block_m_each=block_m_each)
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
-block_m <- rbind(c(10, 40),
+block_m_each <- rbind(c(10, 40),
                  c(30, 70),
                  c(50, 150))
 
-declaration <- declare_ra(block_var=block_var, block_m=block_m)
+declaration <- declare_ra(block_var=block_var, block_m_each=block_m_each)
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
-declaration <- declare_ra(block_var=block_var, block_m=block_m, 
+declaration <- declare_ra(block_var=block_var, block_m_each=block_m_each, 
                           condition_names=c("control", "treatment"))
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
@@ -138,10 +146,10 @@ declaration$probabilities_matrix
 
 
 # Multi-arm Designs
-block_m <- rbind(c(10, 20, 20),
+block_m_each <- rbind(c(10, 20, 20),
                  c(30, 50, 20),
                  c(50, 75, 75))
-declaration <- declare_ra(block_var=block_var, block_m=block_m)
+declaration <- declare_ra(block_var=block_var, block_m_each=block_m_each)
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
@@ -153,7 +161,7 @@ Z <- conduct_ra(declaration)
 obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
-declaration <- declare_ra(block_var=block_var, block_m=block_m, 
+declaration <- declare_ra(block_var=block_var, block_m_each=block_m_each, 
                           condition_names=c("control", "placebo", "treatment"))
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
@@ -166,7 +174,10 @@ Z <- conduct_ra(declaration)
 obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
-context("Cluster Random Assignments")
+context("Declarations: Cluster Random Assignments")
+
+# Cluster Random Assignments ----------------------------------------------
+
 
 # Two Group Designs
 clust_var <- rep(letters, times=1:26)
@@ -222,7 +233,9 @@ Z <- conduct_ra(declaration)
 obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
-# blocked and cluster -----------------------------------------------------
+
+context("Declarations: Blocked and Cluster Random Assignments")
+# Blocked and cluster -----------------------------------------------------
 
 clust_var <- rep(letters, times=1:26)
 block_var <- rep(NA, length(clust_var))
@@ -252,13 +265,13 @@ Z <- conduct_ra(declaration)
 obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
-block_m <- rbind(c(2, 3),
+block_m_each <- rbind(c(2, 3),
                  c(1, 4),
                  c(3, 2),
                  c(2, 3),
                  c(5, 1))
 
-declaration <- declare_ra(clust_var = clust_var, block_var = block_var, block_m = block_m)
+declaration <- declare_ra(clust_var = clust_var, block_var = block_var, block_m_each = block_m_each)
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)

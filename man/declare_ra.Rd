@@ -4,32 +4,39 @@
 \alias{declare_ra}
 \title{Declare a random assignment procedure.}
 \usage{
-declare_ra(N = NULL, prob = NULL, num_arms = NULL, prob_each = NULL,
-  m = NULL, m_each = NULL, block_var = NULL, block_m = NULL,
-  clust_var = NULL, condition_names = NULL, simple = FALSE)
+declare_ra(N = NULL, m = NULL, m_each = NULL, prob_each = NULL,
+  block_var = NULL, block_m = NULL, block_m_each = NULL,
+  block_prob_each = NULL, clust_var = NULL, prob = NULL, simple = FALSE,
+  num_arms = NULL, condition_names = NULL, remainder_draws = 100)
 }
 \arguments{
 \item{N}{The total number of units in the experimental sample.}
-
-\item{prob}{The probability of assignment to treatment. If specified, a two-group design is assumed.}
-
-\item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m, the length of prob_each, the length of m_each, or the length of condition_names.}
-
-\item{prob_each}{A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.}
 
 \item{m}{If specified, a two-group design is assumed. m is the total number of units to be assigned to treatment. Should only be specified for a two group design in which exactly m of N units are assigned to treatment. If not specified (and no other arguments are specified), half of the sample (N/2) will be assigned to treatment (if N is odd, m will be set to either floor(N/2) or ceiling(N/2) with equal probability). m is NULL by default.}
 
 \item{m_each}{A numeric vector giving the size of each treatment group. Must sum to N. If unspecified, equally sized (rounded) groups will be assumed.}
 
+\item{prob_each}{A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each or block_m_each.}
+
 \item{block_var}{A vector of length N indicating which block each unit belongs to.}
 
-\item{block_m}{A matrix of arm sizes with blocks in the rows and treatment conditions in the columns. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.}
+\item{block_m}{Deprecated. Use block_m_each instead.}
+
+\item{block_m_each}{A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.}
+
+\item{block_prob_each}{A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within block. Use only if the probabilities of assignment should vary by block. Each row of block_prob_each must sum to 1. As with prob_each, these probabilities are approximate due to rounding.}
 
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
 
-\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc.}
+\item{prob}{The probability of assignment to treatment. If specified, a two-group design is assumed.}
 
 \item{simple}{A logical indicating if simple random assignment is intended. Is FALSE by default.}
+
+\item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m_each or block_prob_each, the length of prob_each, the length of m_each, or the length of condition_names.}
+
+\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc, except in the binary case in which the assignment variable will be numeric with values 0 and 1.}
+
+\item{remainder_draws}{Number of random remainder contigency tables to draw. Defaults to 100. You may need to increase in some cases.}
 }
 \value{
 A random assignment declaration
@@ -38,7 +45,6 @@ A random assignment declaration
 Declare a random assignment procedure.
 }
 \examples{
-
 # The declare_ra function is used in three ways:
 
 # 1. To obtain some basic facts about a randomization:
@@ -74,10 +80,10 @@ declare_ra(N=100, m_each=c(30, 30, 40))
 
 block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
 
-block_m <- rbind(c(10, 40),
+block_m_each <- rbind(c(10, 40),
                  c(30, 70),
                  c(50, 150))
-declare_ra(block_var=block_var, block_m=block_m)
+declare_ra(block_var=block_var, block_m_each=block_m_each)
 
 
 # Cluster Random Assignment Declarations
