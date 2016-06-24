@@ -28,3 +28,18 @@ table(Z)
 Z <- simple_ra(N=100, condition_names=c("control", "placebo", "treatment"))
 table(Z)
 
+
+# Special Cases
+
+replicate(100, simple_ra(N=1, prob = 0))
+replicate(100, simple_ra(N=1, prob = 1))
+replicate(100, simple_ra(N=3, prob = 0))
+replicate(100, simple_ra(N=3, prob = 1))
+
+replicate(100, simple_ra(N=1, prob_each = c(0, 1)))
+replicate(100, simple_ra(N=1, prob_each = c(0, 0, 1)))
+replicate(100, simple_ra(N=3, prob_each = c(0, 1)))
+replicate(100, simple_ra(N=4, prob_each = c(0, 0, 1)))
+
+
+

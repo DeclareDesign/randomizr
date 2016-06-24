@@ -44,6 +44,13 @@
 complete_ra <- function(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL, prob_each = NULL, condition_names = NULL){
   
   # Checks
+  
+  N_check <- length(N) == 1 & (all.equal(N, as.integer(N))) & N > 0
+  
+  if(!N_check){
+    stop("N must be an integer greater than 0")
+  }
+  
   if(!is.null(num_arms)){
     if(num_arms == 1){
       stop("The number of arms (specified with num_arms) must be greater than one.")
@@ -68,28 +75,73 @@ complete_ra <- function(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL
   # Simple 2 group design, returns zeros and ones
   
   if(is.null(m_each) & is.null(condition_names) & is.null(num_arms) & is.null(prob_each)){
+    
     if(N == 1){
-      assign <- rbinom(1,1,.5)
-      return(assign)
-    }
-    if(is.null(m)){
-      coin_flip <- rbinom(1,1,.5)
-      if(coin_flip==0) m <- floor(N/2)
-      if(coin_flip==1) m <- ceiling(N/2)
-    }
-    if(!is.null(prob)){
-      coin_flip <- rbinom(1,1,.5)
-      if(coin_flip==0) m <- floor(N*prob)
-      if(coin_flip==1) m <- ceiling(N*prob)
-    }
-    if(m >= N & N > 1){
-      stop("The number of units assigned to treatment (m) must be smaller than the total number of units (N)")
+      if(is.null(m) & is.null(prob)){
+        assign <- simple_ra(N, prob = 0.5)
+        return(assign)
+      }
+      if(!is.null(m)){
+        if(!m %in% c(0,1)){
+          stop("The number of units assigned to treatment (m) must be less than or equal to the total number of units (N)")
+        }
+        if(m == 0){
+          assign <- 0
+          return(0)
+        }
+        if(m == 1){
+          assign <- simple_ra(N, prob = 0.5)
+          return(assign)
+        }
+      }
+      if(!is.null(prob)){
+        assign <- simple_ra(N, prob = prob)
+      }
     }
     
-    assign <- ifelse(1:N %in% sample(1:N,m),1,0)
-    return(assign)
+    if(N > 1){
+      
+      if(is.null(m) & is.null(prob)){
+        
+        m_low <- floor(N/2)
+        m_high <- ceiling(N/2)
+        
+        if(simple_ra(1, .5) == 0){
+          m <- m_low
+        }else{
+          m <- m_high
+        }
+        assign <-  sample(rep(c(0,1), c(N-m, m)))
+        return(assign)
+      }
+      if(!is.null(m)){
+        if(m == N){
+          assign <- rep(1, N)
+          return(assign)
+        }
+        if(m > N){
+          stop("The number of units assigned to treatment (m) must be smaller than the total number of units (N)")
+        }
+        if(m < 0){
+          stop("The number of units assigned to treatment (m) must be nonnegative.")
+        }
+        assign <- sample(rep(c(0,1), c(N-m, m)))
+        return(assign)
+      }
+      if(!is.null(prob)){
+        m_low <- floor(N*prob)
+        m_high <- ceiling(N*prob)
+        if(m_high == N){m_high <- m_low}
+        if(simple_ra(1, .5) == 0){
+          m <- m_low
+        }else{
+          m <- m_high
+        }
+        assign <- sample(rep(c(0,1), c(N-m, m)))
+        return(assign)
+      }
+    }
   }
-  
   # All other types
   
   if(all(!is.null(m_each), sum(m_each) != N)){
@@ -126,7 +178,8 @@ complete_ra <- function(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL
     }
     m_each <- rep(N%/%num_arms, num_arms)
     remainder <-  N%%num_arms
-    m_each <- m_each + ifelse(1:num_arms %in% sample(1:num_arms,remainder),1,0)
+    
+    m_each <- m_each + sample(rep(c(0,1), c(num_arms-remainder, remainder)))
   }
   
   if(is.null(num_arms)){
@@ -142,11 +195,7 @@ complete_ra <- function(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL
     return(assign)
   }
   
-  rand_order <- sample(1:N,replace = FALSE)
-  assign <- rep(NA, N)
-  for (i in 1:num_arms){
-    assign[rand_order[(sum(m_each[0:(i-1)]) +1):sum(m_each[0:i]) ]] <- condition_names[i]
-  }
+  assign <- sample(rep(condition_names, m_each))
   assign <- factor(assign, levels = condition_names)
   return(assign)
 }
