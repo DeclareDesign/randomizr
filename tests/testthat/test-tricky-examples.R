@@ -220,4 +220,16 @@ table(B, block_ra(block_var = B, prob_each =c(1/6,1/6,1/6, 1/2),
                   condition_names = c("A", "B", "C", "D")))
 
 
+# Bonus trick to show balancing with block_prob_each
+
+block_var <- rep(c("A", "B","C"), times=c(51, 103, 207))
+
+block_prob_each <- rbind(c(.3, .6, .1),
+                         c(.2, .7, .1),
+                         c(.1, .8, .1))
+
+
+table(block_var, block_ra(block_var, block_prob_each = block_prob_each))
+
+
 
