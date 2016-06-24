@@ -38,3 +38,20 @@ table(Z, clust_var)
 table(Z, block_var)
 
 
+
+Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, prob = .5)
+
+table(Z, clust_var)
+table(Z, block_var)
+
+Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, prob = 0)
+
+table(Z, clust_var)
+table(Z, block_var)
+
+Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, prob = 1)
+
+table(Z, clust_var)
+table(Z, block_var)
+
+

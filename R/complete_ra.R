@@ -159,43 +159,77 @@ complete_ra <- function(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL
   if(all(!is.null(prob_each), !is.null(num_arms),length(prob_each) != num_arms)){
     stop("The number of arms (n_arms) must equal the length of prob_each")
   }
+  if(all(!is.null(prob_each), sum(prob_each)!=1)){
+    stop("If specified, the sum of prob_each must equal 1")
+  }
   if(all(!is.null(condition_names), !is.null(num_arms), length(condition_names) != num_arms)){
     stop("The length of condition_names must equal the number of arms (num_arms)")
   }
   
-  if(!is.null(prob_each)){
-    if(sum(prob_each)!=1){
-      stop("If specified, the sum of prob_each must equal 1")
-    }
-    m_each <- floor(N*prob_each)
-    remainder <- N - sum(m_each)
-    m_each <- m_each + complete_ra(N=length(prob_each), m= remainder)
-  } 
   
-  if(is.null(m_each)){
-    if(is.null(num_arms)){
-      num_arms <- length(condition_names)
-    }
-    m_each <- rep(N%/%num_arms, num_arms)
-    remainder <-  N%%num_arms
-    
-    m_each <- m_each + sample(rep(c(0,1), c(num_arms-remainder, remainder)))
-  }
-  
+  # Obtain num_arms
   if(is.null(num_arms)){
-    num_arms <- length(m_each)
+    if(!is.null(m_each)){num_arms <- length(m_each)}
+    if(!is.null(prob_each)){num_arms <- length(prob_each)}
+    if(!is.null(condition_names)){num_arms <- length(condition_names)}
   }
   
+  # Obtain condition_names
   if(is.null(condition_names)){
     condition_names <- paste0("T", 1:num_arms)
   }
   
-  if(N < num_arms){
-    assign <- sample(condition_names, N, replace=FALSE)
-    return(assign)
+  
+  if(is.null(prob_each) & is.null(m_each)){
+    if(N < num_arms){
+      # Case 1: no prob_each and no m_each, and N < num_arms and is a multi-arm design
+      assign <- sample(condition_names, N)
+      return(assign)
+    }else{
+      # Case 2:  no prob_each and no m_each, and N >= num_arms and is a multi-arm design
+      m_each <- rep(N%/%num_arms, num_arms)
+      remainder <-  N%%num_arms
+      m_each <- m_each + sample(rep(c(0,1), c(num_arms-remainder, remainder)))
+      assign <- sample(rep(condition_names, m_each))
+      assign <- clean_condition_names(assign, condition_names)
+      return(assign)
+    }
   }
   
-  assign <- sample(rep(condition_names, m_each))
-  assign <- factor(assign, levels = condition_names)
-  return(assign)
+  # Case 3: prob_each is specified
+  
+  if(!is.null(prob_each)){
+    if(sum(prob_each)!=1){
+      
+    }
+    m_each <- floor(N*prob_each)
+    remainder <- N - sum(m_each)
+    m_each <- m_each + complete_ra(N=length(prob_each), m= remainder)
+    assign <- sample(rep(condition_names, m_each))
+    assign <- clean_condition_names(assign, condition_names)
+    return(assign)
+  } 
+  
+  # Case 4: m_each specified
+  if(!is.null(m_each)){
+    assign <- sample(rep(condition_names, m_each))
+    assign <- clean_condition_names(assign, condition_names)
+    return(assign)
+  }
 }
+
+
+
+clean_condition_names <- function(assign, condition_names){
+  if(all(assign %in% c(0,1))){
+    return(as.numeric(assign))
+  }else{
+    #assign <- condition_names[assign]
+    #if(!identical(condition_names, c(0,1))){
+    #  assign <- factor(assign, levels = condition_names)
+    #}
+    
+      return(factor(assign, levels = condition_names))
+    }
+}
+

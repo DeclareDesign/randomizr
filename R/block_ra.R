@@ -4,6 +4,7 @@
 #' 
 #' @param block_var A vector of length N that indicates which block each unit belongs to.
 #' @param num_arms The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m_each or block_prob_each, the length of prob_each, or the length of condition_names.
+#' @param prob If specified, a two-group design is assumed. prob is the probability of assignment to treatment. Within rounding, N*prob subjects within each block will be assigned to treatment.
 #' @param block_m_each A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units to be assigned to each treatment arm. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.
 #' @param block_m Deprecated. Use block_m_each instead.
 #' @param prob_each A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use block_m_each.
@@ -48,7 +49,7 @@
 #' 
 #' Z <- block_ra(block_var=block_var, prob_each=c(.1, .1, .8))
 #' table(block_var, Z)
-block_ra <- function(block_var, num_arms= NULL, 
+block_ra <- function(block_var, num_arms= NULL, prob = NULL,
                      block_m=NULL, block_m_each = NULL, 
                      prob_each=NULL, block_prob_each = NULL, condition_names = NULL,remainder_draws = 100){
   
@@ -114,6 +115,12 @@ block_ra <- function(block_var, num_arms= NULL,
       stop("prob_each must sum to 1.")
     }
   }
+  
+  if(!is.null(prob)){
+    if(prob >1 | prob <0){stop("If specified, prob must take values between zero and one.")}
+    prob_each <- c(1-prob, prob)
+  }
+  
   # Setup: obtain number of arms and condition_names
   
   if(is.null(num_arms)){
@@ -151,18 +158,10 @@ block_ra <- function(block_var, num_arms= NULL,
     fixed_row_margin <- table(block_var) - rowSums(block_m_each)
     
     if(sum(fixed_column_margin)>0  & sum(fixed_row_margin) >0){
+      block_m_each <- update_block_m_each(block_m_each, fixed_row_margin, fixed_column_margin, remainder_draws)
+    }    
     
-      # Gather some unique possibilities that only have 1's and 0's
-      possibilities <- r2dtable(n = remainder_draws, r = fixed_row_margin, c = fixed_column_margin)
-      possibilities <- unique(possibilities)
-      possibilities <- possibilities[sapply(possibilities, FUN = function(x) all(x %in% c(0,1)))]
-      which_possibility <- sample(1:length(possibilities), 1)
-      
-      #
-      block_m_each <- block_m_each + possibilities[[which_possibility]]
-    }
-    
-    assign <- block_ra(block_var = block_var, block_m_each = block_m_each)
+    assign <- block_ra(block_var = block_var, block_m_each = block_m_each, condition_names=condition_names)
     return(assign)
   }
   
@@ -171,32 +170,43 @@ block_ra <- function(block_var, num_arms= NULL,
       N_block <- sum(block_var==blocks[i])
       assign[block_var==blocks[i]] <- complete_ra(N = N_block, m_each = block_m_each[i,], condition_names=condition_names)
     }
-    assign <- condition_names[assign]
     if(!identical(condition_names, c(0,1))){
-      assign <- factor(assign, levels = condition_names)
+      assign <- condition_names[assign]
     }
+    assign <- clean_condition_names(assign, condition_names)
     return(assign)
   }
   
   if(!is.null(block_prob_each)){
-    for(i in 1:length(blocks)){
-      N_block <- sum(block_var==blocks[i])
-      assign[block_var==blocks[i]] <- complete_ra(N = N_block, prob_each = block_prob_each[i,], condition_names=condition_names)
-    }
-    assign <- condition_names[assign]
-    assign <- factor(assign, levels = condition_names)
+    
+    # Get the baseline allocation
+    block_m_each <- floor(sweep(block_prob_each, 1, table(block_var), `*`))
+    
+    # Figure out the marginals
+    prob_each <- apply(block_prob_each, MARGIN = 2, weighted.mean, w = table(block_var))
+    m_each <- floor(length(block_var)*prob_each)
+    m_remainder <- length(block_var) - sum(m_each)
+    m_each <- m_each + complete_ra(N=length(prob_each), m = m_remainder)
+    
+    fixed_column_margin <- m_each - colSums(block_m_each) 
+    fixed_row_margin <- table(block_var) - rowSums(block_m_each)
+    
+    if(sum(fixed_column_margin)>0  & sum(fixed_row_margin) >0){
+      block_m_each <- update_block_m_each(block_m_each, fixed_row_margin, fixed_column_margin, remainder_draws)
+    }   
+    
+    assign <- block_ra(block_var = block_var, block_m_each = block_m_each, condition_names=condition_names)
     return(assign)
   }
-  
-  # Could Cut  
-  # if(!is.null(prob_each)){
-  #   for(i in 1:length(blocks)){
-  #     N_block <- sum(block_var==blocks[i])
-  #     assign[block_var==blocks[i]] <- complete_ra(N = N_block, prob_each = prob_each, condition_names=condition_names)
-  #   }
-  #   assign <- condition_names[assign]
-  #   assign <- factor(assign, levels = condition_names)
-  #   return(assign)
-  # }
-  
 }
+
+
+update_block_m_each <- 
+  function(block_m_each, fixed_row_margin, fixed_column_margin, remainder_draws){
+    # Gather some unique possibilities that only have 1's and 0's
+    possibilities <- r2dtable(n = remainder_draws, r = fixed_row_margin, c = fixed_column_margin)
+    possibilities <- unique(possibilities)
+    possibilities <- possibilities[sapply(possibilities, FUN = function(x) all(x %in% c(0,1)))]
+    which_possibility <- sample(1:length(possibilities), 1)
+    return(block_m_each + possibilities[[which_possibility]])
+  }

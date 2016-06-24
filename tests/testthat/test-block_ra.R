@@ -52,11 +52,35 @@ table(block_var, Z)
 Z <- block_ra(block_var=block_var, prob_each=c(.213, .568, .219))
 table(block_var, Z)
 
+
+Z <- block_ra(block_var = block_var, prob = .5)
+table(block_var,Z)
+Z <- block_ra(block_var = block_var, prob = 1)
+table(block_var,Z)
+Z <- block_ra(block_var = block_var, prob = 0)
+table(block_var,Z)
+Z <- block_ra(block_var = block_var, prob = .33)
+table(block_var,Z)
+
+
+block_var <- rep(c("A", "B","C"), times=c(51, 103, 207))
+
+block_prob_each <- rbind(c(.3, .6, .1),
+                         c(.2, .7, .1),
+                         c(.1, .8, .1))
+
+
+table(block_var, block_ra(block_var, block_prob_each = block_prob_each))
+
+
+
+
 # Macartan's worry: with blocks of size 3, can assign either 1 or 2 to control. How to fix total number of assignments
 
 block_var <- rep(c("A", "B","C"), times=c(3, 3, 3))
 prob_each <- c(.5, .5)
 expect_true(all(replicate(100, sum(block_ra(block_var = block_var))) %in% c(5,4)))
+
 
 
 # Confirming Errors Correctly Thrown --------------------------------------
@@ -72,6 +96,9 @@ block_m_each <- rbind(c(25, 25),
 block_prob_each <- rbind(c(.3, .6, .1),
                          c(.2, .7, .1),
                          c(.1, .8, .1))
+
+
+
 
 expect_error(block_ra(block_var=block_var, block_m_each=block_m_each, block_prob_each = block_prob_each))
 expect_error(block_ra(block_var=block_var, block_m_each=block_m_each, prob_each = c(.2, .1, .7)))

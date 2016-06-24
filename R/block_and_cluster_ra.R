@@ -5,6 +5,7 @@
 #' @param clust_var A vector of length N that indicates which cluster each unit belongs to.
 #' @param block_var A vector of length N that indicates which block each unit belongs to.
 #' @param num_arms The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m, the length of prob_each, or the length of condition_names.
+#' @param prob If specified, a two-group design is assumed. prob is the probability of assignment to treatment. Within rounding, N_clus*prob clusters within each block will be assigned to treatment.
 #' @param block_m Deprecated. Use block_m_each instead.
 #' @param prob_each A vector whose length is equal to the number of treatment assignments. When specified, prob_each assigns the same (within rounding) proportion of each block to each treatment condition, using complete random assignment. prob_each must sum to 1.
 #' @param condition_names A character vector giving the names of the treatment conditions. If unspecified, the treatment conditions. will be named T1, T2, T3, etc.
@@ -49,7 +50,7 @@
 #' table(Z, block_var)
 #' @export
 block_and_cluster_ra <- 
-  function(clust_var, block_var, num_arms= NULL, 
+  function(clust_var, block_var, num_arms= NULL, prob = NULL,
            block_m=NULL, block_m_each = NULL, 
            prob_each=NULL, block_prob_each = NULL, 
            condition_names = NULL, remainder_draws = 100) {
@@ -73,6 +74,7 @@ block_and_cluster_ra <-
     # Conduct random assignment at cluster level
     z_clust <- block_ra(block_var = clust_blocks, 
                         num_arms = num_arms,
+                        prob = prob,
                         block_m = block_m, 
                         block_m_each = block_m_each,
                         prob_each = prob_each,

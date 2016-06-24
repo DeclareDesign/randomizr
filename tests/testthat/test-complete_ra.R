@@ -49,9 +49,10 @@ expect_true(all(table(Z) %in% c(33, 34)))
 
 
 
-
-
 # Special Cases
+
+complete_ra(2, m_each = c(1, 0, 1), condition_names = c("T1", "T2", "T3"))
+
 
 expect_less_than(sum(replicate(1000, complete_ra(1))), 600)
 expect_more_than(sum(replicate(1000, complete_ra(1))), 400)

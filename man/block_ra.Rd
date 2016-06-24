@@ -4,14 +4,16 @@
 \alias{block_ra}
 \title{Block Random Assignment}
 \usage{
-block_ra(block_var, num_arms = NULL, block_m = NULL, block_m_each = NULL,
-  prob_each = NULL, block_prob_each = NULL, condition_names = NULL,
-  remainder_draws = 100)
+block_ra(block_var, num_arms = NULL, prob = NULL, block_m = NULL,
+  block_m_each = NULL, prob_each = NULL, block_prob_each = NULL,
+  condition_names = NULL, remainder_draws = 100)
 }
 \arguments{
 \item{block_var}{A vector of length N that indicates which block each unit belongs to.}
 
 \item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m_each or block_prob_each, the length of prob_each, or the length of condition_names.}
+
+\item{prob}{If specified, a two-group design is assumed. prob is the probability of assignment to treatment. Within rounding, N*prob subjects within each block will be assigned to treatment.}
 
 \item{block_m}{Deprecated. Use block_m_each instead.}
 

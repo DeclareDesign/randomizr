@@ -4,9 +4,9 @@
 \alias{block_and_cluster_ra}
 \title{Blocked and Clustered Random Assignment.}
 \usage{
-block_and_cluster_ra(clust_var, block_var, num_arms = NULL, block_m = NULL,
-  block_m_each = NULL, prob_each = NULL, block_prob_each = NULL,
-  condition_names = NULL, remainder_draws = 100)
+block_and_cluster_ra(clust_var, block_var, num_arms = NULL, prob = NULL,
+  block_m = NULL, block_m_each = NULL, prob_each = NULL,
+  block_prob_each = NULL, condition_names = NULL, remainder_draws = 100)
 }
 \arguments{
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
@@ -14,6 +14,8 @@ block_and_cluster_ra(clust_var, block_var, num_arms = NULL, block_m = NULL,
 \item{block_var}{A vector of length N that indicates which block each unit belongs to.}
 
 \item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m, the length of prob_each, or the length of condition_names.}
+
+\item{prob}{If specified, a two-group design is assumed. prob is the probability of assignment to treatment. Within rounding, N_clus*prob clusters within each block will be assigned to treatment.}
 
 \item{block_m}{Deprecated. Use block_m_each instead.}
 

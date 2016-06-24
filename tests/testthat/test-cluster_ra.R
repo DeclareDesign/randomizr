@@ -13,6 +13,11 @@ table(Z, clust_var)
 Z <- cluster_ra(clust_var=clust_var, m_each = c(10, 16), 
                 condition_names = c("control", "treatment"))
 
+Z <- cluster_ra(clust_var=clust_var, prob = .5)
+table(Z, clust_var)
+Z <- cluster_ra(clust_var=clust_var, prob = 0)
+table(Z, clust_var)
+Z <- cluster_ra(clust_var=clust_var, prob = 1)
 table(Z, clust_var)
 
 # Multi-arm Designs
