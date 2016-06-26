@@ -11,7 +11,6 @@
 #' @param condition_names A character vector giving the names of the treatment conditions. If unspecified, the treatment conditions. will be named T1, T2, T3, etc.
 #' @param block_m_each A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of *clusters* (not units) to be assigned to each treatment arm. The rows should respect the alphabetical ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.
 #' @param block_prob_each A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within block. Use only if the probabilities of assignment should vary by block. Each row of block_prob_each must sum to 1.
-#' @param remainder_draws Number of random remainder contigency tables to draw. Defaults to 100. You may need to increase in some cases.
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #' 
@@ -53,14 +52,13 @@ block_and_cluster_ra <-
   function(clust_var, block_var, num_arms= NULL, prob = NULL,
            block_m=NULL, block_m_each = NULL, 
            prob_each=NULL, block_prob_each = NULL, 
-           condition_names = NULL, remainder_draws = 100) {
+           condition_names = NULL) {
     
-    # confirm that all units within clusters are in the same block
-    # is there a computationally faster way to confirm this (possible c++ loop?)
-    
-    if(!all(rowSums(table(clust_var, block_var) != 0)==1)){
-      stop("All units within a cluster must be in the same block.")
-    }
+    check_inputs <- check_randomizr_arguments(clust_var = clust_var, block_var = block_var,
+                                              num_arms = num_arms, prob = prob,
+                                              block_m = block_m, block_m_each = block_m_each,
+                                              prob_each = prob_each, block_prob_each = block_prob_each,
+                                              condition_names = condition_names)
     
     # Setup: obtain unique clusters
     unique_clust <- unique(clust_var)

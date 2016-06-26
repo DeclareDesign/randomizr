@@ -44,36 +44,9 @@
 complete_ra <- function(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL, prob_each = NULL, condition_names = NULL){
   
   # Checks
-  
-  N_check <- length(N) == 1 & (all.equal(N, as.integer(N))) & N > 0
-  
-  if(!N_check){
-    stop("N must be an integer greater than 0")
-  }
-  
-  if(!is.null(num_arms)){
-    if(num_arms == 1){
-      stop("The number of arms (specified with num_arms) must be greater than one.")
-    }
-  }
-  if(!is.null(condition_names) & length(condition_names) ==1){
-    stop("The number of arms (as inferred from the length of condition_names) must be greater than one.")
-  }
-  if(!is.null(m_each) & length(m_each) ==1){
-    stop("The number of arms (as inferred from the length of m_each) must be greater than one.")
-  }
-  if(!is.null(prob_each) & length(prob_each) ==1){
-    stop("The number of arms (as inferred from the length of prob_each) must be greater than one.")
-  }
-  if(!is.null(m) & !is.null(condition_names)){
-    stop("Do not specify m and condition_names together. Use m_each and condition_names instead.")
-  }
-  if(!is.null(prob_each) & !is.null(m_each)){
-    stop("Do not specify prob_each and m_each together. Use one or the other.")
-  }
+  check_inputs <- check_randomizr_arguments(N = N, m = m, prob = prob, num_arms = num_arms, m_each = m_each, prob_each = prob_each, condition_names = condition_names)
   
   # Simple 2 group design, returns zeros and ones
-  
   if(is.null(m_each) & is.null(condition_names) & is.null(num_arms) & is.null(prob_each)){
     
     if(N == 1){
@@ -103,13 +76,13 @@ complete_ra <- function(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL
       
       if(is.null(m) & is.null(prob)){
         
-        m_low <- floor(N/2)
-        m_high <- ceiling(N/2)
+        m_floor <- floor(N/2)
+        m_ceiling <- ceiling(N/2)
         
         if(simple_ra(1, .5) == 0){
-          m <- m_low
+          m <- m_floor
         }else{
-          m <- m_high
+          m <- m_ceiling
         }
         assign <-  sample(rep(c(0,1), c(N-m, m)))
         return(assign)
@@ -119,23 +92,17 @@ complete_ra <- function(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL
           assign <- rep(1, N)
           return(assign)
         }
-        if(m > N){
-          stop("The number of units assigned to treatment (m) must be smaller than the total number of units (N)")
-        }
-        if(m < 0){
-          stop("The number of units assigned to treatment (m) must be nonnegative.")
-        }
         assign <- sample(rep(c(0,1), c(N-m, m)))
         return(assign)
       }
       if(!is.null(prob)){
-        m_low <- floor(N*prob)
-        m_high <- ceiling(N*prob)
-        if(m_high == N){m_high <- m_low}
+        m_floor <- floor(N*prob)
+        m_ceiling <- ceiling(N*prob)
+        if(m_ceiling == N){m_ceiling <- m_floor}
         if(simple_ra(1, .5) == 0){
-          m <- m_low
+          m <- m_floor
         }else{
-          m <- m_high
+          m <- m_ceiling
         }
         assign <- sample(rep(c(0,1), c(N-m, m)))
         return(assign)
@@ -144,46 +111,14 @@ complete_ra <- function(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL
   }
   # All other types
   
-  if(all(!is.null(m_each), sum(m_each) != N)){
-    stop("The sum of the number assigned to each condition (m_each) must equal the total number of units (N)")
-  }
-  if(all(!is.null(condition_names), !is.null(m_each), length(m_each) != length(condition_names))){
-    stop("The length of conditions_names must equal the length of m_each")
-  }
-  if(all(!is.null(condition_names), !is.null(prob_each), length(prob_each) != length(condition_names))){
-    stop("The length of conditions_names must equal the length of prob_each")
-  }
-  if(all(!is.null(m_each), !is.null(num_arms),length(m_each) != num_arms)){
-    stop("The number of arms (n_arms) must equal the length of m_each")
-  }
-  if(all(!is.null(prob_each), !is.null(num_arms),length(prob_each) != num_arms)){
-    stop("The number of arms (n_arms) must equal the length of prob_each")
-  }
-  if(all(!is.null(prob_each), sum(prob_each)!=1)){
-    stop("If specified, the sum of prob_each must equal 1")
-  }
-  if(all(!is.null(condition_names), !is.null(num_arms), length(condition_names) != num_arms)){
-    stop("The length of condition_names must equal the number of arms (num_arms)")
-  }
-  
-  
-  # Obtain num_arms
-  if(is.null(num_arms)){
-    if(!is.null(m_each)){num_arms <- length(m_each)}
-    if(!is.null(prob_each)){num_arms <- length(prob_each)}
-    if(!is.null(condition_names)){num_arms <- length(condition_names)}
-  }
-  
-  # Obtain condition_names
-  if(is.null(condition_names)){
-    condition_names <- paste0("T", 1:num_arms)
-  }
-  
+  num_arms <- check_inputs$num_arms
+  condition_names <- check_inputs$condition_names
   
   if(is.null(prob_each) & is.null(m_each)){
     if(N < num_arms){
       # Case 1: no prob_each and no m_each, and N < num_arms and is a multi-arm design
       assign <- sample(condition_names, N)
+      assign <- clean_condition_names(assign, condition_names)
       return(assign)
     }else{
       # Case 2:  no prob_each and no m_each, and N >= num_arms and is a multi-arm design
@@ -216,20 +151,5 @@ complete_ra <- function(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL
     assign <- clean_condition_names(assign, condition_names)
     return(assign)
   }
-}
-
-
-
-clean_condition_names <- function(assign, condition_names){
-  if(all(assign %in% c(0,1))){
-    return(as.numeric(assign))
-  }else{
-    #assign <- condition_names[assign]
-    #if(!identical(condition_names, c(0,1))){
-    #  assign <- factor(assign, levels = condition_names)
-    #}
-    
-      return(factor(assign, levels = condition_names))
-    }
 }
 

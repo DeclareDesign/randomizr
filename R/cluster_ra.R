@@ -40,6 +40,8 @@
 #'                 condition_names=c("control", "placebo", "treatment"))
 #' table(Z, clust_var)
 cluster_ra <- function(clust_var, m=NULL, prob = NULL, num_arms=NULL, m_each = NULL, prob_each = NULL, condition_names = NULL){
+  #check_inputs <- check_randomizr_arguments(clust_var = clust_var, m = m, prob = prob, num_arms = num_arms, 
+  #                                          m_each = m_each, prob_each = prob_each, condition_names = condition_names)
   unique_clus <- unique(clust_var)
   n_clus <- length(unique_clus)
   z_clus <- complete_ra(N = n_clus, m = m, prob = prob, num_arms = num_arms, m_each = m_each, prob_each = prob_each,

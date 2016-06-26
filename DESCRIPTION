@@ -2,7 +2,7 @@ Package: randomizr
 Title: Easy to Use Tools for Common Forms of Random Assignment
 Version: 0.4.0
 Authors@R: person("Alexander", "Coppock", role = c("aut", "cre"),
-		  email = "ac3242@columbia.edu")
+		  email = "acoppock@gmail.com")
 Description: Generates random assignments for common experimental
     designs: simple, complete, blocked, and clustered.
 Depends:

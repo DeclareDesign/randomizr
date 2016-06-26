@@ -121,3 +121,12 @@ block_m_each <- rbind(c(2, 3),
                       c(5, 1))
 
 block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, block_m_each = block_m_each)
+
+
+
+
+
+
+
+
+

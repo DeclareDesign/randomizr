@@ -4,13 +4,16 @@
 \alias{cluster_ra_probabilities}
 \title{Probabilties of assignment: Cluster Random Assignment}
 \usage{
-cluster_ra_probabilities(clust_var, m = NULL, num_arms = NULL,
-  m_each = NULL, prob_each = NULL, condition_names = NULL)
+cluster_ra_probabilities(clust_var, m = NULL, prob = NULL,
+  num_arms = NULL, m_each = NULL, prob_each = NULL,
+  condition_names = NULL)
 }
 \arguments{
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{m}{The total number clusters to be treated. Should only be specified for a two group design in which exactly m of N clusters is assigned to treatment. If not specified, half of the clusters will be assigned to treatment. Is NULL by default.}
+
+\item{prob}{If specified, a two-group design is assumed. prob is the probability of assignment to treatment. Within rounding, N_clusters*prob clusters will be assigned to treatment.}
 
 \item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.}
 

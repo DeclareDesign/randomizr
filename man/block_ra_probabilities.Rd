@@ -5,8 +5,8 @@
 \title{Probabilties of assignment: Block Random Assignment}
 \usage{
 block_ra_probabilities(block_var, num_arms = NULL, block_m = NULL,
-  block_m_each = NULL, prob_each = NULL, block_prob_each = NULL,
-  condition_names = NULL)
+  block_m_each = NULL, prob = NULL, prob_each = NULL,
+  block_prob_each = NULL, condition_names = NULL)
 }
 \arguments{
 \item{block_var}{A vector of length N indicating which block each unit belongs to.}

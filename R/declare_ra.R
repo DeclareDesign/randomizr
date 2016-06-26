@@ -13,7 +13,6 @@
 #' @param simple A logical indicating if simple random assignment is intended. Is FALSE by default.
 #' @param num_arms The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m_each or block_prob_each, the length of prob_each, the length of m_each, or the length of condition_names.
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc, except in the binary case in which the assignment variable will be numeric with values 0 and 1.
-#' @param remainder_draws Number of random remainder contigency tables to draw. Defaults to 100. You may need to increase in some cases.
 #'
 #' @return A random assignment declaration
 #' 
@@ -94,25 +93,13 @@ declare_ra <- function(N = NULL,
                        prob = NULL, 
                        simple = FALSE,
                        num_arms = NULL, 
-                       condition_names = NULL,
-                       remainder_draws = 100){
-  
-  # Global checks
-  
+                       condition_names = NULL){
+  # Determine ra_type
   if(simple == FALSE){
     ra_type <- "complete"
   }else{
     ra_type <- "simple"
   }
-  
-  if(!is.null(block_m)){
-    warning("Use of block_m is deprecated. Use block_m_each instead.")
-    if(!is.null(block_m_each)){
-      block_m_each <- block_m
-    }
-  }
-  
-  # Determine ra_type
   if(!is.null(block_var) & is.null(clust_var)){
     ra_type <- "blocked"
   }
@@ -139,10 +126,6 @@ declare_ra <- function(N = NULL,
   }
   
   if(ra_type=="complete"){
-    if(!is.null(block_var)){stop("You can't specify 'block_var' when using complete random assignment.")}
-    if(!is.null(block_m_each)){stop("You can't specify 'block_m_each' when using complete random assignment.")}
-    if(!is.null(clust_var)){stop("You can't specify 'clust_var' when using complete random assignment.")}
-    
     ra_function <- function(){
       complete_ra(N = N, m = m, prob = prob, num_arms = num_arms, 
                   m_each = m_each, prob_each = prob_each, 
@@ -156,21 +139,20 @@ declare_ra <- function(N = NULL,
   }
   
   if(ra_type=="blocked"){
-    if(!is.null(clust_var)){stop("You can't specify 'clust_var' when using block random assignment.")}
-    
     ra_function <- function(){
       block_ra(block_var = block_var, num_arms = num_arms, 
                block_m = block_m,
                block_m_each = block_m_each, 
+               prob = prob,
                prob_each = prob_each, 
                block_prob_each = block_prob_each,
-               condition_names = condition_names,
-               remainder_draws = remainder_draws)
+               condition_names = condition_names)
     }
     
     probabilities_matrix <- block_ra_probabilities(block_var = block_var, num_arms = num_arms, 
                                                    block_m = block_m,
                                                    block_m_each = block_m_each, 
+                                                   prob = prob,
                                                    prob_each = prob_each, 
                                                    block_prob_each = block_prob_each,
                                                    condition_names = condition_names)
@@ -178,16 +160,15 @@ declare_ra <- function(N = NULL,
   
   
   if(ra_type=="clustered"){
-    if(!is.null(block_var)){stop("You can't specify 'block_var' when using cluster random assignment.")}
-    if(!is.null(block_m_each)){stop("You can't specify 'block_m_each' when using cluster random assignment.")}
-    
     ra_function <- function(){
       cluster_ra(clust_var = clust_var, m = m, num_arms = num_arms, 
+                 prob = prob,
                  m_each = m_each, prob_each = prob_each, 
                  condition_names = condition_names)
     }
     
     probabilities_matrix <- cluster_ra_probabilities(clust_var = clust_var, m = m, num_arms = num_arms, 
+                                                     prob = prob,
                                                      m_each = m_each, prob_each = prob_each, 
                                                      condition_names = condition_names)
     
@@ -198,13 +179,15 @@ declare_ra <- function(N = NULL,
     ra_function <- function(){
       block_and_cluster_ra(clust_var = clust_var, block_var = block_var, 
                            num_arms = num_arms, block_m = block_m, block_m_each = block_m_each, 
+                           prob = prob,
                            block_prob_each = block_prob_each,
-                           prob_each = prob_each, condition_names = condition_names, remainder_draws = remainder_draws)
+                           prob_each = prob_each, condition_names = condition_names)
     }
     
     probabilities_matrix <- block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, 
                                                                num_arms = num_arms, block_m = block_m, 
                                                                block_m_each = block_m_each,
+                                                               prob = prob,
                                                                block_prob_each = block_prob_each,
                                                                prob_each = prob_each, condition_names = condition_names)
     

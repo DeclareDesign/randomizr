@@ -3,9 +3,7 @@ library(randomizr)
 
 context("Complete Random Assignments")
 
-expect_error(complete_ra(100, num_arms = 1))
-expect_error(complete_ra(100, condition_names = c("Treatment")))
-expect_error(complete_ra(100, m_each = c(100)))
+
 expect_error(complete_ra(100, prob_each = c(.2)))
 expect_error(complete_ra(100, m=50, condition_names = c("Control", "Treatment")))
 expect_error(complete_ra(100, m_each = c(30, 70), prob_each = c(.3, .7)))
@@ -16,6 +14,14 @@ expect_error(complete_ra(N=100, m=101))
 expect_error(complete_ra(N=100, m=-2))
 expect_error(complete_ra(N=0, m=0))
 expect_error(complete_ra(N=1, m=2))
+
+# should this be allowed?
+complete_ra(100, num_arms = 1)
+complete_ra(100, m_each = c(100))
+complete_ra(100, condition_names = c("Treatment"))
+
+table(complete_ra(1, num_arms = 2))
+table(complete_ra(1, num_arms = 2, condition_names = c(0,1)))
 
 Z <- complete_ra(N=100)
 expect_equal(sum(Z), 50)

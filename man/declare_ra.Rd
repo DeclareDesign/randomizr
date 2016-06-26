@@ -7,7 +7,7 @@
 declare_ra(N = NULL, m = NULL, m_each = NULL, prob_each = NULL,
   block_var = NULL, block_m = NULL, block_m_each = NULL,
   block_prob_each = NULL, clust_var = NULL, prob = NULL, simple = FALSE,
-  num_arms = NULL, condition_names = NULL, remainder_draws = 100)
+  num_arms = NULL, condition_names = NULL)
 }
 \arguments{
 \item{N}{The total number of units in the experimental sample.}
@@ -35,8 +35,6 @@ declare_ra(N = NULL, m = NULL, m_each = NULL, prob_each = NULL,
 \item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the number of columns of block_m_each or block_prob_each, the length of prob_each, the length of m_each, or the length of condition_names.}
 
 \item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be names T1, T2, T3, etc, except in the binary case in which the assignment variable will be numeric with values 0 and 1.}
-
-\item{remainder_draws}{Number of random remainder contigency tables to draw. Defaults to 100. You may need to increase in some cases.}
 }
 \value{
 A random assignment declaration

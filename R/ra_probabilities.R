@@ -24,23 +24,15 @@
 #' @export
 simple_ra_probabilities <- function(N, prob = NULL, num_arms = NULL, prob_each = NULL, condition_names = NULL){
   
-  # Setup: obtain number of arms and condition_names
+  clean_inputs <- check_randomizr_arguments(N = N, prob = prob, num_arms = num_arms, prob_each = prob_each, condition_names = condition_names)
   
-  if(is.null(num_arms)){
-    num_arms <- 2
-    if(!is.null(prob_each)){num_arms <- length(prob_each)}
-    if(!is.null(condition_names)){num_arms <- length(condition_names)}
-  }
+  num_arms <- clean_inputs$num_arms
+  condition_names <- clean_inputs$condition_names
+
+  # Three easy cases
   
-  if(is.null(condition_names)){
-    if(num_arms==2){
-      condition_names = c(0,1)
-    }else{
-      condition_names <- paste0("T", 1:num_arms)    
-    }
-  }
   if(is.null(prob) & is.null(prob_each)){
-    prob_each <- rep(1/num_arms, num_arms)
+    condition_probabilities <- rep(1/num_arms, num_arms)
   }
   if(!is.null(prob)){
     condition_probabilities <- c(1-prob, prob)
@@ -93,25 +85,18 @@ complete_ra_probabilities <- function(N, m = NULL, prob = NULL, num_arms = NULL,
   
   # Setup: obtain number of arms and condition_names
   
-  if(is.null(num_arms)){
-    num_arms <- 2
-    if(!is.null(m_each)){num_arms <- length(m_each)}
-    if(!is.null(prob_each)){num_arms <- length(prob_each)}
-    if(!is.null(condition_names)){num_arms <- length(condition_names)}
-  }
+  check_inputs <- check_randomizr_arguments(N = N, m = m, prob = prob, num_arms = num_arms, m_each = m_each, prob_each = prob_each, condition_names = condition_names)
   
-  if(is.null(condition_names)){
-    if(num_arms==2){
-      condition_names = c(0,1)
-    }else{
-      condition_names <- paste0("T", 1:num_arms)    
-      }
-  }
+  num_arms <- check_inputs$num_arms
+  condition_names <- check_inputs$condition_names
   
   # Case 0: Two Arms and N = 1
   if(is.null(m_each) & is.null(prob_each) & num_arms ==2 & N ==1) {
+    if(!is.null(prob)){
     prob <- 0.5
-    prob_mat <- matrix(rep(c(1-prob, prob), N), byrow=TRUE, ncol=2, dimnames = list(NULL,  paste0("prob_",condition_names)))
+    }
+    prob_mat <- matrix(rep(c(1-prob, prob), N), byrow=TRUE, 
+                       ncol=2, dimnames = list(NULL,  paste0("prob_",condition_names)))
     return(prob_mat)
   }
   
@@ -128,6 +113,7 @@ complete_ra_probabilities <- function(N, m = NULL, prob = NULL, num_arms = NULL,
     if(!is.null(prob)){
       m_floor <- floor(N*prob)
       m_ceiling <- ceiling(N*prob)
+      if(m_ceiling == N){m_ceiling <- m_floor}
     }
     
     prob <- 0.5*(m_floor/N) + 0.5*(m_ceiling/N)
@@ -223,33 +209,18 @@ block_ra_probabilities <- function(block_var,
                                    num_arms = NULL, 
                                    block_m=NULL, 
                                    block_m_each = NULL,
+                                   prob = NULL,
                                    prob_each = NULL, 
                                    block_prob_each = NULL,
                                    condition_names = NULL){
   
-  if(!is.null(block_m)){
-    warning("Use of block_m is deprecated. Use block_m_each instead.")
-    if(!is.null(block_m_each)){
-      block_m_each <- block_m
-    }
-  }
+  check_inputs <- check_randomizr_arguments(block_var = block_var, num_arms = num_arms, prob = prob,
+                                            block_m = block_m, block_m_each = block_m_each,
+                                            prob_each = prob_each, block_prob_each = block_prob_each,
+                                            condition_names = condition_names)
   
-  # Setup: obtain number of arms and condition_names
-  if(is.null(num_arms)){
-    num_arms <- 2
-    if(!is.null(block_m_each)){num_arms <- ncol(block_m_each)}
-    if(!is.null(prob_each)){num_arms <- length(prob_each)}
-    if(!is.null(block_prob_each)){num_arms <- ncol(block_prob_each)}
-    if(!is.null(condition_names)){num_arms <- length(condition_names)}
-  }
-  
-  if(is.null(condition_names)){
-    if(num_arms==2){
-      condition_names = c(0,1)
-    }else{
-      condition_names <- paste0("T", 1:num_arms)    
-    }
-  }
+  num_arms <- check_inputs$num_arms
+  condition_names <- check_inputs$condition_names
   
   blocks <- sort(unique(block_var))
   prob_mat <- matrix(NA, 
@@ -257,17 +228,38 @@ block_ra_probabilities <- function(block_var,
                      ncol = length(condition_names),
                      dimnames = list(NULL,  paste0("prob_",condition_names)))
   
-  # Case 1: Assume (approximately) equal probabilities for all blocks and conditions.
-  # This is possibly incorrect; will need to investigate.
-  if(is.null(block_m) & is.null(prob_each) & is.null(prob_each)){
-    for(i in 1:length(blocks)){
-      N_block <- sum(block_var==blocks[i])
-      prob_mat[block_var==blocks[i],] <- complete_ra_probabilities(N = N_block, condition_names=condition_names)
+  
+  N_per_block <- table(block_var)
+  
+  # Case 1 use or infer prob_each
+  if(is.null(block_m_each) & is.null(block_prob_each)){
+    
+    if(!is.null(prob)){
+      prob_each <- c(1-prob, prob)
     }
+    
+    if(is.null(prob_each)){
+      prob_each <- rep(1/num_arms, num_arms)
+    }
+    
+    for_sure_allocations <- floor(N_per_block %*% t(prob_each))
+    possible_allocations <- matrix(1/num_arms, nrow = length(N_per_block), ncol = num_arms)
+    
+    for_sure_probs <- sweep(for_sure_allocations, 1, N_per_block, `/`)
+    possible_probs <- sweep(possible_allocations, 1, (N_per_block - rowSums(for_sure_allocations))/N_per_block, `*`)
+    final_probs <- for_sure_probs + possible_probs
+    
+    for(i in 1:length(blocks)){
+      dimensions <- dim(prob_mat[block_var==blocks[i],, drop = FALSE])
+      prob_mat[block_var==blocks[i],] <- matrix(final_probs[i,], nrow = dimensions[1],ncol = dimensions[2], byrow = TRUE)
+    }
+    
     return(prob_mat)
   }
   
-  # Case 2: block_m_each is specified
+  
+  # Case 2 use block_m_each
+  
   if(!is.null(block_m_each)){
     for(i in 1:length(blocks)){
       N_block <- sum(block_var==blocks[i])
@@ -278,33 +270,34 @@ block_ra_probabilities <- function(block_var,
     return(prob_mat)
   }
   
-  # Case 3: prob_each is specified
-  if(!is.null(prob_each)){
-    for(i in 1:length(blocks)){
-      N_block <- sum(block_var==blocks[i])
-      prob_mat[block_var==blocks[i],] <- complete_ra_probabilities(N = N_block, 
-                                                                   prob_each = prob_each, 
-                                                                   condition_names=condition_names)
-    }
-    return(prob_mat)
-  }
   
-  # Case 4: block_prob_each is specified
+  # Case 3 use block_prob_each
+  
   if(!is.null(block_prob_each)){
+    
+    for_sure_allocations <- floor(sweep(block_prob_each, 1, table(block_var), `*`))
+    possible_allocations <- matrix(1/num_arms, nrow = length(N_per_block), ncol = num_arms)
+    
+    for_sure_probs <- sweep(for_sure_allocations, 1, N_per_block, `/`)
+    possible_probs <- sweep(possible_allocations, 1, (N_per_block - rowSums(for_sure_allocations))/N_per_block, `*`)
+    final_probs <- for_sure_probs + possible_probs
+    
     for(i in 1:length(blocks)){
-      N_block <- sum(block_var==blocks[i])
-      prob_mat[block_var==blocks[i],] <- complete_ra_probabilities(N = N_block, 
-                                                                   prob_each = block_prob_each[i,], 
-                                                                   condition_names=condition_names)
+      dimensions <- dim(prob_mat[block_var==blocks[i],])
+      prob_mat[block_var==blocks[i],] <- matrix(final_probs[i,], nrow = dimensions[1],ncol = dimensions[2], byrow = TRUE)
     }
     return(prob_mat)
+    
   }
+
+  
 }
 
 #' Probabilties of assignment: Cluster Random Assignment
 #'
 #' @param clust_var A vector of length N that indicates which cluster each unit belongs to.
 #' @param m The total number clusters to be treated. Should only be specified for a two group design in which exactly m of N clusters is assigned to treatment. If not specified, half of the clusters will be assigned to treatment. Is NULL by default. 
+#' @param prob If specified, a two-group design is assumed. prob is the probability of assignment to treatment. Within rounding, N_clusters*prob clusters will be assigned to treatment.
 #' @param num_arms The total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.
 #' @param m_each A numeric vector giving the number of clusters to be assigned to each treatment group. Must sum to the total number of clusters. If unspecified, equally sized (rounded) groups will be assumed.
 #' @param prob_each A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.
@@ -338,10 +331,10 @@ block_ra_probabilities <- function(block_var,
 #' 
 #' 
 #' @export
-cluster_ra_probabilities <- function(clust_var, m=NULL, num_arms = NULL, m_each = NULL, prob_each = NULL, condition_names = NULL){
+cluster_ra_probabilities <- function(clust_var, m=NULL, prob = NULL, num_arms = NULL, m_each = NULL, prob_each = NULL, condition_names = NULL){
   unique_clus <- unique(clust_var)
   n_clus <- length(unique_clus)
-  probs_clus <- complete_ra_probabilities(N = n_clus, m = m, num_arms = num_arms, m_each = m_each, prob_each = prob_each, condition_names = condition_names)
+  probs_clus <- complete_ra_probabilities(N = n_clus, m = m, prob = NULL, num_arms = num_arms, m_each = m_each, prob_each = prob_each, condition_names = condition_names)
   merged <- merge(x = data.frame(clust_var, init_order = 1:length(clust_var)), 
                   data.frame(clust_var=unique_clus, probs_clus), by="clust_var")
   merged <- merged[order(merged$init_order),]
@@ -396,13 +389,6 @@ cluster_ra_probabilities <- function(clust_var, m=NULL, num_arms = NULL, m_each 
 block_and_cluster_ra_probabilities <- 
   function(clust_var, block_var, num_arms = NULL, block_m=NULL, block_m_each=NULL,
            prob_each=NULL, block_prob_each = NULL, condition_names = NULL){
-    
-    if(!is.null(block_m)){
-      warning("Use of block_m is deprecated. Use block_m_each instead.")
-      if(!is.null(block_m_each)){
-        block_m_each <- block_m
-      }
-    }
     
     unique_clus <- unique(clust_var)
     

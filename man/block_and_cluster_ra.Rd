@@ -6,7 +6,7 @@
 \usage{
 block_and_cluster_ra(clust_var, block_var, num_arms = NULL, prob = NULL,
   block_m = NULL, block_m_each = NULL, prob_each = NULL,
-  block_prob_each = NULL, condition_names = NULL, remainder_draws = 100)
+  block_prob_each = NULL, condition_names = NULL)
 }
 \arguments{
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
@@ -26,8 +26,6 @@ block_and_cluster_ra(clust_var, block_var, num_arms = NULL, prob = NULL,
 \item{block_prob_each}{A matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within block. Use only if the probabilities of assignment should vary by block. Each row of block_prob_each must sum to 1.}
 
 \item{condition_names}{A character vector giving the names of the treatment conditions. If unspecified, the treatment conditions. will be named T1, T2, T3, etc.}
-
-\item{remainder_draws}{Number of random remainder contigency tables to draw. Defaults to 100. You may need to increase in some cases.}
 }
 \value{
 A vector of length N that indicates the treatment condition of each unit.
