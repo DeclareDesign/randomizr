@@ -64,3 +64,23 @@ dec$probabilities_matrix
 analytic_probs
 final_probs
 
+
+
+# figure out prob_each ----------------------------------------------------
+
+
+
+prob <- 0.1
+N <- 11
+m_floor <- floor(N*prob)
+m_ceiling <- ceiling(N*prob)
+
+m_floor * (1-prob) + m_ceiling * (prob)
+(prob * N)
+
+prob_each <- c(.1, .2, .7)
+m_each <- floor(N*prob_each)
+
+m_each / (sum(m_each))
+  
+

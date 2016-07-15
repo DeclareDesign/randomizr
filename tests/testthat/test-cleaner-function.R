@@ -4,7 +4,6 @@ library(randomizr)
 
 
 
-
 expect_error(check_randomizr_arguments(N = "a"))
 expect_error(check_randomizr_arguments(N = -1))
 

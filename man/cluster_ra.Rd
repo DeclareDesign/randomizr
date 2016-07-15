@@ -4,57 +4,60 @@
 \alias{cluster_ra}
 \title{Cluster Random Assignment}
 \usage{
-cluster_ra(clust_var, m = NULL, prob = NULL, num_arms = NULL,
-  m_each = NULL, prob_each = NULL, condition_names = NULL)
+cluster_ra(clust_var, m = NULL, m_each = NULL, prob = NULL,
+  prob_each = NULL, num_arms = NULL, condition_names = NULL,
+  simple = FALSE)
 }
 \arguments{
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
 
-\item{m}{The total number clusters to be treated. Should only be specified for a two group design in which exactly m of N clusters are assigned to treatment. If not specified, half of the clusters will be assigned to treatment. Is NULL by default.}
+\item{m}{Use for a two-arm design in which m clusters are assigned to treatment and N-m clusters are assigned to control. (optional)}
 
-\item{prob}{If specified, a two-group design is assumed. prob is the probability of assignment to treatment. Within rounding, N_clusters*prob clusters will be assigned to treatment.}
+\item{m_each}{Use for a multi-arm design in which the values of m_each determine the number of clusters assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many clusters should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)}
+
+\item{prob}{Use for a two-arm design in which either floor(N_clusters*prob) or ceiling(N_clusters*prob) clusters are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_clusters*prob) clusters will be assigned to treatment and with probability prob, ceiling(N_clusters*prob) clusters will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)}
+
+\item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of clusters assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
 
 \item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.}
 
-\item{m_each}{A numeric vector giving the number of clusters to be assigned to each treatment group. Must sum to the total number of clusters. If unspecified, equally sized (rounded) groups will be assumed.}
-
-\item{prob_each}{A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.}
-
 \item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.}
+
+\item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment of clusters to conditions is used. When simple = TRUE, please do not specify m or m_each.}
 }
 \value{
 A vector of length N that indicates the treatment condition of each unit.
 }
 \description{
-Random assignment where groups of units are assigned together (as a cluster) to treatment conditions. This function conducts complete random assignment at the cluster level.
+cluster_ra implements a random assignment procedure in which groups of units are assigned together (as a cluster) to treatment conditions. This function conducts complete random assignment at the cluster level, unless simple = TRUE, in which case \link{\code{simple_ra}} analogues are used.
 }
 \examples{
 # Two Group Designs
 clust_var <- rep(letters, times=1:26)
 
-Z <- cluster_ra(clust_var=clust_var)
+Z <- cluster_ra(clust_var = clust_var)
 table(Z, clust_var)
 
-Z <- cluster_ra(clust_var=clust_var, m=13)
+Z <- cluster_ra(clust_var = clust_var, m = 13)
 table(Z, clust_var)
 
-Z <- cluster_ra(clust_var=clust_var, m_each = c(10, 16), 
+Z <- cluster_ra(clust_var = clust_var, m_each = c(10, 16),
                 condition_names = c("control", "treatment"))
 table(Z, clust_var)
 
 # Multi-arm Designs
-Z <- cluster_ra(clust_var=clust_var, num_arms=3)
+Z <- cluster_ra(clust_var = clust_var, num_arms = 3)
 table(Z, clust_var)
 
-Z <- cluster_ra(clust_var=clust_var, m_each=c(7, 7, 12))
+Z <- cluster_ra(clust_var = clust_var, m_each = c(7, 7, 12))
 table(Z, clust_var)
 
-Z <- cluster_ra(clust_var=clust_var, m_each=c(7, 7, 12), 
-                condition_names=c("control", "placebo", "treatment"))
+Z <- cluster_ra(clust_var = clust_var, m_each = c(7, 7, 12),
+                condition_names = c("control", "placebo", "treatment"))
 table(Z, clust_var)
 
-Z <- cluster_ra(clust_var=clust_var, 
-                condition_names=c("control", "placebo", "treatment"))
+Z <- cluster_ra(clust_var = clust_var,
+                condition_names = c("control", "placebo", "treatment"))
 table(Z, clust_var)
 }
 

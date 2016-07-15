@@ -5,7 +5,6 @@ context("Complete Random Assignments")
 
 
 expect_error(complete_ra(100, prob_each = c(.2)))
-expect_error(complete_ra(100, m=50, condition_names = c("Control", "Treatment")))
 expect_error(complete_ra(100, m_each = c(30, 70), prob_each = c(.3, .7)))
 expect_error(complete_ra(100, m_each=c(20, 20, 20)))
 expect_error(complete_ra(100, m_each=c(20, 20, 60), condition_names=c(1,2)))
@@ -15,10 +14,13 @@ expect_error(complete_ra(N=100, m=-2))
 expect_error(complete_ra(N=0, m=0))
 expect_error(complete_ra(N=1, m=2))
 
+table(complete_ra(100, m=30, condition_names = c("Control", "Treatment")))
+
 # should this be allowed?
 complete_ra(100, num_arms = 1)
 complete_ra(100, m_each = c(100))
 complete_ra(100, condition_names = c("Treatment"))
+
 
 table(complete_ra(1, num_arms = 2))
 table(complete_ra(1, num_arms = 2, condition_names = c(0,1)))
@@ -60,8 +62,8 @@ expect_true(all(table(Z) %in% c(33, 34)))
 complete_ra(2, m_each = c(1, 0, 1), condition_names = c("T1", "T2", "T3"))
 
 
-expect_less_than(sum(replicate(1000, complete_ra(1))), 600)
-expect_more_than(sum(replicate(1000, complete_ra(1))), 400)
+expect_lt(sum(replicate(1000, complete_ra(1))), 600)
+expect_gt(sum(replicate(1000, complete_ra(1))), 400)
 # correct!
 replicate(100, complete_ra(N=1, m=1))
 
@@ -77,5 +79,3 @@ expect_equivalent(as.numeric(table(Z)), c(50, 50, 0))
 
 Z <- complete_ra(N=100, m_each=c(100, 0, 0))
 expect_equivalent(as.numeric(table(Z)), c(100, 0, 0))
-
-

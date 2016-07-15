@@ -4,56 +4,74 @@
 \alias{complete_ra}
 \title{Complete Random Assignment}
 \usage{
-complete_ra(N, m = NULL, prob = NULL, num_arms = NULL, m_each = NULL,
-  prob_each = NULL, condition_names = NULL)
+complete_ra(N, m = NULL, m_each = NULL, prob = NULL, prob_each = NULL,
+  num_arms = NULL, condition_names = NULL)
 }
 \arguments{
-\item{N}{The total number of units in the experimental sample (required).}
+\item{N}{The number of units. N must be a positive integer. (required)}
 
-\item{m}{If specified, a two-group design is assumed. m is the total number of units to be assigned to treatment. Should only be specified for a two group design in which exactly m of N units are assigned to treatment. If not specified (and no other arguments are specified), half of the sample (N/2) will be assigned to treatment (if N is odd, m will be set to either floor(N/2) or ceiling(N/2) with equal probability). m is NULL by default.}
+\item{m}{Use for a two-arm design in which m units are assigned to treatment and N-m units are assigned to control. (optional)}
 
-\item{prob}{If specified, a two-group design is assumed. prob is the probability of assignment to treatment. Within rounding, N*prob subjects will be assigned to treatment.}
+\item{m_each}{Use for a multi-arm design in which the values of m_each determine the number of units assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many units should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)}
 
-\item{num_arms}{The total number of treatment arms. If unspecified, num_arms will be determined from the length of m_each, prob_each, or condition_names.}
+\item{prob}{Use for a two-arm design in which either floor(N*prob) or ceiling(N*prob) units are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N*prob) units will be assigned to treatment and with probability prob, ceiling(N*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{m_each}{A numeric vector giving the size of each treatment group. Must sum to N. If unspecified, equally sized (rounded) groups will be assumed.}
+\item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
 
-\item{prob_each}{A numeric vector giving the probability of assignment to each treatment arm. Must sum to 1. Please note that due to rounding, these probabilities are approximate. For finer control, please use m_each.}
+\item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
-\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc. An execption is a two-group design in which N only or N and m are specified, in which the condition names default to 0 and 1.}
+\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
 }
 \value{
-A vector of length N that indicates the treatment condition of each unit.
+A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by condition_names) in a multi-arm trial.
 }
 \description{
-Random assignment where a fixed number (within rounding) of units is assigned to treatment conditions. The canonical example of complete random assignment is a procedure in which exactly m of N units is assigned to treatment.
+complete_ra implements a random assignment procedure in which fixed numbers of units are assigned to treatment conditions. The canonical example of complete random assignment is a procedure in which exactly m of N units are assigned to treatment and N-m units are assigned to control.\cr \cr
+Users can set the exact number of units to assign to each condition with m or m_each. Alternatively, users can specify probabilities of assignment with prob or prob_each and complete_ra will infer the correct number of units to assign to each condition.
+In a two-arm design, complete_ra will either assign floor(N*prob) or ceiling(N*prob) units to treatment, choosing between these two values to ensure that the overall probability of assignment is exactly prob.
+In a multi-arm design, complete_ra will first assign floor(N*prob_each) units to their respective conditions, then will assign the remaining units using simple random assignment, choosing these second-stage probabilties so that the overall probabilities of assignment are exactly prob_each.\cr \cr
+In most cases, users should specify N and not more than one of m, m_each, prob, prob_each, or num_arms. \cr \cr
+If only N is specified, a two-arm trial in which N/2 units are assigned to treatment is assumed. If N is odd, either floor(N/2) units or ceiling(N/2) units will be assigned to treatment.
 }
 \examples{
-# Two Group Designs
-
-Z <- complete_ra(N=100)
+# Two-arm Designs
+Z <- complete_ra(N = 100)
 table(Z)
 
-Z <- complete_ra(N=100, m=50)
+Z <- complete_ra(N = 100, m = 50)
 table(Z)
 
-Z <- complete_ra(N=100, m_each = c(30, 70), 
-                 condition_names = c("control", "treatment"))
+Z <- complete_ra(N = 100, prob = .111)
 table(Z)
+
+Z <- complete_ra(N = 100, condition_names = c("control", "treatment"))
+table(Z)
+
 
 # Multi-arm Designs
-Z <- complete_ra(N=100, num_arms=3)
+Z <- complete_ra(N = 100, num_arms = 3)
 table(Z)
 
-Z <- complete_ra(N=100, m_each=c(30, 30, 40))
+Z <- complete_ra(N = 100, m_each = c(30, 30, 40))
 table(Z)
 
-Z <- complete_ra(N=100, m_each=c(30, 30, 40), 
-                 condition_names=c("control", "placebo", "treatment"))
+Z <- complete_ra(N = 100, prob_each = c(.1, .2, .7))
 table(Z)
 
-Z <- complete_ra(N=100, condition_names=c("control", "placebo", "treatment"))
+Z <- complete_ra(N = 100, condition_names = c("control", "placebo", "treatment"))
 table(Z)
+
+# Special Cases
+# Two-arm trial where the condition_names are by default "T1" and "T2"
+Z <- complete_ra(N = 100, num_arms = 2)
+table(Z)
+
+# If N = m, assign with 100\% probability...
+complete_ra(N=2, m=2)
+
+# except if N = m = 1, in which case assign with 50\% probability
+complete_ra(N=1, m=1)
+
 
 }
 

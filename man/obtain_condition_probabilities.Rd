@@ -25,7 +25,7 @@ declaration <- declare_ra(block_var = block_var, block_m_each = block_m_each)
 Z <- conduct_ra(ra_declaration = declaration)
 table(Z, block_var)
 
-observed_probabilities <- 
+observed_probabilities <-
    obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
 
 # Probabilities in the control group:
