@@ -65,7 +65,8 @@
 #'
 #'
 #' # Experimental feature: load balancing
-#' # This procedure constrains the total number of units in each arm.  This will never exceed 5 treated units total.
+#' # This procedure constrains the total number of units in each arm.  
+#' # This will never exceed 5 treated units total.
 #'
 #' block_var <- rep(c("A", "B","C"), times=c(3, 3, 3))
 #' Z <- block_ra(block_var = block_var, balance_load = TRUE)
@@ -85,9 +86,6 @@ block_ra <- function(block_var,
                      num_arms = NULL,
                      condition_names = NULL,
                      balance_load = FALSE) {
-  #if(all(balance_load & is.null(prob) & is.null(prob_each) & is.null(block_prob_each))){
-  #  stop("If you use the experimental feature 'balance_load', then you must specify one of prob, prob_each, or block_prob_each.")
-  #}
   
   check_inputs <- check_randomizr_arguments(
     block_var = block_var,

@@ -1,6 +1,6 @@
 #' Cluster Random Assignment
 #'
-#' cluster_ra implements a random assignment procedure in which groups of units are assigned together (as a cluster) to treatment conditions. This function conducts complete random assignment at the cluster level, unless simple = TRUE, in which case \link{\code{simple_ra}} analogues are used.
+#' cluster_ra implements a random assignment procedure in which groups of units are assigned together (as a cluster) to treatment conditions. This function conducts complete random assignment at the cluster level, unless simple = TRUE, in which case \code{\link{simple_ra}} analogues are used.
 #'
 #' @param clust_var A vector of length N that indicates which cluster each unit belongs to.
 #' @param m Use for a two-arm design in which m clusters are assigned to treatment and N-m clusters are assigned to control. (optional)

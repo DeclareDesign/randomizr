@@ -116,7 +116,7 @@ table(Z)
 To change the number of units assigned, specify the `m` argument:
 
 ```{r}
-Z <- complete_ra(N = N, m=200)
+Z <- complete_ra(N = N, m = 200)
 table(Z)
 ```
 
@@ -138,7 +138,7 @@ You can also name your treatment arms.
 
 ```{r}
 Z <- complete_ra(N = N, m_each = c(100, 200, 292),
-               condition_names=c("control", "placebo", "treatment"))
+               condition_names = c("control", "placebo", "treatment"))
 table(Z)
 ```
 
@@ -207,37 +207,37 @@ table(Z, hec$Hair)
 For multiple treatment arms, use the `num_arms` argument, with or without the `condition_names` argument
 
 ```{r}
-Z <- block_ra(block_var = hec$Hair, num_arms=3)
+Z <- block_ra(block_var = hec$Hair, num_arms = 3)
 table(Z, hec$Hair)
-Z <- block_ra(block_var = hec$Hair, condition_names=c("Control", "Placebo", "Treatment"))
+Z <- block_ra(block_var = hec$Hair, condition_names = c("Control", "Placebo", "Treatment"))
 table(Z, hec$Hair)
 ```
 
 `block_ra()` provides a number of ways to adjust the number of subjects assigned to each conditions. The `prob_each` argument describes what proportion of each block should be assigned to treatment arm. Note of course, that `block_ra()` still uses complete random assignment within each block; the appropriate number of units to assign to treatment within each block is automatically determined.
 
 ```{r}
-Z <- block_ra(block_var = hec$Hair,prob_each = c(.3, .7))
+Z <- block_ra(block_var = hec$Hair, prob_each = c(.3, .7))
 table(Z, hec$Hair)
 ```
 
-For finer control, use the `block_m` argument, which takes a matrix with as many rows as there are blocks, and as many columns as there are treatment conditions.  Remember that the rows are in the same order as `sort(unique(block_var))`, a command that is good to run before constructing a `block_m` matrix. 
+For finer control, use the `block_m_each` argument, which takes a matrix with as many rows as there are blocks, and as many columns as there are treatment conditions.  Remember that the rows are in the same order as `sort(unique(block_var))`, a command that is good to run before constructing a `block_m_each` matrix. 
 
 ```{r}
 sort(unique(hec$Hair))
-block_m <- rbind(c(78, 30),
-                 c(186, 100),
-                 c(51, 20),
-                 c(87,40))
+block_m_each <- rbind(c(78, 30),
+                      c(186, 100),
+                      c(51, 20),
+                      c(87,40))
 
-block_m
-Z <- block_ra(block_var = hec$Hair, block_m = block_m)
+block_m_each
+Z <- block_ra(block_var = hec$Hair, block_m_each = block_m_each)
 table(Z, hec$Hair)
 ```
 
 In the example above, the different blocks have different probabilities of assignment to treatment. In this case, people with Black hair have a 30/108 = 27.8% chance of being treated, those with Brown hair have 100/286 = 35.0% change, etc. Left unadressed, this discrepancy could bias treatment effects. We can see this directly with the `declare_ra()` function.
 
 ```{r}
-declaration <- declare_ra(block_var = hec$Hair, block_m = block_m)
+declaration <- declare_ra(block_var = hec$Hair, block_m_each = block_m_each)
 
 # show the probability that each unit is assigned to each condition
 head(declaration$probabilities_matrix)
@@ -250,30 +250,30 @@ table(hec$Hair, round(declaration$probabilities_matrix[,2], 3))
 
 There are commong two ways to address this problem: LSDV (Least-Squares Dummy Variable, also known as "control for blocks") or IPW (Inverse-probability weights).
 
-The following code snippet shows how to use either the LSDV approach or the IPW approach. A note for scrupulous readers: the estimands of these two approaches are subtly different from one another. The LSDV approach estimates the average **block-level** treatment effect. The IPW approach estimates the average **individual-level** treatment effect. They can be different. Since the average block-level treatment effect is not what most people have in mind when thinking about causal effects, analysts using this approach should present both. The `condition_probs()` function used to calculate the probabilities of assignment is explained below.
+The following code snippet shows how to use either the LSDV approach or the IPW approach. A note for scrupulous readers: the estimands of these two approaches are subtly different from one another. The LSDV approach estimates the average **block-level** treatment effect. The IPW approach estimates the average **individual-level** treatment effect. They can be different. Since the average block-level treatment effect is not what most people have in mind when thinking about causal effects, analysts using this approach should present both. The `obtain_condition_probabilities()` function used to calculate the probabilities of assignment is explained below.
 
 ```{r}
 hec <- within(hec,{
-  Z_blocked <- block_ra(block_var = hec$Hair,block_m=block_m, condition_names = c(0, 1))
+  Z_blocked <- block_ra(block_var = hec$Hair,
+                        block_m_each = block_m_each)
   Y_blocked <- Y1*(Z_blocked) + Y0*(1-Z_blocked)
   cond_prob <- obtain_condition_probabilities(declaration, Z_blocked)
   IPW_weights <- 1/(cond_prob)
 })
 
 fit_LSDV <- lm(Y_blocked ~ Z_blocked + Hair, data=hec)
-fit_IPW <- lm(Y_blocked ~ Z_blocked, weights=IPW_weights, data=hec)
+fit_IPW <- lm(Y_blocked ~ Z_blocked, weights = IPW_weights, data = hec)
 
 summary(fit_LSDV)
 summary(fit_IPW)
 ```
 
-How to create blocks? In the `HairEyeColor` dataset, we could make blocks for each unique combination of hair color, eye color, and sex using `dplyr`'s `id` function:
+How to create blocks? In the `HairEyeColor` dataset, we could make blocks for each unique combination of hair color, eye color, and sex.
 
 ```{r}
-suppressMessages(library(dplyr))
-block_id <- id(hec[,c("Hair", "Eye", "Sex")])
-block_var <- paste0("block_", sprintf("%02d", block_id))
-table(block_var)
+block_var <- with(hec, paste(Hair, Eye, Sex, sep = "_"))
+Z <- block_ra(block_var = block_var)
+head(table(block_var, Z))
 ```
 
 An alternative is to use the `blockTools` package, which constructs matched pairs, trios, quartets, etc. from pretreatment covariates. 
@@ -311,14 +311,14 @@ Clustered assignment is unfortunate. If you can avoid assigning subjects to trea
 
 Clustered assignment decreases the effective sample size of an experiment. In the extreme case when outcomes are perfectly correlated with clusters, the experiment has an effective sample size equal to the number of clusters. When outcomes are perfectly uncorrelated with clusters, the effective sample size is equal to the number of subjects. Almost all cluster-assigned experiments fall somewhere in the middle of these two extremes. 
 
-The only required argument for the `cluster_ra()` function is the `clust_var` argument, which is a vector of length `N` that indicates which cluster each subject belongs to. Let's pretend that for some reason, we have to assign treatments according to the unique combinations of hair color, eye color, and gender. For this, we'll use `dplyr`'s `id()` function again.
+The only required argument for the `cluster_ra()` function is the `clust_var` argument, which is a vector of length `N` that indicates which cluster each subject belongs to. Let's pretend that for some reason, we have to assign treatments according to the unique combinations of hair color, eye color, and gender. 
 
 ```{r}
-clust_id <- id(hec[,c("Hair", "Eye", "Sex")])
-clust_var <- paste0("clust_", sprintf("%02d", clust_id))
+clust_var <- with(hec, paste(Hair, Eye, Sex, sep = "_"))
 hec$clust_var <- clust_var
 
 Z_clust <- cluster_ra(clust_var = clust_var)
+
 head(table(clust_var, Z_clust))
 ```
 
@@ -327,7 +327,7 @@ This shows that each cluster is either assigned to treatment or control. No two 
 As with all functions in `randomizr`, you can specify multiple treatment arms in a variety of ways:
 
 ```{r}
-Z_clust <- cluster_ra(clust_var=clust_var, num_arms=3)
+Z_clust <- cluster_ra(clust_var = clust_var, num_arms = 3)
 head(table(clust_var, Z_clust))
 ```
 
@@ -346,14 +346,14 @@ Z_clust <- cluster_ra(clust_var=clust_var, m_each=c(5, 15, 12))
 head(table(clust_var, Z_clust))
 ```
 
-
 # Blocked and clustered assignment
 
 The power of clustered experiments can sometimes be improved through blocking. In this scenario, whole clusters are members of a particular block -- imagine villages nested within discrete regions, or classrooms nested within discrete schools.
 
-As an example, let's group our clusters into blocks by size:
+As an example, let's group our clusters into blocks by size using `dplyr`
 
 ```{r}
+suppressMessages(library(dplyr))
 cluster_level_df <- 
   hec %>%
   group_by(clust_var) %>%
@@ -379,17 +379,24 @@ All five random assignment functions in `randomizr` assign units to treatment wi
 Let's take a look at the block random assignment we used before.
 
 ```{r}
-block_m <- cbind(c(78, 186, 51, 87),c(30, 100, 20, 40))
-Z <- block_ra(block_var = hec$Hair,block_m=block_m)
-table(Z, hec$Hair)
+block_m_each <- 
+  rbind(c(78, 30),
+        c(186, 100),
+        c(51, 20),
+        c(87, 40))
+  
+Z <- block_ra(block_var = hec$Hair,
+              block_m_each = block_m_each)
+
+table(hec$Hair, Z)
 ```
 
 In order to calculate the probabilities of assignment, we call the `declare_ra()` function with the same exact arguments as we used for the `block_ra()` call. The `declaration` object contains a matrix of probabilities of assignment:
 
 ```{r}
-declaration <- declare_ra(block_var = hec$Hair,block_m=block_m)
+declaration <- declare_ra(block_var = hec$Hair,
+                          block_m_each = block_m_each)
 prob_mat <- declaration$probabilities_matrix
-
 head(prob_mat)
 ```
 
@@ -461,8 +468,8 @@ Whenever you conduct a random assignment for use in an experiment, save it! At a
 ```{r,eval=FALSE}
 hec <- within(hec,{
   Z_blocked <- complete_ra(N = N, m_each = c(100, 200, 292),
-               condition_names=c("control", "placebo", "treatment"))
+               condition_names = c("control", "placebo", "treatment"))
   id_var <- 1:nrow(hec)
 })
-write.csv(hec[,c("id_var", "Z_blocked")], file="MyRandomAssignment.csv")
+write.csv(hec[,c("id_var", "Z_blocked")], file = "MyRandomAssignment.csv")
 ```

@@ -16,6 +16,8 @@
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #'
 #' @examples
+#' clust_var <- rep(letters, times=1:26)
+#' 
 #' block_var <- rep(NA, length(clust_var))
 #' block_var[clust_var %in% letters[1:5]] <- "block_1"
 #' block_var[clust_var %in% letters[6:10]] <- "block_2"
@@ -23,29 +25,35 @@
 #' block_var[clust_var %in% letters[16:20]] <- "block_4"
 #' block_var[clust_var %in% letters[21:26]] <- "block_5"
 #'
-#' clust_var <- rep(letters, times=1:26)
 #'
 #' table(block_var, clust_var)
 #'
-#' Z <- block_and_cluster_ra(block_var = block_var, clust_var = clust_var)
+#' Z <- block_and_cluster_ra(block_var = block_var, 
+#'                           clust_var = clust_var)
 #'
 #' table(Z, block_var)
 #' table(Z, clust_var)
 #'
-#' Z <- block_and_cluster_ra(block_var = block_var, clust_var = clust_var, num_arms = 3)
+#' Z <- block_and_cluster_ra(block_var = block_var, 
+#'                           clust_var = clust_var, 
+#'                           num_arms = 3)
 #'
 #' table(Z, block_var)
 #' table(Z, clust_var)
 #'
-#' Z <- block_and_cluster_ra(block_var = block_var, clust_var = clust_var, prob_each = c(.2, .5, .3))
+#' Z <- block_and_cluster_ra(block_var = block_var, 
+#'                           clust_var = clust_var, 
+#'                           prob_each = c(.2, .5, .3))
 #'
 #' block_m_each <- rbind(c(2, 3),
-#'                  c(1, 4),
-#'                  c(3, 2),
-#'                  c(2, 3),
-#'                  c(5, 1))
+#'                       c(1, 4),
+#'                       c(3, 2),
+#'                       c(2, 3),
+#'                       c(5, 1))
 #'
-#' Z <- block_and_cluster_ra(block_var = block_var, clust_var = clust_var, block_m_each = block_m_each)
+#' Z <- block_and_cluster_ra(block_var = block_var, 
+#'                           clust_var = clust_var, 
+#'                           block_m_each = block_m_each)
 #'
 #' table(Z, block_var)
 #' table(Z, clust_var)

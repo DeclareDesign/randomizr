@@ -80,7 +80,8 @@ table(block_var, Z)
 
 
 # Experimental feature: load balancing
-# This procedure constrains the total number of units in each arm.  This will never exceed 5 treated units total.
+# This procedure constrains the total number of units in each arm.  
+# This will never exceed 5 treated units total.
 
 block_var <- rep(c("A", "B","C"), times=c(3, 3, 3))
 Z <- block_ra(block_var = block_var, balance_load = TRUE)

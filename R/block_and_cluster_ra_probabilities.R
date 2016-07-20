@@ -24,13 +24,15 @@
 #'                                    block_var = block_var,
 #'                                    prob_each = c(.2, .5, .3))
 #'
-#' block_m <- rbind(c(2, 3),
-#'                  c(1, 4),
-#'                  c(3, 2),
-#'                  c(2, 3),
-#'                  c(5, 1))
+#' block_m_each <- rbind(c(2, 3),
+#'                      c(1, 4),
+#'                      c(3, 2),
+#'                      c(2, 3),
+#'                      c(5, 1))
 #'
-#' block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, block_m_each = block_m_each)
+#' block_and_cluster_ra_probabilities(clust_var = clust_var, 
+#'                                    block_var = block_var, 
+#'                                    block_m_each = block_m_each)
 #'
 #'
 #' @export

@@ -1,6 +1,5 @@
 # randomizr input cleaning and helper functions
 
-#'@export
 check_randomizr_arguments <-
   function(N = NULL,
            prob = NULL,

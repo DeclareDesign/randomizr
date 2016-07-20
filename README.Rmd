@@ -35,7 +35,7 @@ There are five main functions in randomizr: `simple_ra()`, `complete_ra()`, `blo
 
 ```{r}
 library(randomizr)
-Z <- complete_ra(N=100, m=50)
+Z <- complete_ra(N = 100, m = 50)
 table(Z)
 ```
 
@@ -43,12 +43,11 @@ A more complicated design that, for example, assigns different numbers of cluste
 
 ```{r}
 # This makes a cluster variable: one unit in cluster "a", two in "b"...
-clust_var <- rep(letters, times=1:26)
+clust_var <- rep(letters, times = 1:26)
 
-Z <- cluster_ra(clust_var=clust_var, m_each=c(7, 7, 12),
+Z <- cluster_ra(clust_var=clust_var, m_each = c(7, 7, 12),
                 condition_names=c("control", "placebo", "treatment"))
 table(Z, clust_var)
 ```
-
 
 Happy randomizing!
