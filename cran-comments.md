@@ -1,4 +1,4 @@
-## Update randomizr to version 0.4.0
+## Update randomizr to version 0.4.1
 * harmonized function arguments
 * added experimental load balancing
 * documentation, examples, and vignette improvements
