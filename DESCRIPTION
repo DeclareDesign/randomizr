@@ -15,5 +15,6 @@ Suggests:
     blockTools,
     testthat,
     rmarkdown
-VignetteBuilder: rmarkdown
+VignetteBuilder: knitr
 RoxygenNote: 5.0.1
+	
