@@ -35,34 +35,41 @@ Probabilties of assignment: Block Random Assignment
 }
 \examples{
 
-block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
-block_ra_probabilities(block_var=block_var)
+block_var <- rep(c("A", "B","C"), times = c(50, 100, 200))
+prob_mat <- block_ra_probabilities(block_var = block_var)
+head(prob_mat)
 
 block_m_each <- rbind(c(25, 25),
                  c(50, 50),
                  c(100, 100))
 
-block_ra_probabilities(block_var=block_var, block_m_each=block_m_each)
+prob_mat <- block_ra_probabilities(block_var = block_var, block_m_each = block_m_each)
+head(prob_mat)
 
 block_m_each <- rbind(c(10, 40),
                  c(30, 70),
                  c(50, 150))
 
-block_ra_probabilities(block_var=block_var, block_m_each=block_m_each,
-                       condition_names=c("control", "treatment"))
+prob_mat <- block_ra_probabilities(block_var = block_var, 
+                                   block_m_each = block_m_each,
+                                   condition_names = c("control", "treatment"))
+head(prob_mat)
 
-block_ra_probabilities(block_var=block_var, num_arms=3)
+prob_mat <- block_ra_probabilities(block_var = block_var, num_arms = 3)
+head(prob_mat)
 
 block_m_each <- rbind(c(10, 20, 20),
                  c(30, 50, 20),
                  c(50, 75, 75))
-block_ra_probabilities(block_var = block_var, block_m_each = block_m_each)
+prob_mat <- block_ra_probabilities(block_var = block_var, block_m_each = block_m_each)
+head(prob_mat)
 
-block_ra_probabilities(block_var=block_var, block_m_each=block_m_each,
+prob_mat <- block_ra_probabilities(block_var=block_var, block_m_each=block_m_each,
                        condition_names=c("control", "placebo", "treatment"))
+head(prob_mat)
 
-block_ra_probabilities(block_var=block_var, prob_each=c(.1, .1, .8))
-
+prob_mat <- block_ra_probabilities(block_var=block_var, prob_each=c(.1, .1, .8))
+head(prob_mat)
 
 }
 

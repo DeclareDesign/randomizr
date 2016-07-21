@@ -47,24 +47,30 @@ block_var[clust_var \%in\% letters[16:20]] <- "block_4"
 block_var[clust_var \%in\% letters[21:26]] <- "block_5"
 
 
-block_and_cluster_ra_probabilities(clust_var = clust_var,
-                                   block_var = block_var)
-block_and_cluster_ra_probabilities(clust_var = clust_var,
-                                   block_var = block_var,
-                                   num_arms = 3)
-block_and_cluster_ra_probabilities(clust_var = clust_var,
-                                   block_var = block_var,
-                                   prob_each = c(.2, .5, .3))
+prob_mat <- block_and_cluster_ra_probabilities(clust_var = clust_var,
+                                               block_var = block_var)
+head(prob_mat)
+                                    
+prob_mat <- block_and_cluster_ra_probabilities(clust_var = clust_var,
+                                               block_var = block_var,
+                                               num_arms = 3)
+head(prob_mat)
+                                    
+prob_mat <- block_and_cluster_ra_probabilities(clust_var = clust_var,
+                                               block_var = block_var,
+                                               prob_each = c(.2, .5, .3))
+head(prob_mat)                                    
 
 block_m_each <- rbind(c(2, 3),
-                     c(1, 4),
-                     c(3, 2),
-                     c(2, 3),
-                     c(5, 1))
+                      c(1, 4),
+                      c(3, 2),
+                      c(2, 3),
+                      c(5, 1))
 
-block_and_cluster_ra_probabilities(clust_var = clust_var, 
-                                   block_var = block_var, 
-                                   block_m_each = block_m_each)
+prob_mat <- block_and_cluster_ra_probabilities(clust_var = clust_var, 
+                                               block_var = block_var, 
+                                               block_m_each = block_m_each)
+head(prob_mat)                                    
 
 
 }

@@ -30,22 +30,35 @@ Probabilties of assignment: Complete Random Assignment
 }
 \examples{
 # 2-arm designs
-complete_ra_probabilities(N=100)
-complete_ra_probabilities(N=100, m=50)
-complete_ra_probabilities(N=100, prob = .3)
+prob_mat <- complete_ra_probabilities(N=100)
+head(prob_mat)
 
-complete_ra_probabilities(N=100, m_each = c(30, 70),
+prob_mat <- complete_ra_probabilities(N=100, m=50)
+head(prob_mat)
+
+prob_mat <- complete_ra_probabilities(N=100, prob = .3)
+head(prob_mat)
+
+prob_mat <- complete_ra_probabilities(N=100, m_each = c(30, 70),
                           condition_names = c("control", "treatment"))
+head(prob_mat)                           
 
 # Multi-arm Designs
-complete_ra_probabilities(N=100, num_arms=3)
-complete_ra_probabilities(N=100, m_each=c(30, 30, 40))
+prob_mat <- complete_ra_probabilities(N=100, num_arms=3)
+head(prob_mat)
 
-complete_ra_probabilities(N=100, m_each=c(30, 30, 40),
+prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40))
+head(prob_mat)
+
+prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40),
                           condition_names=c("control", "placebo", "treatment"))
+head(prob_mat)                           
 
-complete_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
-complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))
+prob_mat <- complete_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
+head(prob_mat)
+
+prob_mat <- complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))
+head(prob_mat)
 
 }
 

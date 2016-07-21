@@ -26,16 +26,29 @@ Probabilties of assignment: Simple Random Assignment
 }
 \examples{
 # Two Group Designs
-simple_ra_probabilities(N=100)
-simple_ra_probabilities(N=100, prob=0.5)
-simple_ra_probabilities(N=100, prob_each = c(0.3, 0.7),
+prob_mat <- simple_ra_probabilities(N=100)
+head(prob_mat)
+
+prob_mat <- simple_ra_probabilities(N=100, prob=0.5)
+head(prob_mat)
+
+prob_mat <- simple_ra_probabilities(N=100, prob_each = c(0.3, 0.7),
                         condition_names = c("control", "treatment"))
+head(prob_mat)
+                         
 # Multi-arm Designs
-simple_ra_probabilities(N=100, num_arms=3)
-simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4))
-simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4),
+prob_mat <- simple_ra_probabilities(N=100, num_arms=3)
+head(prob_mat)
+
+prob_mat <- simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4))
+head(prob_mat)
+
+prob_mat <- simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4),
                         condition_names=c("control", "placebo", "treatment"))
-simple_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
+head(prob_mat)
+                         
+prob_mat <- simple_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
+head(prob_mat)
 
 }
 

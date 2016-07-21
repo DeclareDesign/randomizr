@@ -40,7 +40,7 @@ check_randomizr_arguments <-
     
     
     if (!is.null(N)) {
-      if (!(length(N) == 1 & (all.equal(N, as.integer(N))) & N > 0)) {
+      if (!(length(N) == 1 & (isTRUE(all.equal(N, as.integer(N)))) & N > 0)) {
         stop("N must be an integer greater than 0")
       }
     }
@@ -68,7 +68,7 @@ check_randomizr_arguments <-
           "The probabiltiies of assignment to any condition may not be greater than 1 or less than zero."
         )
       }
-      if (sum(prob_each) != 1) {
+      if (!isTRUE(all.equal(sum(prob_each), 1))) {
         stop(
           "The sum of the probabilities of assignment to each condition (prob_each) must equal 1."
         )
@@ -219,7 +219,7 @@ check_randomizr_arguments <-
           )
         }
         if (is.null(clust_var) &
-            any(apply(block_prob_each, 1, sum) != 1)) {
+            !isTRUE(all.equal(apply(block_prob_each, 1, sum), rep(1, N_blocks)))) {
           stop("If specified, each row of block_prob_each must sum to 1.")
         }
       }

@@ -29,6 +29,7 @@ Z <- complete_ra(N=100)
 expect_equal(sum(Z), 50)
 
 Z <- complete_ra(N=101, prob = .34); table(Z)
+Z <- complete_ra(N=101, prob_each = c(.34, .66)); table(Z)
 
 Z <- complete_ra(N=100, m=50)
 expect_equal(sum(Z), 50)

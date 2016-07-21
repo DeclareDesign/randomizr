@@ -34,25 +34,35 @@ Probabilties of assignment: Cluster Random Assignment
 \examples{
 
 # Two Group Designs
-clust_var <- rep(letters, times=1:26)
-cluster_ra_probabilities(clust_var=clust_var)
+clust_var <- rep(letters, times = 1:26)
+prob_mat <- cluster_ra_probabilities(clust_var = clust_var)
+head(prob_mat)
 
-cluster_ra_probabilities(clust_var=clust_var, m=10)
+prob_mat <- cluster_ra_probabilities(clust_var = clust_var, m = 10)
+head(prob_mat)
 
-cluster_ra_probabilities(clust_var=clust_var, m_each = c(9, 17),
-                         condition_names = c("control", "treatment"))
+prob_mat <- cluster_ra_probabilities(clust_var = clust_var, 
+                                     m_each = c(9, 17),
+                                     condition_names = c("control", "treatment"))
 
 # Multi-arm Designs
-cluster_ra_probabilities(clust_var=clust_var, num_arms=3)
-cluster_ra_probabilities(clust_var=clust_var, m_each=c(7, 7, 12))
+prob_mat <- cluster_ra_probabilities(clust_var = clust_var, num_arms = 3)
+head(prob_mat)
 
-cluster_ra_probabilities(clust_var=clust_var, m_each=c(7, 7, 12),
+prob_mat <- cluster_ra_probabilities(clust_var = clust_var, m_each = c(7, 7, 12))
+head(prob_mat)
+
+prob_mat <- cluster_ra_probabilities(clust_var = clust_var, m_each = c(7, 7, 12),
                          condition_names=c("control", "placebo", "treatment"))
+head(prob_mat)                          
 
-cluster_ra_probabilities(clust_var=clust_var,
+prob_mat <- cluster_ra_probabilities(clust_var = clust_var,
                          condition_names=c("control", "placebo", "treatment"))
+head(prob_mat)                          
 
-cluster_ra_probabilities(clust_var=clust_var, prob_each = c(.1, .2, .7))
+prob_mat <- cluster_ra_probabilities(clust_var = clust_var, 
+                                     prob_each = c(.1, .2, .7))
+head(prob_mat)                                      
 
 
 
