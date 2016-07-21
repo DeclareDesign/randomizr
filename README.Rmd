@@ -14,6 +14,8 @@ knitr::opts_chunk$set(
 )
 ```
 
+[![Travis-CI Build Status](https://travis-ci.org/acoppock/randomizr.svg?branch=master)](https://travis-ci.org/acoppock/randomizr)
+
 randomizr is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process.  
 
 Installation from CRAN is easy:
