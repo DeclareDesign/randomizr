@@ -7,6 +7,19 @@
 strata_and_cluster_rs_probabilities(strata_var, clust_var, prob = NULL,
   strata_m = NULL, strata_prob = NULL, balance_load = FALSE)
 }
+\arguments{
+\item{strata_var}{A vector of length N that indicates which stratum each unit belongs to.}
+
+\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
+
+\item{prob}{Use for a design in which either floor(N_clusters_stratum*prob) or ceiling(N_clusters_stratum*prob) clusters are sampled within each stratum. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters_stratum*prob) clusters will be sampled and with probability prob, ceiling(N_clusters_stratum*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
+
+\item{strata_m}{Use for a design in which strata_m describes the number of units to sample within each stratum.}
+
+\item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
+
+\item{balance_load}{logical, defaults to FALSE. This feature is experimental. Please use with caution and perform many tests before using in a real research scenario.}
+}
 \value{
 A vector length N indicating the probability of being sampled.
 }

@@ -40,7 +40,7 @@ Z <- strata_rs(strata_var = strata_var, strata_m = c(20, 30, 40))
 table(strata_var, Z)
 
 # Experimental feature: load balancing
-# This procedure constrains the total number of units that are sampled  
+# This procedure constrains the total number of units that are sampled
 # This will never exceed 5 sampled units total.
 
 strata_var <- rep(c("A", "B","C"), times=c(3, 3, 3))

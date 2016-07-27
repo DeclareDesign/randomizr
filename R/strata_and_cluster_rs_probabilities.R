@@ -1,6 +1,6 @@
 #' Probabilties of assignment: Stratified Cluster Random Assignment
 #'
-#' @inheritParams strata_and_cluster_rs_probabilities
+#' @inheritParams strata_and_cluster_rs
 #'
 #' @return A vector length N indicating the probability of being sampled.
 #'

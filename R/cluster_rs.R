@@ -28,9 +28,6 @@ cluster_rs <- function(clust_var,
     if (!is.null(m)) {
       stop("Please do not specify m when simple = TRUE")
     }
-    if (!is.null(m_each)) {
-      stop("Please do not specify m_each when simple = TRUE")
-    }
     S_clust <- simple_rs(
       N = n_clust,
       prob = prob)

@@ -68,6 +68,7 @@ declare_rs(N = 100, m = 30)
 # Stratified Random Sampling Declarations
 
 strata_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
+declare_rs(strata_var = strata_var)
 declare_rs(strata_var = strata_var, prob = .5)
 
 

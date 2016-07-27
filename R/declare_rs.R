@@ -47,7 +47,7 @@
 #' # Stratified Random Sampling Declarations
 #'
 #' strata_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
-#  declare_rs(strata_var = strata_var)
+#' declare_rs(strata_var = strata_var)
 #' declare_rs(strata_var = strata_var, prob = .5)
 #'
 #'
@@ -285,19 +285,20 @@ draw_rs <- function(rs_declaration = NULL,
 #'
 #' # Draw a stratified random sample
 #' strata_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
+#' 
+#' declaration <- declare_rs(strata_var = strata_var)
 #'
 #' observed_probabilities <-
 #'    obtain_inclusion_probabilities(rs_declaration = declaration)
 #'    
-#' table(strata_var, obtain_inclusion_probabilities)
+#' table(strata_var, observed_probabilities)
 #'
 #'
 #' # Sometimes it is convenient to skip the declaration step
 #' observed_probabilities <-
-#'    obtain_inclusion_probabilities(assignment = S,
-#'                                   strata_var = strata_var)
+#'    obtain_inclusion_probabilities(strata_var = strata_var)
 #'                                   
-#' table(strata_var, obtain_inclusion_probabilities)                               
+#' table(strata_var, observed_probabilities)                               
 #'
 #' @export
 obtain_inclusion_probabilities <-
@@ -335,6 +336,7 @@ obtain_inclusion_probabilities <-
 
 #' @export
 print.rs_declaration <- function(x, ...) {
+  S <- x$rs_function()
   n <- length(S)
   
   constant_probabilities <- all(x$probabilities_vector[1] == x$probabilities_vector)
