@@ -133,14 +133,21 @@ complete_ra_probabilities <- function(N,
         m_floor <- floor(N * prob)
         m_ceiling <- ceiling(N * prob)
         if (m_ceiling == N) {
-          m_ceiling <- m_floor
+          m <- m_floor
+          
+          prob_mat <-
+            matrix(
+              rep(c(1 - (m/N), (m/N)), N),
+              byrow = TRUE,
+              ncol = 2,
+              dimnames = list(NULL,  paste0("prob_", condition_names))
+            )
+          return(prob_mat)
         }
-        
-        prob_temp <- (m_floor / N) * (1 - prob) + (m_ceiling / N) * (prob)
         
         prob_mat <-
           matrix(
-            rep(c(1 - prob_temp, prob_temp), N),
+            rep(c(1 - prob, prob), N),
             byrow = TRUE,
             ncol = 2,
             dimnames = list(NULL,  paste0("prob_", condition_names))

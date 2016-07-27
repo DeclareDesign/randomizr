@@ -49,17 +49,17 @@ cluster_ra <- function(clust_var,
                        num_arms = NULL,
                        condition_names = NULL,
                        simple = FALSE) {
-  unique_clus <- unique(clust_var)
-  n_clus <- length(unique_clus)
+  unique_clust <- unique(clust_var)
+  n_clust <- length(unique_clust)
   if (simple) {
     if (!is.null(m)) {
-      stop("Please do not specify m when simple = FALSE")
+      stop("Please do not specify m when simple = TRUE")
     }
     if (!is.null(m_each)) {
-      stop("Please do not specify m_each when simple = FALSE")
+      stop("Please do not specify m_each when simple = TRUE")
     }
-    z_clus <- simple_ra(
-      N = n_clus,
+    z_clust <- simple_ra(
+      N = n_clust,
       prob = prob,
       prob_each = prob_each,
       num_arms = num_arms,
@@ -67,8 +67,8 @@ cluster_ra <- function(clust_var,
     )
     
   } else{
-    z_clus <- complete_ra(
-      N = n_clus,
+    z_clust <- complete_ra(
+      N = n_clust,
       m = m,
       m_each = m_each,
       prob = prob,
@@ -80,9 +80,9 @@ cluster_ra <- function(clust_var,
   merged <-
     merge(
       x = data.frame(clust_var, init_order = 1:length(clust_var)),
-      y = data.frame(clust_var = unique_clus, z_clus),
+      y = data.frame(clust_var = unique_clust, z_clust),
       by = "clust_var"
     )
-  merged <- merged[order(merged$init_order),]
-  return(merged$z_clus)
+  merged <- merged[order(merged$init_order), ]
+  return(merged$z_clust)
 }

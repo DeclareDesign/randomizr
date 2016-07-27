@@ -13,6 +13,13 @@ table(block_var, Z)
 
 Z <- block_ra(block_var=block_var, block_m = c(20, 30, 40))
 
+
+Z <- block_ra(block_var=block_var, block_prob = c(.1, .2, .3))
+Z <- block_ra(block_var=block_var, block_prob = c(0, .2, .3))
+expect_error(block_ra(block_var=block_var, block_prob = c(.1, .2, .3, .4)))
+expect_error(block_ra(block_var=block_var, block_prob = c(.1, .2, -.3)))
+expect_error(block_ra(block_var=block_var, block_prob = c(.1, .2, 1.1)))
+
 table(block_var, Z)
 
 

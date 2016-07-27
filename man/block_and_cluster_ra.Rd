@@ -2,11 +2,12 @@
 % Please edit documentation in R/block_and_cluster_ra.R
 \name{block_and_cluster_ra}
 \alias{block_and_cluster_ra}
-\title{Blocked and Clustered Random Assignment.}
+\title{Blocked and Clustered Random Assignment}
 \usage{
 block_and_cluster_ra(block_var, clust_var, prob = NULL, prob_each = NULL,
-  block_m = NULL, block_m_each = NULL, block_prob_each = NULL,
-  num_arms = NULL, condition_names = NULL, balance_load = FALSE)
+  block_m = NULL, block_m_each = NULL, block_prob = NULL,
+  block_prob_each = NULL, num_arms = NULL, condition_names = NULL,
+  balance_load = FALSE)
 }
 \arguments{
 \item{block_var}{A vector of length N that indicates which block each unit belongs to.}
@@ -21,6 +22,8 @@ block_and_cluster_ra(block_var, clust_var, prob = NULL, prob_each = NULL,
 
 \item{block_m_each}{Use for a multi-arm design in which the values of block_m_each determine the number of clusters assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of clusters to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.}
 
+\item{block_prob}{Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Differs from prob in that the probability of assignment can vary across blocks.}
+
 \item{block_prob_each}{Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.}
 
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
@@ -33,7 +36,7 @@ block_and_cluster_ra(block_var, clust_var, prob = NULL, prob_each = NULL,
 A vector of length N that indicates the treatment condition of each unit.
 }
 \description{
-Random assignment where units are assigned as clusters and clusters are nested within blocks.
+A random assignment procedure in which units are assigned as clusters and clusters are nested within blocks.
 }
 \examples{
 clust_var <- rep(letters, times=1:26)

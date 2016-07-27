@@ -5,8 +5,8 @@
 \title{Block Random Assignment}
 \usage{
 block_ra(block_var, prob = NULL, prob_each = NULL, block_m = NULL,
-  block_m_each = NULL, block_prob_each = NULL, num_arms = NULL,
-  condition_names = NULL, balance_load = FALSE)
+  block_m_each = NULL, block_prob = NULL, block_prob_each = NULL,
+  num_arms = NULL, condition_names = NULL, balance_load = FALSE)
 }
 \arguments{
 \item{block_var}{A vector of length N that indicates which block each unit belongs to. Can be a character, factor, or numeric vector. (required)}
@@ -19,19 +19,21 @@ block_ra(block_var, prob = NULL, prob_each = NULL, block_m = NULL,
 
 \item{block_m_each}{Use for a multi-arm design in which the values of block_m_each determine the number of units assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.}
 
+\item{block_prob}{Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Differs from prob in that the probability of assignment can vary across blocks.}
+
 \item{block_prob_each}{Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.}
 
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
 \item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
 
-\item{balance_load}{logical, defaults to FALSE. This feature is experimental. If set to TRUE, the function will resolve rounding problems by randomly assigning "remainder" units to each possible treatment condition with equal probability, while ensuring that the total number of units assigned to each condition does not vary greatly from assignment to assignment. However, the true probabiltiies of assignment may be different from the nominal probabilities specified in prob_each or block_prob_each. Please use with caution and perform many tests before using in a real research scenario.}
+\item{balance_load}{logical, defaults to FALSE. This feature is experimental. If set to TRUE, the function will resolve rounding problems by randomly assigning "remainder" units to each possible treatment condition with equal probability, while ensuring that the total number of units assigned to each condition does not vary greatly from assignment to assignment. However, the true probabilities of assignment may be different from the nominal probabilities specified in prob_each or block_prob_each. Please use with caution and perform many tests before using in a real research scenario.}
 }
 \value{
 A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by condition_names) in a multi-arm trial.
 }
 \description{
-block_ra implements a random assignment in which units that are grouped into blocks defined by pre-treatment covariates are assiged using complete random assignment withing block. For example, imagine that 50 of 100 men are assigned to treatment and 75 of 200 women are assigned to treatment.
+block_ra implements a random assignment procedure in which units that are grouped into blocks defined by pre-treatment covariates are assiged using complete random assignment within block. For example, imagine that 50 of 100 men are assigned to treatment and 75 of 200 women are assigned to treatment.
 }
 \examples{
 
@@ -43,6 +45,10 @@ table(block_var, Z)
 
 Z <- block_ra(block_var = block_var, prob = .3)
 table(block_var, Z)
+
+Z <- block_ra(block_var = block_var, block_prob = c(.1, .2, .3))
+table(block_var, Z)
+
 Z <- block_ra(block_var = block_var, block_m = c(20, 30, 40))
 table(block_var, Z)
 

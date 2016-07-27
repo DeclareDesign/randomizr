@@ -9,6 +9,7 @@
 #' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
 #' @param block_m Use for a two-arm design in which block_m describes the number of units to assign to treatment within each block. Note that in previous versions of randomizr, block_m behaved like block_m_each.
 #' @param block_m_each Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.
+#' @param block_prob Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Differs from prob in that the probability of assignment can vary across blocks.
 #' @param block_prob_each Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
@@ -96,6 +97,7 @@ declare_ra <- function(N = NULL,
                        prob_each = NULL,
                        block_m = NULL,
                        block_m_each = NULL,
+                       block_prob = NULL,
                        block_prob_each = NULL,
                        num_arms = NULL,
                        condition_names = NULL,
@@ -112,6 +114,7 @@ declare_ra <- function(N = NULL,
     prob_each = prob_each,
     block_m = block_m,
     block_m_each = block_m_each,
+    block_prob = block_prob,
     block_prob_each = block_prob_each,
     num_arms = num_arms,
     condition_names = condition_names
@@ -200,6 +203,7 @@ declare_ra <- function(N = NULL,
         block_m_each = block_m_each,
         prob = prob,
         prob_each = prob_each,
+        block_prob = block_prob,
         block_prob_each = block_prob_each,
         condition_names = condition_names,
         balance_load = balance_load
@@ -209,13 +213,14 @@ declare_ra <- function(N = NULL,
     probabilities_matrix <-
       block_ra_probabilities(
         block_var = block_var,
-        num_arms = num_arms,
         block_m = block_m,
         block_m_each = block_m_each,
         prob = prob,
         prob_each = prob_each,
+        block_prob = block_prob,
         block_prob_each = block_prob_each,
         condition_names = condition_names,
+        num_arms = num_arms,
         balance_load = balance_load
       )
   }
@@ -254,13 +259,14 @@ declare_ra <- function(N = NULL,
       block_and_cluster_ra(
         clust_var = clust_var,
         block_var = block_var,
-        num_arms = num_arms,
+        prob = prob,
+        prob_each = prob_each,
         block_m = block_m,
         block_m_each = block_m_each,
-        prob = prob,
+        block_prob = block_prob,
         block_prob_each = block_prob_each,
-        prob_each = prob_each,
         condition_names = condition_names,
+        num_arms = num_arms,
         balance_load = balance_load
       )
     }
@@ -269,10 +275,11 @@ declare_ra <- function(N = NULL,
       block_and_cluster_ra_probabilities(
         clust_var = clust_var,
         block_var = block_var,
-        block_m = block_m,
-        block_m_each = block_m_each,
         prob = prob,
         prob_each = prob_each,
+        block_prob = block_prob,
+        block_m = block_m,
+        block_m_each = block_m_each,
         block_prob_each = block_prob_each,
         num_arms = num_arms,
         condition_names = condition_names,
@@ -321,6 +328,7 @@ conduct_ra <- function(ra_declaration = NULL,
                        prob_each = NULL,
                        block_m = NULL,
                        block_m_each = NULL,
+                       block_prob = NULL,
                        block_prob_each = NULL,
                        num_arms = NULL,
                        condition_names = NULL,
@@ -342,6 +350,7 @@ conduct_ra <- function(ra_declaration = NULL,
                  prob_each = prob_each,
                  block_m = block_m,
                  block_m_each = block_m_each,
+                 block_prob = block_prob,
                  block_prob_each = block_prob_each,
                  num_arms = num_arms,
                  condition_names = condition_names,
@@ -406,6 +415,7 @@ obtain_condition_probabilities <-
            prob_each = NULL,
            block_m = NULL,
            block_m_each = NULL,
+           block_prob = NULL,
            block_prob_each = NULL,
            num_arms = NULL,
            condition_names = NULL,
@@ -427,6 +437,7 @@ obtain_condition_probabilities <-
                    prob_each = prob_each,
                    block_m = block_m,
                    block_m_each = block_m_each,
+                   block_prob = block_prob,
                    block_prob_each = block_prob_each,
                    num_arms = num_arms,
                    condition_names = condition_names,

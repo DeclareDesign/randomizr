@@ -49,6 +49,7 @@ block_and_cluster_ra_probabilities <-
            prob_each = NULL,
            block_m = NULL,
            block_m_each = NULL,
+           block_prob = NULL,
            block_prob_each = NULL,
            num_arms = NULL,
            condition_names = NULL,
@@ -63,11 +64,13 @@ block_and_cluster_ra_probabilities <-
     
     probs_clus <- block_ra_probabilities(
       block_var = clust_blocks,
+      prob = prob,
+      prob_each = prob_each,
       block_m = block_m,
       block_m_each = block_m_each,
-      num_arms = num_arms,
-      prob_each = prob_each,
+      block_prob = block_prob,
       block_prob_each = block_prob_each,
+      num_arms = num_arms,
       condition_names = condition_names,
       balance_load = balance_load
     )

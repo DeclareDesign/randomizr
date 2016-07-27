@@ -48,6 +48,7 @@ block_ra_probabilities <- function(block_var,
                                    prob_each = NULL,
                                    block_m = NULL,
                                    block_m_each = NULL,
+                                   block_prob = NULL,
                                    block_prob_each = NULL,
                                    num_arms = NULL,
                                    condition_names = NULL,
@@ -63,6 +64,7 @@ block_ra_probabilities <- function(block_var,
     prob_each = prob_each,
     block_m = block_m,
     block_m_each = block_m_each,
+    block_prob = block_prob,
     block_prob_each = block_prob_each,
     num_arms = num_arms,
     condition_names = condition_names
@@ -88,6 +90,19 @@ block_ra_probabilities <- function(block_var,
       prob_mat[block_var == blocks[i],] <-
         complete_ra_probabilities(N = N_per_block[i],
                                   m = block_m[i],
+                                  condition_names =
+                                    condition_names)
+    }
+    return(prob_mat)
+  }
+  
+  # Case 1.5 use block_prob
+  
+  if (!is.null(block_prob)) {
+    for (i in 1:length(blocks)) {
+      prob_mat[block_var == blocks[i],] <-
+        complete_ra_probabilities(N = N_per_block[i],
+                                  prob = block_prob[i],
                                   condition_names =
                                     condition_names)
     }

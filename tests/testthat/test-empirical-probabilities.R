@@ -84,3 +84,18 @@ m_each <- floor(N*prob_each)
 m_each / (sum(m_each))
   
 
+
+# complete_ra -------------------------------------------------------------
+
+complete_ra(5, prob = .1)
+complete_ra_probabilities(5, prob = .1)
+
+Z_mat <- replicate(n = 10000, complete_ra(5, prob = .1))
+mean(Z_mat)
+
+ceiling(5*.1)
+floor(5*.1)
+
+
+
+

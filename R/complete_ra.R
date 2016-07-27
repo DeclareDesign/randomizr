@@ -119,7 +119,13 @@ complete_ra <- function(N,
         m_floor <- floor(N / 2)
         m_ceiling <- ceiling(N / 2)
         
-        if (simple_ra(1, .5) == 0) {
+        if (m_ceiling > m_floor) {
+          prob_fix_up <- ((N * .5) - m_floor) / (m_ceiling - m_floor)
+        } else{
+          prob_fix_up <- .5
+        }
+        
+        if (simple_ra(1, prob_fix_up) == 0) {
           m <- m_floor
         } else{
           m <- m_ceiling
@@ -139,9 +145,18 @@ complete_ra <- function(N,
         m_floor <- floor(N * prob)
         m_ceiling <- ceiling(N * prob)
         if (m_ceiling == N) {
-          m_ceiling <- m_floor
+          m <- m_floor
+          assign <- sample(rep(condition_names, c(N - m, m)))
+          return(assign)
         }
-        if (simple_ra(1, prob) == 0) {
+        
+        if (m_ceiling > m_floor) {
+          prob_fix_up <- ((N * prob) - m_floor) / (m_ceiling - m_floor)
+        } else{
+          prob_fix_up <- .5
+        }
+        
+        if (simple_ra(1, prob_fix_up) == 0) {
           m <- m_floor
         } else{
           m <- m_ceiling
