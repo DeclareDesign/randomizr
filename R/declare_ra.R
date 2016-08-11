@@ -427,6 +427,9 @@ obtain_condition_probabilities <-
         stop("You must provide a random assignment declaration created by declare_ra().")
       }
     }else{
+      if(is.null(N)){
+        N <- length(assignment)
+      }
       ra_declaration <- 
         declare_ra(N = N,
                    block_var = block_var,
