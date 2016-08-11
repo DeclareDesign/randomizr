@@ -5,7 +5,7 @@
 #' @param clust_var A vector of length N that indicates which cluster each unit belongs to.
 #' @param n Use for a design in which n units (or clusters) are sampled. (optional)
 #' @param prob Use for a design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be sampled and with probability prob, ceiling(N*prob) units (or clusters) will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
-#' @param strata_n Use for a design in which strata_n describes the number of units to sample within each stratum. 
+#' @param strata_n Use for a design in which strata_n describes the number of units to sample within each stratum.
 #' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of assignment can vary across strata.
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify n or strata_n.
 #' @param balance_load logical, defaults to FALSE. This feature is experimental. Please use with caution and perform many tests before using in a real research scenario.
@@ -82,7 +82,6 @@ declare_rs <- function(N = NULL,
                        strata_prob = NULL,
                        simple = FALSE,
                        balance_load = FALSE) {
-  
   check_inputs <- check_samplr_arguments(
     N = N,
     strata_var = strata_var,
@@ -90,7 +89,8 @@ declare_rs <- function(N = NULL,
     n = n,
     prob = prob,
     strata_n = strata_n,
-    strata_prob = strata_prob)
+    strata_prob = strata_prob
+  )
   # Determine rs_type
   if (simple == FALSE) {
     rs_type <- "complete"
@@ -116,33 +116,25 @@ declare_rs <- function(N = NULL,
     }
     
     rs_function <- function() {
-      simple_rs(
-        N = N,
-        prob = prob
-      )
+      simple_rs(N = N,
+                prob = prob)
     }
     probabilities_vector <-
-      simple_rs_probabilities(
-        N = N,
-        prob = prob
-      )
+      simple_rs_probabilities(N = N,
+                              prob = prob)
   }
   
   if (rs_type == "complete") {
     rs_function <- function() {
-      complete_rs(
-        N = N,
-        n = n,
-        prob = prob
-      )
+      complete_rs(N = N,
+                  n = n,
+                  prob = prob)
     }
     
     probabilities_vector <-
-      complete_rs_probabilities(
-        N = N,
-        n = n,
-        prob = prob
-      )
+      complete_rs_probabilities(N = N,
+                                n = n,
+                                prob = prob)
     
   }
   
@@ -226,83 +218,84 @@ declare_rs <- function(N = NULL,
 }
 
 #' Draw a random sample
-#' 
+#'
 #' You can either give draw_rs() an rs_declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random assignment procedure.
 #'
-#' @param rs_declaration A random sampling declaration, created by \code{\link{declare_rs}}. 
+#' @param rs_declaration A random sampling declaration, created by \code{\link{declare_rs}}.
 #' @inheritParams declare_rs
 #' @examples
 #' declaration <- declare_rs(N = 100, n = 30)
 #' S <- draw_rs(rs_declaration = declaration)
 #' table(S)
-#' 
+#'
 #' # equivalent to
 #' S <- draw_rs(N = 100, n = 30)
 #' table(S)
 #'
 #' @export
-draw_rs <- function(rs_declaration = NULL, 
-                       N = NULL,
-                       strata_var = NULL,
-                       clust_var = NULL,
-                       n = NULL,
-                       prob = NULL,
-                       strata_n = NULL,
-                       strata_prob = NULL,
-                       simple = FALSE,
-                       balance_load = FALSE) {
-  
-  if(!is.null(rs_declaration)){
+draw_rs <- function(rs_declaration = NULL,
+                    N = NULL,
+                    strata_var = NULL,
+                    clust_var = NULL,
+                    n = NULL,
+                    prob = NULL,
+                    strata_n = NULL,
+                    strata_prob = NULL,
+                    simple = FALSE,
+                    balance_load = FALSE) {
+  if (!is.null(rs_declaration)) {
     if (class(rs_declaration) != "rs_declaration") {
       stop("You must provide a random sampling declaration created by declare_rs().")
     }
-  }else{
-    rs_declaration <- 
-      declare_rs(N = N,
-                 strata_var = strata_var,
-                 clust_var = clust_var,
-                 n = n,
-                 prob = prob,
-                 strata_n = strata_n,
-                 strata_prob = strata_prob,
-                 simple = simple,
-                 balance_load = balance_load)
+  } else{
+    rs_declaration <-
+      declare_rs(
+        N = N,
+        strata_var = strata_var,
+        clust_var = clust_var,
+        n = n,
+        prob = prob,
+        strata_n = strata_n,
+        strata_prob = strata_prob,
+        simple = simple,
+        balance_load = balance_load
+      )
     
   }
   return(rs_declaration$rs_function())
 }
 
-#' Obtain inclusion probabilities 
-#' 
+#' Obtain inclusion probabilities
+#'
 #' You can either give obtain_inclusion_probabilities() an rs_declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.\cr \cr
 #' This function is especially useful when units have different inclusion probabilties and the analyst plans to use inverse-probability weights.
-#' 
+#'
 #'
 #' @param rs_declaration A random sampling declaration, created by \code{\link{declare_rs}}.
 #' @inheritParams declare_rs
-#' 
+#'
 #' @examples
 #'
 #' # Draw a stratified random sample
 #' strata_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
-#' 
+#'
 #' declaration <- declare_rs(strata_var = strata_var)
 #'
 #' observed_probabilities <-
 #'    obtain_inclusion_probabilities(rs_declaration = declaration)
-#'    
+#'
 #' table(strata_var, observed_probabilities)
 #'
 #'
 #' # Sometimes it is convenient to skip the declaration step
 #' observed_probabilities <-
 #'    obtain_inclusion_probabilities(strata_var = strata_var)
-#'                                   
-#' table(strata_var, observed_probabilities)                               
+#'
+#' table(strata_var, observed_probabilities)
 #'
 #' @export
 obtain_inclusion_probabilities <-
-  function(rs_declaration = NULL, 
+  function(rs_declaration = NULL,
            N = NULL,
            strata_var = NULL,
            clust_var = NULL,
@@ -313,21 +306,23 @@ obtain_inclusion_probabilities <-
            simple = FALSE,
            balance_load = FALSE) {
     # checks
-    if(!is.null(rs_declaration)){
+    if (!is.null(rs_declaration)) {
       if (class(rs_declaration) != "rs_declaration") {
         stop("You must provide a random assignment declaration created by declare_rs().")
       }
-    }else{
-      rs_declaration <- 
-        declare_rs(N = N,
-                   strata_var = strata_var,
-                   clust_var = clust_var,
-                   n = n,
-                   prob = prob,
-                   strata_n = strata_n,
-                   strata_prob = strata_prob,
-                   simple = simple,
-                   balance_load = balance_load)
+    } else{
+      rs_declaration <-
+        declare_rs(
+          N = N,
+          strata_var = strata_var,
+          clust_var = clust_var,
+          n = n,
+          prob = prob,
+          strata_n = strata_n,
+          strata_prob = strata_prob,
+          simple = simple,
+          balance_load = balance_load
+        )
     }
     
     probabilities_vector <- rs_declaration$probabilities_vector
@@ -339,7 +334,8 @@ print.rs_declaration <- function(x, ...) {
   S <- x$rs_function()
   n <- length(S)
   
-  constant_probabilities <- all(x$probabilities_vector[1] == x$probabilities_vector)
+  constant_probabilities <-
+    all(x$probabilities_vector[1] == x$probabilities_vector)
   
   cat("\n")
   if (x$rs_type == "stratified")
