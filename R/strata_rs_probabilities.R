@@ -16,13 +16,13 @@
 #' probs <- strata_rs_probabilities(strata_var = strata_var, strata_prob = c(.1, .2, .3))
 #' table(strata_var, probs)
 #'
-#' probs <- strata_rs_probabilities(strata_var = strata_var, strata_m = c(10, 40, 70))
+#' probs <- strata_rs_probabilities(strata_var = strata_var, strata_n = c(10, 40, 70))
 #' table(strata_var, probs)
 #'
 #' @export
 strata_rs_probabilities <- function(strata_var,
                                     prob = NULL,
-                                    strata_m = NULL,
+                                    strata_n = NULL,
                                     strata_prob = NULL,
                                     balance_load = FALSE) {
   #if(all(balance_load & is.null(prob) & is.null(prob_each) & is.null(strata_prob_each))){
@@ -32,13 +32,13 @@ strata_rs_probabilities <- function(strata_var,
   check_inputs <- check_samplr_arguments(
     strata_var = strata_var,
     prob = prob,
-    strata_m = strata_m,
+    strata_n = strata_n,
     strata_prob = strata_prob
   )
   
   N_per_stratum <- check_inputs$N_per_stratum
   
-  if (is.null(prob) & is.null(strata_m) & is.null(strata_prob)) {
+  if (is.null(prob) & is.null(strata_n) & is.null(strata_prob)) {
     prob <- 0.5
   }
   
@@ -51,11 +51,11 @@ strata_rs_probabilities <- function(strata_var,
   strata <- sort(unique(strata_var))
   prob_vec <- rep(NA, length(strata_var))
   
-  # Case 2: strata_m is specified
-  if (!is.null(strata_m)) {
+  # Case 2: strata_n is specified
+  if (!is.null(strata_n)) {
     for (i in 1:length(strata)) {
       prob_vec[strata_var == strata[i]] <-
-        complete_rs_probabilities(N = N_per_stratum[i], m = strata_m[i])
+        complete_rs_probabilities(N = N_per_stratum[i], n = strata_n[i])
     }
     return(prob_vec)
   }

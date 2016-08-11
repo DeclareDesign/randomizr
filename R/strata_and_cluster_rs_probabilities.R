@@ -33,7 +33,7 @@
 #'
 #' probs <- strata_and_cluster_rs_probabilities(clust_var = clust_var,
 #'                                          strata_var = strata_var,
-#'                                          strata_m = c(2, 3, 2, 3, 2))
+#'                                          strata_n = c(2, 3, 2, 3, 2))
 #'
 #' table(probs, clust_var)
 #' table(probs, strata_var)
@@ -51,7 +51,7 @@ strata_and_cluster_rs_probabilities <-
   function(strata_var,
            clust_var,
            prob = NULL,
-           strata_m = NULL,
+           strata_n = NULL,
            strata_prob = NULL,
            balance_load = FALSE) {
     unique_clus <- unique(clust_var)
@@ -65,7 +65,7 @@ strata_and_cluster_rs_probabilities <-
     probs_clus <- strata_rs_probabilities(
       strata_var = clust_strata,
       prob = prob,
-      strata_m = strata_m,
+      strata_n = strata_n,
       strata_prob = strata_prob,
       balance_load = balance_load
     )

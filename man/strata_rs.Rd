@@ -4,7 +4,7 @@
 \alias{strata_rs}
 \title{Stratified Random Sampling}
 \usage{
-strata_rs(strata_var, prob = NULL, strata_m = NULL, strata_prob = NULL,
+strata_rs(strata_var, prob = NULL, strata_n = NULL, strata_prob = NULL,
   balance_load = FALSE)
 }
 \arguments{
@@ -12,7 +12,7 @@ strata_rs(strata_var, prob = NULL, strata_m = NULL, strata_prob = NULL,
 
 \item{prob}{Use for a design in which either floor(N_stratum*prob) or ceiling(N_stratum*prob) units are assigned to treatment within each stratum. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_stratum*prob) units will be assigned to treatment and with probability prob, ceiling(N_stratum*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{strata_m}{Use for a in which strata_m describes the number of units to assign to treatment within each stratum.}
+\item{strata_n}{Use for a in which strata_n describes the number of units to assign to treatment within each stratum.}
 
 \item{strata_prob}{Use for a in which strata_prob describes the probability of assignment to treatment within each stratum. Differs from prob in that the probability of assignment can vary across strata.}
 
@@ -36,7 +36,7 @@ table(strata_var, Z)
 Z <- strata_rs(strata_var = strata_var, strata_prob = c(.1, .2, .3))
 table(strata_var, Z)
 
-Z <- strata_rs(strata_var = strata_var, strata_m = c(20, 30, 40))
+Z <- strata_rs(strata_var = strata_var, strata_n = c(20, 30, 40))
 table(strata_var, Z)
 
 # Experimental feature: load balancing

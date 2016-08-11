@@ -332,15 +332,15 @@ check_randomizr_arguments <-
 check_samplr_arguments <-
   function(N = NULL,
            prob = NULL,
-           m = NULL,
+           n = NULL,
            strata_var = NULL,
-           strata_m = NULL,
+           strata_n = NULL,
            strata_prob = NULL,
            clust_var = NULL) {
     conflict_args <- list(
       prob = prob,
-      m = m,
-      strata_m = strata_m,
+      n = n,
+      strata_n = strata_n,
       strata_prob = strata_prob
     )
     
@@ -376,13 +376,13 @@ check_samplr_arguments <-
       }
     }
     
-    if (!is.null(m)) {
-      if (m < 0) {
-        stop("If specified, the number of units sampled (m) must be nonnegative.")
+    if (!is.null(n)) {
+      if (n < 0) {
+        stop("If specified, the number of units sampled (n) must be nonnegative.")
       }
-      if (m > N) {
+      if (n > N) {
         stop(
-          "If specified, the number of units sampled (m) must not be greater than the total number of units (N)."
+          "If specified, the number of units sampled (n) must not be greater than the total number of units (N)."
         )
       }
     }
@@ -393,10 +393,10 @@ check_samplr_arguments <-
       N_per_stratum <- as.numeric(table(strata_var))
       N_strata <- length(N_per_stratum)
       
-      if (!is.null(strata_m)) {
-        if (length(strata_m) != N_strata) {
+      if (!is.null(strata_n)) {
+        if (length(strata_n) != N_strata) {
           stop(
-            "If specified, strata_m should have the same length as there are unique strata in strata_var."
+            "If specified, strata_n should have the same length as there are unique strata in strata_var."
           )
         }
       }
@@ -408,9 +408,9 @@ check_samplr_arguments <-
         }
       }
       
-      if(!is.null(strata_m)){
-        if(any(strata_m > N_per_stratum | strata_m < 0)){
-          stop("The number of units assigned to treatment within a stratum must be nonnegative and not exceed the total number units within the strata.")
+      if(!is.null(strata_n)){
+        if(any(strata_n > N_per_stratum | strata_n < 0)){
+          stop("The number of units sampled within a stratum must be nonnegative and not exceed the total number units within the strata.")
         }
       }
       

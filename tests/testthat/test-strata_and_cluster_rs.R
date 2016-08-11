@@ -58,12 +58,12 @@ table(probs, strata_var)
 
 S <- strata_and_cluster_rs(clust_var = clust_var,
                            strata_var = strata_var,
-                           strata_m = c(2, 3, 2, 3, 2)
+                           strata_n = c(2, 3, 2, 3, 2)
                            )
 
 probs <- strata_and_cluster_rs_probabilities(clust_var = clust_var,
                                              strata_var = strata_var,
-                                             strata_m = c(2, 3, 2, 3, 2))
+                                             strata_n = c(2, 3, 2, 3, 2))
 
 table(S, clust_var)
 table(S, strata_var)

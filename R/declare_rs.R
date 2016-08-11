@@ -3,11 +3,11 @@
 #' @param N The number of units. N must be a positive integer. (required)
 #' @param strata_var A vector of length N that indicates which stratum each unit belongs to.
 #' @param clust_var A vector of length N that indicates which cluster each unit belongs to.
-#' @param m Use for a design in which m units (or clusters) are sampled. (optional)
+#' @param n Use for a design in which n units (or clusters) are sampled. (optional)
 #' @param prob Use for a design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be sampled and with probability prob, ceiling(N*prob) units (or clusters) will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
-#' @param strata_m Use for a design in which strata_m describes the number of units to sample within each stratum. 
+#' @param strata_n Use for a design in which strata_n describes the number of units to sample within each stratum. 
 #' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of assignment can vary across strata.
-#' @param simple logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m or strata_m.
+#' @param simple logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify n or strata_n.
 #' @param balance_load logical, defaults to FALSE. This feature is experimental. Please use with caution and perform many tests before using in a real research scenario.
 #'
 #' @return A list of class "rs_declaration".  The list has five entries:
@@ -21,7 +21,7 @@
 #' # The declare_rs function is used in three ways:
 #'
 #' # 1. To obtain some basic facts about a sampling procedure:
-#' declaration <- declare_rs(N = 100, m = 30)
+#' declaration <- declare_rs(N = 100, n = 30)
 #' declaration
 #'
 #' # 2. To draw a random sample:
@@ -42,7 +42,7 @@
 #' # Complete Random Assignment Declarations
 #'
 #' declare_rs(N = 100)
-#' declare_rs(N = 100, m = 30)
+#' declare_rs(N = 100, n = 30)
 #'
 #' # Stratified Random Sampling Declarations
 #'
@@ -55,7 +55,7 @@
 #'
 #' clust_var <- rep(letters, times = 1:26)
 #' declare_rs(clust_var = clust_var)
-#' declare_rs(clust_var = clust_var, m = 10)
+#' declare_rs(clust_var = clust_var, n = 10)
 #'
 #' # Stratified and Clustered Random Sampling Declarations
 #'
@@ -76,9 +76,9 @@
 declare_rs <- function(N = NULL,
                        strata_var = NULL,
                        clust_var = NULL,
-                       m = NULL,
+                       n = NULL,
                        prob = NULL,
-                       strata_m = NULL,
+                       strata_n = NULL,
                        strata_prob = NULL,
                        simple = FALSE,
                        balance_load = FALSE) {
@@ -87,9 +87,9 @@ declare_rs <- function(N = NULL,
     N = N,
     strata_var = strata_var,
     clust_var = clust_var,
-    m = m,
+    n = n,
     prob = prob,
-    strata_m = strata_m,
+    strata_n = strata_n,
     strata_prob = strata_prob)
   # Determine rs_type
   if (simple == FALSE) {
@@ -108,8 +108,8 @@ declare_rs <- function(N = NULL,
   }
   
   if (rs_type == "simple" & is.null(clust_var)) {
-    if (!is.null(m)) {
-      stop("You can't specify 'm' when using simple random assignment.")
+    if (!is.null(n)) {
+      stop("You can't specify 'n' when using simple random assignment.")
     }
     if (!is.null(strata_var)) {
       stop("You can't specify 'strata_var' when using simple random assignment.")
@@ -132,7 +132,7 @@ declare_rs <- function(N = NULL,
     rs_function <- function() {
       complete_rs(
         N = N,
-        m = m,
+        n = n,
         prob = prob
       )
     }
@@ -140,7 +140,7 @@ declare_rs <- function(N = NULL,
     probabilities_vector <-
       complete_rs_probabilities(
         N = N,
-        m = m,
+        n = n,
         prob = prob
       )
     
@@ -150,7 +150,7 @@ declare_rs <- function(N = NULL,
     rs_function <- function() {
       strata_rs(
         strata_var = strata_var,
-        strata_m = strata_m,
+        strata_n = strata_n,
         prob = prob,
         strata_prob = strata_prob,
         balance_load = balance_load
@@ -160,7 +160,7 @@ declare_rs <- function(N = NULL,
     probabilities_vector <-
       strata_rs_probabilities(
         strata_var = strata_var,
-        strata_m = strata_m,
+        strata_n = strata_n,
         prob = prob,
         strata_prob = strata_prob,
         balance_load = balance_load
@@ -172,7 +172,7 @@ declare_rs <- function(N = NULL,
     rs_function <- function() {
       cluster_rs(
         clust_var = clust_var,
-        m = m,
+        n = n,
         prob = prob,
         simple = simple
       )
@@ -181,7 +181,7 @@ declare_rs <- function(N = NULL,
     probabilities_vector <-
       cluster_rs_probabilities(
         clust_var = clust_var,
-        m = m,
+        n = n,
         prob = prob,
         simple = simple
       )
@@ -194,7 +194,7 @@ declare_rs <- function(N = NULL,
         clust_var = clust_var,
         strata_var = strata_var,
         prob = prob,
-        strata_m = strata_m,
+        strata_n = strata_n,
         strata_prob = strata_prob,
         balance_load = balance_load
       )
@@ -206,7 +206,7 @@ declare_rs <- function(N = NULL,
         strata_var = strata_var,
         prob = prob,
         strata_prob = strata_prob,
-        strata_m = strata_m,
+        strata_n = strata_n,
         balance_load = balance_load
       )
     
@@ -232,12 +232,12 @@ declare_rs <- function(N = NULL,
 #' @param rs_declaration A random sampling declaration, created by \code{\link{declare_rs}}. 
 #' @inheritParams declare_rs
 #' @examples
-#' declaration <- declare_rs(N = 100, m = 30)
+#' declaration <- declare_rs(N = 100, n = 30)
 #' S <- draw_rs(rs_declaration = declaration)
 #' table(S)
 #' 
 #' # equivalent to
-#' S <- draw_rs(N = 100, m = 30)
+#' S <- draw_rs(N = 100, n = 30)
 #' table(S)
 #'
 #' @export
@@ -245,9 +245,9 @@ draw_rs <- function(rs_declaration = NULL,
                        N = NULL,
                        strata_var = NULL,
                        clust_var = NULL,
-                       m = NULL,
+                       n = NULL,
                        prob = NULL,
-                       strata_m = NULL,
+                       strata_n = NULL,
                        strata_prob = NULL,
                        simple = FALSE,
                        balance_load = FALSE) {
@@ -261,9 +261,9 @@ draw_rs <- function(rs_declaration = NULL,
       declare_rs(N = N,
                  strata_var = strata_var,
                  clust_var = clust_var,
-                 m = m,
+                 n = n,
                  prob = prob,
-                 strata_m = strata_m,
+                 strata_n = strata_n,
                  strata_prob = strata_prob,
                  simple = simple,
                  balance_load = balance_load)
@@ -306,9 +306,9 @@ obtain_inclusion_probabilities <-
            N = NULL,
            strata_var = NULL,
            clust_var = NULL,
-           m = NULL,
+           n = NULL,
            prob = NULL,
-           strata_m = NULL,
+           strata_n = NULL,
            strata_prob = NULL,
            simple = FALSE,
            balance_load = FALSE) {
@@ -322,9 +322,9 @@ obtain_inclusion_probabilities <-
         declare_rs(N = N,
                    strata_var = strata_var,
                    clust_var = clust_var,
-                   m = m,
+                   n = n,
                    prob = prob,
-                   strata_m = strata_m,
+                   strata_n = strata_n,
                    strata_prob = strata_prob,
                    simple = simple,
                    balance_load = balance_load)

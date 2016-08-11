@@ -10,9 +10,9 @@ table(S, clust_var)
 probs <- cluster_rs_probabilities(clust_var = clust_var)
 table(probs, clust_var)
 
-S <- cluster_rs(clust_var = clust_var, m = 13)
+S <- cluster_rs(clust_var = clust_var, n = 13)
 table(S, clust_var)
-probs <- cluster_rs_probabilities(clust_var = clust_var, m = 13)
+probs <- cluster_rs_probabilities(clust_var = clust_var, n = 13)
 table(probs, clust_var)
 
 S <- cluster_rs(clust_var = clust_var, prob = .5)

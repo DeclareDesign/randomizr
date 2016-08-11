@@ -11,7 +11,7 @@
 #' probs <- cluster_rs_probabilities(clust_var = clust_var)
 #' table(probs, clust_var)
 #'
-#' prob_mat <- cluster_rs_probabilities(clust_var = clust_var, m = 10)
+#' prob_mat <- cluster_rs_probabilities(clust_var = clust_var, n = 10)
 #' table(probs, clust_var)
 #'
 #' prob_mat <- cluster_rs_probabilities(clust_var = clust_var, prob = .3)
@@ -21,7 +21,7 @@
 #' @export
 cluster_rs_probabilities <-
   function(clust_var,
-           m = NULL,
+           n = NULL,
            prob = NULL,
            simple = FALSE) {
     unique_clus <- unique(clust_var)
@@ -34,7 +34,7 @@ cluster_rs_probabilities <-
     } else{
       probs_clus <-
         complete_rs_probabilities(N = n_clus,
-                                  m = m,
+                                  n = n,
                                   prob = prob)
     }
     merged <-

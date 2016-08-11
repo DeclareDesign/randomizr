@@ -16,7 +16,7 @@ S <- draw_rs(declaration)
 obtain_inclusion_probabilities(rs_declaration = declaration)
 declaration$probabilities_vector
 
-declaration <- declare_rs(N = 100, m = 50)
+declaration <- declare_rs(N = 100, n = 50)
 table(declaration$rs_function())
 S <- draw_rs(declaration)
 obtain_inclusion_probabilities(rs_declaration = declaration)
@@ -48,7 +48,7 @@ S <- draw_rs(declaration)
 obtain_inclusion_probabilities(rs_declaration = declaration)
 declaration$probabilities_vector
 
-declaration <- declare_rs(clust_var = clust_var, m = 10)
+declaration <- declare_rs(clust_var = clust_var, n = 10)
 table(declaration$rs_function())
 S <- draw_rs(declaration)
 obtain_inclusion_probabilities(rs_declaration = declaration)

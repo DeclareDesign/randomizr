@@ -4,12 +4,12 @@
 \alias{complete_rs}
 \title{Complete Random Sampling}
 \usage{
-complete_rs(N, m = NULL, prob = NULL)
+complete_rs(N, n = NULL, prob = NULL)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
 
-\item{m}{Use for a design in which exactly m units are sampled. (optional)}
+\item{n}{Use for a design in which exactly n units are sampled. (optional)}
 
 \item{prob}{Use for a design in which either floor(N*prob) or ceiling(N*prob) units are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units will be sampled and with probability prob, ceiling(N*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
 }
@@ -17,27 +17,27 @@ complete_rs(N, m = NULL, prob = NULL)
 A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
 }
 \description{
-complete_rs implements a random sampling procedure in which fixed numbers of units are sampled. The canonical example of complete random sampling is a procedure in which exactly m of N units are sampled.\cr \cr
-Users can set the exact number of units to sample with m. Alternatively, users can specify the probability of being sampled with prob and complete_rs will infer the correct number of units to sample.
+complete_rs implements a random sampling procedure in which fixed numbers of units are sampled. The canonical example of complete random sampling is a procedure in which exactly n of N units are sampled.\cr \cr
+Users can set the exact number of units to sample with n. Alternatively, users can specify the probability of being sampled with prob and complete_rs will infer the correct number of units to sample.
 complete_rs will either sample floor(N*prob) or ceiling(N*prob) units, choosing between these two values to ensure that the overall probability of being sampled is exactly prob.
-Users should specify N and not more than one of m or prob. \cr \cr
+Users should specify N and not more than one of n or prob. \cr \cr
 If only N is specified, N/2 units will be sampled. If N is odd, either floor(N/2) units or ceiling(N/2) units will be sampled.
 }
 \examples{
 S <- complete_rs(N = 100)
 table(S)
 
-S <- complete_rs(N = 100, m = 50)
+S <- complete_rs(N = 100, n = 50)
 table(S)
 
 S <- complete_rs(N = 100, prob = .111)
 table(S)
 
-# If N = m, sample with 100\% probability...
-complete_ra(N=2, m=2)
+# If N = n, sample with 100\% probability...
+complete_ra(N=2, n=2)
 
-# except if N = m = 1, in which case sample with 50\% probability
-complete_ra(N=1, m=1)
+# except if N = n = 1, in which case sample with 50\% probability
+complete_ra(N=1, n=1)
 
 
 }

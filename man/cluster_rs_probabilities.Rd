@@ -4,16 +4,16 @@
 \alias{cluster_rs_probabilities}
 \title{Probabilties of assignment: Cluster Random Assignment}
 \usage{
-cluster_rs_probabilities(clust_var, m = NULL, prob = NULL, simple = FALSE)
+cluster_rs_probabilities(clust_var, n = NULL, prob = NULL, simple = FALSE)
 }
 \arguments{
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
 
-\item{m}{Use for a design in which m clusters are sampled. (optional)}
+\item{n}{Use for a design in which n clusters are sampled. (optional)}
 
 \item{prob}{Use for a design in which either floor(N_clusters*prob) or ceiling(N_clusters*prob) clusters are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters*prob) clusters will be sampled and with probability prob, ceiling(N_clusters*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling of clusters. When simple = TRUE, please do not specify m.}
+\item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling of clusters. When simple = TRUE, please do not specify n.}
 }
 \value{
 A vector length N indicating the probability of being sampled.
@@ -28,7 +28,7 @@ clust_var <- rep(letters, times = 1:26)
 probs <- cluster_rs_probabilities(clust_var = clust_var)
 table(probs, clust_var)
 
-prob_mat <- cluster_rs_probabilities(clust_var = clust_var, m = 10)
+prob_mat <- cluster_rs_probabilities(clust_var = clust_var, n = 10)
 table(probs, clust_var)
 
 prob_mat <- cluster_rs_probabilities(clust_var = clust_var, prob = .3)

@@ -5,8 +5,8 @@
 \title{Obtain inclusion probabilities}
 \usage{
 obtain_inclusion_probabilities(rs_declaration = NULL, N = NULL,
-  strata_var = NULL, clust_var = NULL, m = NULL, prob = NULL,
-  strata_m = NULL, strata_prob = NULL, simple = FALSE,
+  strata_var = NULL, clust_var = NULL, n = NULL, prob = NULL,
+  strata_n = NULL, strata_prob = NULL, simple = FALSE,
   balance_load = FALSE)
 }
 \arguments{
@@ -18,15 +18,15 @@ obtain_inclusion_probabilities(rs_declaration = NULL, N = NULL,
 
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
 
-\item{m}{Use for a design in which m units (or clusters) are sampled. (optional)}
+\item{n}{Use for a design in which n units (or clusters) are sampled. (optional)}
 
 \item{prob}{Use for a design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be sampled and with probability prob, ceiling(N*prob) units (or clusters) will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{strata_m}{Use for a design in which strata_m describes the number of units to sample within each stratum.}
+\item{strata_n}{Use for a design in which strata_n describes the number of units to sample within each stratum.}
 
 \item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of assignment can vary across strata.}
 
-\item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m or strata_m.}
+\item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify n or strata_n.}
 
 \item{balance_load}{logical, defaults to FALSE. This feature is experimental. Please use with caution and perform many tests before using in a real research scenario.}
 }
