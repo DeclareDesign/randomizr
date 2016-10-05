@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-[![Travis-CI Build Status](https://travis-ci.org/acoppock/randomizr.svg?branch=master)](https://travis-ci.org/acoppock/randomizr)
+[![Travis-CI Build Status](https://travis-ci.org/DeclareDesign/randomizr.svg?branch=master)](https://travis-ci.org/DeclareDesign/randomizr)
 
 randomizr is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process.  
 
@@ -28,7 +28,7 @@ If you'd like to install the most current development release, use the following
 
 ```{r,eval=FALSE}
 install.packages("devtools")
-devtools::install_github("acoppock/randomizr")
+devtools::install_github("DeclareDesign/randomizr")
 ```
 
 There are five main functions in randomizr: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`, which correspond to common experimental designs. 
