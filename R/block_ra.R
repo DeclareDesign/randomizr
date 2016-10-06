@@ -176,14 +176,16 @@ block_ra <- function(block_var,
         )
       return(assign)
     } else{
-      for (i in 1:length(blocks)) {
-        assign[block_var == blocks[i]] <-
-          complete_ra(
-            N = N_per_block[i],
-            prob_each = prob_each,
-            condition_names = condition_names
-          )
-      }
+      
+      assign <- lapply(1:length(blocks), function(x){
+        randomizr::complete_ra(
+          N = N_per_block[x],
+          prob_each = prob_each,
+          condition_names = condition_names
+        )
+      })
+      assign <- unlist(assign)[order(order(block_var))]
+      
       if (!identical(condition_names, c(0, 1))) {
         assign <- condition_names[assign]
       }
