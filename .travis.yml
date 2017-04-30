@@ -1,5 +1,39 @@
-# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+language: r
 
-language: R
+r:
+  - release
+
 sudo: false
+
 cache: packages
+
+warnings_are_errors: false
+
+os:
+  - linux
+  - osx
+
+env:
+  global:
+    - OS=$(uname -s)
+
+r_github_packages:
+  - jimhester/covr
+  - graemeblair/drat
+
+r_packages:
+  - git2r
+
+after_success:
+  - Rscript -e 'covr::coveralls()'
+  - test $TRAVIS_OS_NAME == "osx" && Rscript -e "devtools::build(binary = TRUE, args = c('--preclean'))"
+  - test $TRAVIS_OS_NAME == "linux" && Rscript -e "devtools::build()"
+  - test $TRAVIS_REPO_SLUG == "DeclareDesign/randomizr" && test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && bash deploy.sh
+
+notifications:
+  email:
+    recipients:
+    - graeme.blair@ucla.edu
+    - alex.coppock@yale.edu
+    on_success: change
+    on_failure: change
