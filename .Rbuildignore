@@ -8,3 +8,7 @@
 ^README\.md$
 ^\.travis\.yml$
 ^docs$
+deploy.sh
+_pkgdown.yml
+appveyor.yml
+CONDUCT.md
