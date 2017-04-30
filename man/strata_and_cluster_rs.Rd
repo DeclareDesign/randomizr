@@ -68,4 +68,3 @@ table(S, strata_var)
 
 
 }
-

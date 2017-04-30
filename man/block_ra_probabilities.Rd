@@ -75,4 +75,3 @@ prob_mat <- block_ra_probabilities(block_var=block_var, prob_each=c(.1, .1, .8))
 head(prob_mat)
 
 }
-

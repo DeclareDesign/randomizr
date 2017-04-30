@@ -53,4 +53,3 @@ table(Z)
 Z <- simple_ra(N=100, condition_names=c("control", "placebo", "treatment"))
 table(Z)
 }
-

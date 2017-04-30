@@ -99,4 +99,3 @@ Z <- block_ra(block_var = block_var, balance_load = FALSE)
 table(block_var, Z)
 
 }
-

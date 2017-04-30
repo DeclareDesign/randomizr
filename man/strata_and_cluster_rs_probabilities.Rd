@@ -69,4 +69,3 @@ table(probs, strata_var)
 
 
 }
-

@@ -61,4 +61,3 @@ prob_mat <- complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))
 head(prob_mat)
 
 }
-

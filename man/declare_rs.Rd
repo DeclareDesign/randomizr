@@ -94,4 +94,3 @@ declare_rs(clust_var = clust_var, strata_var = strata_var)
 declare_rs(clust_var = clust_var, strata_var = strata_var, prob = .3)
 
 }
-

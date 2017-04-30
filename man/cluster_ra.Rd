@@ -60,4 +60,3 @@ Z <- cluster_ra(clust_var = clust_var,
                 condition_names = c("control", "placebo", "treatment"))
 table(Z, clust_var)
 }
-

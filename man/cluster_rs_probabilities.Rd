@@ -36,4 +36,3 @@ table(probs, clust_var)
 
 
 }
-

@@ -81,4 +81,3 @@ table(observed_probabilities[Z == 0], block_var[Z == 0])
 table(observed_probabilities[Z == 1], block_var[Z == 1])                                   
 
 }
-

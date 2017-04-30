@@ -26,4 +26,3 @@ S <- simple_rs(N = 100, prob = 0.3)
 table(S)
 
 }
-

@@ -82,4 +82,3 @@ table(Z, block_var)
 table(Z, clust_var)
 
 }
-

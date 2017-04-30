@@ -116,4 +116,3 @@ declare_ra(clust_var = clust_var, block_var = block_var)
 declare_ra(clust_var = clust_var, block_var = block_var, prob_each = c(.2, .5, .3))
 
 }
-

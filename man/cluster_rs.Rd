@@ -31,4 +31,3 @@ S <- cluster_rs(clust_var = clust_var, n = 13)
 table(S, clust_var)
 
 }
-

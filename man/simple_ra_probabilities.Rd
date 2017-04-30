@@ -51,4 +51,3 @@ prob_mat <- simple_ra_probabilities(N=100, condition_names=c("control", "placebo
 head(prob_mat)
 
 }
-

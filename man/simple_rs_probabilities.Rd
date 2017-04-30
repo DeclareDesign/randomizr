@@ -25,4 +25,3 @@ probs <- simple_ra_probabilities(N = 100, prob = 0.3)
 table(probs)
 
 }
-

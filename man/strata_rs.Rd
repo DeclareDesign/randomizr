@@ -53,4 +53,3 @@ Z <- strata_rs(strata_var = strata_var, balance_load = FALSE)
 table(strata_var, Z)
 
 }
-

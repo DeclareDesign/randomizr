@@ -30,4 +30,3 @@ probs <- complete_rs_probabilities(N=100, prob = .3)
 table(probs)
 
 }
-

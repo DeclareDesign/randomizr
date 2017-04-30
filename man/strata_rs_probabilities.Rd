@@ -40,4 +40,3 @@ probs <- strata_rs_probabilities(strata_var = strata_var, strata_n = c(10, 40, 7
 table(strata_var, probs)
 
 }
-

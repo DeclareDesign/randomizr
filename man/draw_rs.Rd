@@ -42,4 +42,3 @@ S <- draw_rs(N = 100, n = 30)
 table(S)
 
 }
-

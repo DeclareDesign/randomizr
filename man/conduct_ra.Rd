@@ -57,4 +57,3 @@ Z <- conduct_ra(N = 100, m_each = c(30, 30, 40))
 table(Z)
 
 }
-

@@ -76,4 +76,3 @@ head(prob_mat)
 
 
 }
-

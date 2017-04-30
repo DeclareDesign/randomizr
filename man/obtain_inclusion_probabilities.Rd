@@ -43,15 +43,14 @@ declaration <- declare_rs(strata_var = strata_var)
 
 observed_probabilities <-
    obtain_inclusion_probabilities(rs_declaration = declaration)
-   
+
 table(strata_var, observed_probabilities)
 
 
 # Sometimes it is convenient to skip the declaration step
 observed_probabilities <-
    obtain_inclusion_probabilities(strata_var = strata_var)
-                                  
-table(strata_var, observed_probabilities)                               
+
+table(strata_var, observed_probabilities)
 
 }
-
