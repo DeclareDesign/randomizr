@@ -216,8 +216,6 @@ check_randomizr_arguments <-
       }
     }
     
-    
-    
     # Blocked Design Checks
     N_per_block <- NULL
     if (!is.null(block_var)) {

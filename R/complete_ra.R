@@ -67,21 +67,23 @@ complete_ra <- function(N,
                         prob = NULL,
                         prob_each = NULL,
                         num_arms = NULL,
-                        condition_names = NULL) {
-  # Checks
-  check_inputs <-
-    check_randomizr_arguments(
-      N = N,
-      m = m,
-      m_each = m_each,
-      prob = prob,
-      prob_each = prob_each,
-      num_arms = num_arms,
-      condition_names = condition_names
-    )
+                        condition_names = NULL,
+                        check_inputs = TRUE) {
   
-  num_arms <- check_inputs$num_arms
-  condition_names <- check_inputs$condition_names
+  if (check_inputs) {
+    check_inputs <-
+      check_randomizr_arguments(
+        N = N,
+        m = m,
+        m_each = m_each,
+        prob = prob,
+        prob_each = prob_each,
+        num_arms = num_arms,
+        condition_names = condition_names
+      )
+    num_arms <- check_inputs$num_arms
+    condition_names <- check_inputs$condition_names
+  } 
   
   # Simple 2 group design, returns zeros and ones
   if (is.null(m_each) &
