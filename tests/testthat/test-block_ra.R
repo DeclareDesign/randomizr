@@ -107,6 +107,8 @@ block_prob_each <- rbind(c(.3, .6, .1),
                          c(.1, .8, .1))
 
 
+block_ra(block_var = rep(c(T, F), c(5, 5)))
+
 
 
 expect_error(block_ra(block_var=block_var, block_m_each=block_m_each, block_prob_each = block_prob_each))
@@ -122,4 +124,10 @@ expect_error(block_ra(block_var=block_var, condition_names = c("1", "2"), prob_e
 expect_error(block_ra(block_var=block_var, condition_names = c("1", "2", "3"), block_m_each=block_m_each))
 
 expect_error(block_ra(block_var=block_var, condition_names = c("1", "2", "3"), num_arms = 2))
+
+
+
+cookie_type <- rep(c("sugar", "chip"), c(36, 36))
+batch <- block_ra(block_var = cookie_type, block_m = c(18, 18), condition_names = c("batch_1", "batch_2"))
+
 

@@ -113,13 +113,9 @@ block_ra <- function(block_var,
           condition_names = condition_names,
           num_arms = num_arms,
           check_inputs = FALSE
-        ))
+        ), SIMPLIFY = FALSE)
     
     assign <- unlist(assign_list)[order(block_spots)]
-    
-    if (!identical(condition_names, c(0, 1))) {
-      assign <- condition_names[assign]
-    }
     assign <- clean_condition_names(assign, condition_names)
     return(assign)
   }
@@ -135,13 +131,9 @@ block_ra <- function(block_var,
           condition_names = condition_names,
           num_arms = num_arms,
           check_inputs = FALSE
-        ))
+        ), SIMPLIFY = FALSE)
     
     assign <- unlist(assign_list)[order(block_spots)]
-    
-    if (!identical(condition_names, c(0, 1))) {
-      assign <- condition_names[assign]
-    }
     assign <- clean_condition_names(assign, condition_names)
     return(assign)
   }
@@ -160,13 +152,9 @@ block_ra <- function(block_var,
           condition_names = condition_names,
           num_arms = num_arms,
           check_inputs = FALSE
-        ))
+        ), SIMPLIFY = FALSE)
     
     assign <- unlist(assign_list)[order(block_spots)]
-    
-    if (!identical(condition_names, c(0, 1))) {
-      assign <- condition_names[assign]
-    }
     assign <- clean_condition_names(assign, condition_names)
     return(assign)
   }
@@ -186,13 +174,9 @@ block_ra <- function(block_var,
           condition_names = condition_names,
           num_arms = num_arms,
           check_inputs = FALSE
-        ))
+        ), SIMPLIFY = FALSE)
     
     assign <- unlist(assign_list)[order(block_spots)]
-    
-    if (!identical(condition_names, c(0, 1))) {
-      assign <- condition_names[assign]
-    }
     assign <- clean_condition_names(assign, condition_names)
     return(assign)
   }
@@ -212,13 +196,9 @@ block_ra <- function(block_var,
           condition_names = condition_names,
           num_arms = num_arms,
           check_inputs = FALSE
-        ))
+        ), SIMPLIFY = FALSE)
     
     assign <- unlist(assign_list)[order(block_spots)]
-    
-    if (!identical(condition_names, c(0, 1))) {
-      assign <- condition_names[assign]
-    }
     assign <- clean_condition_names(assign, condition_names)
     return(assign)
   }
