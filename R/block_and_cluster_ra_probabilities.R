@@ -53,15 +53,15 @@ block_and_cluster_ra_probabilities <-
            block_prob_each = NULL,
            num_arms = NULL,
            condition_names = NULL) {
-    unique_clus <- unique(clust_var)
     
-    ## get the block for each cluster
-    clust_blocks <- rep(NA, length(unique_clus))
-    for (i in 1:length(unique_clus)) {
-      clust_blocks[i] <- unique(block_var[clust_var == unique_clus[i]])
-    }
+    # Setup: obtain unique clusters
+    n_per_clust <- tapply(clust_var, clust_var, length)
+    n_clust <- length(n_per_clust)
     
-    probs_clus <- block_ra_probabilities(
+    # get the block for each cluster
+    clust_blocks <- tapply(block_var, clust_var, unique)
+    
+    probs_clust <- block_ra_probabilities(
       block_var = clust_blocks,
       prob = prob,
       prob_each = prob_each,
@@ -73,13 +73,7 @@ block_and_cluster_ra_probabilities <-
       condition_names = condition_names
     )
     
-    merged <-
-      merge(
-        x = data.frame(clust_var, init_order = 1:length(clust_var)),
-        data.frame(clust_var = unique_clus, probs_clus),
-        by = "clust_var"
-      )
-    merged <- merged[order(merged$init_order),]
-    prob_mat <- as.matrix(merged[, colnames(probs_clus)])
+    prob_mat <- probs_clust[rep(1:n_clust, n_per_clust), , drop = FALSE]
+    prob_mat <- prob_mat[order(unlist(split(1:length(clust_var),clust_var))), , drop = FALSE]
     return(prob_mat)
   }

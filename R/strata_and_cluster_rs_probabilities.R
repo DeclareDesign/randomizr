@@ -53,29 +53,21 @@ strata_and_cluster_rs_probabilities <-
            prob = NULL,
            strata_n = NULL,
            strata_prob = NULL) {
-    unique_clus <- unique(clust_var)
     
-    ## get the strata for each cluster
-    clust_strata <- rep(NA, length(unique_clus))
-    for (i in 1:length(unique_clus)) {
-      clust_strata[i] <- unique(strata_var[clust_var == unique_clus[i]])
-    }
+    # Setup: obtain unique clusters
+    n_per_clust <- tapply(clust_var, clust_var, length)
     
-    probs_clus <- strata_rs_probabilities(
+    # get the stratum for each cluster
+    clust_strata <- tapply(strata_var, clust_var, unique)
+    
+    probs_clust <- strata_rs_probabilities(
       strata_var = clust_strata,
       prob = prob,
       strata_n = strata_n,
       strata_prob = strata_prob
     )
     
-    merged <-
-      merge(
-        x = data.frame(clust_var, init_order = 1:length(clust_var)),
-        data.frame(clust_var = unique_clus, probs_clus),
-        by = "clust_var"
-      )
-    
-    merged <- merged[order(merged$init_order), ]
-    prob_vec <- merged$probs_clus
+    prob_vec <- rep(probs_clust, n_per_clust)
+    prob_vec <- prob_vec[order(unlist(split(1:length(clust_var),clust_var)))]
     return(prob_vec)
   }

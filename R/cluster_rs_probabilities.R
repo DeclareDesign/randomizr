@@ -24,26 +24,24 @@ cluster_rs_probabilities <-
            n = NULL,
            prob = NULL,
            simple = FALSE) {
-    unique_clus <- unique(clust_var)
-    n_clus <- length(unique_clus)
+    
+    n_per_clust <- tapply(clust_var, clust_var, length)
+    unique_clust <- names(n_per_clust)
+    n_clust <- length(unique_clust)
     
     if (simple) {
-      probs_clus <-
-        simple_rs_probabilities(N = n_clus,
+      probs_clust <-
+        simple_rs_probabilities(N = n_clust,
                                 prob = prob)
     } else{
-      probs_clus <-
-        complete_rs_probabilities(N = n_clus,
+      probs_clust <-
+        complete_rs_probabilities(N = n_clust,
                                   n = n,
                                   prob = prob)
     }
-    merged <-
-      merge(
-        x = data.frame(clust_var, init_order = 1:length(clust_var)),
-        data.frame(clust_var = unique_clus, probs_clus),
-        by = "clust_var"
-      )
-    merged <- merged[order(merged$init_order),]
-    prob_vec <- merged$probs_clus
+    
+    
+    prob_vec <- rep(probs_clust, n_per_clust)
+    prob_vec <- prob_vec[order(unlist(split(1:length(clust_var),clust_var)))]
     return(prob_vec)
   }

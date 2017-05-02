@@ -22,8 +22,11 @@ cluster_rs <- function(clust_var,
                        n = NULL,
                        prob = NULL,
                        simple = FALSE) {
-  unique_clust <- unique(clust_var)
+  
+  n_per_clust <- tapply(clust_var, clust_var, length)
+  unique_clust <- names(n_per_clust)
   n_clust <- length(unique_clust)
+  
   if (simple) {
     if (!is.null(n)) {
       stop("Please do not specify n when simple = TRUE")
@@ -38,12 +41,7 @@ cluster_rs <- function(clust_var,
       n = n,
       prob = prob)
   }
-  merged <-
-    merge(
-      x = data.frame(clust_var, init_order = 1:length(clust_var)),
-      y = data.frame(clust_var = unique_clust, S_clust),
-      by = "clust_var"
-    )
-  merged <- merged[order(merged$init_order),]
-  return(merged$S_clust)
+  assign <- rep(S_clust, n_per_clust)
+  assign <- assign[order(unlist(split(1:length(clust_var),clust_var)))]
+  return(assign)
 }

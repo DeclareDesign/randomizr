@@ -49,22 +49,24 @@ cluster_ra_probabilities <-
            num_arms = NULL,
            condition_names = NULL,
            simple = FALSE) {
-    unique_clus <- unique(clust_var)
-    n_clus <- length(unique_clus)
+    
+    n_per_clust <- tapply(clust_var, clust_var, length)
+    unique_clust <- names(n_per_clust)
+    n_clust <- length(unique_clust)
     
     if (simple) {
-      probs_clus <-
+      probs_clust <-
         simple_ra_probabilities(
-          N = n_clus,
+          N = n_clust,
           prob = prob,
           prob_each = prob_each,
           num_arms = num_arms,
           condition_names = condition_names
         )
     } else{
-      probs_clus <-
+      probs_clust <-
         complete_ra_probabilities(
-          N = n_clus,
+          N = n_clust,
           m = m,
           m_each = m_each,
           prob = prob,
@@ -73,13 +75,7 @@ cluster_ra_probabilities <-
           condition_names = condition_names
         )
     }
-    merged <-
-      merge(
-        x = data.frame(clust_var, init_order = 1:length(clust_var)),
-        data.frame(clust_var = unique_clus, probs_clus),
-        by = "clust_var"
-      )
-    merged <- merged[order(merged$init_order), ]
-    prob_mat <- as.matrix(merged[, colnames(probs_clus)])
+    prob_mat <- probs_clust[rep(1:n_clust, n_per_clust), , drop = FALSE]
+    prob_mat <- prob_mat[order(unlist(split(1:length(clust_var),clust_var))), , drop = FALSE]
     return(prob_mat)
   }

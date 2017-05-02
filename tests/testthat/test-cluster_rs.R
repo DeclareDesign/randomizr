@@ -3,6 +3,7 @@ library(randomizr)
 
 context("Cluster Random Sampling")
 
+#debugonce(cluster_rs_probabilities)
 # Two Group Designs
 clust_var <- rep(letters, times = 1:26)
 S <- cluster_rs(clust_var = clust_var)

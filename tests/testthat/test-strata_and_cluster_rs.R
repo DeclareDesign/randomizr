@@ -1,7 +1,7 @@
 library(testthat)
 library(randomizr)
 
-context("Stratified and Clustered Random Assignments")
+context("Stratified and Clustered Random Sampling")
 
 clust_var <- rep(letters, times = 1:26)
 strata_var <- rep(NA, length(clust_var))

@@ -101,38 +101,47 @@ block_ra_probabilities(block_var=block_var, block_prob_each=block_prob_each)
 context("Probabilities: Clustered")
 # clustered designs -------------------------------------------------------
 
+
+#debugonce(cluster_ra_probabilities)
 # Two Group Designs
-clust_var <- rep(letters, times=1:26)
-cluster_ra_probabilities(clust_var=clust_var)
+clust_var <- rep(letters, times = 1:26)
+cluster_ra_probabilities(clust_var = clust_var)
 
-cluster_ra_probabilities(clust_var=clust_var, m=10)
+cluster_ra_probabilities(clust_var = clust_var, m = 10)
 
-cluster_ra_probabilities(clust_var=clust_var, m_each = c(9, 17), 
-                         condition_names = c("control", "treatment"))
+cluster_ra_probabilities(
+  clust_var = clust_var,
+  m_each = c(9, 17),
+  condition_names = c("control", "treatment")
+)
 
 # Multi-arm Designs
-cluster_ra_probabilities(clust_var=clust_var, num_arms=3)
-cluster_ra_probabilities(clust_var=clust_var, m_each=c(7, 7, 12))
+cluster_ra_probabilities(clust_var = clust_var, num_arms = 3)
+cluster_ra_probabilities(clust_var = clust_var, m_each = c(7, 7, 12))
 
-cluster_ra_probabilities(clust_var=clust_var, m_each=c(7, 7, 12), 
-                         condition_names=c("control", "placebo", "treatment"))
+cluster_ra_probabilities(
+  clust_var = clust_var,
+  m_each = c(7, 7, 12),
+  condition_names = c("control", "placebo", "treatment")
+)
 
-cluster_ra_probabilities(clust_var=clust_var, 
-                         condition_names=c("control", "placebo", "treatment"))
+cluster_ra_probabilities(
+  clust_var = clust_var,
+  condition_names = c("control", "placebo", "treatment")
+)
 
-cluster_ra_probabilities(clust_var=clust_var, prob_each = c(.1, .2, .7))
+cluster_ra_probabilities(clust_var = clust_var, prob_each = c(.1, .2, .7))
 
 
 context("Probabilities: Blocked and Clustered")
 # Blocked and clustered designs -------------------------------------------
-clust_var <- rep(letters, times=1:26)
+clust_var <- rep(letters, times = 1:26)
 block_var <- rep(NA, length(clust_var))
 block_var[clust_var %in% letters[1:5]] <- "block_1"
 block_var[clust_var %in% letters[6:10]] <- "block_2"
 block_var[clust_var %in% letters[11:15]] <- "block_3"
 block_var[clust_var %in% letters[16:20]] <- "block_4"
 block_var[clust_var %in% letters[21:26]] <- "block_5"
-
 
 block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var)
 block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, num_arms = 3)
@@ -145,12 +154,4 @@ block_m_each <- rbind(c(2, 3),
                       c(5, 1))
 
 block_and_cluster_ra_probabilities(clust_var = clust_var, block_var = block_var, block_m_each = block_m_each)
-
-
-
-
-
-
-
-
 

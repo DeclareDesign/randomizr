@@ -68,13 +68,10 @@ strata_and_cluster_rs <-
       )
     
     # Setup: obtain unique clusters
-    unique_clust <- unique(clust_var)
+    n_per_clust <- tapply(clust_var, clust_var, length)
     
-    # get the strata for each cluster
-    clust_strata <- rep(NA, length(unique_clust))
-    for (i in 1:length(unique_clust)) {
-      clust_strata[i] <- unique(strata_var[clust_var == unique_clust[i]])
-    }
+    # get the stratum for each cluster
+    clust_strata <- tapply(strata_var, clust_var, unique)
     
     # Conduct random assignment at cluster level
     S_clust <- strata_rs(
@@ -84,13 +81,8 @@ strata_and_cluster_rs <-
       strata_prob = strata_prob
     )
     
-    # Merge back up to the individual level, maintaining original ordering
-    merged <-
-      merge(
-        x = data.frame(clust_var, init_order = 1:length(clust_var)),
-        y = data.frame(clust_var = unique_clust, S_clust),
-        by = "clust_var"
-      )
-    merged <- merged[order(merged$init_order), ]
-    return(merged$S_clust)
+    # back up to the individual level, maintaining original ordering
+    assign <- rep(S_clust, n_per_clust)
+    assign <- assign[order(unlist(split(1:length(clust_var), clust_var)))]
+    return(assign)
   }
