@@ -7,8 +7,7 @@
 declare_ra(N = NULL, block_var = NULL, clust_var = NULL, m = NULL,
   m_each = NULL, prob = NULL, prob_each = NULL, block_m = NULL,
   block_m_each = NULL, block_prob = NULL, block_prob_each = NULL,
-  num_arms = NULL, condition_names = NULL, simple = FALSE,
-  balance_load = FALSE)
+  num_arms = NULL, condition_names = NULL, simple = FALSE)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
@@ -38,8 +37,6 @@ declare_ra(N = NULL, block_var = NULL, clust_var = NULL, m = NULL,
 \item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
 
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.}
-
-\item{balance_load}{logical, defaults to FALSE. This feature is experimental. If set to TRUE, the function will resolve rounding problems by randomly assigning "remainder" units to each possible treatment condition with equal probability, while ensuring that the total number of units assigned to each condition does not vary greatly from assignment to assignment. However, the true probabiltiies of assignment may be different from the nominal probabilities specified in prob_each or block_prob_each. Please use with caution and perform many tests before using in a real research scenario.}
 }
 \value{
 A list of class "ra_declaration".  The list has five entries:

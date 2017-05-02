@@ -12,7 +12,6 @@
 #' @param block_prob_each Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
-#' @param balance_load logical, defaults to FALSE. This feature is experimental. If set to TRUE, the function will resolve rounding problems by randomly assigning "remainder" units to each possible treatment condition with equal probability, while ensuring that the total number of units assigned to each condition does not vary greatly from assignment to assignment. However, the true probabiltiies of assignment may be different from the nominal probabilities specified in prob_each or block_prob_each. Please use with caution and perform many tests before using in a real research scenario.
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #'
@@ -70,8 +69,7 @@ block_and_cluster_ra <-
            block_prob = NULL,
            block_prob_each = NULL,
            num_arms = NULL,
-           condition_names = NULL,
-           balance_load = FALSE) {
+           condition_names = NULL) {
     check_inputs <-
       check_randomizr_arguments(
         block_var = block_var,
@@ -105,8 +103,7 @@ block_and_cluster_ra <-
       block_m_each = block_m_each,
       block_prob = block_prob,
       block_prob_each = block_prob_each,
-      condition_names = condition_names,
-      balance_load = balance_load
+      condition_names = condition_names
     )
     
     # Merge back up to the individual level, maintaining original ordering

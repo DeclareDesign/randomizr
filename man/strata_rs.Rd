@@ -4,8 +4,7 @@
 \alias{strata_rs}
 \title{Stratified Random Sampling}
 \usage{
-strata_rs(strata_var, prob = NULL, strata_n = NULL, strata_prob = NULL,
-  balance_load = FALSE)
+strata_rs(strata_var, prob = NULL, strata_n = NULL, strata_prob = NULL)
 }
 \arguments{
 \item{strata_var}{A vector of length N that indicates which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)}
@@ -15,8 +14,6 @@ strata_rs(strata_var, prob = NULL, strata_n = NULL, strata_prob = NULL,
 \item{strata_n}{Use for a in which strata_n describes the number of units to assign to treatment within each stratum.}
 
 \item{strata_prob}{Use for a in which strata_prob describes the probability of assignment to treatment within each stratum. Differs from prob in that the probability of assignment can vary across strata.}
-
-\item{balance_load}{logical, defaults to FALSE. This feature is experimental. Please use with caution and perform many tests before using in a real research scenario.}
 }
 \value{
 A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
@@ -39,17 +36,5 @@ table(strata_var, Z)
 Z <- strata_rs(strata_var = strata_var, strata_n = c(20, 30, 40))
 table(strata_var, Z)
 
-# Experimental feature: load balancing
-# This procedure constrains the total number of units that are sampled
-# This will never exceed 5 sampled units total.
-
-strata_var <- rep(c("A", "B","C"), times=c(3, 3, 3))
-Z <- strata_rs(strata_var = strata_var, balance_load = TRUE)
-table(strata_var, Z)
-
-# compare to strata_rs without load balancing
-# Sometimes this procedure assigns 6 total units to treatment
-Z <- strata_rs(strata_var = strata_var, balance_load = FALSE)
-table(strata_var, Z)
 
 }

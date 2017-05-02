@@ -6,8 +6,7 @@
 \usage{
 block_and_cluster_ra(block_var, clust_var, prob = NULL, prob_each = NULL,
   block_m = NULL, block_m_each = NULL, block_prob = NULL,
-  block_prob_each = NULL, num_arms = NULL, condition_names = NULL,
-  balance_load = FALSE)
+  block_prob_each = NULL, num_arms = NULL, condition_names = NULL)
 }
 \arguments{
 \item{block_var}{A vector of length N that indicates which block each unit belongs to.}
@@ -29,8 +28,6 @@ block_and_cluster_ra(block_var, clust_var, prob = NULL, prob_each = NULL,
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
 \item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
-
-\item{balance_load}{logical, defaults to FALSE. This feature is experimental. If set to TRUE, the function will resolve rounding problems by randomly assigning "remainder" units to each possible treatment condition with equal probability, while ensuring that the total number of units assigned to each condition does not vary greatly from assignment to assignment. However, the true probabiltiies of assignment may be different from the nominal probabilities specified in prob_each or block_prob_each. Please use with caution and perform many tests before using in a real research scenario.}
 }
 \value{
 A vector of length N that indicates the treatment condition of each unit.

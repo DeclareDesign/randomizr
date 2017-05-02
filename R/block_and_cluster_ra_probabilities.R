@@ -52,8 +52,7 @@ block_and_cluster_ra_probabilities <-
            block_prob = NULL,
            block_prob_each = NULL,
            num_arms = NULL,
-           condition_names = NULL,
-           balance_load = FALSE) {
+           condition_names = NULL) {
     unique_clus <- unique(clust_var)
     
     ## get the block for each cluster
@@ -71,8 +70,7 @@ block_and_cluster_ra_probabilities <-
       block_prob = block_prob,
       block_prob_each = block_prob_each,
       num_arms = num_arms,
-      condition_names = condition_names,
-      balance_load = balance_load
+      condition_names = condition_names
     )
     
     merged <-

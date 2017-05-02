@@ -23,12 +23,8 @@
 strata_rs_probabilities <- function(strata_var,
                                     prob = NULL,
                                     strata_n = NULL,
-                                    strata_prob = NULL,
-                                    balance_load = FALSE) {
-  #if(all(balance_load & is.null(prob) & is.null(prob_each) & is.null(strata_prob_each))){
-  #  stop("If you use the experimental feature 'balance_load', then you must specify one of prob, prob_each, or strata_prob_each.")
-  #}
-  
+                                    strata_prob = NULL) {
+
   check_inputs <- check_samplr_arguments(
     strata_var = strata_var,
     prob = prob,

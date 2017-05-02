@@ -221,7 +221,8 @@ check_randomizr_arguments <-
     # Blocked Design Checks
     N_per_block <- NULL
     if (!is.null(block_var)) {
-      N_per_block <- as.numeric(table(block_var))
+      N_per_block <- tapply(block_var, block_var, length)
+      attributes(N_per_block) <- NULL
       N_blocks <- length(N_per_block)
       
       if (!is.null(block_m)) {

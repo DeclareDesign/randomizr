@@ -14,7 +14,6 @@
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.
-#' @param balance_load logical, defaults to FALSE. This feature is experimental. If set to TRUE, the function will resolve rounding problems by randomly assigning "remainder" units to each possible treatment condition with equal probability, while ensuring that the total number of units assigned to each condition does not vary greatly from assignment to assignment. However, the true probabiltiies of assignment may be different from the nominal probabilities specified in prob_each or block_prob_each. Please use with caution and perform many tests before using in a real research scenario.
 #'
 #' @return A list of class "ra_declaration".  The list has five entries:
 #'   $ra_function, a function that generates random assignments accroding to the declaration.
@@ -101,8 +100,7 @@ declare_ra <- function(N = NULL,
                        block_prob_each = NULL,
                        num_arms = NULL,
                        condition_names = NULL,
-                       simple = FALSE,
-                       balance_load = FALSE) {
+                       simple = FALSE) {
   
   check_inputs <- check_randomizr_arguments(
     N = N,
@@ -205,8 +203,7 @@ declare_ra <- function(N = NULL,
         prob_each = prob_each,
         block_prob = block_prob,
         block_prob_each = block_prob_each,
-        condition_names = condition_names,
-        balance_load = balance_load
+        condition_names = condition_names
       )
     }
     
@@ -220,8 +217,7 @@ declare_ra <- function(N = NULL,
         block_prob = block_prob,
         block_prob_each = block_prob_each,
         condition_names = condition_names,
-        num_arms = num_arms,
-        balance_load = balance_load
+        num_arms = num_arms
       )
   }
   
@@ -266,8 +262,7 @@ declare_ra <- function(N = NULL,
         block_prob = block_prob,
         block_prob_each = block_prob_each,
         condition_names = condition_names,
-        num_arms = num_arms,
-        balance_load = balance_load
+        num_arms = num_arms
       )
     }
     
@@ -282,8 +277,7 @@ declare_ra <- function(N = NULL,
         block_m_each = block_m_each,
         block_prob_each = block_prob_each,
         num_arms = num_arms,
-        condition_names = condition_names,
-        balance_load = balance_load
+        condition_names = condition_names
       )
     
   }
@@ -332,8 +326,7 @@ conduct_ra <- function(ra_declaration = NULL,
                        block_prob_each = NULL,
                        num_arms = NULL,
                        condition_names = NULL,
-                       simple = FALSE,
-                       balance_load = FALSE) {
+                       simple = FALSE) {
   
   if(!is.null(ra_declaration)){
     if (class(ra_declaration) != "ra_declaration") {
@@ -354,8 +347,7 @@ conduct_ra <- function(ra_declaration = NULL,
                  block_prob_each = block_prob_each,
                  num_arms = num_arms,
                  condition_names = condition_names,
-                 simple = simple,
-                 balance_load = balance_load)
+                 simple = simple)
     
   }
   return(ra_declaration$ra_function())
@@ -419,8 +411,7 @@ obtain_condition_probabilities <-
            block_prob_each = NULL,
            num_arms = NULL,
            condition_names = NULL,
-           simple = FALSE,
-           balance_load = FALSE) {
+           simple = FALSE) {
     # checks
     if(!is.null(ra_declaration)){
       if (class(ra_declaration) != "ra_declaration") {
@@ -444,8 +435,7 @@ obtain_condition_probabilities <-
                    block_prob_each = block_prob_each,
                    num_arms = num_arms,
                    condition_names = condition_names,
-                   simple = simple,
-                   balance_load = balance_load)
+                   simple = simple)
     }
     
     probabilities_matrix <- ra_declaration$probabilities_matrix

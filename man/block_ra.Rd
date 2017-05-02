@@ -6,7 +6,7 @@
 \usage{
 block_ra(block_var, prob = NULL, prob_each = NULL, block_m = NULL,
   block_m_each = NULL, block_prob = NULL, block_prob_each = NULL,
-  num_arms = NULL, condition_names = NULL, balance_load = FALSE)
+  num_arms = NULL, condition_names = NULL)
 }
 \arguments{
 \item{block_var}{A vector of length N that indicates which block each unit belongs to. Can be a character, factor, or numeric vector. (required)}
@@ -26,8 +26,6 @@ block_ra(block_var, prob = NULL, prob_each = NULL, block_m = NULL,
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
 \item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
-
-\item{balance_load}{logical, defaults to FALSE. This feature is experimental. If set to TRUE, the function will resolve rounding problems by randomly assigning "remainder" units to each possible treatment condition with equal probability, while ensuring that the total number of units assigned to each condition does not vary greatly from assignment to assignment. However, the true probabilities of assignment may be different from the nominal probabilities specified in prob_each or block_prob_each. Please use with caution and perform many tests before using in a real research scenario.}
 }
 \value{
 A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by condition_names) in a multi-arm trial.
@@ -85,17 +83,5 @@ Z <- block_ra(block_var = block_var, prob_each = c(.1, .1, .8))
 table(block_var, Z)
 
 
-# Experimental feature: load balancing
-# This procedure constrains the total number of units in each arm.  
-# This will never exceed 5 treated units total.
-
-block_var <- rep(c("A", "B","C"), times=c(3, 3, 3))
-Z <- block_ra(block_var = block_var, balance_load = TRUE)
-table(block_var, Z)
-
-# compare to block_ra without load balancing
-# Sometimes this procedure assigns 6 total units to treatment
-Z <- block_ra(block_var = block_var, balance_load = FALSE)
-table(block_var, Z)
 
 }

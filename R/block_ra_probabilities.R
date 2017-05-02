@@ -51,12 +51,7 @@ block_ra_probabilities <- function(block_var,
                                    block_prob = NULL,
                                    block_prob_each = NULL,
                                    num_arms = NULL,
-                                   condition_names = NULL,
-                                   balance_load = FALSE) {
-  #if(all(balance_load & is.null(prob) & is.null(prob_each) & is.null(block_prob_each))){
-  #  stop("If you use the experimental feature 'balance_load', then you must specify one of prob, prob_each, or block_prob_each.")
-  #}
-  
+                                   condition_names = NULL) {
   
   check_inputs <- check_randomizr_arguments(
     block_var = block_var,
@@ -119,45 +114,17 @@ block_ra_probabilities <- function(block_var,
       prob_each <- rep(1 / num_arms, num_arms)
     }
     
-    if (balance_load) {
-      for_sure_allocations <- floor(N_per_block %*% t(prob_each))
-      possible_allocations <-
-        matrix(1 / num_arms,
-               nrow = length(N_per_block),
-               ncol = num_arms)
-      
-      for_sure_probs <-
-        sweep(for_sure_allocations, 1, N_per_block, `/`)
-      possible_probs <-
-        sweep(possible_allocations,
-              1,
-              (N_per_block - rowSums(for_sure_allocations)) / N_per_block,
-              `*`)
-      final_probs <- for_sure_probs + possible_probs
-      
-      for (i in 1:length(blocks)) {
-        dimensions <- dim(prob_mat[block_var == blocks[i], , drop = FALSE])
-        prob_mat[block_var == blocks[i],] <-
-          matrix(
-            final_probs[i,],
-            nrow = dimensions[1],
-            ncol = dimensions[2],
-            byrow = TRUE
-          )
-      }
-      return(prob_mat)
-    } else{
-      for (i in 1:length(blocks)) {
-        prob_mat[block_var == blocks[i],] <-
-          complete_ra_probabilities(
-            N = N_per_block[i],
-            prob_each = prob_each,
-            condition_names =
-              condition_names
-          )
-      }
-      return(prob_mat)
+    
+    for (i in 1:length(blocks)) {
+      prob_mat[block_var == blocks[i],] <-
+        complete_ra_probabilities(
+          N = N_per_block[i],
+          prob_each = prob_each,
+          condition_names =
+            condition_names
+        )
     }
+    return(prob_mat)
     
   }
   
@@ -178,47 +145,16 @@ block_ra_probabilities <- function(block_var,
   # Case 3 use block_prob_each
   
   if (!is.null(block_prob_each)) {
-    if (balance_load) {
-      for_sure_allocations <-
-        floor(sweep(block_prob_each, 1, table(block_var), `*`))
-      possible_allocations <-
-        matrix(1 / num_arms,
-               nrow = length(N_per_block),
-               ncol = num_arms)
-      
-      for_sure_probs <-
-        sweep(for_sure_allocations, 1, N_per_block, `/`)
-      possible_probs <-
-        sweep(possible_allocations,
-              1,
-              (N_per_block - rowSums(for_sure_allocations)) / N_per_block,
-              `*`)
-      final_probs <- for_sure_probs + possible_probs
-      
-      for (i in 1:length(blocks)) {
-        dimensions <- dim(prob_mat[block_var == blocks[i],])
-        prob_mat[block_var == blocks[i],] <-
-          matrix(
-            final_probs[i,],
-            nrow = dimensions[1],
-            ncol = dimensions[2],
-            byrow = TRUE
-          )
-      }
-      return(prob_mat)
-      
-    } else{
-      for (i in 1:length(blocks)) {
-        prob_mat[block_var == blocks[i],] <-
-          complete_ra_probabilities(
-            N = N_per_block[i],
-            prob_each = block_prob_each[i,],
-            condition_names =
-              condition_names
-          )
-      }
-      return(prob_mat)
+    for (i in 1:length(blocks)) {
+      prob_mat[block_var == blocks[i],] <-
+        complete_ra_probabilities(
+          N = N_per_block[i],
+          prob_each = block_prob_each[i,],
+          condition_names =
+            condition_names
+        )
     }
+    return(prob_mat)
   }
   
   

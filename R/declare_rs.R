@@ -8,7 +8,6 @@
 #' @param strata_n Use for a design in which strata_n describes the number of units to sample within each stratum.
 #' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of assignment can vary across strata.
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify n or strata_n.
-#' @param balance_load logical, defaults to FALSE. This feature is experimental. Please use with caution and perform many tests before using in a real research scenario.
 #'
 #' @return A list of class "rs_declaration".  The list has five entries:
 #'   $rs_function, a function that generates random assignments accroding to the declaration.
@@ -80,8 +79,7 @@ declare_rs <- function(N = NULL,
                        prob = NULL,
                        strata_n = NULL,
                        strata_prob = NULL,
-                       simple = FALSE,
-                       balance_load = FALSE) {
+                       simple = FALSE) {
   check_inputs <- check_samplr_arguments(
     N = N,
     strata_var = strata_var,
@@ -144,8 +142,7 @@ declare_rs <- function(N = NULL,
         strata_var = strata_var,
         strata_n = strata_n,
         prob = prob,
-        strata_prob = strata_prob,
-        balance_load = balance_load
+        strata_prob = strata_prob
       )
     }
     
@@ -154,8 +151,7 @@ declare_rs <- function(N = NULL,
         strata_var = strata_var,
         strata_n = strata_n,
         prob = prob,
-        strata_prob = strata_prob,
-        balance_load = balance_load
+        strata_prob = strata_prob
       )
   }
   
@@ -187,8 +183,7 @@ declare_rs <- function(N = NULL,
         strata_var = strata_var,
         prob = prob,
         strata_n = strata_n,
-        strata_prob = strata_prob,
-        balance_load = balance_load
+        strata_prob = strata_prob
       )
     }
     
@@ -198,8 +193,7 @@ declare_rs <- function(N = NULL,
         strata_var = strata_var,
         prob = prob,
         strata_prob = strata_prob,
-        strata_n = strata_n,
-        balance_load = balance_load
+        strata_n = strata_n
       )
     
   }
@@ -241,8 +235,7 @@ draw_rs <- function(rs_declaration = NULL,
                     prob = NULL,
                     strata_n = NULL,
                     strata_prob = NULL,
-                    simple = FALSE,
-                    balance_load = FALSE) {
+                    simple = FALSE) {
   if (!is.null(rs_declaration)) {
     if (class(rs_declaration) != "rs_declaration") {
       stop("You must provide a random sampling declaration created by declare_rs().")
@@ -257,8 +250,7 @@ draw_rs <- function(rs_declaration = NULL,
         prob = prob,
         strata_n = strata_n,
         strata_prob = strata_prob,
-        simple = simple,
-        balance_load = balance_load
+        simple = simple
       )
     
   }
@@ -303,8 +295,7 @@ obtain_inclusion_probabilities <-
            prob = NULL,
            strata_n = NULL,
            strata_prob = NULL,
-           simple = FALSE,
-           balance_load = FALSE) {
+           simple = FALSE) {
     # checks
     if (!is.null(rs_declaration)) {
       if (class(rs_declaration) != "rs_declaration") {
@@ -320,8 +311,7 @@ obtain_inclusion_probabilities <-
           prob = prob,
           strata_n = strata_n,
           strata_prob = strata_prob,
-          simple = simple,
-          balance_load = balance_load
+          simple = simple
         )
     }
     

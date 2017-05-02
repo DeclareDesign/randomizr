@@ -6,7 +6,6 @@
 #' @param prob Use for a design in which either floor(N_stratum*prob) or ceiling(N_stratum*prob) units are assigned to treatment within each stratum. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_stratum*prob) units will be assigned to treatment and with probability prob, ceiling(N_stratum*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
 #' @param strata_n Use for a in which strata_n describes the number of units to assign to treatment within each stratum.
 #' @param strata_prob Use for a in which strata_prob describes the probability of assignment to treatment within each stratum. Differs from prob in that the probability of assignment can vary across strata.
-#' @param balance_load logical, defaults to FALSE. This feature is experimental. Please use with caution and perform many tests before using in a real research scenario.
 #'
 #' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
 #' @export
@@ -28,24 +27,11 @@
 #' Z <- strata_rs(strata_var = strata_var, strata_n = c(20, 30, 40))
 #' table(strata_var, Z)
 #'
-#' # Experimental feature: load balancing
-#' # This procedure constrains the total number of units that are sampled
-#' # This will never exceed 5 sampled units total.
-#'
-#' strata_var <- rep(c("A", "B","C"), times=c(3, 3, 3))
-#' Z <- strata_rs(strata_var = strata_var, balance_load = TRUE)
-#' table(strata_var, Z)
-#'
-#' # compare to strata_rs without load balancing
-#' # Sometimes this procedure assigns 6 total units to treatment
-#' Z <- strata_rs(strata_var = strata_var, balance_load = FALSE)
-#' table(strata_var, Z)
 #'
 strata_rs <- function(strata_var,
                       prob = NULL,
                       strata_n = NULL,
-                      strata_prob = NULL,
-                      balance_load = FALSE) {
+                      strata_prob = NULL) {
   check_inputs <- check_samplr_arguments(
     strata_var = strata_var,
     prob = prob,

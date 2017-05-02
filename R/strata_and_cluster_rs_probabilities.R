@@ -52,8 +52,7 @@ strata_and_cluster_rs_probabilities <-
            clust_var,
            prob = NULL,
            strata_n = NULL,
-           strata_prob = NULL,
-           balance_load = FALSE) {
+           strata_prob = NULL) {
     unique_clus <- unique(clust_var)
     
     ## get the strata for each cluster
@@ -66,8 +65,7 @@ strata_and_cluster_rs_probabilities <-
       strata_var = clust_strata,
       prob = prob,
       strata_n = strata_n,
-      strata_prob = strata_prob,
-      balance_load = balance_load
+      strata_prob = strata_prob
     )
     
     merged <-
