@@ -1,7 +1,7 @@
 Package: randomizr
 Title: Easy to Use Tools for Common Forms of Random Assignment and Sampling
 Version: 0.6.0
-Authors@R: c(person("Alexander", "Coppock", email = "alex.coppock@yale.edu", role = c("aut", "cre")),
+Authors@R: c(person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut", "cre")),
              person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("ctb")))
 Description: Generates random assignments for common experimental designs and 
 	    random samples for common sampling designs.
