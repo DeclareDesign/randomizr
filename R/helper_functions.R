@@ -97,6 +97,10 @@ check_randomizr_arguments <-
     # Lengths
     
     if (!is.null(condition_names)) {
+      
+      if(length(unique(condition_names)) != length(condition_names)){
+        stop("You must supply unique values to condition_names.")
+      }
       if (!is.null(m)) {
         if (length(condition_names) != 2) {
           stop(
