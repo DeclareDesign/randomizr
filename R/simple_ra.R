@@ -10,6 +10,7 @@
 #' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1.  (optional)
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
+#' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by condition_names) in a multi-arm trial.
 #' @export
@@ -47,17 +48,20 @@ simple_ra <-
            prob = NULL,
            prob_each = NULL,
            num_arms = NULL,
-           condition_names = NULL) {
-    clean_inputs <-
-      check_randomizr_arguments(
-        N = N,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        condition_names = condition_names
-      )
-    num_arms <- clean_inputs$num_arms
-    condition_names <- clean_inputs$condition_names
+           condition_names = NULL,
+           check_inputs = TRUE) {
+    if (check_inputs) {
+      check_inputs <-
+        check_randomizr_arguments(
+          N = N,
+          prob = prob,
+          prob_each = prob_each,
+          num_arms = num_arms,
+          condition_names = condition_names
+        )
+      num_arms <- check_inputs$num_arms
+      condition_names <- check_inputs$condition_names
+    }
     
     if (!is.null(prob) & is.null(prob_each)) {
       prob_each <- c(1 - prob, prob)
@@ -67,13 +71,13 @@ simple_ra <-
       prob_each <- rep(1 / num_arms, num_arms)
     }
     
-    assign <-
+    assignment <-
       sample(
         x = condition_names,
         size = N,
         replace = TRUE,
         prob = prob_each
       )
-    assign <- clean_condition_names(assign, condition_names)
-    return(assign)
+    assignment <- clean_condition_names(assignment, condition_names)
+    return(assignment)
   }

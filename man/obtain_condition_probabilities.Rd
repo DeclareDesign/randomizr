@@ -60,7 +60,7 @@ table(Z, block_var)
 
 observed_probabilities <-
    obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
-   
+
 
 # Probabilities in the control group:
 table(observed_probabilities[Z == 0], block_var[Z == 0])
@@ -73,9 +73,9 @@ table(observed_probabilities[Z == 1], block_var[Z == 1])
 Z <- conduct_ra(block_var = block_var, block_m_each = block_m_each)
 observed_probabilities <-
    obtain_condition_probabilities(assignment = Z,
-                                  block_var = block_var, 
+                                  block_var = block_var,
                                   block_m_each = block_m_each)
 table(observed_probabilities[Z == 0], block_var[Z == 0])
-table(observed_probabilities[Z == 1], block_var[Z == 1])                                   
+table(observed_probabilities[Z == 1], block_var[Z == 1])
 
 }

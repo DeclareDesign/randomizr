@@ -6,11 +6,10 @@
 #' @param prob Use for a design in which either floor(N_stratum*prob) or ceiling(N_stratum*prob) units are assigned to treatment within each stratum. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_stratum*prob) units will be assigned to treatment and with probability prob, ceiling(N_stratum*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
 #' @param strata_n Use for a in which strata_n describes the number of units to assign to treatment within each stratum.
 #' @param strata_prob Use for a in which strata_prob describes the probability of assignment to treatment within each stratum. Differs from prob in that the probability of assignment can vary across strata.
+#' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
 #' @export
-#'
-#' @importFrom stats r2dtable
 #'
 #' @examples
 #'
@@ -31,15 +30,19 @@
 strata_rs <- function(strata_var,
                       prob = NULL,
                       strata_n = NULL,
-                      strata_prob = NULL) {
-  check_inputs <- check_samplr_arguments(
-    strata_var = strata_var,
-    prob = prob,
-    strata_n = strata_n,
-    strata_prob = strata_prob
-  )
+                      strata_prob = NULL,
+                      check_inputs = TRUE) {
+  if (check_inputs) {
+    check_inputs <- check_samplr_arguments(
+      strata_var = strata_var,
+      prob = prob,
+      strata_n = strata_n,
+      strata_prob = strata_prob
+    )
+  }
   
-  strata_spots <- unlist(split(1:length(strata_var),strata_var), FALSE, FALSE)
+  strata_spots <-
+    unlist(split(1:length(strata_var), strata_var), FALSE, FALSE)
   
   # Setup: obtain number of arms and condition_names
   N_per_stratum <- check_inputs$N_per_stratum
@@ -50,48 +53,46 @@ strata_rs <- function(strata_var,
   
   # Case 1: prob is specified
   if (!is.null(prob)) {
-    
-    assign_list <- 
+    assign_list <-
       mapply(
         FUN = complete_rs,
         N = N_per_stratum,
-        MoreArgs = list(
-          prob = prob,
-          check_inputs = FALSE
-        ), SIMPLIFY = FALSE)
+        MoreArgs = list(prob = prob,
+                        check_inputs = FALSE),
+        SIMPLIFY = FALSE
+      )
     
-    assign <- unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
-    return(assign)
+    assignment <- unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
+    return(assignment)
   }
   
   # Case 2: strata_n is specified
   if (!is.null(strata_n)) {
-    assign_list <- 
+    assign_list <-
       mapply(
         FUN = complete_rs,
         N = N_per_stratum,
         n = strata_n,
-        MoreArgs = list(
-          check_inputs = FALSE
-        ), SIMPLIFY = FALSE)
+        MoreArgs = list(check_inputs = FALSE),
+        SIMPLIFY = FALSE
+      )
     
-    assign <- unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
-    return(assign)
+    assignment <- unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
+    return(assignment)
   }
   
   # Case 3: strata_prob is specified
   if (!is.null(strata_prob)) {
-
-    assign_list <- 
+    assign_list <-
       mapply(
         FUN = complete_rs,
         N = N_per_stratum,
         prob = strata_prob,
-        MoreArgs = list(
-          check_inputs = FALSE
-        ), SIMPLIFY = FALSE)
+        MoreArgs = list(check_inputs = FALSE),
+        SIMPLIFY = FALSE
+      )
     
-    assign <- unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
-    return(assign)
+    assignment <- unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
+    return(assignment)
   }
 }

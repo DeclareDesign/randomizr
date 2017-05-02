@@ -12,12 +12,13 @@
 #' @param block_prob_each Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
+#' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #'
 #' @examples
 #' clust_var <- rep(letters, times=1:26)
-#' 
+#'
 #' block_var <- rep(NA, length(clust_var))
 #' block_var[clust_var %in% letters[1:5]] <- "block_1"
 #' block_var[clust_var %in% letters[6:10]] <- "block_2"
@@ -28,21 +29,21 @@
 #'
 #' table(block_var, clust_var)
 #'
-#' Z <- block_and_cluster_ra(block_var = block_var, 
+#' Z <- block_and_cluster_ra(block_var = block_var,
 #'                           clust_var = clust_var)
 #'
 #' table(Z, block_var)
 #' table(Z, clust_var)
 #'
-#' Z <- block_and_cluster_ra(block_var = block_var, 
-#'                           clust_var = clust_var, 
+#' Z <- block_and_cluster_ra(block_var = block_var,
+#'                           clust_var = clust_var,
 #'                           num_arms = 3)
 #'
 #' table(Z, block_var)
 #' table(Z, clust_var)
 #'
-#' Z <- block_and_cluster_ra(block_var = block_var, 
-#'                           clust_var = clust_var, 
+#' Z <- block_and_cluster_ra(block_var = block_var,
+#'                           clust_var = clust_var,
 #'                           prob_each = c(.2, .5, .3))
 #'
 #' block_m_each <- rbind(c(2, 3),
@@ -51,8 +52,8 @@
 #'                       c(2, 3),
 #'                       c(5, 1))
 #'
-#' Z <- block_and_cluster_ra(block_var = block_var, 
-#'                           clust_var = clust_var, 
+#' Z <- block_and_cluster_ra(block_var = block_var,
+#'                           clust_var = clust_var,
 #'                           block_m_each = block_m_each)
 #'
 #' table(Z, block_var)
@@ -69,20 +70,23 @@ block_and_cluster_ra <-
            block_prob = NULL,
            block_prob_each = NULL,
            num_arms = NULL,
-           condition_names = NULL) {
-    check_inputs <-
-      check_randomizr_arguments(
-        block_var = block_var,
-        clust_var = clust_var,
-        prob = prob,
-        prob_each = prob_each,
-        block_m = block_m,
-        block_m_each = block_m_each,
-        block_prob = block_prob,
-        block_prob_each = block_prob_each,
-        num_arms = num_arms,
-        condition_names = condition_names
-      )
+           condition_names = NULL,
+           check_inputs = TRUE) {
+    if (check_inputs) {
+      check_inputs <-
+        check_randomizr_arguments(
+          block_var = block_var,
+          clust_var = clust_var,
+          prob = prob,
+          prob_each = prob_each,
+          block_m = block_m,
+          block_m_each = block_m_each,
+          block_prob = block_prob,
+          block_prob_each = block_prob_each,
+          num_arms = num_arms,
+          condition_names = condition_names
+        )
+    }
     
     # Setup: obtain unique clusters
     n_per_clust <- tapply(clust_var, clust_var, length)
@@ -104,7 +108,8 @@ block_and_cluster_ra <-
     )
     
     # back up to the individual level, maintaining original ordering
-    assign <- rep(z_clust, n_per_clust)
-    assign <- assign[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
-    return(assign)
+    assignment <- rep(z_clust, n_per_clust)
+    assignment <-
+      assignment[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
+    return(assignment)
   }

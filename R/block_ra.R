@@ -11,6 +11,8 @@
 #' @param block_prob_each Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
+#' @param check_inputs logical. Defaults to TRUE.
+#' 
 #' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by condition_names) in a multi-arm trial.
 #' @export
 #'
@@ -25,10 +27,10 @@
 #'
 #' Z <- block_ra(block_var = block_var, prob = .3)
 #' table(block_var, Z)
-#' 
+#'
 #' Z <- block_ra(block_var = block_var, block_prob = c(.1, .2, .3))
 #' table(block_var, Z)
-#' 
+#'
 #' Z <- block_ra(block_var = block_var, block_m = c(20, 30, 40))
 #' table(block_var, Z)
 #'
@@ -74,21 +76,24 @@ block_ra <- function(block_var,
                      block_prob = NULL,
                      block_prob_each = NULL,
                      num_arms = NULL,
-                     condition_names = NULL) {
+                     condition_names = NULL,
+                     check_inputs = TRUE) {
+  if (check_inputs) {
+    check_inputs <- check_randomizr_arguments(
+      block_var = block_var,
+      prob = prob,
+      prob_each = prob_each,
+      block_m = block_m,
+      block_m_each = block_m_each,
+      block_prob = block_prob,
+      block_prob_each = block_prob_each,
+      num_arms = num_arms,
+      condition_names = condition_names
+    )
+  }
   
-  check_inputs <- check_randomizr_arguments(
-    block_var = block_var,
-    prob = prob,
-    prob_each = prob_each,
-    block_m = block_m,
-    block_m_each = block_m_each,
-    block_prob = block_prob,
-    block_prob_each = block_prob_each,
-    num_arms = num_arms,
-    condition_names = condition_names
-  )
-  
-  block_spots <- unlist(split(1:length(block_var),block_var), FALSE, FALSE)
+  block_spots <-
+    unlist(split(1:length(block_var), block_var), FALSE, FALSE)
   
   if (!is.null(prob)) {
     prob_each <- c(1 - prob, prob)
@@ -102,7 +107,7 @@ block_ra <- function(block_var,
   
   # Case 1: block_m is specified
   if (!is.null(block_m)) {
-    assign_list <- 
+    assign_list <-
       mapply(
         FUN = complete_ra,
         N = N_per_block,
@@ -111,16 +116,18 @@ block_ra <- function(block_var,
           condition_names = condition_names,
           num_arms = num_arms,
           check_inputs = FALSE
-        ), SIMPLIFY = FALSE)
+        ),
+        SIMPLIFY = FALSE
+      )
     
-    assign <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assign <- clean_condition_names(assign, condition_names)
-    return(assign)
+    assignment <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
+    assignment <- clean_condition_names(assignment, condition_names)
+    return(assignment)
   }
   
   # Case 1.5: block_prob is specified
   if (!is.null(block_prob)) {
-    assign_list <- 
+    assign_list <-
       mapply(
         FUN = complete_ra,
         N = N_per_block,
@@ -129,11 +136,13 @@ block_ra <- function(block_var,
           condition_names = condition_names,
           num_arms = num_arms,
           check_inputs = FALSE
-        ), SIMPLIFY = FALSE)
+        ),
+        SIMPLIFY = FALSE
+      )
     
-    assign <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assign <- clean_condition_names(assign, condition_names)
-    return(assign)
+    assignment <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
+    assignment <- clean_condition_names(assignment, condition_names)
+    return(assignment)
   }
   
   # Case 2 use or infer prob_each
@@ -141,7 +150,7 @@ block_ra <- function(block_var,
     if (is.null(prob_each)) {
       prob_each <- rep(1 / num_arms, num_arms)
     }
-    assign_list <- 
+    assign_list <-
       mapply(
         FUN = complete_ra,
         N = N_per_block,
@@ -150,20 +159,22 @@ block_ra <- function(block_var,
           condition_names = condition_names,
           num_arms = num_arms,
           check_inputs = FALSE
-        ), SIMPLIFY = FALSE)
+        ),
+        SIMPLIFY = FALSE
+      )
     
-    assign <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assign <- clean_condition_names(assign, condition_names)
-    return(assign)
+    assignment <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
+    assignment <- clean_condition_names(assignment, condition_names)
+    return(assignment)
   }
   
   # Case 3 use block_m_each
   
   if (!is.null(block_m_each)) {
-    block_m_each_list <- 
+    block_m_each_list <-
       split(block_m_each, rep(1:nrow(block_m_each), times = ncol(block_m_each)))
     
-    assign_list <- 
+    assign_list <-
       mapply(
         FUN = complete_ra,
         N = N_per_block,
@@ -172,20 +183,22 @@ block_ra <- function(block_var,
           condition_names = condition_names,
           num_arms = num_arms,
           check_inputs = FALSE
-        ), SIMPLIFY = FALSE)
+        ),
+        SIMPLIFY = FALSE
+      )
     
-    assign <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assign <- clean_condition_names(assign, condition_names)
-    return(assign)
+    assignment <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
+    assignment <- clean_condition_names(assignment, condition_names)
+    return(assignment)
   }
   
   # Case 4 use block_prob_each
   
   if (!is.null(block_prob_each)) {
-    block_prob_each_list <- 
+    block_prob_each_list <-
       split(block_prob_each, rep(1:nrow(block_prob_each), times = ncol(block_prob_each)))
     
-    assign_list <- 
+    assign_list <-
       mapply(
         FUN = complete_ra,
         N = N_per_block,
@@ -194,10 +207,12 @@ block_ra <- function(block_var,
           condition_names = condition_names,
           num_arms = num_arms,
           check_inputs = FALSE
-        ), SIMPLIFY = FALSE)
+        ),
+        SIMPLIFY = FALSE
+      )
     
-    assign <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assign <- clean_condition_names(assign, condition_names)
-    return(assign)
+    assignment <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
+    assignment <- clean_condition_names(assignment, condition_names)
+    return(assignment)
   }
 }

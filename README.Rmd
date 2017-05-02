@@ -27,7 +27,7 @@ install.packages("devtools")
 devtools::install_github("DeclareDesign/randomizr")
 ```
 
-There are five main functions in randomizr: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`, which correspond to common experimental designs. 
+There are five main random assignment functions in randomizr: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`, which correspond to common experimental designs. 
 
 `complete_ra()` is the workhorse function that will be most appropriate for a large number of experimental situations: it assigns m of N units to treatment:
 

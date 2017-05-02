@@ -5,7 +5,7 @@
 \title{Probabilties of assignment: Stratified Cluster Random Assignment}
 \usage{
 strata_and_cluster_rs_probabilities(strata_var, clust_var, prob = NULL,
-  strata_n = NULL, strata_prob = NULL)
+  strata_n = NULL, strata_prob = NULL, check_inputs = TRUE)
 }
 \arguments{
 \item{strata_var}{A vector of length N that indicates which stratum each unit belongs to.}
@@ -17,6 +17,8 @@ strata_and_cluster_rs_probabilities(strata_var, clust_var, prob = NULL,
 \item{strata_n}{Use for a design in which strata_n describes the number of units to sample within each stratum.}
 
 \item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
+
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
 A vector length N indicating the probability of being sampled.

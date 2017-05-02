@@ -6,7 +6,8 @@
 \usage{
 block_and_cluster_ra(block_var, clust_var, prob = NULL, prob_each = NULL,
   block_m = NULL, block_m_each = NULL, block_prob = NULL,
-  block_prob_each = NULL, num_arms = NULL, condition_names = NULL)
+  block_prob_each = NULL, num_arms = NULL, condition_names = NULL,
+  check_inputs = TRUE)
 }
 \arguments{
 \item{block_var}{A vector of length N that indicates which block each unit belongs to.}
@@ -28,6 +29,8 @@ block_and_cluster_ra(block_var, clust_var, prob = NULL, prob_each = NULL,
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
 \item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
+
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
 A vector of length N that indicates the treatment condition of each unit.
@@ -48,21 +51,21 @@ block_var[clust_var \%in\% letters[21:26]] <- "block_5"
 
 table(block_var, clust_var)
 
-Z <- block_and_cluster_ra(block_var = block_var, 
+Z <- block_and_cluster_ra(block_var = block_var,
                           clust_var = clust_var)
 
 table(Z, block_var)
 table(Z, clust_var)
 
-Z <- block_and_cluster_ra(block_var = block_var, 
-                          clust_var = clust_var, 
+Z <- block_and_cluster_ra(block_var = block_var,
+                          clust_var = clust_var,
                           num_arms = 3)
 
 table(Z, block_var)
 table(Z, clust_var)
 
-Z <- block_and_cluster_ra(block_var = block_var, 
-                          clust_var = clust_var, 
+Z <- block_and_cluster_ra(block_var = block_var,
+                          clust_var = clust_var,
                           prob_each = c(.2, .5, .3))
 
 block_m_each <- rbind(c(2, 3),
@@ -71,8 +74,8 @@ block_m_each <- rbind(c(2, 3),
                       c(2, 3),
                       c(5, 1))
 
-Z <- block_and_cluster_ra(block_var = block_var, 
-                          clust_var = clust_var, 
+Z <- block_and_cluster_ra(block_var = block_var,
+                          clust_var = clust_var,
                           block_m_each = block_m_each)
 
 table(Z, block_var)

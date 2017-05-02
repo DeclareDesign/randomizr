@@ -12,6 +12,8 @@ complete_rs_probabilities(N, n = NULL, prob = NULL, check_inputs = TRUE)
 \item{n}{Use for a design in which exactly n units are sampled. (optional)}
 
 \item{prob}{Use for a design in which either floor(N*prob) or ceiling(N*prob) units are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units will be sampled and with probability prob, ceiling(N*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
+
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
 A vector length N indicating the probability of being sampled.

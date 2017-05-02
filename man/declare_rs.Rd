@@ -5,7 +5,8 @@
 \title{Declare a random sampling procedure.}
 \usage{
 declare_rs(N = NULL, strata_var = NULL, clust_var = NULL, n = NULL,
-  prob = NULL, strata_n = NULL, strata_prob = NULL, simple = FALSE)
+  prob = NULL, strata_n = NULL, strata_prob = NULL, simple = FALSE,
+  check_inputs = TRUE)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
@@ -23,6 +24,8 @@ declare_rs(N = NULL, strata_var = NULL, clust_var = NULL, n = NULL,
 \item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of assignment can vary across strata.}
 
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify n or strata_n.}
+
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
 A list of class "rs_declaration".  The list has five entries:

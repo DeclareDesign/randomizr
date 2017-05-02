@@ -6,7 +6,7 @@
 \usage{
 cluster_ra_probabilities(clust_var, m = NULL, m_each = NULL, prob = NULL,
   prob_each = NULL, num_arms = NULL, condition_names = NULL,
-  simple = FALSE)
+  simple = FALSE, check_inputs = TRUE)
 }
 \arguments{
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
@@ -24,6 +24,8 @@ cluster_ra_probabilities(clust_var, m = NULL, m_each = NULL, prob = NULL,
 \item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.}
 
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment of clusters to conditions is used. When simple = TRUE, please do not specify m or m_each.}
+
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
 A matrix of probabilities of assignment
@@ -41,7 +43,7 @@ head(prob_mat)
 prob_mat <- cluster_ra_probabilities(clust_var = clust_var, m = 10)
 head(prob_mat)
 
-prob_mat <- cluster_ra_probabilities(clust_var = clust_var, 
+prob_mat <- cluster_ra_probabilities(clust_var = clust_var,
                                      m_each = c(9, 17),
                                      condition_names = c("control", "treatment"))
 
@@ -54,15 +56,15 @@ head(prob_mat)
 
 prob_mat <- cluster_ra_probabilities(clust_var = clust_var, m_each = c(7, 7, 12),
                          condition_names=c("control", "placebo", "treatment"))
-head(prob_mat)                          
+head(prob_mat)
 
 prob_mat <- cluster_ra_probabilities(clust_var = clust_var,
                          condition_names=c("control", "placebo", "treatment"))
-head(prob_mat)                          
+head(prob_mat)
 
-prob_mat <- cluster_ra_probabilities(clust_var = clust_var, 
+prob_mat <- cluster_ra_probabilities(clust_var = clust_var,
                                      prob_each = c(.1, .2, .7))
-head(prob_mat)                                      
+head(prob_mat)
 
 
 

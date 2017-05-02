@@ -52,7 +52,24 @@ block_and_cluster_ra_probabilities <-
            block_prob = NULL,
            block_prob_each = NULL,
            num_arms = NULL,
-           condition_names = NULL) {
+           condition_names = NULL,
+           check_inputs = TRUE) {
+    
+    if (check_inputs) {
+      check_inputs <-
+        check_randomizr_arguments(
+          block_var = block_var,
+          clust_var = clust_var,
+          prob = prob,
+          prob_each = prob_each,
+          block_m = block_m,
+          block_m_each = block_m_each,
+          block_prob = block_prob,
+          block_prob_each = block_prob_each,
+          num_arms = num_arms,
+          condition_names = condition_names
+        )
+    }
     
     # Setup: obtain unique clusters
     n_per_clust <- tapply(clust_var, clust_var, length)

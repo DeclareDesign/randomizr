@@ -10,6 +10,7 @@
 #' @param num_arms The total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment of clusters to conditions is used. When simple = TRUE, please do not specify m or m_each.
+#' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #' @export
@@ -48,16 +49,18 @@ cluster_ra <- function(clust_var,
                        prob_each = NULL,
                        num_arms = NULL,
                        condition_names = NULL,
-                       simple = FALSE) {
-  
-  check_inputs <-
-    check_randomizr_arguments(
-      clust_var = clust_var,
-      prob = prob,
-      prob_each = prob_each,
-      num_arms = num_arms,
-      condition_names = condition_names
-    )
+                       simple = FALSE,
+                       check_inputs = TRUE) {
+  if (check_inputs) {
+    check_inputs <-
+      check_randomizr_arguments(
+        clust_var = clust_var,
+        prob = prob,
+        prob_each = prob_each,
+        num_arms = num_arms,
+        condition_names = condition_names
+      )
+  }
   
   n_per_clust <- tapply(clust_var, clust_var, length)
   unique_clust <- names(n_per_clust)
@@ -90,7 +93,8 @@ cluster_ra <- function(clust_var,
     )
   }
   
-  assign <- rep(z_clust, n_per_clust)
-  assign <- assign[order(unlist(split(1:length(clust_var),clust_var), FALSE, FALSE))]
-  return(assign)
+  assignment <- rep(z_clust, n_per_clust)
+  assignment <-
+    assignment[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
+  return(assignment)
 }

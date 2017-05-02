@@ -8,7 +8,7 @@ conduct_ra(ra_declaration = NULL, N = NULL, block_var = NULL,
   clust_var = NULL, m = NULL, m_each = NULL, prob = NULL,
   prob_each = NULL, block_m = NULL, block_m_each = NULL,
   block_prob = NULL, block_prob_each = NULL, num_arms = NULL,
-  condition_names = NULL, simple = FALSE)
+  condition_names = NULL, simple = FALSE, check_inputs = TRUE)
 }
 \arguments{
 \item{ra_declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
@@ -40,6 +40,8 @@ conduct_ra(ra_declaration = NULL, N = NULL, block_var = NULL,
 \item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
 
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.}
+
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \description{
 You can either give conduct_ra() an ra_declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.

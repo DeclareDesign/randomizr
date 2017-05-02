@@ -16,7 +16,7 @@ install.packages("devtools")
 devtools::install_github("DeclareDesign/randomizr")
 ```
 
-There are five main functions in randomizr: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`, which correspond to common experimental designs.
+There are five main random assignment functions in randomizr: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`, which correspond to common experimental designs.
 
 `complete_ra()` is the workhorse function that will be most appropriate for a large number of experimental situations: it assigns m of N units to treatment:
 
@@ -40,14 +40,14 @@ Z <- cluster_ra(clust_var=clust_var, m_each = c(7, 7, 12),
 table(Z, clust_var)
 #>            clust_var
 #> Z            a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u
-#>   control    0  0  0  0  0  6  7  0  0  0 11 12 13 14  0  0  0  0  0  0  0
-#>   placebo    0  0  3  0  5  0  0  0  9  0  0  0  0  0  0 16  0 18  0  0  0
-#>   treatment  1  2  0  4  0  0  0  8  0 10  0  0  0  0 15  0 17  0 19 20 21
+#>   control    1  2  0  0  0  0  0  0  0  0 11 12 13  0  0  0  0  0 19  0  0
+#>   placebo    0  0  3  0  5  0  0  8  0  0  0  0  0 14  0  0  0 18  0 20  0
+#>   treatment  0  0  0  4  0  6  7  0  9 10  0  0  0  0 15 16 17  0  0  0 21
 #>            clust_var
 #> Z            v  w  x  y  z
-#>   control    0 23  0  0  0
-#>   placebo    0  0  0 25 26
-#>   treatment 22  0 24  0  0
+#>   control    0  0  0 25  0
+#>   placebo    0  0 24  0  0
+#>   treatment 22 23  0  0 26
 ```
 
 Happy randomizing!

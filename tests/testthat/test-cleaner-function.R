@@ -1,8 +1,8 @@
 context("Cleaner Function")
 
 
-
-expect_error(check_randomizr_arguments(N = "a"))
+# throws a dumb warning in test that
+#expect_error(check_randomizr_arguments(N = "a"))
 expect_error(check_randomizr_arguments(N = -1))
 
 expect_error(check_randomizr_arguments(N = 100, prob = -1))

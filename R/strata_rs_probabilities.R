@@ -23,18 +23,22 @@
 strata_rs_probabilities <- function(strata_var,
                                     prob = NULL,
                                     strata_n = NULL,
-                                    strata_prob = NULL) {
-
-  check_inputs <- check_samplr_arguments(
-    strata_var = strata_var,
-    prob = prob,
-    strata_n = strata_n,
-    strata_prob = strata_prob
-  )
+                                    strata_prob = NULL,
+                                    check_inputs = TRUE) {
+  if (check_inputs) {
+    check_inputs <- check_samplr_arguments(
+      strata_var = strata_var,
+      prob = prob,
+      strata_n = strata_n,
+      strata_prob = strata_prob
+    )
+    
+    N_per_stratum <- check_inputs$N_per_stratum
+  }
   
-  N_per_stratum <- check_inputs$N_per_stratum
   
-  strata_spots <- unlist(split(1:length(strata_var),strata_var), FALSE, FALSE)
+  strata_spots <-
+    unlist(split(1:length(strata_var), strata_var), FALSE, FALSE)
   
   if (is.null(prob) & is.null(strata_n) & is.null(strata_prob)) {
     prob <- 0.5
@@ -51,33 +55,34 @@ strata_rs_probabilities <- function(strata_var,
   
   # Case 2: strata_n is specified
   if (!is.null(strata_n)) {
-
-    prob_vec_list <- 
+    prob_vec_list <-
       mapply(
         FUN = complete_rs_probabilities,
         N = N_per_stratum,
         n = strata_n,
-        MoreArgs = list(
-          prob = prob,
-          check_inputs = FALSE
-        ), SIMPLIFY = FALSE)
+        MoreArgs = list(prob = prob,
+                        check_inputs = FALSE),
+        SIMPLIFY = FALSE
+      )
     
-    prob_vec <- unlist(prob_vec_list, FALSE, FALSE)[order(strata_spots)]
+    prob_vec <-
+      unlist(prob_vec_list, FALSE, FALSE)[order(strata_spots)]
     return(prob_vec)
   }
   
   # Case 3: strata_prob is specified
   if (!is.null(strata_prob)) {
-    prob_vec_list <- 
+    prob_vec_list <-
       mapply(
         FUN = complete_rs_probabilities,
         N = N_per_stratum,
         prob = strata_prob,
-        MoreArgs = list(
-          check_inputs = FALSE
-        ), SIMPLIFY = FALSE)
+        MoreArgs = list(check_inputs = FALSE),
+        SIMPLIFY = FALSE
+      )
     
-    prob_vec <- unlist(prob_vec_list, FALSE, FALSE)[order(strata_spots)]
+    prob_vec <-
+      unlist(prob_vec_list, FALSE, FALSE)[order(strata_spots)]
     return(prob_vec)
   }
 }

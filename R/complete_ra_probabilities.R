@@ -7,31 +7,31 @@
 #' # 2-arm designs
 #' prob_mat <- complete_ra_probabilities(N=100)
 #' head(prob_mat)
-#' 
+#'
 #' prob_mat <- complete_ra_probabilities(N=100, m=50)
 #' head(prob_mat)
-#' 
+#'
 #' prob_mat <- complete_ra_probabilities(N=100, prob = .3)
 #' head(prob_mat)
 #'
 #' prob_mat <- complete_ra_probabilities(N=100, m_each = c(30, 70),
 #'                           condition_names = c("control", "treatment"))
-#' head(prob_mat)                           
+#' head(prob_mat)
 #'
 #' # Multi-arm Designs
 #' prob_mat <- complete_ra_probabilities(N=100, num_arms=3)
 #' head(prob_mat)
-#' 
+#'
 #' prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40))
 #' head(prob_mat)
 #'
 #' prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40),
 #'                           condition_names=c("control", "placebo", "treatment"))
-#' head(prob_mat)                           
+#' head(prob_mat)
 #'
 #' prob_mat <- complete_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
 #' head(prob_mat)
-#' 
+#'
 #' prob_mat <- complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))
 #' head(prob_mat)
 #'
@@ -44,9 +44,8 @@ complete_ra_probabilities <- function(N,
                                       num_arms = NULL,
                                       condition_names = NULL,
                                       check_inputs = TRUE) {
-  
   # Setup: obtain number of arms and condition_names
-  if(check_inputs){
+  if (check_inputs) {
     check_inputs <-
       check_randomizr_arguments(
         N = N,
@@ -59,7 +58,7 @@ complete_ra_probabilities <- function(N,
       )
     num_arms <- check_inputs$num_arms
     condition_names <- check_inputs$condition_names
-  } 
+  }
   
   if (is.null(m_each) &
       is.null(prob_each) & length(condition_names) == 2) {
@@ -137,7 +136,7 @@ complete_ra_probabilities <- function(N,
           
           prob_mat <-
             matrix(
-              rep(c(1 - (m/N), (m/N)), N),
+              rep(c(1 - (m / N), (m / N)), N),
               byrow = TRUE,
               ncol = 2,
               dimnames = list(NULL,  paste0("prob_", condition_names))

@@ -6,7 +6,7 @@
 \usage{
 cluster_ra(clust_var, m = NULL, m_each = NULL, prob = NULL,
   prob_each = NULL, num_arms = NULL, condition_names = NULL,
-  simple = FALSE)
+  simple = FALSE, check_inputs = TRUE)
 }
 \arguments{
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
@@ -24,6 +24,8 @@ cluster_ra(clust_var, m = NULL, m_each = NULL, prob = NULL,
 \item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.}
 
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment of clusters to conditions is used. When simple = TRUE, please do not specify m or m_each.}
+
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
 A vector of length N that indicates the treatment condition of each unit.

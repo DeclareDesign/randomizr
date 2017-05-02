@@ -13,11 +13,14 @@
 #' @export
 simple_rs_probabilities <-
   function(N,
-           prob = NULL) {
-    clean_inputs <-
-      check_samplr_arguments(N = N,
-                             prob = prob)
+           prob = NULL,
+           check_inputs = TRUE) {
     
+    if (check_inputs) {
+      check_inputs <-
+        check_samplr_arguments(N = N,
+                               prob = prob)
+    }
     if (is.null(prob)) {
       prob <- 0.5
     }

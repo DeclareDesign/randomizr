@@ -6,6 +6,7 @@
 #' @param n Use for a design in which n clusters are sampled. (optional)
 #' @param prob Use for a design in which either floor(N_clusters*prob) or ceiling(N_clusters*prob) clusters are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters*prob) clusters will be sampled and with probability prob, ceiling(N_clusters*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
 #' @param simple logical, defaults to FALSE. If TRUE, simple random sampling of clusters. When simple = TRUE, please do not specify n.
+#' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
 #' @export
@@ -21,7 +22,14 @@
 cluster_rs <- function(clust_var,
                        n = NULL,
                        prob = NULL,
-                       simple = FALSE) {
+                       simple = FALSE,
+                       check_inputs = TRUE) {
+  if (check_inputs) {
+    check_inputs <-
+      check_samplr_arguments(n = n,
+                             clust_var = clust_var,
+                             prob = prob)
+  }
   
   n_per_clust <- tapply(clust_var, clust_var, length)
   unique_clust <- names(n_per_clust)
@@ -31,17 +39,16 @@ cluster_rs <- function(clust_var,
     if (!is.null(n)) {
       stop("Please do not specify n when simple = TRUE")
     }
-    S_clust <- simple_rs(
-      N = n_clust,
-      prob = prob)
+    S_clust <- simple_rs(N = n_clust,
+                         prob = prob)
     
   } else{
-    S_clust <- complete_rs(
-      N = n_clust,
-      n = n,
-      prob = prob)
+    S_clust <- complete_rs(N = n_clust,
+                           n = n,
+                           prob = prob)
   }
-  assign <- rep(S_clust, n_per_clust)
-  assign <- assign[order(unlist(split(1:length(clust_var),clust_var), FALSE, FALSE))]
-  return(assign)
+  assignment <- rep(S_clust, n_per_clust)
+  assignment <-
+    assignment[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
+  return(assignment)
 }

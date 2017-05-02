@@ -447,14 +447,14 @@ check_samplr_arguments <-
 
 
 
-clean_condition_names <- function(assign, condition_names) {
-  if (is.numeric(assign)) {
-    return(assign)
+clean_condition_names <- function(assignment, condition_names) {
+  if (is.numeric(assignment)) {
+    return(assignment)
     
-  } else if (is.logical(assign)) {
-    return(as.numeric(assign))
+  } else if (is.logical(assignment)) {
+    return(as.numeric(assignment))
     
   } else {
-    return(factor(assign, levels = condition_names))
+    return(factor(assignment, levels = condition_names))
   }
 }

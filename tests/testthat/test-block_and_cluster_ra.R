@@ -22,6 +22,8 @@ table(Z, clust_var)
 table(Z, block_var)
 
 Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, prob_each = c(.2, .5, .3))
+Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, prob_each = c(.2, .8))
+Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, num_arms = 2)
 
 
 block_m_each <- rbind(c(2, 3),

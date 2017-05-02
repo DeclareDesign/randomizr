@@ -22,6 +22,8 @@ complete_ra_probabilities(N, m = NULL, m_each = NULL, prob = NULL,
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
 \item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
+
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
 A matrix of probabilities of assignment
@@ -42,7 +44,7 @@ head(prob_mat)
 
 prob_mat <- complete_ra_probabilities(N=100, m_each = c(30, 70),
                           condition_names = c("control", "treatment"))
-head(prob_mat)                           
+head(prob_mat)
 
 # Multi-arm Designs
 prob_mat <- complete_ra_probabilities(N=100, num_arms=3)
@@ -53,7 +55,7 @@ head(prob_mat)
 
 prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40),
                           condition_names=c("control", "placebo", "treatment"))
-head(prob_mat)                           
+head(prob_mat)
 
 prob_mat <- complete_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
 head(prob_mat)

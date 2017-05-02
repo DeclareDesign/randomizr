@@ -4,12 +4,14 @@
 \alias{simple_rs_probabilities}
 \title{Inclusion Probabilities: Simple Random Sampling}
 \usage{
-simple_rs_probabilities(N, prob = NULL)
+simple_rs_probabilities(N, prob = NULL, check_inputs = TRUE)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
 
 \item{prob}{prob is the probability of being sampled must be a real number between 0 and 1 inclusive. (optional)}
+
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
 A vector length N indicating the probability of being sampled.

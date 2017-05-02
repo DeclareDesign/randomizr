@@ -23,7 +23,14 @@ cluster_rs_probabilities <-
   function(clust_var,
            n = NULL,
            prob = NULL,
-           simple = FALSE) {
+           simple = FALSE,
+           check_inputs = TRUE) {
+    if (check_inputs) {
+      check_inputs <-
+        check_samplr_arguments(n = n,
+                               clust_var = clust_var,
+                               prob = prob)
+    }
     
     n_per_clust <- tapply(clust_var, clust_var, length)
     unique_clust <- names(n_per_clust)
@@ -42,6 +49,7 @@ cluster_rs_probabilities <-
     
     
     prob_vec <- rep(probs_clust, n_per_clust)
-    prob_vec <- prob_vec[order(unlist(split(1:length(clust_var),clust_var), FALSE, FALSE))]
+    prob_vec <-
+      prob_vec[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
     return(prob_vec)
   }

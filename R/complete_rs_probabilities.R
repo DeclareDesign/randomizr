@@ -16,9 +16,9 @@
 #' @export
 complete_rs_probabilities <- function(N,
                                       n = NULL,
-                                      prob = NULL, 
+                                      prob = NULL,
                                       check_inputs = TRUE) {
-  if(check_inputs){
+  if (check_inputs) {
     check_inputs <-
       check_samplr_arguments(N = N,
                              n = n,

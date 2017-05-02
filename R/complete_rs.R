@@ -10,6 +10,7 @@
 #' @param N The number of units. N must be a positive integer. (required)
 #' @param n Use for a design in which exactly n units are sampled. (optional)
 #' @param prob Use for a design in which either floor(N*prob) or ceiling(N*prob) units are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units will be sampled and with probability prob, ceiling(N*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
+#' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
 #' @export
@@ -35,22 +36,20 @@
 #'
 complete_rs <- function(N,
                         n = NULL,
-                        prob = NULL, 
+                        prob = NULL,
                         check_inputs = TRUE) {
   # Checks
-  if(check_inputs){
+  if (check_inputs) {
     check_inputs <-
-      check_samplr_arguments(
-        N = N,
-        n = n,
-        prob = prob)
+      check_samplr_arguments(N = N,
+                             n = n,
+                             prob = prob)
   }
-  
   
   if (N == 1) {
     if (is.null(n) & is.null(prob)) {
-      assign <- simple_rs(N, prob = 0.5)
-      return(assign)
+      assignment <- simple_rs(N, prob = 0.5)
+      return(assignment)
     }
     if (!is.null(n)) {
       if (!n %in% c(0, 1)) {
@@ -59,16 +58,16 @@ complete_rs <- function(N,
         )
       }
       if (n == 0) {
-        assign <- 0
-        return(assign)
+        assignment <- 0
+        return(assignment)
       }
       if (n == 1) {
-        assign <- simple_rs(N, prob = 0.5)
-        return(assign)
+        assignment <- simple_rs(N, prob = 0.5)
+        return(assignment)
       }
     }
     if (!is.null(prob)) {
-      assign <- simple_rs(N, prob = prob)
+      assignment <- simple_rs(N, prob = prob)
     }
   }
   
@@ -77,9 +76,9 @@ complete_rs <- function(N,
       n_floor <- floor(N / 2)
       n_ceiling <- ceiling(N / 2)
       
-      if(n_ceiling > n_floor){
-        prob_fix_up <- ((N*.5) - n_floor) / (n_ceiling - n_floor)
-      }else{
+      if (n_ceiling > n_floor) {
+        prob_fix_up <- ((N * .5) - n_floor) / (n_ceiling - n_floor)
+      } else{
         prob_fix_up <- .5
       }
       
@@ -88,29 +87,29 @@ complete_rs <- function(N,
       } else{
         n <- n_ceiling
       }
-      assign <-  sample(rep(c(0, 1), c(N - n, n)))
-      return(assign)
+      assignment <-  sample(rep(c(0, 1), c(N - n, n)))
+      return(assignment)
     }
     if (!is.null(n)) {
       if (n == N) {
-        assign <- rep(1, N)
-        return(assign)
+        assignment <- rep(1, N)
+        return(assignment)
       }
-      assign <- sample(rep(c(0, 1), c(N - n, n)))
-      return(assign)
+      assignment <- sample(rep(c(0, 1), c(N - n, n)))
+      return(assignment)
     }
     if (!is.null(prob)) {
       n_floor <- floor(N * prob)
       n_ceiling <- ceiling(N * prob)
       if (n_ceiling == N) {
         n <- n_floor
-        assign <- sample(rep(c(0, 1), c(N - n, n)))
-        return(assign)
+        assignment <- sample(rep(c(0, 1), c(N - n, n)))
+        return(assignment)
       }
       
-      if(n_ceiling > n_floor){
-        prob_fix_up <- ((N*prob) - n_floor) / (n_ceiling - n_floor)
-      }else{
+      if (n_ceiling > n_floor) {
+        prob_fix_up <- ((N * prob) - n_floor) / (n_ceiling - n_floor)
+      } else{
         prob_fix_up <- .5
       }
       
@@ -119,8 +118,8 @@ complete_rs <- function(N,
       } else{
         n <- n_ceiling
       }
-      assign <- sample(rep(c(0, 1), c(N - n, n)))
-      return(assign)
+      assignment <- sample(rep(c(0, 1), c(N - n, n)))
+      return(assignment)
     }
   }
 }

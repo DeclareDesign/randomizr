@@ -4,7 +4,8 @@
 \alias{strata_rs}
 \title{Stratified Random Sampling}
 \usage{
-strata_rs(strata_var, prob = NULL, strata_n = NULL, strata_prob = NULL)
+strata_rs(strata_var, prob = NULL, strata_n = NULL, strata_prob = NULL,
+  check_inputs = TRUE)
 }
 \arguments{
 \item{strata_var}{A vector of length N that indicates which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)}
@@ -14,6 +15,8 @@ strata_rs(strata_var, prob = NULL, strata_n = NULL, strata_prob = NULL)
 \item{strata_n}{Use for a in which strata_n describes the number of units to assign to treatment within each stratum.}
 
 \item{strata_prob}{Use for a in which strata_prob describes the probability of assignment to treatment within each stratum. Differs from prob in that the probability of assignment can vary across strata.}
+
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
 A numeric vector of length N that indicates if a unit is sampled (1) or not (0).

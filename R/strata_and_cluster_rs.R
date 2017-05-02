@@ -7,6 +7,7 @@
 #' @param prob Use for a design in which either floor(N_clusters_stratum*prob) or ceiling(N_clusters_stratum*prob) clusters are sampled within each stratum. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters_stratum*prob) clusters will be sampled and with probability prob, ceiling(N_clusters_stratum*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
 #' @param strata_n Use for a design in which strata_n describes the number of units to sample within each stratum.
 #' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.
+#' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #'
@@ -57,7 +58,11 @@ strata_and_cluster_rs <-
            clust_var,
            prob = NULL,
            strata_n = NULL,
-           strata_prob = NULL) {
+           strata_prob = NULL,
+           check_inputs = TRUE) {
+    
+    if(check_inputs){
+      
     check_inputs <-
       check_samplr_arguments(
         strata_var = strata_var,
@@ -66,6 +71,7 @@ strata_and_cluster_rs <-
         strata_n = strata_n,
         strata_prob = strata_prob
       )
+    }
     
     # Setup: obtain unique clusters
     n_per_clust <- tapply(clust_var, clust_var, length)
@@ -82,7 +88,7 @@ strata_and_cluster_rs <-
     )
     
     # back up to the individual level, maintaining original ordering
-    assign <- rep(S_clust, n_per_clust)
-    assign <- assign[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
-    return(assign)
+    assignment <- rep(S_clust, n_per_clust)
+    assignment <- assignment[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
+    return(assignment)
   }

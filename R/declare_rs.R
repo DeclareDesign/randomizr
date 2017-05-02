@@ -8,6 +8,7 @@
 #' @param strata_n Use for a design in which strata_n describes the number of units to sample within each stratum.
 #' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of assignment can vary across strata.
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify n or strata_n.
+#' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A list of class "rs_declaration".  The list has five entries:
 #'   $rs_function, a function that generates random assignments accroding to the declaration.
@@ -79,16 +80,20 @@ declare_rs <- function(N = NULL,
                        prob = NULL,
                        strata_n = NULL,
                        strata_prob = NULL,
-                       simple = FALSE) {
-  check_inputs <- check_samplr_arguments(
-    N = N,
-    strata_var = strata_var,
-    clust_var = clust_var,
-    n = n,
-    prob = prob,
-    strata_n = strata_n,
-    strata_prob = strata_prob
-  )
+                       simple = FALSE,
+                       check_inputs = TRUE) {
+  if (check_inputs) {
+    check_inputs <- check_samplr_arguments(
+      N = N,
+      strata_var = strata_var,
+      clust_var = clust_var,
+      n = n,
+      prob = prob,
+      strata_n = strata_n,
+      strata_prob = strata_prob
+    )
+    
+  }
   # Determine rs_type
   if (simple == FALSE) {
     rs_type <- "complete"

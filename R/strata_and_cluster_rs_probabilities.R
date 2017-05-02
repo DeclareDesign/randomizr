@@ -52,7 +52,20 @@ strata_and_cluster_rs_probabilities <-
            clust_var,
            prob = NULL,
            strata_n = NULL,
-           strata_prob = NULL) {
+           strata_prob = NULL,
+           check_inputs = TRUE) {
+    
+    if(check_inputs){
+      
+      check_inputs <-
+        check_samplr_arguments(
+          strata_var = strata_var,
+          clust_var = clust_var,
+          prob = prob,
+          strata_n = strata_n,
+          strata_prob = strata_prob
+        )
+    }
     
     # Setup: obtain unique clusters
     n_per_clust <- tapply(clust_var, clust_var, length)

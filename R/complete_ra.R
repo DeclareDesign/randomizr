@@ -15,6 +15,7 @@
 #' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
+#' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by condition_names) in a multi-arm trial.
 #' @export
@@ -69,7 +70,6 @@ complete_ra <- function(N,
                         num_arms = NULL,
                         condition_names = NULL,
                         check_inputs = TRUE) {
-  
   if (check_inputs) {
     check_inputs <-
       check_randomizr_arguments(
@@ -83,17 +83,17 @@ complete_ra <- function(N,
       )
     num_arms <- check_inputs$num_arms
     condition_names <- check_inputs$condition_names
-  } 
+  }
   
   # Simple 2 group design, returns zeros and ones
   if (is.null(m_each) &
       is.null(prob_each) & length(condition_names) == 2) {
     if (N == 1) {
       if (is.null(m) & is.null(prob)) {
-        assign <-
+        assignment <-
           simple_ra(N, prob = 0.5, condition_names = condition_names)
-        assign <- clean_condition_names(assign, condition_names)
-        return(assign)
+        assignment <- clean_condition_names(assignment, condition_names)
+        return(assignment)
       }
       if (!is.null(m)) {
         if (!m %in% c(0, 1)) {
@@ -102,22 +102,22 @@ complete_ra <- function(N,
           )
         }
         if (m == 0) {
-          assign <- condition_names[1]
-          assign <- clean_condition_names(assign, condition_names)
-          return(assign)
+          assignment <- condition_names[1]
+          assignment <- clean_condition_names(assignment, condition_names)
+          return(assignment)
         }
         if (m == 1) {
-          assign <-
+          assignment <-
             simple_ra(N, prob = 0.5, condition_names = condition_names)
-          assign <- clean_condition_names(assign, condition_names)
-          return(assign)
+          assignment <- clean_condition_names(assignment, condition_names)
+          return(assignment)
         }
       }
       if (!is.null(prob)) {
-        assign <-
+        assignment <-
           simple_ra(N, prob = prob, condition_names = condition_names)
-        assign <- clean_condition_names(assign, condition_names)
-        return(assign)
+        assignment <- clean_condition_names(assignment, condition_names)
+        return(assignment)
       }
     }
     
@@ -137,28 +137,28 @@ complete_ra <- function(N,
         } else{
           m <- m_ceiling
         }
-        assign <-  sample(rep(condition_names, c(N - m, m)))
-        assign <- clean_condition_names(assign, condition_names)
-        return(assign)
+        assignment <-  sample(rep(condition_names, c(N - m, m)))
+        assignment <- clean_condition_names(assignment, condition_names)
+        return(assignment)
       }
       if (!is.null(m)) {
         if (m == N) {
-          assign <- rep(1, N)
-          assign <- clean_condition_names(assign, condition_names)
-          return(assign)
+          assignment <- rep(1, N)
+          assignment <- clean_condition_names(assignment, condition_names)
+          return(assignment)
         }
-        assign <- sample(rep(condition_names, c(N - m, m)))
-        assign <- clean_condition_names(assign, condition_names)
-        return(assign)
+        assignment <- sample(rep(condition_names, c(N - m, m)))
+        assignment <- clean_condition_names(assignment, condition_names)
+        return(assignment)
       }
       if (!is.null(prob)) {
         m_floor <- floor(N * prob)
         m_ceiling <- ceiling(N * prob)
         if (m_ceiling == N) {
           m <- m_floor
-          assign <- sample(rep(condition_names, c(N - m, m)))
-          assign <- clean_condition_names(assign, condition_names)
-          return(assign)
+          assignment <- sample(rep(condition_names, c(N - m, m)))
+          assignment <- clean_condition_names(assignment, condition_names)
+          return(assignment)
         }
         
         if (m_ceiling > m_floor) {
@@ -172,9 +172,9 @@ complete_ra <- function(N,
         } else{
           m <- m_ceiling
         }
-        assign <- sample(rep(condition_names, c(N - m, m)))
-        assign <- clean_condition_names(assign, condition_names)
-        return(assign)
+        assignment <- sample(rep(condition_names, c(N - m, m)))
+        assignment <- clean_condition_names(assignment, condition_names)
+        return(assignment)
       }
     }
   }
@@ -184,12 +184,12 @@ complete_ra <- function(N,
   # Case 1: neither prob_each nor m_each specified
   if (is.null(prob_each) & is.null(m_each)) {
     prob_each <- rep(1 / num_arms, num_arms)
-    assign <-
+    assignment <-
       complete_ra(N = N,
                   prob_each = prob_each,
                   condition_names = condition_names)
-    assign <- clean_condition_names(assign, condition_names)
-    return(assign)
+    assignment <- clean_condition_names(assignment, condition_names)
+    return(assignment)
   }
   
   # Case 2: prob_each is specified
@@ -214,15 +214,15 @@ complete_ra <- function(N,
       conditions_vec <- rep(condition_names, m_each_floor)
     }
     
-    assign <- sample(conditions_vec)
-    assign <- clean_condition_names(assign, condition_names)
-    return(assign)
+    assignment <- sample(conditions_vec)
+    assignment <- clean_condition_names(assignment, condition_names)
+    return(assignment)
   }
   
   # Case 4: m_each specified
   if (!is.null(m_each)) {
-    assign <- sample(rep(condition_names, m_each))
-    assign <- clean_condition_names(assign, condition_names)
-    return(assign)
+    assignment <- sample(rep(condition_names, m_each))
+    assignment <- clean_condition_names(assignment, condition_names)
+    return(assignment)
   }
 }
