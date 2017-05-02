@@ -34,6 +34,8 @@ strata_rs_probabilities <- function(strata_var,
   
   N_per_stratum <- check_inputs$N_per_stratum
   
+  strata_spots <- unlist(split(1:length(strata_var),strata_var))
+  
   if (is.null(prob) & is.null(strata_n) & is.null(strata_prob)) {
     prob <- 0.5
   }
@@ -49,19 +51,36 @@ strata_rs_probabilities <- function(strata_var,
   
   # Case 2: strata_n is specified
   if (!is.null(strata_n)) {
-    for (i in 1:length(strata)) {
-      prob_vec[strata_var == strata[i]] <-
-        complete_rs_probabilities(N = N_per_stratum[i], n = strata_n[i])
-    }
+    # for (i in 1:length(strata)) {
+    #   prob_vec[strata_var == strata[i]] <-
+    #     complete_rs_probabilities(N = N_per_stratum[i], n = strata_n[i])
+    # }
+    prob_vec_list <- 
+      mapply(
+        FUN = complete_rs_probabilities,
+        N = N_per_stratum,
+        n = strata_n,
+        MoreArgs = list(
+          prob = prob,
+          check_inputs = FALSE
+        ), SIMPLIFY = FALSE)
+    
+    prob_vec <- unlist(prob_vec_list)[order(strata_spots)]
     return(prob_vec)
   }
   
   # Case 3: strata_prob is specified
   if (!is.null(strata_prob)) {
-    for (i in 1:length(strata)) {
-      prob_vec[strata_var == strata[i]] <-
-        complete_rs_probabilities(N = N_per_stratum[i], prob = strata_prob[i])
-    }
+    prob_vec_list <- 
+      mapply(
+        FUN = complete_rs_probabilities,
+        N = N_per_stratum,
+        prob = strata_prob,
+        MoreArgs = list(
+          check_inputs = FALSE
+        ), SIMPLIFY = FALSE)
+    
+    prob_vec <- unlist(prob_vec_list)[order(strata_spots)]
     return(prob_vec)
   }
 }

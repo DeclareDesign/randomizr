@@ -44,6 +44,7 @@ complete_ra_probabilities <- function(N,
                                       num_arms = NULL,
                                       condition_names = NULL,
                                       check_inputs = TRUE) {
+  
   # Setup: obtain number of arms and condition_names
   if(check_inputs){
     check_inputs <-
