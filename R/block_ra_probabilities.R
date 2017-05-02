@@ -69,6 +69,8 @@ block_ra_probabilities <- function(block_var,
   condition_names <- check_inputs$condition_names
   N_per_block <- check_inputs$N_per_block
   
+  block_spots <- unlist(split(1:length(block_var),block_var))
+  
   blocks <- sort(unique(block_var))
   prob_mat <- matrix(
     NA,
@@ -81,26 +83,41 @@ block_ra_probabilities <- function(block_var,
   # Case 1 use block_m
   
   if (!is.null(block_m)) {
-    for (i in 1:length(blocks)) {
-      prob_mat[block_var == blocks[i],] <-
-        complete_ra_probabilities(N = N_per_block[i],
-                                  m = block_m[i],
-                                  condition_names =
-                                    condition_names)
-    }
+    prob_mat_list <- 
+      mapply(
+        FUN = complete_ra_probabilities,
+        N = N_per_block,
+        m = block_m,
+        MoreArgs = list(
+          condition_names = condition_names,
+          num_arms = num_arms,
+          check_inputs = FALSE
+        ), SIMPLIFY = FALSE)
+    
+    prob_mat <- do.call(rbind,prob_mat_list)
+    prob_mat <- prob_mat[order(block_spots),,drop = FALSE]
+    
     return(prob_mat)
   }
   
   # Case 1.5 use block_prob
   
   if (!is.null(block_prob)) {
-    for (i in 1:length(blocks)) {
-      prob_mat[block_var == blocks[i],] <-
-        complete_ra_probabilities(N = N_per_block[i],
-                                  prob = block_prob[i],
-                                  condition_names =
-                                    condition_names)
-    }
+    prob_mat_list <- 
+      mapply(
+        FUN = complete_ra_probabilities,
+        N = N_per_block,
+        prob = block_prob,
+        MoreArgs = list(
+          condition_names = condition_names,
+          num_arms = num_arms,
+          check_inputs = FALSE
+        ), SIMPLIFY = FALSE)
+    
+    prob_mat <- do.call(rbind,prob_mat_list)
+    prob_mat <- prob_mat[order(block_spots),,drop = FALSE]
+    
+    return(prob_mat)
     return(prob_mat)
   }
   
@@ -114,16 +131,20 @@ block_ra_probabilities <- function(block_var,
       prob_each <- rep(1 / num_arms, num_arms)
     }
     
-    
-    for (i in 1:length(blocks)) {
-      prob_mat[block_var == blocks[i],] <-
-        complete_ra_probabilities(
-          N = N_per_block[i],
+    prob_mat_list <- 
+      mapply(
+        FUN = complete_ra_probabilities,
+        N = N_per_block,
+        MoreArgs = list(
           prob_each = prob_each,
-          condition_names =
-            condition_names
-        )
-    }
+          condition_names = condition_names,
+          num_arms = num_arms,
+          check_inputs = FALSE
+        ), SIMPLIFY = FALSE)
+    
+    prob_mat <- do.call(rbind,prob_mat_list)
+    prob_mat <- prob_mat[order(block_spots),,drop = FALSE]
+    
     return(prob_mat)
     
   }
@@ -131,13 +152,24 @@ block_ra_probabilities <- function(block_var,
   # Case 2 use block_m_each
   
   if (!is.null(block_m_each)) {
-    for (i in 1:length(blocks)) {
-      prob_mat[block_var == blocks[i],] <-
-        complete_ra_probabilities(N = N_per_block[i],
-                                  m_each = block_m_each[i,],
-                                  condition_names =
-                                    condition_names)
-    }
+    
+    block_m_each_list <- 
+      split(block_m_each, rep(1:nrow(block_m_each), times = ncol(block_m_each)))
+    
+    prob_mat_list <- 
+      mapply(
+        FUN = complete_ra_probabilities,
+        N = N_per_block,
+        m_each = block_m_each_list,
+        MoreArgs = list(
+          condition_names = condition_names,
+          num_arms = num_arms,
+          check_inputs = FALSE
+        ), SIMPLIFY = FALSE)
+    
+    prob_mat <- do.call(rbind,prob_mat_list)
+    prob_mat <- prob_mat[order(block_spots),,drop = FALSE]
+    
     return(prob_mat)
   }
   
@@ -145,15 +177,23 @@ block_ra_probabilities <- function(block_var,
   # Case 3 use block_prob_each
   
   if (!is.null(block_prob_each)) {
-    for (i in 1:length(blocks)) {
-      prob_mat[block_var == blocks[i],] <-
-        complete_ra_probabilities(
-          N = N_per_block[i],
-          prob_each = block_prob_each[i,],
-          condition_names =
-            condition_names
-        )
-    }
+    block_prob_each_list <- 
+      split(block_prob_each, rep(1:nrow(block_prob_each), times = ncol(block_prob_each)))
+    
+    prob_mat_list <- 
+      mapply(
+        FUN = complete_ra_probabilities,
+        N = N_per_block,
+        prob_each = block_prob_each_list,
+        MoreArgs = list(
+          condition_names = condition_names,
+          num_arms = num_arms,
+          check_inputs = FALSE
+        ), SIMPLIFY = FALSE)
+    
+    prob_mat <- do.call(rbind,prob_mat_list)
+    prob_mat <- prob_mat[order(block_spots),,drop = FALSE]
+    
     return(prob_mat)
   }
   

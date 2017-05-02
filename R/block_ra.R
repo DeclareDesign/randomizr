@@ -88,8 +88,6 @@ block_ra <- function(block_var,
     condition_names = condition_names
   )
   
-  #blocks <- sort(unique(block_var))
-  #assign <- rep(NA, length(block_var))
   block_spots <- unlist(split(1:length(block_var),block_var))
   
   if (!is.null(prob)) {
