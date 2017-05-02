@@ -92,6 +92,7 @@ complete_ra <- function(N,
       if (is.null(m) & is.null(prob)) {
         assign <-
           simple_ra(N, prob = 0.5, condition_names = condition_names)
+        assign <- clean_condition_names(assign, condition_names)
         return(assign)
       }
       if (!is.null(m)) {
@@ -102,17 +103,21 @@ complete_ra <- function(N,
         }
         if (m == 0) {
           assign <- condition_names[1]
+          assign <- clean_condition_names(assign, condition_names)
           return(assign)
         }
         if (m == 1) {
           assign <-
             simple_ra(N, prob = 0.5, condition_names = condition_names)
+          assign <- clean_condition_names(assign, condition_names)
           return(assign)
         }
       }
       if (!is.null(prob)) {
         assign <-
           simple_ra(N, prob = prob, condition_names = condition_names)
+        assign <- clean_condition_names(assign, condition_names)
+        return(assign)
       }
     }
     
@@ -133,14 +138,17 @@ complete_ra <- function(N,
           m <- m_ceiling
         }
         assign <-  sample(rep(condition_names, c(N - m, m)))
+        assign <- clean_condition_names(assign, condition_names)
         return(assign)
       }
       if (!is.null(m)) {
         if (m == N) {
           assign <- rep(1, N)
+          assign <- clean_condition_names(assign, condition_names)
           return(assign)
         }
         assign <- sample(rep(condition_names, c(N - m, m)))
+        assign <- clean_condition_names(assign, condition_names)
         return(assign)
       }
       if (!is.null(prob)) {
@@ -149,6 +157,7 @@ complete_ra <- function(N,
         if (m_ceiling == N) {
           m <- m_floor
           assign <- sample(rep(condition_names, c(N - m, m)))
+          assign <- clean_condition_names(assign, condition_names)
           return(assign)
         }
         
@@ -164,6 +173,7 @@ complete_ra <- function(N,
           m <- m_ceiling
         }
         assign <- sample(rep(condition_names, c(N - m, m)))
+        assign <- clean_condition_names(assign, condition_names)
         return(assign)
       }
     }
@@ -178,6 +188,7 @@ complete_ra <- function(N,
       complete_ra(N = N,
                   prob_each = prob_each,
                   condition_names = condition_names)
+    assign <- clean_condition_names(assign, condition_names)
     return(assign)
   }
   
