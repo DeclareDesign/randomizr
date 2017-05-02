@@ -1,6 +1,3 @@
-library(testthat)
-library(randomizr)
-
 context("Block Random Assignments")
 
 block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))

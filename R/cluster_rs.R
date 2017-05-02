@@ -42,6 +42,6 @@ cluster_rs <- function(clust_var,
       prob = prob)
   }
   assign <- rep(S_clust, n_per_clust)
-  assign <- assign[order(unlist(split(1:length(clust_var),clust_var)))]
+  assign <- assign[order(unlist(split(1:length(clust_var),clust_var), FALSE, FALSE))]
   return(assign)
 }

@@ -88,7 +88,7 @@ block_ra <- function(block_var,
     condition_names = condition_names
   )
   
-  block_spots <- unlist(split(1:length(block_var),block_var))
+  block_spots <- unlist(split(1:length(block_var),block_var), FALSE, FALSE)
   
   if (!is.null(prob)) {
     prob_each <- c(1 - prob, prob)
@@ -113,7 +113,7 @@ block_ra <- function(block_var,
           check_inputs = FALSE
         ), SIMPLIFY = FALSE)
     
-    assign <- unlist(assign_list)[order(block_spots)]
+    assign <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
     assign <- clean_condition_names(assign, condition_names)
     return(assign)
   }
@@ -131,7 +131,7 @@ block_ra <- function(block_var,
           check_inputs = FALSE
         ), SIMPLIFY = FALSE)
     
-    assign <- unlist(assign_list)[order(block_spots)]
+    assign <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
     assign <- clean_condition_names(assign, condition_names)
     return(assign)
   }
@@ -152,7 +152,7 @@ block_ra <- function(block_var,
           check_inputs = FALSE
         ), SIMPLIFY = FALSE)
     
-    assign <- unlist(assign_list)[order(block_spots)]
+    assign <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
     assign <- clean_condition_names(assign, condition_names)
     return(assign)
   }
@@ -174,7 +174,7 @@ block_ra <- function(block_var,
           check_inputs = FALSE
         ), SIMPLIFY = FALSE)
     
-    assign <- unlist(assign_list)[order(block_spots)]
+    assign <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
     assign <- clean_condition_names(assign, condition_names)
     return(assign)
   }
@@ -196,7 +196,7 @@ block_ra <- function(block_var,
           check_inputs = FALSE
         ), SIMPLIFY = FALSE)
     
-    assign <- unlist(assign_list)[order(block_spots)]
+    assign <- unlist(assign_list, FALSE, FALSE)[order(block_spots)]
     assign <- clean_condition_names(assign, condition_names)
     return(assign)
   }

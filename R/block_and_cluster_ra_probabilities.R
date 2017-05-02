@@ -74,6 +74,6 @@ block_and_cluster_ra_probabilities <-
     )
     
     prob_mat <- probs_clust[rep(1:n_clust, n_per_clust), , drop = FALSE]
-    prob_mat <- prob_mat[order(unlist(split(1:length(clust_var),clust_var))), , drop = FALSE]
+    prob_mat <- prob_mat[order(unlist(split(1:length(clust_var),clust_var), FALSE, FALSE)), , drop = FALSE]
     return(prob_mat)
   }

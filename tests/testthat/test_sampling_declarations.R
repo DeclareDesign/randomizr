@@ -1,6 +1,6 @@
-library(testthat)
-library(randomizr)
 
+
+context("Sampling Declarations")
 
 # Complete Random Assignments ----------------------------------------------
 

@@ -1,5 +1,3 @@
-library(testthat)
-library(randomizr)
 
 context("Cluster Random Assignments")
 

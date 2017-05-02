@@ -91,6 +91,6 @@ cluster_ra <- function(clust_var,
   }
   
   assign <- rep(z_clust, n_per_clust)
-  assign <- assign[order(unlist(split(1:length(clust_var),clust_var)))]
+  assign <- assign[order(unlist(split(1:length(clust_var),clust_var), FALSE, FALSE))]
   return(assign)
 }

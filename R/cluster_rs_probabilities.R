@@ -42,6 +42,6 @@ cluster_rs_probabilities <-
     
     
     prob_vec <- rep(probs_clust, n_per_clust)
-    prob_vec <- prob_vec[order(unlist(split(1:length(clust_var),clust_var)))]
+    prob_vec <- prob_vec[order(unlist(split(1:length(clust_var),clust_var), FALSE, FALSE))]
     return(prob_vec)
   }

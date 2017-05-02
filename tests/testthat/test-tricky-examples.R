@@ -1,11 +1,8 @@
-rm(list=ls())
-
+context("Tricky Examples")
 
 # Compare tricky examples vs. randomizr
 
 #devtools::install_github("acoppock/randomizr")
-library(randomizr)
-library(testthat)
 
 # Examples ----------------------------------------------------------------
 

@@ -1,5 +1,3 @@
-library(testthat)
-library(randomizr)
 
 context("Stratified Random Sampling")
 

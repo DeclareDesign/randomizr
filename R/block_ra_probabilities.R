@@ -69,7 +69,7 @@ block_ra_probabilities <- function(block_var,
   condition_names <- check_inputs$condition_names
   N_per_block <- check_inputs$N_per_block
   
-  block_spots <- unlist(split(1:length(block_var),block_var))
+  block_spots <- unlist(split(1:length(block_var),block_var), FALSE, FALSE)
   
   blocks <- sort(unique(block_var))
   prob_mat <- matrix(

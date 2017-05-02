@@ -26,7 +26,7 @@ check_randomizr_arguments <-
     )
     
     
-    if(!is.null(clust_var)){
+    if (!is.null(clust_var)) {
       N <- length(unique(clust_var))
     }
     
@@ -42,7 +42,10 @@ check_randomizr_arguments <-
     
     
     if (!is.null(N)) {
-      if (!(length(N) == 1 & (isTRUE(all.equal(N, as.integer(N)))) & N > 0)) {
+      if (!(length(N) == 1 &
+            (isTRUE(all.equal(
+              N, as.integer(N)
+            ))) & N > 0)) {
         stop("N must be an integer greater than 0")
       }
     }
@@ -97,8 +100,7 @@ check_randomizr_arguments <-
     # Lengths
     
     if (!is.null(condition_names)) {
-      
-      if(length(unique(condition_names)) != length(condition_names)){
+      if (length(unique(condition_names)) != length(condition_names)) {
         stop("You must supply unique values to condition_names.")
       }
       if (!is.null(m)) {
@@ -242,9 +244,11 @@ check_randomizr_arguments <-
         }
       }
       
-      if(!is.null(block_m)){
-        if(any(block_m > N_per_block | block_m < 0)){
-          stop("The number of units assigned to treatment within a block must be nonnegative and not exceed the total number units within the block.")
+      if (!is.null(block_m)) {
+        if (any(block_m > N_per_block | block_m < 0)) {
+          stop(
+            "The number of units assigned to treatment within a block must be nonnegative and not exceed the total number units within the block."
+          )
         }
       }
       
@@ -277,7 +281,8 @@ check_randomizr_arguments <-
       }
       
       if (!is.null(clust_var)) {
-        if (!all(rowSums(table(clust_var, block_var) != 0) == 1)) {
+        if (!all(tapply(block_var, clust_var, function(x)
+          all(x == x[1])))) {
           stop("All units within a cluster must be in the same block.")
         }
       }
@@ -348,7 +353,7 @@ check_samplr_arguments <-
     )
     
     
-    if(!is.null(clust_var)){
+    if (!is.null(clust_var)) {
       N <- length(unique(clust_var))
     }
     
@@ -362,7 +367,10 @@ check_samplr_arguments <-
     
     
     if (!is.null(N)) {
-      if (!(length(N) == 1 & (isTRUE(all.equal(N, as.integer(N)))) & N > 0)) {
+      if (!(length(N) == 1 &
+            (isTRUE(all.equal(
+              N, as.integer(N)
+            ))) & N > 0)) {
         stop("N must be an integer greater than 0")
       }
     }
@@ -393,7 +401,8 @@ check_samplr_arguments <-
     # stratified Design Checks
     N_per_stratum <- NULL
     if (!is.null(strata_var)) {
-      N_per_stratum <- as.numeric(table(strata_var))
+      N_per_stratum <- tapply(strata_var, strata_var, length)
+      attributes(N_per_stratum) <- NULL
       N_strata <- length(N_per_stratum)
       
       if (!is.null(strata_n)) {
@@ -411,27 +420,28 @@ check_samplr_arguments <-
         }
       }
       
-      if(!is.null(strata_n)){
-        if(any(strata_n > N_per_stratum | strata_n < 0)){
-          stop("The number of units sampled within a stratum must be nonnegative and not exceed the total number units within the strata.")
+      if (!is.null(strata_n)) {
+        if (any(strata_n > N_per_stratum | strata_n < 0)) {
+          stop(
+            "The number of units sampled within a stratum must be nonnegative and not exceed the total number units within the strata."
+          )
         }
       }
       
       if (!is.null(clust_var)) {
-        if (!all(rowSums(table(clust_var, strata_var) != 0) == 1)) {
+        if (!all(tapply(strata_var, clust_var, function(x)
+          all(x == x[1])))) {
           stop("All units within a cluster must be in the same stratum.")
         }
       }
       
     }
     
-    return(
-      list(
-        num_arms = 2,
-        condition_names =  c(0, 1),
-        N_per_stratum = N_per_stratum
-      )
-    )
+    return(list(
+      num_arms = 2,
+      condition_names =  c(0, 1),
+      N_per_stratum = N_per_stratum
+    ))
     
   }
 

@@ -39,7 +39,7 @@ strata_rs <- function(strata_var,
     strata_prob = strata_prob
   )
   
-  strata_spots <- unlist(split(1:length(strata_var),strata_var))
+  strata_spots <- unlist(split(1:length(strata_var),strata_var), FALSE, FALSE)
   
   # Setup: obtain number of arms and condition_names
   N_per_stratum <- check_inputs$N_per_stratum
@@ -60,7 +60,7 @@ strata_rs <- function(strata_var,
           check_inputs = FALSE
         ), SIMPLIFY = FALSE)
     
-    assign <- unlist(assign_list)[order(strata_spots)]
+    assign <- unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
     return(assign)
   }
   
@@ -75,17 +75,13 @@ strata_rs <- function(strata_var,
           check_inputs = FALSE
         ), SIMPLIFY = FALSE)
     
-    assign <- unlist(assign_list)[order(strata_spots)]
+    assign <- unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
     return(assign)
   }
   
   # Case 3: strata_prob is specified
   if (!is.null(strata_prob)) {
-    # for (i in 1:length(strata)) {
-    #   assign[strata_var == strata[i]] <-
-    #     complete_rs(N = N_per_stratum[i], prob = strata_prob[i])
-    # }
-    # return(assign)
+
     assign_list <- 
       mapply(
         FUN = complete_rs,
@@ -95,7 +91,7 @@ strata_rs <- function(strata_var,
           check_inputs = FALSE
         ), SIMPLIFY = FALSE)
     
-    assign <- unlist(assign_list)[order(strata_spots)]
+    assign <- unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
     return(assign)
   }
 }

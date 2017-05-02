@@ -1,6 +1,4 @@
-library(testthat)
-
-library(randomizr)
+context("Cleaner Function")
 
 
 
