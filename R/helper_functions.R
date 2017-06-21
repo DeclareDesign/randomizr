@@ -62,7 +62,7 @@ check_randomizr_arguments <-
       }
     }
     
-    if (!is.null(m)) {
+    if (!is.null(m) & is.null(block_var)) {
       if (m < 0) {
         stop("If specified, the number of units assigned to treatment (m) must be nonnegative.")
       }
@@ -244,6 +244,10 @@ check_randomizr_arguments <-
         }
       }
       
+      if(!is.null(m) & !is.null(block_var)){
+        block_m <- rep(m, length(N_per_block))
+      }
+      
       if (!is.null(block_m)) {
         if (any(block_m > N_per_block | block_m < 0)) {
           stop(
@@ -387,7 +391,7 @@ check_samplr_arguments <-
       }
     }
     
-    if (!is.null(n)) {
+    if (!is.null(n) & is.null(strata_var)) {
       if (n < 0) {
         stop("If specified, the number of units sampled (n) must be nonnegative.")
       }

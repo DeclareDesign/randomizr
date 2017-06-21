@@ -3,16 +3,16 @@
 #' @param N The number of units. N must be a positive integer. (required)
 #' @param strata_var A vector of length N that indicates which stratum each unit belongs to.
 #' @param clust_var A vector of length N that indicates which cluster each unit belongs to.
-#' @param n Use for a design in which n units (or clusters) are sampled. (optional)
+#' @param n Use for a design in which n units (or clusters) are sampled. In a stratified design, exactly n units in each stratum will be sampled. (optional)
 #' @param prob Use for a design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be sampled and with probability prob, ceiling(N*prob) units (or clusters) will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
 #' @param strata_n Use for a design in which strata_n describes the number of units to sample within each stratum.
-#' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of assignment can vary across strata.
-#' @param simple logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify n or strata_n.
+#' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.
+#' @param simple logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.
 #' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A list of class "rs_declaration".  The list has five entries:
-#'   $rs_function, a function that generates random assignments accroding to the declaration.
-#'   $rs_type, a string indicating the type of random assignment used
+#'   $rs_function, a function that generates random samplings according to the declaration.
+#'   $rs_type, a string indicating the type of random sampling used
 #'   $probabilities_vector, A vector length N indicating the probability of being sampled.
 #'   $strata_var, the stratification variable.
 #'   $clust_var, the clustering variable.
@@ -39,7 +39,7 @@
 #' declare_rs(N = 100, simple = TRUE)
 #' declare_rs(N = 100, prob = .4, simple = TRUE)
 #'
-#' # Complete Random Assignment Declarations
+#' # Complete Random Sampling Declarations
 #'
 #' declare_rs(N = 100)
 #' declare_rs(N = 100, n = 30)
@@ -112,10 +112,10 @@ declare_rs <- function(N = NULL,
   
   if (rs_type == "simple" & is.null(clust_var)) {
     if (!is.null(n)) {
-      stop("You can't specify 'n' when using simple random assignment.")
+      stop("You can't specify 'n' when using simple random sampling.")
     }
     if (!is.null(strata_var)) {
-      stop("You can't specify 'strata_var' when using simple random assignment.")
+      stop("You can't specify 'strata_var' when using simple random sampling.")
     }
     
     rs_function <- function() {
@@ -145,6 +145,7 @@ declare_rs <- function(N = NULL,
     rs_function <- function() {
       strata_rs(
         strata_var = strata_var,
+        n = n,
         strata_n = strata_n,
         prob = prob,
         strata_prob = strata_prob
@@ -154,6 +155,7 @@ declare_rs <- function(N = NULL,
     probabilities_vector <-
       strata_rs_probabilities(
         strata_var = strata_var,
+        n = n,
         strata_n = strata_n,
         prob = prob,
         strata_prob = strata_prob
@@ -187,6 +189,7 @@ declare_rs <- function(N = NULL,
         clust_var = clust_var,
         strata_var = strata_var,
         prob = prob,
+        n = n,
         strata_n = strata_n,
         strata_prob = strata_prob
       )
@@ -197,6 +200,7 @@ declare_rs <- function(N = NULL,
         clust_var = clust_var,
         strata_var = strata_var,
         prob = prob,
+        n = n,
         strata_prob = strata_prob,
         strata_n = strata_n
       )
@@ -218,7 +222,7 @@ declare_rs <- function(N = NULL,
 
 #' Draw a random sample
 #'
-#' You can either give draw_rs() an rs_declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random assignment procedure.
+#' You can either give draw_rs() an rs_declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.
 #'
 #' @param rs_declaration A random sampling declaration, created by \code{\link{declare_rs}}.
 #' @inheritParams declare_rs
@@ -304,7 +308,7 @@ obtain_inclusion_probabilities <-
     # checks
     if (!is.null(rs_declaration)) {
       if (class(rs_declaration) != "rs_declaration") {
-        stop("You must provide a random assignment declaration created by declare_rs().")
+        stop("You must provide a random sampling declaration created by declare_rs().")
       }
     } else{
       rs_declaration <-

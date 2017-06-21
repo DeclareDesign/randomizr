@@ -10,6 +10,9 @@
 #' block_var <- rep(c("A", "B","C"), times = c(50, 100, 200))
 #' prob_mat <- block_ra_probabilities(block_var = block_var)
 #' head(prob_mat)
+#' 
+#' prob_mat <- block_ra_probabilities(block_var = block_var, m = 20)
+#' head(prob_mat)
 #'
 #' block_m_each <- rbind(c(25, 25),
 #'                  c(50, 50),
@@ -47,6 +50,7 @@
 block_ra_probabilities <- function(block_var,
                                    prob = NULL,
                                    prob_each = NULL,
+                                   m = NULL,
                                    block_m = NULL,
                                    block_m_each = NULL,
                                    block_prob = NULL,
@@ -59,6 +63,7 @@ block_ra_probabilities <- function(block_var,
       block_var = block_var,
       prob = prob,
       prob_each = prob_each,
+      m = m,
       block_m = block_m,
       block_m_each = block_m_each,
       block_prob = block_prob,
@@ -84,6 +89,11 @@ block_ra_probabilities <- function(block_var,
     dimnames = list(NULL,  paste0("prob_", condition_names))
   )
   
+  # Case 0: m is specified
+  
+  if(!is.null(m)){
+    block_m <- rep(m, length(N_per_block))
+  }
   
   # Case 1 use block_m
   

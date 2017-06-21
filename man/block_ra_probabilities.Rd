@@ -4,7 +4,7 @@
 \alias{block_ra_probabilities}
 \title{Probabilties of assignment: Block Random Assignment}
 \usage{
-block_ra_probabilities(block_var, prob = NULL, prob_each = NULL,
+block_ra_probabilities(block_var, prob = NULL, prob_each = NULL, m = NULL,
   block_m = NULL, block_m_each = NULL, block_prob = NULL,
   block_prob_each = NULL, num_arms = NULL, condition_names = NULL,
   check_inputs = TRUE)
@@ -16,7 +16,9 @@ block_ra_probabilities(block_var, prob = NULL, prob_each = NULL,
 
 \item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
 
-\item{block_m}{Use for a two-arm design in which block_m describes the number of units to assign to treatment within each block. Note that in previous versions of randomizr, block_m behaved like block_m_each.}
+\item{m}{Use for a two-arm design in which the scalar m describes the fixed number of units to assign in each block. This number does not vary across blocks.}
+
+\item{block_m}{Use for a two-arm design in which the vector block_m describes the number of units to assign to treatment within each block. block_m must be a numeric vector that is as long as the number of blocks. Note that in previous versions of randomizr, block_m behaved like block_m_each.}
 
 \item{block_m_each}{Use for a multi-arm design in which the values of block_m_each determine the number of units assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.}
 
@@ -40,6 +42,9 @@ Probabilties of assignment: Block Random Assignment
 
 block_var <- rep(c("A", "B","C"), times = c(50, 100, 200))
 prob_mat <- block_ra_probabilities(block_var = block_var)
+head(prob_mat)
+
+prob_mat <- block_ra_probabilities(block_var = block_var, m = 20)
 head(prob_mat)
 
 block_m_each <- rbind(c(25, 25),

@@ -5,7 +5,8 @@
 #' @param block_var A vector of length N that indicates which block each unit belongs to. Can be a character, factor, or numeric vector. (required)
 #' @param prob Use for a two-arm design in which either floor(N_block*prob) or ceiling(N_block*prob) units are assigned to treatment within each block. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_block*prob) units will be assigned to treatment and with probability prob, ceiling(N_block*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
 #' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
-#' @param block_m Use for a two-arm design in which block_m describes the number of units to assign to treatment within each block. Note that in previous versions of randomizr, block_m behaved like block_m_each.
+#' @param m Use for a two-arm design in which the scalar m describes the fixed number of units to assign in each block. This number does not vary across blocks.
+#' @param block_m Use for a two-arm design in which the vector block_m describes the number of units to assign to treatment within each block. block_m must be a numeric vector that is as long as the number of blocks. Note that in previous versions of randomizr, block_m behaved like block_m_each.
 #' @param block_m_each Use for a multi-arm design in which the values of block_m_each determine the number of units assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.
 #' @param block_prob Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Differs from prob in that the probability of assignment can vary across blocks.
 #' @param block_prob_each Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.
@@ -29,6 +30,9 @@
 #' table(block_var, Z)
 #'
 #' Z <- block_ra(block_var = block_var, block_prob = c(.1, .2, .3))
+#' table(block_var, Z)
+#' 
+#' Z <- block_ra(block_var = block_var, m = 20)
 #' table(block_var, Z)
 #'
 #' Z <- block_ra(block_var = block_var, block_m = c(20, 30, 40))
@@ -71,6 +75,7 @@
 block_ra <- function(block_var,
                      prob = NULL,
                      prob_each = NULL,
+                     m = NULL,
                      block_m = NULL,
                      block_m_each = NULL,
                      block_prob = NULL,
@@ -83,6 +88,7 @@ block_ra <- function(block_var,
       block_var = block_var,
       prob = prob,
       prob_each = prob_each,
+      m = m,
       block_m = block_m,
       block_m_each = block_m_each,
       block_prob = block_prob,
@@ -104,6 +110,12 @@ block_ra <- function(block_var,
   num_arms <- check_inputs$num_arms
   condition_names <- check_inputs$condition_names
   N_per_block <- check_inputs$N_per_block
+  
+  # Case 0: m is specified
+  
+  if(!is.null(m)){
+    block_m <- rep(m, length(N_per_block))
+  }
   
   # Case 1: block_m is specified
   if (!is.null(block_m)) {

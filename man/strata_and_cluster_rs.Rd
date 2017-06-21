@@ -2,10 +2,10 @@
 % Please edit documentation in R/strata_and_cluster_rs.R
 \name{strata_and_cluster_rs}
 \alias{strata_and_cluster_rs}
-\title{Stratified and Clustered Random Assignment}
+\title{Stratified and Clustered Random Sampling}
 \usage{
-strata_and_cluster_rs(strata_var, clust_var, prob = NULL, strata_n = NULL,
-  strata_prob = NULL, check_inputs = TRUE)
+strata_and_cluster_rs(strata_var, clust_var, prob = NULL, n = NULL,
+  strata_n = NULL, strata_prob = NULL, check_inputs = TRUE)
 }
 \arguments{
 \item{strata_var}{A vector of length N that indicates which stratum each unit belongs to.}
@@ -14,6 +14,8 @@ strata_and_cluster_rs(strata_var, clust_var, prob = NULL, strata_n = NULL,
 
 \item{prob}{Use for a design in which either floor(N_clusters_stratum*prob) or ceiling(N_clusters_stratum*prob) clusters are sampled within each stratum. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters_stratum*prob) clusters will be sampled and with probability prob, ceiling(N_clusters_stratum*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
 
+\item{n}{Use for a design in which the scalar n describes the fixed number of units to sample in each stratum. This number does not vary across strata.}
+
 \item{strata_n}{Use for a design in which strata_n describes the number of units to sample within each stratum.}
 
 \item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
@@ -21,7 +23,7 @@ strata_and_cluster_rs(strata_var, clust_var, prob = NULL, strata_n = NULL,
 \item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
-A vector of length N that indicates the treatment condition of each unit.
+A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
 }
 \description{
 A random sampling procedure in which units are sampled as clusters and clusters are nested within strata.

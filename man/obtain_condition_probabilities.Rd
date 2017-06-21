@@ -21,7 +21,7 @@ obtain_condition_probabilities(ra_declaration = NULL, assignment, N = NULL,
 
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
 
-\item{m}{Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. (optional)}
+\item{m}{Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. In a blocked design, exactly m units in each block will be treated. (optional)}
 
 \item{m_each}{Use for a multi-arm design in which the values of m_each determine the number of units (or clusters) assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many units (or clusters) should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)}
 

@@ -1,4 +1,4 @@
-#' Probabilties of assignment: Stratified Cluster Random Assignment
+#' Inclusion Probabilities: Stratified and Clustered Random Sampling
 #'
 #' @inheritParams strata_and_cluster_rs
 #'
@@ -51,6 +51,7 @@ strata_and_cluster_rs_probabilities <-
   function(strata_var,
            clust_var,
            prob = NULL,
+           n = NULL,
            strata_n = NULL,
            strata_prob = NULL,
            check_inputs = TRUE) {
@@ -62,6 +63,7 @@ strata_and_cluster_rs_probabilities <-
           strata_var = strata_var,
           clust_var = clust_var,
           prob = prob,
+          n = n,
           strata_n = strata_n,
           strata_prob = strata_prob
         )
@@ -76,6 +78,7 @@ strata_and_cluster_rs_probabilities <-
     probs_clust <- strata_rs_probabilities(
       strata_var = clust_strata,
       prob = prob,
+      n = n,
       strata_n = strata_n,
       strata_prob = strata_prob
     )

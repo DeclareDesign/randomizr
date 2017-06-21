@@ -2,7 +2,7 @@
 % Please edit documentation in R/cluster_rs_probabilities.R
 \name{cluster_rs_probabilities}
 \alias{cluster_rs_probabilities}
-\title{Probabilties of assignment: Cluster Random Assignment}
+\title{Inclusion Probabilities: Cluster Sampling}
 \usage{
 cluster_rs_probabilities(clust_var, n = NULL, prob = NULL, simple = FALSE,
   check_inputs = TRUE)
@@ -22,7 +22,7 @@ cluster_rs_probabilities(clust_var, n = NULL, prob = NULL, simple = FALSE,
 A vector length N indicating the probability of being sampled.
 }
 \description{
-Probabilties of assignment: Cluster Random Assignment
+Inclusion Probabilities: Cluster Sampling
 }
 \examples{
 

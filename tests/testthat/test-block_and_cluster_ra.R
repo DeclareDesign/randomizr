@@ -25,6 +25,13 @@ Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, prob_eac
 Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, prob_each = c(.2, .8))
 Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, num_arms = 2)
 
+Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, m = 2)
+table(Z, clust_var)
+table(Z, block_var)
+
+table(Z, clust_var, block_var)
+
+
 
 block_m_each <- rbind(c(2, 3),
                  c(1, 4),

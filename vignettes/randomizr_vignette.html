@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Alexander Coppock" />
+
+<meta name="date" content="2017-06-20" />
+
+<title>Design and Analysis of Experiments with Randomizr</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Design and Analysis of Experiments with Randomizr</h1>
+<h4 class="author"><em>Alexander Coppock</em></h4>
+<h4 class="date"><em>2017-06-20</em></h4>
+
+
+
+<p><code>randomizr</code> is a small package for r that simplifies the design and analysis of randomized experiments. In particular, it makes the random assignment <strong>procedure</strong> transparent, flexible, and most importantly reproduceable. By the time that many experiments are written up and made public, the process by which some units recieved treatments is lost or imprecisely described. The <code>randomizr</code> package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.</p>
+<p>A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage. First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a <strong>cluster</strong>. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of average causal effects and the uncertainty attending to them may be incorrect.</p>
+<div id="a-hypothetical-experiment" class="section level1">
+<h1>A Hypothetical Experiment</h1>
+<p>Throughout this vignette, we’ll pretend we’re conducting an experiment among the 592 individuals in the built-in <code>HairEyeColor</code> dataset. As we’ll see, there are many ways to randomly assign subjects to treatments. We’ll step through five common designs, each associated with one of the five <code>randomizr</code> functions: <code>simple_ra()</code>, <code>complete_ra()</code>, <code>block_ra()</code>, <code>cluster_ra()</code>, and <code>block_and_cluster_ra()</code>.</p>
+<div id="setting-up-the-experiment" class="section level2">
+<h2>Setting up the experiment</h2>
+<p>We first need to transform the dataset, which has each row describe a <strong>type</strong> of subject, to a new dataset in which each row describes an individual subject.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load built-in dataset</span>
+<span class="kw">data</span>(HairEyeColor)
+HairEyeColor &lt;-<span class="st"> </span><span class="kw">data.frame</span>(HairEyeColor)
+
+<span class="co"># Transform so each row is a subject</span>
+<span class="co"># Columns describe subject's hair color, eye color, and gender</span>
+hec &lt;-<span class="st"> </span>HairEyeColor[<span class="kw">rep</span>(<span class="dv">1</span>:<span class="kw">nrow</span>(HairEyeColor),
+                        <span class="dt">times =</span> HairEyeColor$Freq), <span class="dv">1</span>:<span class="dv">3</span>]
+
+N &lt;-<span class="st"> </span><span class="kw">nrow</span>(hec)
+
+<span class="co"># Fix the rownames</span>
+<span class="kw">rownames</span>(hec) &lt;-<span class="st"> </span><span class="ot">NULL</span></code></pre></div>
+<p>Typically, researchers know some basic information about their subjects before deploying treatment. For example, they usually know how many subjects there are in the experimental sample (N), and they usually know some basic demographic information about each subject.</p>
+<p>Our new dataset has 592 subjects. We have three pretreatment covariates, <code>Hair</code>, <code>Eye</code>, and <code>Sex</code>, which describe the hair color, eye color, and gender of each subject.</p>
+<p>We now need to create simulated <em>potential outcomes</em>. We’ll call the untreated outcome <code>Y0</code> and we’ll call the treated outcome <code>Y1</code>. Imagine that in the absence of any intervention, the outcome (<code>Y0</code>) is correlated with out pretreatment covariates. Imagine further that the effectiveness of the program varies according to these covariates, i.e., the difference between <code>Y1</code> and <code>Y0</code> is correlated with the pretreatment covariates.</p>
+<p>If we were really running an experiment, we would only observe either <code>Y0</code> or <code>Y1</code> for each subject, but since we are simulating, we generate both. Our inferential target is the average treatment effect (ATE), which is defined as the average difference between <code>Y0</code> and <code>Y1</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Set a seed for reproducability</span>
+<span class="kw">set.seed</span>(<span class="dv">343</span>)
+
+<span class="co"># Create untreated and treated outcomes for all subjects</span>
+hec &lt;-<span class="st"> </span><span class="kw">within</span>(hec,{
+  Y0 &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dt">n =</span> N,<span class="dt">mean =</span> (<span class="dv">2</span>*<span class="kw">as.numeric</span>(Hair) +<span class="st"> </span>-<span class="dv">4</span>*<span class="kw">as.numeric</span>(Eye) +<span class="st"> </span>-<span class="dv">6</span>*<span class="kw">as.numeric</span>(Sex)), <span class="dt">sd =</span> <span class="dv">5</span>)
+  Y1 &lt;-<span class="st"> </span>Y0 +<span class="st"> </span><span class="dv">6</span>*<span class="kw">as.numeric</span>(Hair) +<span class="st"> </span><span class="dv">4</span>*<span class="kw">as.numeric</span>(Eye) +<span class="st"> </span><span class="dv">2</span>*<span class="kw">as.numeric</span>(Sex)
+})
+
+<span class="co"># Calculate true ATE</span>
+<span class="kw">with</span>(hec, <span class="kw">mean</span>(Y1 -<span class="st"> </span>Y0))</code></pre></div>
+<pre><code>## [1] 25.26351</code></pre>
+<p>We are now ready to allocate treatment assignments to subjects. Let’s start by contrasting simple and complete random assignment.</p>
+</div>
+</div>
+<div id="simple-random-assignment" class="section level1">
+<h1>Simple Random Assignment</h1>
+<p>Simple random assignment assigns all subjects to treatment with an equal probability by flipping a (weighted) coin for each subject. The main trouble with simple random assignment is that the number of subjects assigned to treatment is itself a random number - depending on the random assignment, a different number of subjects might be assigned to each group.</p>
+<p>The <code>simple_ra()</code> function has one required argument <code>N</code>, the total number of subjects. If no other arguments are specified, <code>simple_ra()</code> assumes a two-group design and a 0.50 probability of assignment.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(randomizr)</code></pre></div>
+<pre><code>## Warning: package 'randomizr' was built under R version 3.3.2</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">simple_ra</span>(<span class="dt">N =</span> N)
+<span class="kw">table</span>(Z)</code></pre></div>
+<pre><code>## Z
+##   0   1 
+## 291 301</code></pre>
+<p>To change the probability of assignment, specify the <code>prob</code> argument:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">simple_ra</span>(<span class="dt">N =</span> N, <span class="dt">prob =</span> <span class="fl">0.30</span>)
+<span class="kw">table</span>(Z)</code></pre></div>
+<pre><code>## Z
+##   0   1 
+## 402 190</code></pre>
+<p>If you specify <code>num_arms</code> without changing <code>prob_each</code>, <code>simple_ra()</code> will assume equal probabilities across all arms.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">simple_ra</span>(<span class="dt">N =</span> N, <span class="dt">num_arms =</span> <span class="dv">3</span>)
+<span class="kw">table</span>(Z)</code></pre></div>
+<pre><code>## Z
+##  T1  T2  T3 
+## 186 191 215</code></pre>
+<p>You can also just specify the probabilites of your multiple arms. The probabilities must sum to 1.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">simple_ra</span>(<span class="dt">N =</span> N, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">2</span>, .<span class="dv">2</span>, .<span class="dv">6</span>))
+<span class="kw">table</span>(Z)</code></pre></div>
+<pre><code>## Z
+##  T1  T2  T3 
+## 125 111 356</code></pre>
+<p>You can also name your treatment arms.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">simple_ra</span>(<span class="dt">N =</span> N, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">2</span>, .<span class="dv">2</span>, .<span class="dv">6</span>),
+               <span class="dt">condition_names=</span><span class="kw">c</span>(<span class="st">&quot;control&quot;</span>, <span class="st">&quot;placebo&quot;</span>, <span class="st">&quot;treatment&quot;</span>))
+<span class="kw">table</span>(Z)</code></pre></div>
+<pre><code>## Z
+##   control   placebo treatment 
+##       103       127       362</code></pre>
+</div>
+<div id="complete-random-assignment" class="section level1">
+<h1>Complete Random Assignment</h1>
+<p>Complete random assignment is very similar to simple random assignment, except that the researcher can specify <em>exactly</em> how many units are assigned to each condition.</p>
+<p>The syntax for <code>complete_ra()</code> is very similar to that of <code>simple_ra()</code>. The argument <code>m</code> is the number of units assigned to treatment in two-arm designs; it is analogous to <code>simple_ra()</code>’s <code>prob</code>. Similarly, the argument <code>m_each</code> is analogous to <code>prob_each</code>.</p>
+<p>If you only specify <code>N</code>, <code>complete_ra()</code> assigns exactly half of the subjects to treatment.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">complete_ra</span>(<span class="dt">N =</span> N)
+<span class="kw">table</span>(Z)</code></pre></div>
+<pre><code>## Z
+##   0   1 
+## 296 296</code></pre>
+<p>To change the number of units assigned, specify the <code>m</code> argument:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">complete_ra</span>(<span class="dt">N =</span> N, <span class="dt">m =</span> <span class="dv">200</span>)
+<span class="kw">table</span>(Z)</code></pre></div>
+<pre><code>## Z
+##   0   1 
+## 392 200</code></pre>
+<p>If you specify multiple arms, <code>complete_ra()</code> will assign an equal (within rounding) number of units to treatment.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">complete_ra</span>(<span class="dt">N =</span> N, <span class="dt">num_arms =</span> <span class="dv">3</span>)
+<span class="kw">table</span>(Z)</code></pre></div>
+<pre><code>## Z
+##  T1  T2  T3 
+## 197 198 197</code></pre>
+<p>You can also specify exactly how many units should be assigned to each arm. The total of <code>m_each</code> must equal <code>N</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">complete_ra</span>(<span class="dt">N =</span> N, <span class="dt">m_each =</span> <span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">292</span>))
+<span class="kw">table</span>(Z)</code></pre></div>
+<pre><code>## Z
+##  T1  T2  T3 
+## 100 200 292</code></pre>
+<p>You can also name your treatment arms.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">complete_ra</span>(<span class="dt">N =</span> N, <span class="dt">m_each =</span> <span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">292</span>),
+               <span class="dt">condition_names =</span> <span class="kw">c</span>(<span class="st">&quot;control&quot;</span>, <span class="st">&quot;placebo&quot;</span>, <span class="st">&quot;treatment&quot;</span>))
+<span class="kw">table</span>(Z)</code></pre></div>
+<pre><code>## Z
+##   control   placebo treatment 
+##       100       200       292</code></pre>
+<div id="simple-and-complete-random-assignment-compared" class="section level2">
+<h2>Simple and Complete Random Assignment Compared</h2>
+<p>When should you use <code>simple_ra()</code> versus <code>complete_ra()</code>? Basically, if the number of units is known beforehand, <code>complete_ra()</code> is always preferred, for two reasons: 1. Researchers can plan exactly how many treatments will be deployed. 2. The standard errors associated with complete random assignment are generally smaller, increasing experimental power. See this guide on <a href="http://egap.org/">EGAP</a> for more on <a href="http://egap.org/resources/guides/power/">experimental power</a>.</p>
+<p>Since you need to know <code>N</code> beforehand in order to use <code>simple_ra()</code>, it may seem like a useless function. Sometimes, however, the random assignment isn’t directly in the researcher’s control. For example, when deploying a survey exeriment on a platform like Qualtrics, simple random assignment is the only possibility due to the inflexibility of the built-in random assignment tools. When reconstructing the random assignment for analysis after the experiment has been conducted, <code>simple_ra()</code> provides a convenient way to do so.</p>
+<p>To demonstrate how <code>complete_ra()</code> is superior to <code>simple_ra()</code>, let’s conduct a small simulation with our <code>HairEyeColor</code> dataset.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sims &lt;-<span class="st"> </span><span class="dv">1000</span>
+
+<span class="co"># Set up empty vectors to collect results</span>
+simple_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, sims)
+complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, sims)
+
+<span class="co"># Loop through simulation 2000 times</span>
+for(i in <span class="dv">1</span>:sims){
+  hec &lt;-<span class="st"> </span><span class="kw">within</span>(hec,{
+    
+    <span class="co"># Conduct both kinds of random assignment</span>
+    Z_simple &lt;-<span class="st"> </span><span class="kw">simple_ra</span>(<span class="dt">N =</span> N)
+    Z_complete &lt;-<span class="st"> </span><span class="kw">complete_ra</span>(<span class="dt">N =</span> N)
+    
+    <span class="co"># Reveal observed potential outcomes</span>
+    Y_simple &lt;-<span class="st"> </span>Y1*Z_simple +<span class="st"> </span>Y0*(<span class="dv">1</span>-Z_simple)
+    Y_complete &lt;-<span class="st"> </span>Y1*Z_complete +<span class="st"> </span>Y0*(<span class="dv">1</span>-Z_complete)
+    })
+  
+  <span class="co"># Estimate ATE under both models</span>
+  fit_simple &lt;-<span class="st"> </span><span class="kw">lm</span>(Y_simple ~<span class="st"> </span>Z_simple, <span class="dt">data=</span>hec)
+  fit_complete &lt;-<span class="st"> </span><span class="kw">lm</span>(Y_complete ~<span class="st"> </span>Z_complete, <span class="dt">data=</span>hec)
+  
+  <span class="co"># Save the estimates</span>
+  simple_ests[i] &lt;-<span class="st"> </span><span class="kw">coef</span>(fit_simple)[<span class="dv">2</span>]
+  complete_ests[i] &lt;-<span class="st"> </span><span class="kw">coef</span>(fit_complete)[<span class="dv">2</span>]
+}</code></pre></div>
+<p>The standard error of an estimate is defined as the standard deviation of the sampling distribution of the estimator. When standard errors are estimated (i.e., by using the <code>summary()</code> command on a model fit), they are estimated using some approximation. This simulation allows us to measure the standard error directly, since the vectors <code>simple_ests</code> and <code>complete_ests</code> describe the sampling distribution of each design.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sd</span>(simple_ests)</code></pre></div>
+<pre><code>## [1] 0.5989262</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sd</span>(complete_ests)</code></pre></div>
+<pre><code>## [1] 0.5929085</code></pre>
+<p>In this simulation complete random assignment led to a 2% decrease in sampling variability. This decrease was obtained with a small design tweak that costs the researcher essentially nothing.</p>
+</div>
+</div>
+<div id="block-random-assignment" class="section level1">
+<h1>Block Random Assignment</h1>
+<p>Block random assignment (sometimes known as stratified random assignment) is a powerful tool when used well. In this design, subjects are sorted into blocks (strata) according to their pre-treatment covariates, and then complete random assignment is conducted within each block. For example, a researcher might block on gender, assigning exactly half of the men and exactly half of the women to treatment.</p>
+<p>Why block? The first reason is to signal to future readers that treatment effect heterogeneity may be of interest: is the treatment effect different for men versus women? Of course, such heterogeneity could be explored if complete random assignment had been used, but blocking on a covariate defends a researcher (somewhat) against claims of data dredging. The second reason is to increase precision. If the blocking variables are predicitive of the outcome (i.e., they are correlated with the outcome), then blocking may help to decrease sampling variability. It’s important, however, not to overstate these advantages. The gains from a blocked design can often be realized through covariate adjustment alone.</p>
+<p>Blocking can also produce complications for estimation. Blocking can produce different probabilities of assignment for different subjects. This complication is typically addressed in one of two ways: “controlling for blocks” in a regression context, or inverse probabilitity weights (IPW), in which units are weighted by the inverse of the probability that the unit is in the condition that it is in.</p>
+<p>The only required argument to <code>block_ra()</code> is <code>block_var</code>, which is a vector of length <code>N</code> that describes which block a unit belongs to. <code>block_var</code> can be a factor, character, or numeric variable. If no other arguments are specified, <code>block_ra()</code> assigns an approximately equal proportion of each block to treatment.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair)
+<span class="kw">table</span>(Z, hec$Hair)</code></pre></div>
+<pre><code>##    
+## Z   Black Brown Red Blond
+##   0    54   143  35    63
+##   1    54   143  36    64</code></pre>
+<p>For multiple treatment arms, use the <code>num_arms</code> argument, with or without the <code>condition_names</code> argument</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair, <span class="dt">num_arms =</span> <span class="dv">3</span>)
+<span class="kw">table</span>(Z, hec$Hair)</code></pre></div>
+<pre><code>##     
+## Z    Black Brown Red Blond
+##   T1    36    95  25    42
+##   T2    36    96  23    43
+##   T3    36    95  23    42</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair, <span class="dt">condition_names =</span> <span class="kw">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Placebo&quot;</span>, <span class="st">&quot;Treatment&quot;</span>))
+<span class="kw">table</span>(Z, hec$Hair)</code></pre></div>
+<pre><code>##            
+## Z           Black Brown Red Blond
+##   Control      36    96  23    42
+##   Placebo      36    95  24    42
+##   Treatment    36    95  24    43</code></pre>
+<p><code>block_ra()</code> provides a number of ways to adjust the number of subjects assigned to each conditions. The <code>prob_each</code> argument describes what proportion of each block should be assigned to treatment arm. Note of course, that <code>block_ra()</code> still uses complete random assignment within each block; the appropriate number of units to assign to treatment within each block is automatically determined.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">3</span>, .<span class="dv">7</span>))
+<span class="kw">table</span>(Z, hec$Hair)</code></pre></div>
+<pre><code>##    
+## Z   Black Brown Red Blond
+##   0    32    86  21    39
+##   1    76   200  50    88</code></pre>
+<p>For finer control, use the <code>block_m_each</code> argument, which takes a matrix with as many rows as there are blocks, and as many columns as there are treatment conditions. Remember that the rows are in the same order as <code>sort(unique(block_var))</code>, a command that is good to run before constructing a <code>block_m_each</code> matrix.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(<span class="kw">unique</span>(hec$Hair))</code></pre></div>
+<pre><code>## [1] Black Brown Red   Blond
+## Levels: Black Brown Red Blond</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">block_m_each &lt;-<span class="st"> </span><span class="kw">rbind</span>(<span class="kw">c</span>(<span class="dv">78</span>, <span class="dv">30</span>),
+                      <span class="kw">c</span>(<span class="dv">186</span>, <span class="dv">100</span>),
+                      <span class="kw">c</span>(<span class="dv">51</span>, <span class="dv">20</span>),
+                      <span class="kw">c</span>(<span class="dv">87</span>,<span class="dv">40</span>))
+
+block_m_each</code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,]   78   30
+## [2,]  186  100
+## [3,]   51   20
+## [4,]   87   40</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair, <span class="dt">block_m_each =</span> block_m_each)
+<span class="kw">table</span>(Z, hec$Hair)</code></pre></div>
+<pre><code>##    
+## Z   Black Brown Red Blond
+##   0    78   186  51    87
+##   1    30   100  20    40</code></pre>
+<p>In the example above, the different blocks have different probabilities of assignment to treatment. In this case, people with Black hair have a 30/108 = 27.8% chance of being treated, those with Brown hair have 100/286 = 35.0% change, etc. Left unadressed, this discrepancy could bias treatment effects. We can see this directly with the <code>declare_ra()</code> function.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">declaration &lt;-<span class="st"> </span><span class="kw">declare_ra</span>(<span class="dt">block_var =</span> hec$Hair, <span class="dt">block_m_each =</span> block_m_each)
+
+<span class="co"># show the probability that each unit is assigned to each condition</span>
+<span class="kw">head</span>(declaration$probabilities_matrix)</code></pre></div>
+<pre><code>##         prob_0    prob_1
+## [1,] 0.7222222 0.2777778
+## [2,] 0.7222222 0.2777778
+## [3,] 0.7222222 0.2777778
+## [4,] 0.7222222 0.2777778
+## [5,] 0.7222222 0.2777778
+## [6,] 0.7222222 0.2777778</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Show that the probability of treatment is different within block</span>
+<span class="kw">table</span>(hec$Hair, <span class="kw">round</span>(declaration$probabilities_matrix[,<span class="dv">2</span>], <span class="dv">3</span>))</code></pre></div>
+<pre><code>##        
+##         0.278 0.282 0.315 0.35
+##   Black   108     0     0    0
+##   Brown     0     0     0  286
+##   Red       0    71     0    0
+##   Blond     0     0   127    0</code></pre>
+<p>There are commong two ways to address this problem: LSDV (Least-Squares Dummy Variable, also known as “control for blocks”) or IPW (Inverse-probability weights).</p>
+<p>The following code snippet shows how to use either the LSDV approach or the IPW approach. A note for scrupulous readers: the estimands of these two approaches are subtly different from one another. The LSDV approach estimates the average <strong>block-level</strong> treatment effect. The IPW approach estimates the average <strong>individual-level</strong> treatment effect. They can be different. Since the average block-level treatment effect is not what most people have in mind when thinking about causal effects, analysts using this approach should present both. The <code>obtain_condition_probabilities()</code> function used to calculate the probabilities of assignment is explained below.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">hec &lt;-<span class="st"> </span><span class="kw">within</span>(hec,{
+  Z_blocked &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair,
+                        <span class="dt">block_m_each =</span> block_m_each)
+  Y_blocked &lt;-<span class="st"> </span>Y1*(Z_blocked) +<span class="st"> </span>Y0*(<span class="dv">1</span>-Z_blocked)
+  cond_prob &lt;-<span class="st"> </span><span class="kw">obtain_condition_probabilities</span>(declaration, Z_blocked)
+  IPW_weights &lt;-<span class="st"> </span><span class="dv">1</span>/(cond_prob)
+})
+
+fit_LSDV &lt;-<span class="st"> </span><span class="kw">lm</span>(Y_blocked ~<span class="st"> </span>Z_blocked +<span class="st"> </span>Hair, <span class="dt">data=</span>hec)
+fit_IPW &lt;-<span class="st"> </span><span class="kw">lm</span>(Y_blocked ~<span class="st"> </span>Z_blocked, <span class="dt">weights =</span> IPW_weights, <span class="dt">data =</span> hec)
+
+<span class="kw">summary</span>(fit_LSDV)</code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = Y_blocked ~ Z_blocked + Hair, data = hec)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -20.339  -4.796   0.555   4.653  16.518 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -16.0094     0.6993 -22.895  &lt; 2e-16 ***
+## Z_blocked    25.0499     0.6213  40.318  &lt; 2e-16 ***
+## HairBrown     2.2901     0.7966   2.875  0.00419 ** 
+## HairRed       5.1233     1.0759   4.762 2.42e-06 ***
+## HairBlond     8.9176     0.9221   9.671  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 7.042 on 587 degrees of freedom
+## Multiple R-squared:  0.7482, Adjusted R-squared:  0.7465 
+## F-statistic:   436 on 4 and 587 DF,  p-value: &lt; 2.2e-16</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(fit_IPW)</code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = Y_blocked ~ Z_blocked, data = hec, weights = IPW_weights)
+## 
+## Weighted Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -34.729  -7.028  -0.213   6.662  38.876 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -12.3724     0.4747  -26.06   &lt;2e-16 ***
+## Z_blocked    25.0311     0.6714   37.28   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 11.55 on 590 degrees of freedom
+## Multiple R-squared:  0.702,  Adjusted R-squared:  0.7015 
+## F-statistic:  1390 on 1 and 590 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>How to create blocks? In the <code>HairEyeColor</code> dataset, we could make blocks for each unique combination of hair color, eye color, and sex.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">block_var &lt;-<span class="st"> </span><span class="kw">with</span>(hec, <span class="kw">paste</span>(Hair, Eye, Sex, <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>))
+Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> block_var)
+<span class="kw">head</span>(<span class="kw">table</span>(block_var, Z))</code></pre></div>
+<pre><code>##                     Z
+## block_var             0  1
+##   Black_Blue_Female   5  4
+##   Black_Blue_Male     5  6
+##   Black_Brown_Female 18 18
+##   Black_Brown_Male   16 16
+##   Black_Green_Female  1  1
+##   Black_Green_Male    1  2</code></pre>
+<p>An alternative is to use the <code>blockTools</code> package, which constructs matched pairs, trios, quartets, etc. from pretreatment covariates.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(blockTools)
+
+<span class="co"># BlockTools requires that all variables be numeric</span>
+numeric_mat &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(~Hair+Eye+Sex, <span class="dt">data=</span>hec)[,-<span class="dv">1</span>]
+
+<span class="co"># BlockTools also requres an id variable</span>
+df_forBT &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">id_var =</span> <span class="dv">1</span>:<span class="kw">nrow</span>(numeric_mat), numeric_mat)
+
+<span class="co"># Conducting the actual blocking: let's make trios</span>
+out &lt;-<span class="st"> </span><span class="kw">block</span>(df_forBT, <span class="dt">n.tr =</span> <span class="dv">3</span>, <span class="dt">id.vars =</span> <span class="st">&quot;id_var&quot;</span>, 
+             <span class="dt">block.vars =</span> <span class="kw">colnames</span>(df_forBT)[-<span class="dv">1</span>])
+
+<span class="co"># Extact the block_ids</span>
+hec$block_id &lt;-<span class="st"> </span><span class="kw">createBlockIDs</span>(out, df_forBT, <span class="dt">id.var =</span> <span class="st">&quot;id_var&quot;</span>)
+
+<span class="co"># Conduct actual random assignment with randomizr</span>
+Z_blocked &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$block_id, <span class="dt">num_arms =</span> <span class="dv">3</span>)
+<span class="kw">head</span>(<span class="kw">table</span>(hec$block_id, Z_blocked))</code></pre></div>
+<pre><code>##    Z_blocked
+##     T1 T2 T3
+##   1  1  1  1
+##   2  1  1  1
+##   3  1  1  1
+##   4  1  1  1
+##   5  1  1  1
+##   6  1  1  1</code></pre>
+<p>A note for <code>blockTools</code> users: that package also has an assignment function. My preference is to extract the blocking variable, then conduct the assignment with <code>block_ra()</code>, so that fewer steps are required to reconstruct the random assignment or generate new random assignments for a randomization inference procedure.</p>
+</div>
+<div id="clustered-assignment" class="section level1">
+<h1>Clustered assignment</h1>
+<p>Clustered assignment is unfortunate. If you can avoid assigning subjects to treatments by cluster, you should. Sometimes, clustered assignment is unavoidable. Some common situations include:</p>
+<ol style="list-style-type: decimal">
+<li>Housemates in households: whole households are assigned to treatment or control</li>
+<li>Students in classrooms: whole classrooms are assigned to treatment or control</li>
+<li>Residents in towns or villages: whole communities are assigned to treatment or control</li>
+</ol>
+<p>Clustered assignment decreases the effective sample size of an experiment. In the extreme case when outcomes are perfectly correlated with clusters, the experiment has an effective sample size equal to the number of clusters. When outcomes are perfectly uncorrelated with clusters, the effective sample size is equal to the number of subjects. Almost all cluster-assigned experiments fall somewhere in the middle of these two extremes.</p>
+<p>The only required argument for the <code>cluster_ra()</code> function is the <code>clust_var</code> argument, which is a vector of length <code>N</code> that indicates which cluster each subject belongs to. Let’s pretend that for some reason, we have to assign treatments according to the unique combinations of hair color, eye color, and gender.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">clust_var &lt;-<span class="st"> </span><span class="kw">with</span>(hec, <span class="kw">paste</span>(Hair, Eye, Sex, <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>))
+hec$clust_var &lt;-<span class="st"> </span>clust_var
+
+Z_clust &lt;-<span class="st"> </span><span class="kw">cluster_ra</span>(<span class="dt">clust_var =</span> clust_var)
+
+<span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z_clust))</code></pre></div>
+<pre><code>##                     Z_clust
+## clust_var             0  1
+##   Black_Blue_Female   0  9
+##   Black_Blue_Male     0 11
+##   Black_Brown_Female  0 36
+##   Black_Brown_Male    0 32
+##   Black_Green_Female  0  2
+##   Black_Green_Male    0  3</code></pre>
+<p>This shows that each cluster is either assigned to treatment or control. No two units within the same cluster are assigned to different conditions.</p>
+<p>As with all functions in <code>randomizr</code>, you can specify multiple treatment arms in a variety of ways:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z_clust &lt;-<span class="st"> </span><span class="kw">cluster_ra</span>(<span class="dt">clust_var =</span> clust_var, <span class="dt">num_arms =</span> <span class="dv">3</span>)
+<span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z_clust))</code></pre></div>
+<pre><code>##                     Z_clust
+## clust_var            T1 T2 T3
+##   Black_Blue_Female   9  0  0
+##   Black_Blue_Male     0 11  0
+##   Black_Brown_Female 36  0  0
+##   Black_Brown_Male    0 32  0
+##   Black_Green_Female  0  0  2
+##   Black_Green_Male    0  0  3</code></pre>
+<p>… or using <code>condition_names</code></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z_clust &lt;-<span class="st"> </span><span class="kw">cluster_ra</span>(<span class="dt">clust_var=</span>clust_var, 
+                      <span class="dt">condition_names=</span><span class="kw">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Placebo&quot;</span>, <span class="st">&quot;Treatment&quot;</span>))
+<span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z_clust))</code></pre></div>
+<pre><code>##                     Z_clust
+## clust_var            Control Placebo Treatment
+##   Black_Blue_Female        0       0         9
+##   Black_Blue_Male          0       0        11
+##   Black_Brown_Female       0       0        36
+##   Black_Brown_Male         0       0        32
+##   Black_Green_Female       0       0         2
+##   Black_Green_Male         0       3         0</code></pre>
+<p>… or using <code>m_each</code>, which describes how many clusters should be assigned to each condition. <code>m_each</code> must sum to the number of clusters.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z_clust &lt;-<span class="st"> </span><span class="kw">cluster_ra</span>(<span class="dt">clust_var=</span>clust_var, <span class="dt">m_each=</span><span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">15</span>, <span class="dv">12</span>))
+<span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z_clust))</code></pre></div>
+<pre><code>##                     Z_clust
+## clust_var            T1 T2 T3
+##   Black_Blue_Female   0  0  9
+##   Black_Blue_Male     0 11  0
+##   Black_Brown_Female  0 36  0
+##   Black_Brown_Male   32  0  0
+##   Black_Green_Female  0  0  2
+##   Black_Green_Male    0  3  0</code></pre>
+</div>
+<div id="blocked-and-clustered-assignment" class="section level1">
+<h1>Blocked and clustered assignment</h1>
+<p>The power of clustered experiments can sometimes be improved through blocking. In this scenario, whole clusters are members of a particular block – imagine villages nested within discrete regions, or classrooms nested within discrete schools.</p>
+<p>As an example, let’s group our clusters into blocks by size using <code>dplyr</code></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">suppressMessages</span>(<span class="kw">library</span>(dplyr))
+cluster_level_df &lt;-<span class="st"> </span>
+<span class="st">  </span>hec %&gt;%
+<span class="st">  </span><span class="kw">group_by</span>(clust_var) %&gt;%
+<span class="st">  </span><span class="kw">summarize</span>(<span class="dt">cluster_size =</span> <span class="kw">n</span>()) %&gt;%
+<span class="st">  </span><span class="kw">arrange</span>(cluster_size) %&gt;%
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">block_var =</span> <span class="kw">paste0</span>(<span class="st">&quot;block_&quot;</span>, <span class="kw">sprintf</span>(<span class="st">&quot;%02d&quot;</span>,<span class="kw">rep</span>(<span class="dv">1</span>:<span class="dv">16</span>, <span class="dt">each=</span><span class="dv">2</span>))))
+
+hec &lt;-<span class="st"> </span><span class="kw">left_join</span>(hec, cluster_level_df)</code></pre></div>
+<pre><code>## Joining, by = &quot;clust_var&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Extract the cluster and block variables</span>
+clust_var &lt;-<span class="st"> </span>hec$clust_var
+block_var &lt;-<span class="st"> </span>hec$block_var
+
+Z &lt;-<span class="st"> </span><span class="kw">block_and_cluster_ra</span>(<span class="dt">clust_var =</span> clust_var, <span class="dt">block_var =</span> block_var)
+<span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z))</code></pre></div>
+<pre><code>##                     Z
+## clust_var             0  1
+##   Black_Blue_Female   0  9
+##   Black_Blue_Male    11  0
+##   Black_Brown_Female  0 36
+##   Black_Brown_Male    0 32
+##   Black_Green_Female  0  2
+##   Black_Green_Male    3  0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(<span class="kw">table</span>(block_var, Z))</code></pre></div>
+<pre><code>##           Z
+## block_var  0 1
+##   block_01 3 2
+##   block_02 3 4
+##   block_03 5 5
+##   block_04 5 7
+##   block_05 7 7
+##   block_06 7 7</code></pre>
+</div>
+<div id="calculating-probabilities-of-assignment" class="section level1">
+<h1>Calculating probabilities of assignment</h1>
+<p>All five random assignment functions in <code>randomizr</code> assign units to treatment with known (if sometimes complicated) probabilities. The <code>declare_ra()</code> and <code>obtain_condition_probabilities()</code> functions calculate these probabilities according to the parameters of your experimental design.</p>
+<p>Let’s take a look at the block random assignment we used before.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">block_m_each &lt;-<span class="st"> </span>
+<span class="st">  </span><span class="kw">rbind</span>(<span class="kw">c</span>(<span class="dv">78</span>, <span class="dv">30</span>),
+        <span class="kw">c</span>(<span class="dv">186</span>, <span class="dv">100</span>),
+        <span class="kw">c</span>(<span class="dv">51</span>, <span class="dv">20</span>),
+        <span class="kw">c</span>(<span class="dv">87</span>, <span class="dv">40</span>))
+  
+Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair,
+              <span class="dt">block_m_each =</span> block_m_each)
+
+<span class="kw">table</span>(hec$Hair, Z)</code></pre></div>
+<pre><code>##        Z
+##           0   1
+##   Black  78  30
+##   Brown 186 100
+##   Red    51  20
+##   Blond  87  40</code></pre>
+<p>In order to calculate the probabilities of assignment, we call the <code>declare_ra()</code> function with the same exact arguments as we used for the <code>block_ra()</code> call. The <code>declaration</code> object contains a matrix of probabilities of assignment:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">declaration &lt;-<span class="st"> </span><span class="kw">declare_ra</span>(<span class="dt">block_var =</span> hec$Hair,
+                          <span class="dt">block_m_each =</span> block_m_each)
+prob_mat &lt;-<span class="st"> </span>declaration$probabilities_matrix
+<span class="kw">head</span>(prob_mat)</code></pre></div>
+<pre><code>##         prob_0    prob_1
+## [1,] 0.7222222 0.2777778
+## [2,] 0.7222222 0.2777778
+## [3,] 0.7222222 0.2777778
+## [4,] 0.7222222 0.2777778
+## [5,] 0.7222222 0.2777778
+## [6,] 0.7222222 0.2777778</code></pre>
+<p>The <code>prob_mat</code> objects has <code>N</code> rows and as many columns as there are treatment conditions, in this case 2.</p>
+<p>In order to use inverse-probability weights, we need to know the probability of each unit being in the <strong>condition that it is in</strong>. For each unit, we need to pick the appropriate probability. This bookkeeping is handled automatically by the <code>obtain_condition_probabilities()</code> function.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cond_prob &lt;-<span class="st"> </span><span class="kw">obtain_condition_probabilities</span>(declaration, Z)
+<span class="kw">table</span>(cond_prob, Z)</code></pre></div>
+<pre><code>##                    Z
+## cond_prob             0   1
+##   0.277777777777778   0  30
+##   0.28169014084507    0  20
+##   0.31496062992126    0  40
+##   0.34965034965035    0 100
+##   0.65034965034965  186   0
+##   0.68503937007874   87   0
+##   0.71830985915493   51   0
+##   0.722222222222222  78   0</code></pre>
+</div>
+<div id="best-practices" class="section level1">
+<h1>Best practices</h1>
+<div id="random-assignment-procedure-random-assignment-function" class="section level2">
+<h2>Random assignment procedure = Random assignment <strong>function</strong></h2>
+<p>Random assignment procedures are often described as a series of steps that are manually carried out be the researcher. In order to make this procedure reproducible, these steps need to be translated into a <strong>function</strong> that returns a different random assignment each time it is called.</p>
+<p>For example, consider the following procedure for randomly allocating school vouchers.</p>
+<ol style="list-style-type: decimal">
+<li>Every eligible student’s names is put on a list</li>
+<li>Each name is assigned a random number</li>
+<li>Balls with the numbers associated with all students are put in an urn.</li>
+<li>Then the urn is “shuffled”</li>
+<li>Students names are drawn one by one from the urn until all slots are given out.</li>
+<li>If one sibling in a family wins, all other siblings automatically win too.</li>
+</ol>
+<p>If we write such a procedure into a function, it might look like this:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># 400 families have 1 child in the lottery, 100 families have 2</span>
+family_id &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">sprintf</span>(<span class="st">&quot;%03d&quot;</span>, <span class="dv">1</span>:<span class="dv">500</span>), <span class="kw">sprintf</span>(<span class="st">&quot;%03d&quot;</span>, <span class="dv">1</span>:<span class="dv">100</span>))
+
+school_ra &lt;-<span class="st"> </span>function(m){
+  N &lt;-<span class="st"> </span><span class="kw">length</span>(family_id)
+  random_number &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span>:N, <span class="dt">replace=</span><span class="ot">FALSE</span>)
+  Z &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="dv">0</span>, N)
+  i &lt;-<span class="st"> </span><span class="dv">1</span>
+  while(<span class="kw">sum</span>(Z) &lt;m){
+    Z[family_id==family_id[random_number[i]]] &lt;-<span class="st"> </span><span class="dv">1</span>
+    i &lt;-<span class="st"> </span>i +<span class="st"> </span><span class="dv">1</span>
+  }
+  <span class="kw">return</span>(Z)
+}
+
+Z &lt;-<span class="st"> </span><span class="kw">school_ra</span>(<span class="dv">200</span>)
+<span class="kw">table</span>(Z)</code></pre></div>
+<pre><code>## Z
+##   0   1 
+## 400 200</code></pre>
+<p>This assignment procedure is complicated by the sibling rule, which has two effects: first, students are cluster-assigned by family, and second, the probability of assignment varies student to student. Obviously, families who have two children in the lottery have a higher probability of winning the lottery because they effectively have two “tickets.” There may be better ways of running this assignment procedure (for example, with <code>cluster_ra()</code>), but the purpose of this example is to show how complicated <em>real-world</em> procedures can be written up in a simple function. With this function, the random assignment procedure can be reproduced exactly, the complicated probabilities of assignment can be caluculated, and the analysis is greatly simplified.</p>
+</div>
+<div id="check-probabilities-of-assignment-directly" class="section level2">
+<h2>Check probabilities of assignment directly</h2>
+<p>For many designs, the probability of assignment to treatment can be calculated analytically. For example, in a completely randomized design with 200 units, 60 of which are assigned to treatment, the probability is exactly 0.30 for all units. However, in more complicated designs (such as the schools example described above), analytic probabilities are difficult to calculate. In such a situation, an easy way to obtain the probabilities of assignment is through simulation.</p>
+<ol style="list-style-type: decimal">
+<li>Call your random assignment function an approximately infinite number of times (about 10,000 for most purposes).</li>
+<li>Count how often each unit is assigned to each treatment arm.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z_matrix &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">1000</span>, <span class="kw">school_ra</span>(<span class="dv">200</span>))
+<span class="kw">plot</span>(<span class="kw">rowMeans</span>(Z_matrix))</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>This plot shows that the students who have a sibling in the lottery have a higher probability of assignment. The more simulations, the more precise the estimate of the probability of assignment.</p>
+</div>
+<div id="save-your-random-assignment" class="section level2">
+<h2>Save your random assignment</h2>
+<p>Whenever you conduct a random assignment for use in an experiment, save it! At a minimum, the random assignment should be saved with an id variable in a csv.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">hec &lt;-<span class="st"> </span><span class="kw">within</span>(hec,{
+  Z_blocked &lt;-<span class="st"> </span><span class="kw">complete_ra</span>(<span class="dt">N =</span> N, <span class="dt">m_each =</span> <span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">292</span>),
+               <span class="dt">condition_names =</span> <span class="kw">c</span>(<span class="st">&quot;control&quot;</span>, <span class="st">&quot;placebo&quot;</span>, <span class="st">&quot;treatment&quot;</span>))
+  id_var &lt;-<span class="st"> </span><span class="dv">1</span>:<span class="kw">nrow</span>(hec)
+})
+<span class="kw">write.csv</span>(hec[,<span class="kw">c</span>(<span class="st">&quot;id_var&quot;</span>, <span class="st">&quot;Z_blocked&quot;</span>)], <span class="dt">file =</span> <span class="st">&quot;MyRandomAssignment.csv&quot;</span>)</code></pre></div>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

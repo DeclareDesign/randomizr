@@ -15,22 +15,22 @@ declare_rs(N = NULL, strata_var = NULL, clust_var = NULL, n = NULL,
 
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
 
-\item{n}{Use for a design in which n units (or clusters) are sampled. (optional)}
+\item{n}{Use for a design in which n units (or clusters) are sampled. In a stratified design, exactly n units in each stratum will be sampled. (optional)}
 
 \item{prob}{Use for a design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be sampled and with probability prob, ceiling(N*prob) units (or clusters) will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
 
 \item{strata_n}{Use for a design in which strata_n describes the number of units to sample within each stratum.}
 
-\item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of assignment can vary across strata.}
+\item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
 
-\item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify n or strata_n.}
+\item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
 A list of class "rs_declaration".  The list has five entries:
-  $rs_function, a function that generates random assignments accroding to the declaration.
-  $rs_type, a string indicating the type of random assignment used
+  $rs_function, a function that generates random samplings according to the declaration.
+  $rs_type, a string indicating the type of random sampling used
   $probabilities_vector, A vector length N indicating the probability of being sampled.
   $strata_var, the stratification variable.
   $clust_var, the clustering variable.
@@ -60,7 +60,7 @@ table(probs, S)
 declare_rs(N = 100, simple = TRUE)
 declare_rs(N = 100, prob = .4, simple = TRUE)
 
-# Complete Random Assignment Declarations
+# Complete Random Sampling Declarations
 
 declare_rs(N = 100)
 declare_rs(N = 100, n = 30)

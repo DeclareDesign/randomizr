@@ -22,6 +22,7 @@
 #' @export
 strata_rs_probabilities <- function(strata_var,
                                     prob = NULL,
+                                    n = NULL,
                                     strata_n = NULL,
                                     strata_prob = NULL,
                                     check_inputs = TRUE) {
@@ -29,6 +30,7 @@ strata_rs_probabilities <- function(strata_var,
     check_inputs <- check_samplr_arguments(
       strata_var = strata_var,
       prob = prob,
+      n = n,
       strata_n = strata_n,
       strata_prob = strata_prob
     )
@@ -40,7 +42,7 @@ strata_rs_probabilities <- function(strata_var,
   strata_spots <-
     unlist(split(1:length(strata_var), strata_var), FALSE, FALSE)
   
-  if (is.null(prob) & is.null(strata_n) & is.null(strata_prob)) {
+  if (is.null(prob) & is.null(strata_n) & is.null(strata_prob) & is.null(n)) {
     prob <- 0.5
   }
   
@@ -54,6 +56,10 @@ strata_rs_probabilities <- function(strata_var,
   prob_vec <- rep(NA, length(strata_var))
   
   # Case 2: strata_n is specified
+  if(!is.null(n)){
+    strata_n <- rep(n, length(N_per_stratum))
+  }
+  
   if (!is.null(strata_n)) {
     prob_vec_list <-
       mapply(

@@ -1,4 +1,4 @@
-#' Probabilties of assignment: Cluster Random Assignment
+#' Inclusion Probabilities: Cluster Sampling
 #'
 #' @inheritParams cluster_rs
 #'

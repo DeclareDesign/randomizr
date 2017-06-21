@@ -4,17 +4,19 @@
 \alias{strata_rs_probabilities}
 \title{Inclusion Probabilities: Stratified Random Sampling}
 \usage{
-strata_rs_probabilities(strata_var, prob = NULL, strata_n = NULL,
-  strata_prob = NULL, check_inputs = TRUE)
+strata_rs_probabilities(strata_var, prob = NULL, n = NULL,
+  strata_n = NULL, strata_prob = NULL, check_inputs = TRUE)
 }
 \arguments{
 \item{strata_var}{A vector of length N that indicates which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)}
 
-\item{prob}{Use for a design in which either floor(N_stratum*prob) or ceiling(N_stratum*prob) units are assigned to treatment within each stratum. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_stratum*prob) units will be assigned to treatment and with probability prob, ceiling(N_stratum*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)}
+\item{prob}{Use for a design in which either floor(N_stratum*prob) or ceiling(N_stratum*prob) units are sampled within each stratum. The probability of  being sampled is exactly prob because with probability 1-prob, floor(N_stratum*prob) units will be sampled and with probability prob, ceiling(N_stratum*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{strata_n}{Use for a in which strata_n describes the number of units to assign to treatment within each stratum.}
+\item{n}{Use for a design in which the scalar n describes the fixed number of units to sample in each stratum. This number does not vary across strata.}
 
-\item{strata_prob}{Use for a in which strata_prob describes the probability of assignment to treatment within each stratum. Differs from prob in that the probability of assignment can vary across strata.}
+\item{strata_n}{Use for a design in which the numeric vector strata_n describes the number of units to sample within each stratum.}
+
+\item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
 }

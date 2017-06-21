@@ -1,15 +1,16 @@
-#' Stratified and Clustered Random Assignment
+#' Stratified and Clustered Random Sampling
 #'
 #' A random sampling procedure in which units are sampled as clusters and clusters are nested within strata.
 #'
 #' @param strata_var A vector of length N that indicates which stratum each unit belongs to.
 #' @param clust_var A vector of length N that indicates which cluster each unit belongs to.
 #' @param prob Use for a design in which either floor(N_clusters_stratum*prob) or ceiling(N_clusters_stratum*prob) clusters are sampled within each stratum. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters_stratum*prob) clusters will be sampled and with probability prob, ceiling(N_clusters_stratum*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
+#' @param n Use for a design in which the scalar n describes the fixed number of units to sample in each stratum. This number does not vary across strata.
 #' @param strata_n Use for a design in which strata_n describes the number of units to sample within each stratum.
 #' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.
 #' @param check_inputs logical. Defaults to TRUE.
 #'
-#' @return A vector of length N that indicates the treatment condition of each unit.
+#' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
 #'
 #' @examples
 #' clust_var <- rep(letters, times = 1:26)
@@ -57,6 +58,7 @@ strata_and_cluster_rs <-
   function(strata_var,
            clust_var,
            prob = NULL,
+           n = NULL,
            strata_n = NULL,
            strata_prob = NULL,
            check_inputs = TRUE) {
@@ -68,6 +70,7 @@ strata_and_cluster_rs <-
         strata_var = strata_var,
         clust_var = clust_var,
         prob = prob,
+        n = n,
         strata_n = strata_n,
         strata_prob = strata_prob
       )
@@ -83,6 +86,7 @@ strata_and_cluster_rs <-
     S_clust <- strata_rs(
       strata_var = clust_strata,
       prob = prob,
+      n = n,
       strata_n = strata_n,
       strata_prob = strata_prob
     )

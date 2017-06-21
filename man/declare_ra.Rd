@@ -17,7 +17,7 @@ declare_ra(N = NULL, block_var = NULL, clust_var = NULL, m = NULL,
 
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
 
-\item{m}{Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. (optional)}
+\item{m}{Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. In a blocked design, exactly m units in each block will be treated. (optional)}
 
 \item{m_each}{Use for a multi-arm design in which the values of m_each determine the number of units (or clusters) assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many units (or clusters) should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)}
 
@@ -43,7 +43,7 @@ declare_ra(N = NULL, block_var = NULL, clust_var = NULL, m = NULL,
 }
 \value{
 A list of class "ra_declaration".  The list has five entries:
-  $ra_function, a function that generates random assignments accroding to the declaration.
+  $ra_function, a function that generates random assignments according to the declaration.
   $ra_type, a string indicating the type of random assignment used
   $probabilities_matrix, a matrix with N rows and num_arms columns, describing each unit's probabilities of assignment to conditions.
   $block_var, the blocking variable.

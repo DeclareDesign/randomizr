@@ -2,10 +2,10 @@
 % Please edit documentation in R/strata_and_cluster_rs_probabilities.R
 \name{strata_and_cluster_rs_probabilities}
 \alias{strata_and_cluster_rs_probabilities}
-\title{Probabilties of assignment: Stratified Cluster Random Assignment}
+\title{Inclusion Probabilities: Stratified and Clustered Random Sampling}
 \usage{
 strata_and_cluster_rs_probabilities(strata_var, clust_var, prob = NULL,
-  strata_n = NULL, strata_prob = NULL, check_inputs = TRUE)
+  n = NULL, strata_n = NULL, strata_prob = NULL, check_inputs = TRUE)
 }
 \arguments{
 \item{strata_var}{A vector of length N that indicates which stratum each unit belongs to.}
@@ -13,6 +13,8 @@ strata_and_cluster_rs_probabilities(strata_var, clust_var, prob = NULL,
 \item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{prob}{Use for a design in which either floor(N_clusters_stratum*prob) or ceiling(N_clusters_stratum*prob) clusters are sampled within each stratum. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters_stratum*prob) clusters will be sampled and with probability prob, ceiling(N_clusters_stratum*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
+
+\item{n}{Use for a design in which the scalar n describes the fixed number of units to sample in each stratum. This number does not vary across strata.}
 
 \item{strata_n}{Use for a design in which strata_n describes the number of units to sample within each stratum.}
 
@@ -24,7 +26,7 @@ strata_and_cluster_rs_probabilities(strata_var, clust_var, prob = NULL,
 A vector length N indicating the probability of being sampled.
 }
 \description{
-Probabilties of assignment: Stratified Cluster Random Assignment
+Inclusion Probabilities: Stratified and Clustered Random Sampling
 }
 \examples{
 

@@ -3,7 +3,7 @@
 #' @param N The number of units. N must be a positive integer. (required)
 #' @param block_var A vector of length N that indicates which block each unit belongs to.
 #' @param clust_var A vector of length N that indicates which cluster each unit belongs to.
-#' @param m Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. (optional)
+#' @param m Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. In a blocked design, exactly m units in each block will be treated. (optional)
 #' @param m_each Use for a multi-arm design in which the values of m_each determine the number of units (or clusters) assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many units (or clusters) should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)
 #' @param prob Use for a two-arm design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be assigned to treatment and with probability prob, ceiling(N*prob) units (or clusters) will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
 #' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
@@ -17,7 +17,7 @@
 #' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A list of class "ra_declaration".  The list has five entries:
-#'   $ra_function, a function that generates random assignments accroding to the declaration.
+#'   $ra_function, a function that generates random assignments according to the declaration.
 #'   $ra_type, a string indicating the type of random assignment used
 #'   $probabilities_matrix, a matrix with N rows and num_arms columns, describing each unit's probabilities of assignment to conditions.
 #'   $block_var, the blocking variable.
@@ -200,6 +200,7 @@ declare_ra <- function(N = NULL,
       block_ra(
         block_var = block_var,
         num_arms = num_arms,
+        m = m,
         block_m = block_m,
         block_m_each = block_m_each,
         prob = prob,
@@ -213,6 +214,7 @@ declare_ra <- function(N = NULL,
     probabilities_matrix <-
       block_ra_probabilities(
         block_var = block_var,
+        m = m,
         block_m = block_m,
         block_m_each = block_m_each,
         prob = prob,
@@ -260,6 +262,7 @@ declare_ra <- function(N = NULL,
         block_var = block_var,
         prob = prob,
         prob_each = prob_each,
+        m = m,
         block_m = block_m,
         block_m_each = block_m_each,
         block_prob = block_prob,
@@ -276,6 +279,7 @@ declare_ra <- function(N = NULL,
         prob = prob,
         prob_each = prob_each,
         block_prob = block_prob,
+        m = m,
         block_m = block_m,
         block_m_each = block_m_each,
         block_prob_each = block_prob_each,

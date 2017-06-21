@@ -13,10 +13,15 @@ table(strata_var, clust_var)
 S <- strata_and_cluster_rs(clust_var = clust_var, strata_var = strata_var)
 probs <- strata_and_cluster_rs_probabilities(clust_var = clust_var, strata_var = strata_var)
 
+S <- strata_and_cluster_rs(clust_var = clust_var, strata_var = strata_var, n = 2)
+probs <- strata_and_cluster_rs_probabilities(clust_var = clust_var, strata_var = strata_var, n = 2)
+
 table(S, clust_var)
 table(S, strata_var)
+table(S, clust_var, strata_var)
 table(probs, clust_var)
 table(probs, strata_var)
+table(probs, clust_var, strata_var)
 
 S <- strata_and_cluster_rs(clust_var = clust_var,
                            strata_var = strata_var,

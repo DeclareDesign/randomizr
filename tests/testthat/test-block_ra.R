@@ -10,6 +10,8 @@ Z <- block_ra(block_var=block_var)
 table(block_var, Z)
 
 Z <- block_ra(block_var=block_var, block_m = c(20, 30, 40))
+Z <- block_ra(block_var=block_var, m = 10)
+expect_error(block_ra(block_var=block_var, m = 60))
 
 
 Z <- block_ra(block_var=block_var, block_prob = c(.1, .2, .3))
