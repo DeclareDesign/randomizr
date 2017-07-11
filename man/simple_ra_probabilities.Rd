@@ -37,7 +37,7 @@ head(prob_mat)
 prob_mat <- simple_ra_probabilities(N=100, prob_each = c(0.3, 0.7),
                         condition_names = c("control", "treatment"))
 head(prob_mat)
-                         
+
 # Multi-arm Designs
 prob_mat <- simple_ra_probabilities(N=100, num_arms=3)
 head(prob_mat)
@@ -48,7 +48,7 @@ head(prob_mat)
 prob_mat <- simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4),
                         condition_names=c("control", "placebo", "treatment"))
 head(prob_mat)
-                         
+
 prob_mat <- simple_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
 head(prob_mat)
 

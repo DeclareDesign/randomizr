@@ -26,7 +26,7 @@ cluster_rs_probabilities <-
            simple = FALSE,
            check_inputs = TRUE) {
     if (check_inputs) {
-      check_inputs <-
+      input_check <-
         check_samplr_arguments(n = n,
                                clust_var = clust_var,
                                prob = prob)

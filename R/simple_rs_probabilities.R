@@ -15,9 +15,8 @@ simple_rs_probabilities <-
   function(N,
            prob = NULL,
            check_inputs = TRUE) {
-    
     if (check_inputs) {
-      check_inputs <-
+      input_check <-
         check_samplr_arguments(N = N,
                                prob = prob)
     }

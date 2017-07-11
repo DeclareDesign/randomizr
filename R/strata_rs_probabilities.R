@@ -27,15 +27,17 @@ strata_rs_probabilities <- function(strata_var,
                                     strata_prob = NULL,
                                     check_inputs = TRUE) {
   if (check_inputs) {
-    check_inputs <- check_samplr_arguments(
+    input_check <- check_samplr_arguments(
       strata_var = strata_var,
       prob = prob,
       n = n,
       strata_n = strata_n,
       strata_prob = strata_prob
     )
-    
-    N_per_stratum <- check_inputs$N_per_stratum
+    N_per_stratum <- input_check$N_per_stratum
+  } else{
+    N_per_stratum <- tapply(strata_var, strata_var, length)
+    attributes(N_per_stratum) <- NULL
   }
   
   

@@ -83,7 +83,7 @@ declare_rs <- function(N = NULL,
                        simple = FALSE,
                        check_inputs = TRUE) {
   if (check_inputs) {
-    check_inputs <- check_samplr_arguments(
+    input_check <- check_samplr_arguments(
       N = N,
       strata_var = strata_var,
       clust_var = clust_var,
@@ -120,24 +120,32 @@ declare_rs <- function(N = NULL,
     
     rs_function <- function() {
       simple_rs(N = N,
-                prob = prob)
+                prob = prob,
+                check_inputs = check_inputs)
     }
     probabilities_vector <-
       simple_rs_probabilities(N = N,
-                              prob = prob)
+                              prob = prob,
+                              check_inputs = check_inputs)
   }
   
   if (rs_type == "complete") {
     rs_function <- function() {
-      complete_rs(N = N,
-                  n = n,
-                  prob = prob)
+      complete_rs(
+        N = N,
+        n = n,
+        prob = prob,
+        check_inputs = check_inputs
+      )
     }
     
     probabilities_vector <-
-      complete_rs_probabilities(N = N,
-                                n = n,
-                                prob = prob)
+      complete_rs_probabilities(
+        N = N,
+        n = n,
+        prob = prob,
+        check_inputs = check_inputs
+      )
     
   }
   
@@ -148,7 +156,8 @@ declare_rs <- function(N = NULL,
         n = n,
         strata_n = strata_n,
         prob = prob,
-        strata_prob = strata_prob
+        strata_prob = strata_prob,
+        check_inputs = check_inputs
       )
     }
     
@@ -158,7 +167,8 @@ declare_rs <- function(N = NULL,
         n = n,
         strata_n = strata_n,
         prob = prob,
-        strata_prob = strata_prob
+        strata_prob = strata_prob,
+        check_inputs = check_inputs
       )
   }
   
@@ -169,7 +179,8 @@ declare_rs <- function(N = NULL,
         clust_var = clust_var,
         n = n,
         prob = prob,
-        simple = simple
+        simple = simple,
+        check_inputs = check_inputs
       )
     }
     
@@ -178,7 +189,8 @@ declare_rs <- function(N = NULL,
         clust_var = clust_var,
         n = n,
         prob = prob,
-        simple = simple
+        simple = simple,
+        check_inputs = check_inputs
       )
     
   }
@@ -191,7 +203,8 @@ declare_rs <- function(N = NULL,
         prob = prob,
         n = n,
         strata_n = strata_n,
-        strata_prob = strata_prob
+        strata_prob = strata_prob,
+        check_inputs = check_inputs
       )
     }
     
@@ -202,7 +215,8 @@ declare_rs <- function(N = NULL,
         prob = prob,
         n = n,
         strata_prob = strata_prob,
-        strata_n = strata_n
+        strata_n = strata_n,
+        check_inputs = check_inputs
       )
     
   }
@@ -212,7 +226,8 @@ declare_rs <- function(N = NULL,
     rs_type = rs_type,
     probabilities_vector = probabilities_vector,
     strata_var = strata_var,
-    clust_var = clust_var
+    clust_var = clust_var,
+    check_inputs = check_inputs
   )
   
   class(return_object) <- "rs_declaration"

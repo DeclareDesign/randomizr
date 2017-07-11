@@ -103,8 +103,9 @@ declare_ra <- function(N = NULL,
                        condition_names = NULL,
                        simple = FALSE,
                        check_inputs = TRUE) {
+  input_check <- NULL
   if (check_inputs) {
-    check_inputs <- check_randomizr_arguments(
+    input_check <- check_randomizr_arguments(
       N = N,
       block_var = block_var,
       clust_var = clust_var,
@@ -156,7 +157,8 @@ declare_ra <- function(N = NULL,
         prob = prob,
         prob_each = prob_each,
         num_arms = num_arms,
-        condition_names = condition_names
+        condition_names = condition_names,
+        check_inputs = check_inputs
       )
     }
     probabilities_matrix <-
@@ -165,7 +167,8 @@ declare_ra <- function(N = NULL,
         prob = prob,
         prob_each = prob_each,
         num_arms = num_arms,
-        condition_names = condition_names
+        condition_names = condition_names,
+        check_inputs = check_inputs
       )
   }
   
@@ -178,7 +181,8 @@ declare_ra <- function(N = NULL,
         prob = prob,
         prob_each = prob_each,
         num_arms = num_arms,
-        condition_names = condition_names
+        condition_names = condition_names,
+        check_inputs = check_inputs
       )
     }
     
@@ -190,7 +194,8 @@ declare_ra <- function(N = NULL,
         prob = prob,
         prob_each = prob_each,
         num_arms = num_arms,
-        condition_names = condition_names
+        condition_names = condition_names,
+        check_inputs = check_inputs
       )
     
   }
@@ -207,13 +212,15 @@ declare_ra <- function(N = NULL,
         prob_each = prob_each,
         block_prob = block_prob,
         block_prob_each = block_prob_each,
-        condition_names = condition_names
+        condition_names = condition_names,
+        check_inputs = check_inputs
       )
     }
     
     probabilities_matrix <-
       block_ra_probabilities(
         block_var = block_var,
+        num_arms = num_arms,
         m = m,
         block_m = block_m,
         block_m_each = block_m_each,
@@ -222,7 +229,7 @@ declare_ra <- function(N = NULL,
         block_prob = block_prob,
         block_prob_each = block_prob_each,
         condition_names = condition_names,
-        num_arms = num_arms
+        check_inputs = check_inputs
       )
   }
   
@@ -237,7 +244,8 @@ declare_ra <- function(N = NULL,
         prob_each = prob_each,
         num_arms = num_arms,
         condition_names = condition_names,
-        simple = simple
+        simple = simple,
+        check_inputs = check_inputs
       )
     }
     
@@ -250,7 +258,8 @@ declare_ra <- function(N = NULL,
         prob_each = prob_each,
         num_arms = num_arms,
         condition_names = condition_names,
-        simple = simple
+        simple = simple,
+        check_inputs = check_inputs
       )
     
   }
@@ -260,6 +269,7 @@ declare_ra <- function(N = NULL,
       block_and_cluster_ra(
         clust_var = clust_var,
         block_var = block_var,
+        num_arms = num_arms,
         prob = prob,
         prob_each = prob_each,
         m = m,
@@ -268,7 +278,7 @@ declare_ra <- function(N = NULL,
         block_prob = block_prob,
         block_prob_each = block_prob_each,
         condition_names = condition_names,
-        num_arms = num_arms
+        check_inputs = check_inputs
       )
     }
     
@@ -284,7 +294,8 @@ declare_ra <- function(N = NULL,
         block_m_each = block_m_each,
         block_prob_each = block_prob_each,
         num_arms = num_arms,
-        condition_names = condition_names
+        condition_names = condition_names,
+        check_inputs = check_inputs
       )
     
   }
@@ -294,7 +305,9 @@ declare_ra <- function(N = NULL,
     ra_type = ra_type,
     probabilities_matrix = probabilities_matrix,
     block_var = block_var,
-    clust_var = clust_var
+    clust_var = clust_var,
+    original_call = match.call(),
+    cleaned_arguments = input_check
   )
   
   class(return_object) <- "ra_declaration"

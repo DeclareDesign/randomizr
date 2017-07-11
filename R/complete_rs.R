@@ -40,7 +40,7 @@ complete_rs <- function(N,
                         check_inputs = TRUE) {
   # Checks
   if (check_inputs) {
-    check_inputs <-
+    input_check <-
       check_samplr_arguments(N = N,
                              n = n,
                              prob = prob)
@@ -62,12 +62,12 @@ complete_rs <- function(N,
         return(assignment)
       }
       if (n == 1) {
-        assignment <- simple_rs(N, prob = 0.5)
+        assignment <- simple_rs(N, prob = 0.5, check_inputs = check_inputs)
         return(assignment)
       }
     }
     if (!is.null(prob)) {
-      assignment <- simple_rs(N, prob = prob)
+      assignment <- simple_rs(N, prob = prob, check_inputs = check_inputs)
     }
   }
   
@@ -82,7 +82,7 @@ complete_rs <- function(N,
         prob_fix_up <- .5
       }
       
-      if (simple_rs(1, prob_fix_up) == 0) {
+      if (simple_rs(1, prob_fix_up, check_inputs = check_inputs) == 0) {
         n <- n_floor
       } else{
         n <- n_ceiling
@@ -113,7 +113,7 @@ complete_rs <- function(N,
         prob_fix_up <- .5
       }
       
-      if (simple_rs(1, prob_fix_up) == 0) {
+      if (simple_rs(1, prob_fix_up, check_inputs = check_inputs) == 0) {
         n <- n_floor
       } else{
         n <- n_ceiling

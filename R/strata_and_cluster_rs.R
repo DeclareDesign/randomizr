@@ -29,29 +29,29 @@
 #'
 #' table(S, strata_var)
 #' table(S, clust_var)
-#' 
-#' 
+#'
+#'
 #' S <- strata_and_cluster_rs(clust_var = clust_var,
 #'                            strata_var = strata_var,
 #'                            prob = .5)
-#' 
+#'
 #' table(S, clust_var)
 #' table(S, strata_var)
-#' 
+#'
 #' S <- strata_and_cluster_rs(clust_var = clust_var,
 #'                            strata_var = strata_var,
 #'                            strata_n = c(2, 3, 2, 3, 2))
-#' 
+#'
 #' table(S, clust_var)
 #' table(S, strata_var)
-#' 
+#'
 #' S <- strata_and_cluster_rs(clust_var = clust_var,
 #'                            strata_var = strata_var,
 #'                            strata_prob = c(.1, .2, .3, .4, .5))
-#' 
+#'
 #' table(S, clust_var)
 #' table(S, strata_var)
-#' 
+#'
 #'
 #' @export
 strata_and_cluster_rs <-
@@ -63,17 +63,16 @@ strata_and_cluster_rs <-
            strata_prob = NULL,
            check_inputs = TRUE) {
     
-    if(check_inputs){
-      
-    check_inputs <-
-      check_samplr_arguments(
-        strata_var = strata_var,
-        clust_var = clust_var,
-        prob = prob,
-        n = n,
-        strata_n = strata_n,
-        strata_prob = strata_prob
-      )
+    if (check_inputs) {
+      input_check <-
+        check_samplr_arguments(
+          strata_var = strata_var,
+          clust_var = clust_var,
+          prob = prob,
+          n = n,
+          strata_n = strata_n,
+          strata_prob = strata_prob
+        )
     }
     
     # Setup: obtain unique clusters
@@ -88,11 +87,13 @@ strata_and_cluster_rs <-
       prob = prob,
       n = n,
       strata_n = strata_n,
-      strata_prob = strata_prob
+      strata_prob = strata_prob,
+      check_inputs = check_inputs
     )
     
     # back up to the individual level, maintaining original ordering
     assignment <- rep(S_clust, n_per_clust)
-    assignment <- assignment[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
+    assignment <-
+      assignment[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
     return(assignment)
   }

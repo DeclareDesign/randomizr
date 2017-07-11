@@ -55,10 +55,8 @@ strata_and_cluster_rs_probabilities <-
            strata_n = NULL,
            strata_prob = NULL,
            check_inputs = TRUE) {
-    
-    if(check_inputs){
-      
-      check_inputs <-
+    if (check_inputs) {
+      input_check <-
         check_samplr_arguments(
           strata_var = strata_var,
           clust_var = clust_var,
@@ -80,10 +78,12 @@ strata_and_cluster_rs_probabilities <-
       prob = prob,
       n = n,
       strata_n = strata_n,
-      strata_prob = strata_prob
+      strata_prob = strata_prob,
+      check_inputs = check_inputs
     )
     
     prob_vec <- rep(probs_clust, n_per_clust)
-    prob_vec <- prob_vec[order(unlist(split(1:length(clust_var),clust_var), FALSE, FALSE))]
+    prob_vec <-
+      prob_vec[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
     return(prob_vec)
   }

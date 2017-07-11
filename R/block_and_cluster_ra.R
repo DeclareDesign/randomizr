@@ -75,7 +75,7 @@ block_and_cluster_ra <-
            condition_names = NULL,
            check_inputs = TRUE) {
     if (check_inputs) {
-      check_inputs <-
+      input_check <-
         check_randomizr_arguments(
           block_var = block_var,
           clust_var = clust_var,
@@ -90,13 +90,13 @@ block_and_cluster_ra <-
           condition_names = condition_names
         )
     }
-    
+
     # Setup: obtain unique clusters
     n_per_clust <- tapply(clust_var, clust_var, length)
-    
+
     # get the block for each cluster
     clust_blocks <- tapply(block_var, clust_var, unique)
-    
+
     # Conduct random assignment at cluster level
     z_clust <- block_ra(
       block_var = clust_blocks,
@@ -108,9 +108,10 @@ block_and_cluster_ra <-
       block_m_each = block_m_each,
       block_prob = block_prob,
       block_prob_each = block_prob_each,
-      condition_names = condition_names
+      condition_names = condition_names,
+      check_inputs = check_inputs
     )
-    
+
     # back up to the individual level, maintaining original ordering
     assignment <- rep(z_clust, n_per_clust)
     assignment <-

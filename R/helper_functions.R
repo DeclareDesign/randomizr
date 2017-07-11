@@ -24,23 +24,23 @@ check_randomizr_arguments <-
       block_prob = block_prob,
       block_prob_each = block_prob_each
     )
-    
-    
+
+
     if (!is.null(clust_var)) {
       N <- length(unique(clust_var))
     }
-    
-    
+
+
     specified_args <- !sapply(conflict_args, is.null)
-    
+
     if (sum(specified_args) > 1) {
       stop("Please specify only one of ",
            paste(names(conflict_args)[specified_args], collapse = " and "),
            ".")
     }
-    
-    
-    
+
+
+
     if (!is.null(N)) {
       if (!(length(N) == 1 &
             (isTRUE(all.equal(
@@ -49,19 +49,19 @@ check_randomizr_arguments <-
         stop("N must be an integer greater than 0")
       }
     }
-    
+
     if (!is.null(prob)) {
       if (prob > 1 | prob < 0) {
         stop("The probability of assignment to treatment must be between 0 and 1.")
       }
     }
-    
+
     if (!is.null(block_prob)) {
       if (any(block_prob > 1 | block_prob < 0)) {
         stop("The probabilities of assignment to treatment must be between 0 and 1 for all blocks.")
       }
     }
-    
+
     if (!is.null(m) & is.null(block_var)) {
       if (m < 0) {
         stop("If specified, the number of units assigned to treatment (m) must be nonnegative.")
@@ -72,7 +72,7 @@ check_randomizr_arguments <-
         )
       }
     }
-    
+
     if (!is.null(prob_each)) {
       if (any(prob_each > 1 | prob_each < 0)) {
         stop(
@@ -85,7 +85,7 @@ check_randomizr_arguments <-
         )
       }
     }
-    
+
     if (!is.null(m_each)) {
       if (any(m_each < 0)) {
         stop("The number of units assigned to all conditions must be nonnegative.")
@@ -96,9 +96,9 @@ check_randomizr_arguments <-
         )
       }
     }
-    
+
     # Lengths
-    
+
     if (!is.null(condition_names)) {
       if (length(unique(condition_names)) != length(condition_names)) {
         stop("You must supply unique values to condition_names.")
@@ -131,7 +131,7 @@ check_randomizr_arguments <-
           )
         }
       }
-      
+
       if (!is.null(prob_each)) {
         if (length(prob_each) != length(condition_names)) {
           stop(
@@ -168,7 +168,7 @@ check_randomizr_arguments <-
         }
       }
     }
-    
+
     if (!is.null(num_arms)) {
       if (!is.null(m)) {
         if (num_arms != 2) {
@@ -185,13 +185,13 @@ check_randomizr_arguments <-
           stop("If prob and num_arms are specified together, num_arms must be 2.")
         }
       }
-      
+
       if (!is.null(block_prob)) {
         if (num_arms != 2) {
           stop("If block_prob and num_arms are specified together, num_arms must be 2.")
         }
       }
-      
+
       if (!is.null(prob_each)) {
         if (length(prob_each) != num_arms) {
           stop(
@@ -221,14 +221,14 @@ check_randomizr_arguments <-
         }
       }
     }
-    
+
     # Blocked Design Checks
     N_per_block <- NULL
     if (!is.null(block_var)) {
       N_per_block <- tapply(block_var, block_var, length)
       attributes(N_per_block) <- NULL
       N_blocks <- length(N_per_block)
-      
+
       if (!is.null(block_m)) {
         if (length(block_m) != N_blocks) {
           stop(
@@ -243,11 +243,11 @@ check_randomizr_arguments <-
           )
         }
       }
-      
+
       if(!is.null(m) & !is.null(block_var)){
         block_m <- rep(m, length(N_per_block))
       }
-      
+
       if (!is.null(block_m)) {
         if (any(block_m > N_per_block | block_m < 0)) {
           stop(
@@ -255,8 +255,8 @@ check_randomizr_arguments <-
           )
         }
       }
-      
-      
+
+
       if (!is.null(block_m_each)) {
         if (nrow(block_m_each) != N_blocks) {
           stop(
@@ -269,9 +269,9 @@ check_randomizr_arguments <-
             "If specified, each row of block_m_each must sum to the number of units in the corresponding block."
           )
         }
-        
+
       }
-      
+
       if (!is.null(block_prob_each)) {
         if (nrow(block_prob_each) != N_blocks) {
           stop(
@@ -279,24 +279,24 @@ check_randomizr_arguments <-
           )
         }
         if (is.null(clust_var) &
-            !isTRUE(all.equal(apply(block_prob_each, 1, sum), rep(1, N_blocks)))) {
+            !isTRUE(all.equal(apply(block_prob_each, 1, sum), rep(1, N_blocks), check.attributes = FALSE))) {
           stop("If specified, each row of block_prob_each must sum to 1.")
         }
       }
-      
+
       if (!is.null(clust_var)) {
         if (!all(tapply(block_var, clust_var, function(x)
           all(x == x[1])))) {
           stop("All units within a cluster must be in the same block.")
         }
       }
-      
+
     }
-    
+
     # learn about design
-    
+
     # obtain num_arms
-    
+
     if (is.null(num_arms)) {
       num_arms <- 2
       if (!is.null(m_each)) {
@@ -321,7 +321,7 @@ check_randomizr_arguments <-
     } else{
       num_arms_was_null <- FALSE
     }
-    
+
     # obtain condition_names
     if (is.null(condition_names)) {
       if (num_arms == 2 & num_arms_was_null) {
@@ -330,7 +330,7 @@ check_randomizr_arguments <-
         condition_names <- paste0("T", 1:num_arms)
       }
     }
-    
+
     return(
       list(
         num_arms = num_arms,
@@ -338,7 +338,7 @@ check_randomizr_arguments <-
         N_per_block = N_per_block
       )
     )
-    
+
   }
 
 check_samplr_arguments <-
@@ -355,21 +355,21 @@ check_samplr_arguments <-
       strata_n = strata_n,
       strata_prob = strata_prob
     )
-    
-    
+
+
     if (!is.null(clust_var)) {
       N <- length(unique(clust_var))
     }
-    
+
     specified_args <- !sapply(conflict_args, is.null)
-    
+
     if (sum(specified_args) > 1) {
       stop("Please specify only one of ",
            paste(names(conflict_args)[specified_args], collapse = " and "),
            ".")
     }
-    
-    
+
+
     if (!is.null(N)) {
       if (!(length(N) == 1 &
             (isTRUE(all.equal(
@@ -378,19 +378,19 @@ check_samplr_arguments <-
         stop("N must be an integer greater than 0")
       }
     }
-    
+
     if (!is.null(prob)) {
       if (prob > 1 | prob < 0) {
         stop("The probability of being sampled must be between 0 and 1.")
       }
     }
-    
+
     if (!is.null(strata_prob)) {
       if (any(strata_prob > 1 | strata_prob < 0)) {
         stop("The probabilities of being sampled must be between 0 and 1 for all strata.")
       }
     }
-    
+
     if (!is.null(n) & is.null(strata_var)) {
       if (n < 0) {
         stop("If specified, the number of units sampled (n) must be nonnegative.")
@@ -401,14 +401,14 @@ check_samplr_arguments <-
         )
       }
     }
-    
+
     # stratified Design Checks
     N_per_stratum <- NULL
     if (!is.null(strata_var)) {
       N_per_stratum <- tapply(strata_var, strata_var, length)
       attributes(N_per_stratum) <- NULL
       N_strata <- length(N_per_stratum)
-      
+
       if (!is.null(strata_n)) {
         if (length(strata_n) != N_strata) {
           stop(
@@ -423,7 +423,7 @@ check_samplr_arguments <-
           )
         }
       }
-      
+
       if (!is.null(strata_n)) {
         if (any(strata_n > N_per_stratum | strata_n < 0)) {
           stop(
@@ -431,22 +431,22 @@ check_samplr_arguments <-
           )
         }
       }
-      
+
       if (!is.null(clust_var)) {
         if (!all(tapply(strata_var, clust_var, function(x)
           all(x == x[1])))) {
           stop("All units within a cluster must be in the same stratum.")
         }
       }
-      
+
     }
-    
+
     return(list(
       num_arms = 2,
       condition_names =  c(0, 1),
       N_per_stratum = N_per_stratum
     ))
-    
+
   }
 
 
@@ -454,10 +454,10 @@ check_samplr_arguments <-
 clean_condition_names <- function(assignment, condition_names) {
   if (is.numeric(assignment)) {
     return(assignment)
-    
+
   } else if (is.logical(assignment)) {
     return(as.numeric(assignment))
-    
+
   } else {
     return(factor(assignment, levels = condition_names))
   }

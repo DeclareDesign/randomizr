@@ -1,5 +1,7 @@
 
 
+
+
 #' Probabilties of assignment: Block Random Assignment
 #'
 #' @inheritParams block_ra
@@ -10,7 +12,7 @@
 #' block_var <- rep(c("A", "B","C"), times = c(50, 100, 200))
 #' prob_mat <- block_ra_probabilities(block_var = block_var)
 #' head(prob_mat)
-#' 
+#'
 #' prob_mat <- block_ra_probabilities(block_var = block_var, m = 20)
 #' head(prob_mat)
 #'
@@ -59,7 +61,7 @@ block_ra_probabilities <- function(block_var,
                                    condition_names = NULL,
                                    check_inputs = TRUE) {
   if (check_inputs) {
-    check_inputs <- check_randomizr_arguments(
+    input_check <- check_randomizr_arguments(
       block_var = block_var,
       prob = prob,
       prob_each = prob_each,
@@ -71,12 +73,14 @@ block_ra_probabilities <- function(block_var,
       num_arms = num_arms,
       condition_names = condition_names
     )
+    num_arms <- input_check$num_arms
+    condition_names <- input_check$condition_names
+    N_per_block <- input_check$N_per_block
     
+  } else {
+    N_per_block <- tapply(block_var, block_var, length)
+    attributes(N_per_block) <- NULL
   }
-  
-  num_arms <- check_inputs$num_arms
-  condition_names <- check_inputs$condition_names
-  N_per_block <- check_inputs$N_per_block
   
   block_spots <-
     unlist(split(1:length(block_var), block_var), FALSE, FALSE)
@@ -91,7 +95,7 @@ block_ra_probabilities <- function(block_var,
   
   # Case 0: m is specified
   
-  if(!is.null(m)){
+  if (!is.null(m)) {
     block_m <- rep(m, length(N_per_block))
   }
   

@@ -51,7 +51,7 @@ simple_ra <-
            condition_names = NULL,
            check_inputs = TRUE) {
     if (check_inputs) {
-      check_inputs <-
+      input_check <-
         check_randomizr_arguments(
           N = N,
           prob = prob,
@@ -59,8 +59,8 @@ simple_ra <-
           num_arms = num_arms,
           condition_names = condition_names
         )
-      num_arms <- check_inputs$num_arms
-      condition_names <- check_inputs$condition_names
+      num_arms <- input_check$num_arms
+      condition_names <- input_check$condition_names
     }
     
     if (!is.null(prob) & is.null(prob_each)) {

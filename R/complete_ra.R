@@ -71,7 +71,7 @@ complete_ra <- function(N,
                         condition_names = NULL,
                         check_inputs = TRUE) {
   if (check_inputs) {
-    check_inputs <-
+    input_check <-
       check_randomizr_arguments(
         N = N,
         m = m,
@@ -81,20 +81,24 @@ complete_ra <- function(N,
         num_arms = num_arms,
         condition_names = condition_names
       )
-    num_arms <- check_inputs$num_arms
-    condition_names <- check_inputs$condition_names
+    num_arms <- input_check$num_arms
+    condition_names <- input_check$condition_names
   }
   
   # Simple 2 group design, returns zeros and ones
   if (is.null(m_each) &
       is.null(prob_each) & length(condition_names) == 2) {
-    
     # Special Cases: N = 1
     if (N == 1) {
       # Special Case 1: N = 1; Neither m nor prob is specified
       if (is.null(m) & is.null(prob)) {
         assignment <-
-          simple_ra(N, prob = 0.5, condition_names = condition_names)
+          simple_ra(
+            N,
+            prob = 0.5,
+            condition_names = condition_names,
+            check_inputs = check_inputs
+          )
         assignment <-
           clean_condition_names(assignment, condition_names)
         return(assignment)
@@ -115,7 +119,12 @@ complete_ra <- function(N,
         }
         if (m == 1) {
           assignment <-
-            simple_ra(N, prob = 0.5, condition_names = condition_names)
+            simple_ra(
+              N,
+              prob = 0.5,
+              condition_names = condition_names,
+              check_inputs = check_inputs
+            )
           assignment <-
             clean_condition_names(assignment, condition_names)
           return(assignment)
@@ -125,7 +134,12 @@ complete_ra <- function(N,
       # Special Case 3: N = 1; prob is specified
       if (!is.null(prob)) {
         assignment <-
-          simple_ra(N, prob = prob, condition_names = condition_names)
+          simple_ra(
+            N,
+            prob = prob,
+            condition_names = condition_names,
+            check_inputs = check_inputs
+          )
         assignment <-
           clean_condition_names(assignment, condition_names)
         return(assignment)
@@ -206,9 +220,12 @@ complete_ra <- function(N,
   if (is.null(prob_each) & is.null(m_each)) {
     prob_each <- rep(1 / num_arms, num_arms)
     assignment <-
-      complete_ra(N = N,
-                  prob_each = prob_each,
-                  condition_names = condition_names)
+      complete_ra(
+        N = N,
+        prob_each = prob_each,
+        condition_names = condition_names,
+        check_inputs = check_inputs
+      )
     assignment <- clean_condition_names(assignment, condition_names)
     return(assignment)
   }

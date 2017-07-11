@@ -57,7 +57,7 @@ block_and_cluster_ra_probabilities <-
            check_inputs = TRUE) {
     
     if (check_inputs) {
-      check_inputs <-
+      input_check <-
         check_randomizr_arguments(
           block_var = block_var,
           clust_var = clust_var,
@@ -90,7 +90,8 @@ block_and_cluster_ra_probabilities <-
       block_prob = block_prob,
       block_prob_each = block_prob_each,
       num_arms = num_arms,
-      condition_names = condition_names
+      condition_names = condition_names,
+      check_inputs = check_inputs
     )
     
     prob_mat <- probs_clust[rep(1:n_clust, n_per_clust), , drop = FALSE]

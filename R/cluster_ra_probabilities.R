@@ -51,7 +51,7 @@ cluster_ra_probabilities <-
            simple = FALSE,
            check_inputs = TRUE) {
     if (check_inputs) {
-      check_inputs <-
+      input_check <-
         check_randomizr_arguments(
           clust_var = clust_var,
           prob = prob,
@@ -71,7 +71,8 @@ cluster_ra_probabilities <-
           prob = prob,
           prob_each = prob_each,
           num_arms = num_arms,
-          condition_names = condition_names
+          condition_names = condition_names,
+          check_inputs = check_inputs
         )
     } else{
       probs_clust <-
@@ -82,7 +83,8 @@ cluster_ra_probabilities <-
           prob = prob,
           prob_each = prob_each,
           num_arms = num_arms,
-          condition_names = condition_names
+          condition_names = condition_names,
+          check_inputs = check_inputs
         )
     }
     prob_mat <-
