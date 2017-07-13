@@ -57,20 +57,20 @@
 #'
 #' # Block Random Assignment Declarations
 #'
-#' block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
-#  declare_ra(block_var=block_var)
+#' block_var <- rep(c("A", "B","C"), times = c(50, 100, 200))
+#  declare_ra(block_var = block_var)
 #'
 #' block_m_each <- rbind(c(10, 40),
 #'                  c(30, 70),
 #'                  c(50, 150))
-#' declare_ra(block_var=block_var, block_m_each=block_m_each)
+#' declare_ra(block_var = block_var, block_m_each = block_m_each)
 #'
 #'
 #' # Cluster Random Assignment Declarations
 #'
-#' clust_var <- rep(letters, times=1:26)
-#' declare_ra(clust_var=clust_var)
-#' declare_ra(clust_var=clust_var, m_each=c(7, 7, 12))
+#' clust_var <- rep(letters, times = 1:26)
+#' declare_ra(clust_var = clust_var)
+#' declare_ra(clust_var = clust_var, m_each = c(7, 7, 12))
 #'
 #' # Blocked and Clustered Random Assignment Declarations
 #'
@@ -299,6 +299,13 @@ declare_ra <- function(N = NULL,
       )
     
   }
+  
+  # Determine total number of possible random assignments
+  # https://www.statlect.com/mathematical-tools/partitions
+  
+  #calculate_multinomial_coefficient <- function(N, m_each)
+  
+  
   
   return_object <- list(
     ra_function = ra_function,
