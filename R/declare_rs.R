@@ -10,7 +10,7 @@
 #' @param simple logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.
 #' @param check_inputs logical. Defaults to TRUE.
 #'
-#' @return A list of class "rs_declaration".  The list has five entries:
+#' @return A list of class "declaration".  The list has five entries:
 #'   $rs_function, a function that generates random samplings according to the declaration.
 #'   $rs_type, a string indicating the type of random sampling used
 #'   $probabilities_vector, A vector length N indicating the probability of being sampled.
@@ -230,20 +230,20 @@ declare_rs <- function(N = NULL,
     check_inputs = check_inputs
   )
   
-  class(return_object) <- "rs_declaration"
+  class(return_object) <- "declaration"
   return(return_object)
   
 }
 
 #' Draw a random sample
 #'
-#' You can either give draw_rs() an rs_declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.
+#' You can either give draw_rs() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.
 #'
-#' @param rs_declaration A random sampling declaration, created by \code{\link{declare_rs}}.
+#' @param declaration A random sampling declaration, created by \code{\link{declare_rs}}.
 #' @inheritParams declare_rs
 #' @examples
 #' declaration <- declare_rs(N = 100, n = 30)
-#' S <- draw_rs(rs_declaration = declaration)
+#' S <- draw_rs(declaration = declaration)
 #' table(S)
 #'
 #' # equivalent to
@@ -251,7 +251,7 @@ declare_rs <- function(N = NULL,
 #' table(S)
 #'
 #' @export
-draw_rs <- function(rs_declaration = NULL,
+draw_rs <- function(declaration = NULL,
                     N = NULL,
                     strata_var = NULL,
                     clust_var = NULL,
@@ -260,12 +260,12 @@ draw_rs <- function(rs_declaration = NULL,
                     strata_n = NULL,
                     strata_prob = NULL,
                     simple = FALSE) {
-  if (!is.null(rs_declaration)) {
-    if (class(rs_declaration) != "rs_declaration") {
+  if (!is.null(declaration)) {
+    if (class(declaration) != "declaration") {
       stop("You must provide a random sampling declaration created by declare_rs().")
     }
   } else{
-    rs_declaration <-
+    declaration <-
       declare_rs(
         N = N,
         strata_var = strata_var,
@@ -278,16 +278,16 @@ draw_rs <- function(rs_declaration = NULL,
       )
     
   }
-  return(rs_declaration$rs_function())
+  return(declaration$rs_function())
 }
 
 #' Obtain inclusion probabilities
 #'
-#' You can either give obtain_inclusion_probabilities() an rs_declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.\cr \cr
+#' You can either give obtain_inclusion_probabilities() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.\cr \cr
 #' This function is especially useful when units have different inclusion probabilties and the analyst plans to use inverse-probability weights.
 #'
 #'
-#' @param rs_declaration A random sampling declaration, created by \code{\link{declare_rs}}.
+#' @param declaration A random sampling declaration, created by \code{\link{declare_rs}}.
 #' @inheritParams declare_rs
 #'
 #' @examples
@@ -298,7 +298,7 @@ draw_rs <- function(rs_declaration = NULL,
 #' declaration <- declare_rs(strata_var = strata_var)
 #'
 #' observed_probabilities <-
-#'    obtain_inclusion_probabilities(rs_declaration = declaration)
+#'    obtain_inclusion_probabilities(declaration = declaration)
 #'
 #' table(strata_var, observed_probabilities)
 #'
@@ -311,7 +311,7 @@ draw_rs <- function(rs_declaration = NULL,
 #'
 #' @export
 obtain_inclusion_probabilities <-
-  function(rs_declaration = NULL,
+  function(declaration = NULL,
            N = NULL,
            strata_var = NULL,
            clust_var = NULL,
@@ -321,12 +321,12 @@ obtain_inclusion_probabilities <-
            strata_prob = NULL,
            simple = FALSE) {
     # checks
-    if (!is.null(rs_declaration)) {
-      if (class(rs_declaration) != "rs_declaration") {
+    if (!is.null(declaration)) {
+      if (class(declaration) != "declaration") {
         stop("You must provide a random sampling declaration created by declare_rs().")
       }
     } else{
-      rs_declaration <-
+      declaration <-
         declare_rs(
           N = N,
           strata_var = strata_var,
@@ -339,12 +339,12 @@ obtain_inclusion_probabilities <-
         )
     }
     
-    probabilities_vector <- rs_declaration$probabilities_vector
+    probabilities_vector <- declaration$probabilities_vector
     return(probabilities_vector)
   }
 
 #' @export
-print.rs_declaration <- function(x, ...) {
+print.declaration <- function(x, ...) {
   S <- x$rs_function()
   n <- length(S)
   

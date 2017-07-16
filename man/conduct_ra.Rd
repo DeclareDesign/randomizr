@@ -4,14 +4,14 @@
 \alias{conduct_ra}
 \title{Conduct a random assignment}
 \usage{
-conduct_ra(ra_declaration = NULL, N = NULL, block_var = NULL,
+conduct_ra(declaration = NULL, N = NULL, block_var = NULL,
   clust_var = NULL, m = NULL, m_each = NULL, prob = NULL,
   prob_each = NULL, block_m = NULL, block_m_each = NULL,
   block_prob = NULL, block_prob_each = NULL, num_arms = NULL,
   condition_names = NULL, simple = FALSE, check_inputs = TRUE)
 }
 \arguments{
-\item{ra_declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
+\item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
 
 \item{N}{The number of units. N must be a positive integer. (required)}
 
@@ -44,11 +44,11 @@ conduct_ra(ra_declaration = NULL, N = NULL, block_var = NULL,
 \item{check_inputs}{logical. Defaults to TRUE.}
 }
 \description{
-You can either give conduct_ra() an ra_declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.
+You can either give conduct_ra() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.
 }
 \examples{
 declaration <- declare_ra(N = 100, m_each = c(30, 30, 40))
-Z <- conduct_ra(ra_declaration = declaration)
+Z <- conduct_ra(declaration = declaration)
 table(Z)
 
 # equivalent to

@@ -28,7 +28,7 @@ declare_rs(N = NULL, strata_var = NULL, clust_var = NULL, n = NULL,
 \item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
-A list of class "rs_declaration".  The list has five entries:
+A list of class "declaration".  The list has five entries:
   $rs_function, a function that generates random samplings according to the declaration.
   $rs_type, a string indicating the type of random sampling used
   $probabilities_vector, A vector length N indicating the probability of being sampled.

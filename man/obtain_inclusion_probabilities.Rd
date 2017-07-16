@@ -4,12 +4,12 @@
 \alias{obtain_inclusion_probabilities}
 \title{Obtain inclusion probabilities}
 \usage{
-obtain_inclusion_probabilities(rs_declaration = NULL, N = NULL,
+obtain_inclusion_probabilities(declaration = NULL, N = NULL,
   strata_var = NULL, clust_var = NULL, n = NULL, prob = NULL,
   strata_n = NULL, strata_prob = NULL, simple = FALSE)
 }
 \arguments{
-\item{rs_declaration}{A random sampling declaration, created by \code{\link{declare_rs}}.}
+\item{declaration}{A random sampling declaration, created by \code{\link{declare_rs}}.}
 
 \item{N}{The number of units. N must be a positive integer. (required)}
 
@@ -28,7 +28,7 @@ obtain_inclusion_probabilities(rs_declaration = NULL, N = NULL,
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.}
 }
 \description{
-You can either give obtain_inclusion_probabilities() an rs_declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.\cr \cr
+You can either give obtain_inclusion_probabilities() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.\cr \cr
 This function is especially useful when units have different inclusion probabilties and the analyst plans to use inverse-probability weights.
 }
 \examples{
@@ -39,7 +39,7 @@ strata_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
 declaration <- declare_rs(strata_var = strata_var)
 
 observed_probabilities <-
-   obtain_inclusion_probabilities(rs_declaration = declaration)
+   obtain_inclusion_probabilities(declaration = declaration)
 
 table(strata_var, observed_probabilities)
 

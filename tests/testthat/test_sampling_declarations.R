@@ -7,31 +7,31 @@ context("Sampling Declarations")
 declaration <- declare_rs(N = 100)
 table(declaration$rs_function())
 S <- draw_rs(declaration)
-obtain_inclusion_probabilities(rs_declaration = declaration)
+obtain_inclusion_probabilities(declaration = declaration)
 declaration$probabilities_vector
 
 declaration <- declare_rs(N = 101, prob = .34)
 table(declaration$rs_function())
 S <- draw_rs(declaration)
-obtain_inclusion_probabilities(rs_declaration = declaration)
+obtain_inclusion_probabilities(declaration = declaration)
 declaration$probabilities_vector
 
 declaration <- declare_rs(N = 100, n = 50)
 table(declaration$rs_function())
 S <- draw_rs(declaration)
-obtain_inclusion_probabilities(rs_declaration = declaration)
+obtain_inclusion_probabilities(declaration = declaration)
 declaration$probabilities_vector
 
 declaration <- declare_rs(N = 100, simple = TRUE)
 table(declaration$rs_function())
 S <- draw_rs(declaration)
-obtain_inclusion_probabilities(rs_declaration = declaration)
+obtain_inclusion_probabilities(declaration = declaration)
 declaration$probabilities_vector
 
 declaration <- declare_rs(N = 100, prob = .4, simple = TRUE)
 table(declaration$rs_function())
 S <- draw_rs(declaration)
-obtain_inclusion_probabilities(rs_declaration = declaration)
+obtain_inclusion_probabilities(declaration = declaration)
 declaration$probabilities_vector
 
 strata_var <- rep(c("A", "B", "C"), times = c(50, 100, 200))
@@ -45,13 +45,13 @@ clust_var <- rep(letters, times = 1:26)
 declaration <- declare_rs(clust_var = clust_var)
 table(declaration$rs_function())
 S <- draw_rs(declaration)
-obtain_inclusion_probabilities(rs_declaration = declaration)
+obtain_inclusion_probabilities(declaration = declaration)
 declaration$probabilities_vector
 
 declaration <- declare_rs(clust_var = clust_var, n = 10)
 table(declaration$rs_function())
 S <- draw_rs(declaration)
-obtain_inclusion_probabilities(rs_declaration = declaration)
+obtain_inclusion_probabilities(declaration = declaration)
 declaration$probabilities_vector
 
 
@@ -69,5 +69,5 @@ declaration <-
   declare_rs(clust_var = clust_var, strata_var = strata_var)
 table(declaration$rs_function())
 S <- draw_rs(declaration)
-obtain_inclusion_probabilities(rs_declaration = declaration)
+obtain_inclusion_probabilities(declaration = declaration)
 declaration$probabilities_vector

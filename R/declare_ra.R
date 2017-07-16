@@ -16,7 +16,7 @@
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.
 #' @param check_inputs logical. Defaults to TRUE.
 #'
-#' @return A list of class "ra_declaration".  The list has five entries:
+#' @return A list of class "declaration".  The list has five entries:
 #'   $ra_function, a function that generates random assignments according to the declaration.
 #'   $ra_type, a string indicating the type of random assignment used
 #'   $probabilities_matrix, a matrix with N rows and num_arms columns, describing each unit's probabilities of assignment to conditions.
@@ -300,13 +300,6 @@ declare_ra <- function(N = NULL,
     
   }
   
-  # Determine total number of possible random assignments
-  # https://www.statlect.com/mathematical-tools/partitions
-  
-  #calculate_multinomial_coefficient <- function(N, m_each)
-  
-  
-  
   return_object <- list(
     ra_function = ra_function,
     ra_type = ra_type,
@@ -317,20 +310,20 @@ declare_ra <- function(N = NULL,
     cleaned_arguments = input_check
   )
   
-  class(return_object) <- "ra_declaration"
+  class(return_object) <- "declaration"
   return(return_object)
   
 }
 
 #' Conduct a random assignment
 #'
-#' You can either give conduct_ra() an ra_declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.
+#' You can either give conduct_ra() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.
 #'
-#' @param ra_declaration A random assignment declaration, created by \code{\link{declare_ra}}.
+#' @param declaration A random assignment declaration, created by \code{\link{declare_ra}}.
 #' @inheritParams declare_ra
 #' @examples
 #' declaration <- declare_ra(N = 100, m_each = c(30, 30, 40))
-#' Z <- conduct_ra(ra_declaration = declaration)
+#' Z <- conduct_ra(declaration = declaration)
 #' table(Z)
 #'
 #' # equivalent to
@@ -339,7 +332,7 @@ declare_ra <- function(N = NULL,
 #' table(Z)
 #'
 #' @export
-conduct_ra <- function(ra_declaration = NULL,
+conduct_ra <- function(declaration = NULL,
                        N = NULL,
                        block_var = NULL,
                        clust_var = NULL,
@@ -355,12 +348,12 @@ conduct_ra <- function(ra_declaration = NULL,
                        condition_names = NULL,
                        simple = FALSE,
                        check_inputs = TRUE) {
-  if (!is.null(ra_declaration)) {
-    if (class(ra_declaration) != "ra_declaration") {
+  if (!is.null(declaration)) {
+    if (class(declaration) != "declaration") {
       stop("You must provide a random assignment declaration created by declare_ra().")
     }
   } else{
-    ra_declaration <-
+    declaration <-
       declare_ra(
         N = N,
         block_var = block_var,
@@ -380,16 +373,16 @@ conduct_ra <- function(ra_declaration = NULL,
       )
     
   }
-  return(ra_declaration$ra_function())
+  return(declaration$ra_function())
 }
 
 #' Obtain the probabilities of units being in the conditions that they are in.
 #'
-#' You can either give obtain_condition_probabilities() an ra_declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.\cr \cr
+#' You can either give obtain_condition_probabilities() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.\cr \cr
 #' This function is especially useful when units have different probabilties of assignment and the analyst plans to use inverse-probability weights.
 #'
 #'
-#' @param ra_declaration A random assignment declaration, created by \code{\link{declare_ra}}.
+#' @param declaration A random assignment declaration, created by \code{\link{declare_ra}}.
 #' @param assignment A vector of random assignments, often created by \code{\link{conduct_ra}}.
 #' @inheritParams declare_ra
 #'
@@ -401,11 +394,11 @@ conduct_ra <- function(ra_declaration = NULL,
 #'                  c(30, 70),
 #'                  c(50, 150))
 #' declaration <- declare_ra(block_var = block_var, block_m_each = block_m_each)
-#' Z <- conduct_ra(ra_declaration = declaration)
+#' Z <- conduct_ra(declaration = declaration)
 #' table(Z, block_var)
 #'
 #' observed_probabilities <-
-#'    obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
+#'    obtain_condition_probabilities(declaration = declaration, assignment = Z)
 #'
 #'
 #' # Probabilities in the control group:
@@ -426,7 +419,7 @@ conduct_ra <- function(ra_declaration = NULL,
 #'
 #' @export
 obtain_condition_probabilities <-
-  function(ra_declaration = NULL,
+  function(declaration = NULL,
            assignment,
            N = NULL,
            block_var = NULL,
@@ -443,15 +436,15 @@ obtain_condition_probabilities <-
            condition_names = NULL,
            simple = FALSE) {
     # checks
-    if (!is.null(ra_declaration)) {
-      if (class(ra_declaration) != "ra_declaration") {
+    if (!is.null(declaration)) {
+      if (class(declaration) != "declaration") {
         stop("You must provide a random assignment declaration created by declare_ra().")
       }
     } else{
       if (is.null(N)) {
         N <- length(assignment)
       }
-      ra_declaration <-
+      declaration <-
         declare_ra(
           N = N,
           block_var = block_var,
@@ -470,7 +463,7 @@ obtain_condition_probabilities <-
         )
     }
     
-    probabilities_matrix <- ra_declaration$probabilities_matrix
+    probabilities_matrix <- declaration$probabilities_matrix
     cond_Z <- paste0("prob_", assignment)
     indicies <-
       sapply(colnames(probabilities_matrix),
@@ -485,7 +478,7 @@ obtain_condition_probabilities <-
   }
 
 #' @export
-print.ra_declaration <- function(x, ...) {
+print.declaration <- function(x, ...) {
   Z <- x$ra_function()
   n <- length(Z)
   

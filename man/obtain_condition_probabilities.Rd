@@ -4,14 +4,14 @@
 \alias{obtain_condition_probabilities}
 \title{Obtain the probabilities of units being in the conditions that they are in.}
 \usage{
-obtain_condition_probabilities(ra_declaration = NULL, assignment, N = NULL,
+obtain_condition_probabilities(declaration = NULL, assignment, N = NULL,
   block_var = NULL, clust_var = NULL, m = NULL, m_each = NULL,
   prob = NULL, prob_each = NULL, block_m = NULL, block_m_each = NULL,
   block_prob = NULL, block_prob_each = NULL, num_arms = NULL,
   condition_names = NULL, simple = FALSE)
 }
 \arguments{
-\item{ra_declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
+\item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
 
 \item{assignment}{A vector of random assignments, often created by \code{\link{conduct_ra}}.}
 
@@ -44,7 +44,7 @@ obtain_condition_probabilities(ra_declaration = NULL, assignment, N = NULL,
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.}
 }
 \description{
-You can either give obtain_condition_probabilities() an ra_declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.\cr \cr
+You can either give obtain_condition_probabilities() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.\cr \cr
 This function is especially useful when units have different probabilties of assignment and the analyst plans to use inverse-probability weights.
 }
 \examples{
@@ -55,11 +55,11 @@ block_m_each <- rbind(c(10, 40),
                  c(30, 70),
                  c(50, 150))
 declaration <- declare_ra(block_var = block_var, block_m_each = block_m_each)
-Z <- conduct_ra(ra_declaration = declaration)
+Z <- conduct_ra(declaration = declaration)
 table(Z, block_var)
 
 observed_probabilities <-
-   obtain_condition_probabilities(ra_declaration = declaration, assignment = Z)
+   obtain_condition_probabilities(declaration = declaration, assignment = Z)
 
 
 # Probabilities in the control group:

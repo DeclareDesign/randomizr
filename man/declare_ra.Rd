@@ -42,7 +42,7 @@ declare_ra(N = NULL, block_var = NULL, clust_var = NULL, m = NULL,
 \item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
-A list of class "ra_declaration".  The list has five entries:
+A list of class "declaration".  The list has five entries:
   $ra_function, a function that generates random assignments according to the declaration.
   $ra_type, a string indicating the type of random assignment used
   $probabilities_matrix, a matrix with N rows and num_arms columns, describing each unit's probabilities of assignment to conditions.
@@ -86,19 +86,19 @@ declare_ra(N=100, m_each=c(30, 30, 40))
 
 # Block Random Assignment Declarations
 
-block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
+block_var <- rep(c("A", "B","C"), times = c(50, 100, 200))
 
 block_m_each <- rbind(c(10, 40),
                  c(30, 70),
                  c(50, 150))
-declare_ra(block_var=block_var, block_m_each=block_m_each)
+declare_ra(block_var = block_var, block_m_each = block_m_each)
 
 
 # Cluster Random Assignment Declarations
 
-clust_var <- rep(letters, times=1:26)
-declare_ra(clust_var=clust_var)
-declare_ra(clust_var=clust_var, m_each=c(7, 7, 12))
+clust_var <- rep(letters, times = 1:26)
+declare_ra(clust_var = clust_var)
+declare_ra(clust_var = clust_var, m_each = c(7, 7, 12))
 
 # Blocked and Clustered Random Assignment Declarations
 

@@ -4,12 +4,12 @@
 \alias{draw_rs}
 \title{Draw a random sample}
 \usage{
-draw_rs(rs_declaration = NULL, N = NULL, strata_var = NULL,
+draw_rs(declaration = NULL, N = NULL, strata_var = NULL,
   clust_var = NULL, n = NULL, prob = NULL, strata_n = NULL,
   strata_prob = NULL, simple = FALSE)
 }
 \arguments{
-\item{rs_declaration}{A random sampling declaration, created by \code{\link{declare_rs}}.}
+\item{declaration}{A random sampling declaration, created by \code{\link{declare_rs}}.}
 
 \item{N}{The number of units. N must be a positive integer. (required)}
 
@@ -28,11 +28,11 @@ draw_rs(rs_declaration = NULL, N = NULL, strata_var = NULL,
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.}
 }
 \description{
-You can either give draw_rs() an rs_declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.
+You can either give draw_rs() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.
 }
 \examples{
 declaration <- declare_rs(N = 100, n = 30)
-S <- draw_rs(rs_declaration = declaration)
+S <- draw_rs(declaration = declaration)
 table(S)
 
 # equivalent to

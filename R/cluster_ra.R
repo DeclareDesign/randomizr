@@ -63,8 +63,7 @@ cluster_ra <- function(clust_var,
   }
   
   n_per_clust <- tapply(clust_var, clust_var, length)
-  unique_clust <- names(n_per_clust)
-  n_clust <- length(unique_clust)
+  n_clust <- length(n_per_clust)
   
   if (simple) {
     if (!is.null(m)) {

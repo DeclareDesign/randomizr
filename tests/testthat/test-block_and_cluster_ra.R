@@ -11,10 +11,13 @@ block_var[clust_var %in% letters[21:26]] <- "block_5"
 
 table(block_var, clust_var)
 
-Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var)
+df <- data.frame(block_var, clust_var)
+df <- df[sample(1:nrow(df)),]
 
-table(Z, clust_var)
-table(Z, block_var)
+Z <- block_and_cluster_ra(clust_var = df$clust_var, block_var = df$block_var)
+
+table(Z, df$clust_var)
+table(Z, df$block_var)
 
 Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var, num_arms = 3)
 
