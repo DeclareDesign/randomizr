@@ -3,27 +3,42 @@ randomizr:::complete_ra_num_permutations(6, prob_each = c(.5, .5), condition_nam
 choose(6, 3)
 perms <- randomizr:::complete_ra_permutations(6, prob_each = c(.5, .5), condition_names = c(0, 1))
 dim(perms)
+perm_probs <- randomizr:::complete_ra_permutation_probabilities(6, prob_each = c(.5, .5), condition_names = c(0, 1))
+length(perm_probs)
+sum(perm_probs)
 
 randomizr:::complete_ra_num_permutations(10, prob_each = c(.5, .5), condition_names = c(0, 1))
 choose(10, 5)
 perms <- randomizr:::complete_ra_permutations(10, prob_each = c(.5, .5), condition_names = c(0, 1))
 dim(perms)
+perm_probs <- randomizr:::complete_ra_permutation_probabilities(10, prob_each = c(.5, .5), condition_names = c(0, 1))
+length(perm_probs)
+sum(perm_probs)
 
 
 randomizr:::complete_ra_num_permutations(3, prob_each = c(.5, .5), condition_names = c(0, 1))
 choose(3, 1) + choose(3, 2)
 perms <- randomizr:::complete_ra_permutations(3, prob_each = c(.5, .5), condition_names = c(0, 1))
 dim(perms)
+perm_probs <- randomizr:::complete_ra_permutation_probabilities(3, prob_each = c(.5, .5), condition_names = c(0, 1))
+length(perm_probs)
+sum(perm_probs)
+
 
 randomizr:::complete_ra_num_permutations(10, prob_each = c(1/3, 1/3, 1/3), condition_names = c("T1", "T2", "T3"))
 perms <- randomizr:::complete_ra_permutations(10, prob_each = c(1/3, 1/3, 1/3), condition_names = c("T1", "T2", "T3"))
 dim(perms)
 dim(unique(perms))
+perm_probs <- randomizr:::complete_ra_permutation_probabilities(10, prob_each = c(1/3, 1/3, 1/3), condition_names = c("T1", "T2", "T3"))
+length(perm_probs)
+sum(perm_probs)
+
 
 declaration <- declare_ra(N = 4)
 perms <- obtain_permutation_matrix(declaration)
 dim(perms)
 obtain_num_permutations(declaration)
+obtain_permutation_probabilities(declaration)
 
 # blocked -----------------------------------------------------------------
 
@@ -32,6 +47,8 @@ declaration <- declare_ra(block_var = block_var)
 perms <- obtain_permutation_matrix(declaration)
 dim(perms)
 obtain_num_permutations(declaration)
+obtain_permutation_probabilities(declaration)
+
 
 # clustered
 
@@ -40,6 +57,7 @@ declaration <- declare_ra(clust_var = clust_var)
 perms <- obtain_permutation_matrix(declaration)
 dim(perms)
 obtain_num_permutations(declaration)
+obtain_permutation_probabilities(declaration)
 
 
 # test against RI package
@@ -74,3 +92,20 @@ declaration <- declare_ra(20)
 choose(20, 10)
 perms <- obtain_permutation_matrix(declaration)
 dim(perms)
+
+
+# test wacky declarations
+
+declaration <- declare_ra(N = 5, prob_each = c(.49, .51))
+obtain_num_permutations(declaration)
+perm_probs <- obtain_permutation_probabilities(declaration)
+perms <- obtain_permutation_matrix(declaration)
+declaration$probabilities_matrix[,2]
+
+# correctly WRONG because the perms have different probs!
+rowMeans(perms)
+
+# correctly correct!
+perms %*% perm_probs
+
+
