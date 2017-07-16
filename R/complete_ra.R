@@ -239,7 +239,7 @@ complete_ra <- function(N,
     if (N_remainder > 0) {
       prob_each_fix_up <- ((prob_each * N) - m_each_floor) / N_remainder
       conditions_vec <-
-        c(
+        unlist(list(
           rep(condition_names, m_each_floor),
           sample(
             condition_names,
@@ -247,7 +247,7 @@ complete_ra <- function(N,
             prob = prob_each_fix_up,
             replace = TRUE
           )
-        )
+        ))
     } else{
       conditions_vec <- rep(condition_names, m_each_floor)
     }

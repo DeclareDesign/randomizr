@@ -105,3 +105,13 @@ expect_equivalent(as.numeric(table(Z)), c(50, 50, 0))
 
 Z <- complete_ra(N = 100, m_each = c(100, 0, 0))
 expect_equivalent(as.numeric(table(Z)), c(100, 0, 0))
+
+conditions <- factor(c("T1", "T2"), levels = c("T1", "T2", "T3"))
+
+#debugonce(complete_ra)
+complete_ra(
+  N = 67,
+  prob_each = c(.5, .5),
+  condition_names = conditions,
+  check_inputs = FALSE
+)
