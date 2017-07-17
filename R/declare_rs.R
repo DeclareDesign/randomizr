@@ -230,7 +230,7 @@ declare_rs <- function(N = NULL,
     check_inputs = check_inputs
   )
   
-  class(return_object) <- "declaration"
+  class(return_object) <- "rs_declaration"
   return(return_object)
   
 }
@@ -261,7 +261,7 @@ draw_rs <- function(declaration = NULL,
                     strata_prob = NULL,
                     simple = FALSE) {
   if (!is.null(declaration)) {
-    if (class(declaration) != "declaration") {
+    if (class(declaration) != "rs_declaration") {
       stop("You must provide a random sampling declaration created by declare_rs().")
     }
   } else{
@@ -322,7 +322,7 @@ obtain_inclusion_probabilities <-
            simple = FALSE) {
     # checks
     if (!is.null(declaration)) {
-      if (class(declaration) != "declaration") {
+      if (class(declaration) != "rs_declaration") {
         stop("You must provide a random sampling declaration created by declare_rs().")
       }
     } else{
@@ -344,7 +344,7 @@ obtain_inclusion_probabilities <-
   }
 
 #' @export
-print.declaration <- function(x, ...) {
+print.rs_declaration <- function(x, ...) {
   S <- x$rs_function()
   n <- length(S)
   

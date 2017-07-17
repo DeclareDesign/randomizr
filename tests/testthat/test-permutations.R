@@ -1,3 +1,26 @@
+context("Permutations")
+
+
+test_that("Simple Random Assignment Procedures",{
+  
+  
+  declaration <- declare_ra(N = 4, simple = TRUE)
+  
+  obtain_num_permutations(declaration)
+  perms <- obtain_permutation_matrix(declaration)
+  debugonce(obtain_permutation_probabilities)
+  perms_probs <- obtain_permutation_probabilities(declaration)
+  
+})
+
+
+
+
+
+
+
+
+
 
 randomizr:::complete_ra_num_permutations(6, prob_each = c(.5, .5), condition_names = c(0, 1))
 choose(6, 3)

@@ -310,7 +310,7 @@ declare_ra <- function(N = NULL,
     cleaned_arguments = input_check
   )
   
-  class(return_object) <- "declaration"
+  class(return_object) <- "ra_declaration"
   return(return_object)
   
 }
@@ -349,7 +349,7 @@ conduct_ra <- function(declaration = NULL,
                        simple = FALSE,
                        check_inputs = TRUE) {
   if (!is.null(declaration)) {
-    if (class(declaration) != "declaration") {
+    if (class(declaration) != "ra_declaration") {
       stop("You must provide a random assignment declaration created by declare_ra().")
     }
   } else{
@@ -437,7 +437,7 @@ obtain_condition_probabilities <-
            simple = FALSE) {
     # checks
     if (!is.null(declaration)) {
-      if (class(declaration) != "declaration") {
+      if (class(declaration) != "ra_declaration") {
         stop("You must provide a random assignment declaration created by declare_ra().")
       }
     } else{
@@ -478,7 +478,7 @@ obtain_condition_probabilities <-
   }
 
 #' @export
-print.declaration <- function(x, ...) {
+print.ra_declaration <- function(x, ...) {
   Z <- x$ra_function()
   n <- length(Z)
   
