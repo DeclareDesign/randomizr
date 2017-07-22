@@ -8,7 +8,7 @@ test_that("Simple Random Assignment Procedures",{
   
   obtain_num_permutations(declaration)
   perms <- obtain_permutation_matrix(declaration)
-  debugonce(obtain_permutation_probabilities)
+  ##debugonce(obtain_permutation_probabilities)
   perms_probs <- obtain_permutation_probabilities(declaration)
   
 })

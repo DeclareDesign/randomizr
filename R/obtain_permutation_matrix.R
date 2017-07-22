@@ -5,6 +5,8 @@
 #'
 #' @return a matrix of all possible (or a random sample of all possible) random assignments consistent with a declaration.
 #' @importFrom utils combn
+#' @importFrom partitions restrictedparts
+#' @importFrom partitions restrictedparts
 #' @export
 #'
 #' @examples

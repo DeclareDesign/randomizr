@@ -7,6 +7,8 @@ Description: Generates random assignments for common experimental designs and
 	    random samples for common sampling designs.
 Depends:
     R (>= 2.10.0)
+Imports:
+    partitions
 License: GPL-3
 LazyData: true
 Suggests:
