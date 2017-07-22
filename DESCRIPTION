@@ -14,6 +14,7 @@ Suggests:
     dplyr,
     blockTools,
     testthat,
-    rmarkdown
+    rmarkdown, 
+    ri
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1

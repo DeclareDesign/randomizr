@@ -4,6 +4,7 @@
 #' @param maximum_permutations If the number of possible random assignments exceeds maximum_permutations, obtain_permutation_matrix will return a random sample of maximum_permutations permutations. Defaults to 10,000.
 #'
 #' @return a matrix of all possible (or a random sample of all possible) random assignments consistent with a declaration.
+#' @importFrom utils combn
 #' @export
 #'
 #' @examples
