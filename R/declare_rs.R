@@ -351,7 +351,6 @@ print.rs_declaration <- function(x, ...) {
   constant_probabilities <-
     all(x$probabilities_vector[1] == x$probabilities_vector)
   
-  cat("\n")
   if (x$rs_type == "stratified")
     cat("Random sampling procedure: Stratified random sampling", "\n")
   if (x$rs_type == "clustered")

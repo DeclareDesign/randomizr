@@ -5,20 +5,19 @@ test_that("Simple Random Assignment Procedures",{
   
   
   declaration <- declare_ra(N = 4, simple = TRUE)
-  
   obtain_num_permutations(declaration)
   perms <- obtain_permutation_matrix(declaration)
-  ##debugonce(obtain_permutation_probabilities)
   perms_probs <- obtain_permutation_probabilities(declaration)
-  
+
+  sum(perms_probs)
+    
+  declaration <- declare_ra(N = 4, prob = .01, simple = TRUE)
+  obtain_num_permutations(declaration)
+  perms <- obtain_permutation_matrix(declaration)
+  perms_probs <- obtain_permutation_probabilities(declaration)
+  sum(perms_probs)
+  .99^4
 })
-
-
-
-
-
-
-
 
 
 

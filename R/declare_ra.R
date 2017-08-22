@@ -493,7 +493,6 @@ print.ra_declaration <- function(x, ...) {
       }
     ))
   
-  cat("\n")
   if (x$ra_type == "blocked")
     cat("Random assignment procedure: Block random assignment", "\n")
   if (x$ra_type == "clustered")
