@@ -9,7 +9,7 @@ Depends:
     R (>= 2.10.0)
 Imports:
     partitions
-License: GPL-3
+License: MIT + file LICENSE
 LazyData: true
 Suggests:
     knitr,
