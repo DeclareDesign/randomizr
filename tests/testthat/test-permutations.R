@@ -63,7 +63,7 @@ dim(perms)
 obtain_num_permutations(declaration)
 obtain_permutation_probabilities(declaration)
 
-# blocked -----------------------------------------------------------------
+# blocked, diff size group --------------------------------------------------
 
 block_var <- c("A", "A", "B", "B", "C", "C", "C")
 declaration <- declare_ra(block_var = block_var)
@@ -72,8 +72,16 @@ dim(perms)
 obtain_num_permutations(declaration)
 obtain_permutation_probabilities(declaration)
 
+# blocked, same size group --------------------------------------------------
 
-# clustered
+block_var <- c("A", "A", "B", "B", "C", "C")
+declaration <- declare_ra(block_var = block_var)
+perms <- obtain_permutation_matrix(declaration)
+dim(perms)
+obtain_num_permutations(declaration)
+obtain_permutation_probabilities(declaration)
+
+# clustered, diff size clusters --------------------------------------------------
 
 clust_var <- c("A", "B", "A", "B", "C", "C", "C")
 declaration <- declare_ra(clust_var = clust_var)
@@ -82,6 +90,38 @@ dim(perms)
 obtain_num_permutations(declaration)
 obtain_permutation_probabilities(declaration)
 
+# clustered, same size clusters --------------------------------------------------
+
+clust_var <- c("A", "B", "A", "B", "C", "C")
+declaration <- declare_ra(clust_var = clust_var)
+perms <- obtain_permutation_matrix(declaration)
+dim(perms)
+obtain_num_permutations(declaration)
+obtain_permutation_probabilities(declaration)
+
+
+# block clustered, simple ----------------------------------------
+
+clust_var <- c("A", "B", "A", "B", "C", "C", "D", "D")
+block_var <- rep(1:2, each = 4)
+declaration <- declare_ra(clust_var = clust_var,
+                          block_var = block_var)
+perms <- obtain_permutation_matrix(declaration)
+dim(perms)
+obtain_num_permutations(declaration)
+obtain_permutation_probabilities(declaration)
+
+
+# block clustered, uneven ----------------------------------------
+
+clust_var <- c("A", "B", "A", "B", "C", "C", "D", "D", "D", "E", "E")
+block_var <- rep(1:2, times = c(4, 7))
+declaration <- declare_ra(clust_var = clust_var,
+                          block_var = block_var)
+perms <- obtain_permutation_matrix(declaration)
+dim(perms)
+obtain_num_permutations(declaration)
+obtain_permutation_probabilities(declaration)
 
 # test against RI package
 

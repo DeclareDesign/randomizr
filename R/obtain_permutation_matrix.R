@@ -109,8 +109,9 @@ obtain_permutation_matrix <-
       perms_by_block <- mapply(FUN = complete_ra_permutations,
                                ns_per_block_list,
                                block_prob_each_local,
-                               condition_names_list)
-      
+                               condition_names_list,
+                               SIMPLIFY = FALSE)
+
       perms <-
         Reduce(expand_matrix, x = perms_by_block)
       
@@ -176,7 +177,8 @@ obtain_permutation_matrix <-
       perms_by_block <- mapply(FUN = complete_ra_permutations,
                                ns_per_block_list,
                                block_prob_each_local,
-                               condition_names_list)
+                               condition_names_list,
+                               SIMPLIFY = FALSE)
       
       perms <-
         Reduce(expand_matrix, x = perms_by_block)
