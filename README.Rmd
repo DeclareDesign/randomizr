@@ -45,8 +45,11 @@ A more complicated design that, for example, assigns different numbers of cluste
 # This makes a cluster variable: one unit in cluster "a", two in "b"...
 clust_var <- rep(letters, times = 1:26)
 
-Z <- cluster_ra(clust_var=clust_var, m_each = c(7, 7, 12),
-                condition_names=c("control", "placebo", "treatment"))
+Z <- cluster_ra(
+  clust_var = clust_var,
+  m_each = c(7, 7, 12),
+  condition_names = c("control", "placebo", "treatment")
+  )
 table(Z, clust_var)
 ```
 
