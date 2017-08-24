@@ -11,6 +11,8 @@ knitr::opts_chunk$set(
 ```
 
 [![Travis-CI Build Status](https://travis-ci.org/DeclareDesign/randomizr.svg?branch=master)](https://travis-ci.org/DeclareDesign/randomizr)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/randomizr?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/randomizr)
+[![Coverage Status](https://coveralls.io/repos/github/DeclareDesign/randomizr/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/randomizr?branch=master)
 
 randomizr is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process.  
 

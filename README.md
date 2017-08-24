@@ -1,5 +1,5 @@
 
-[![Travis-CI Build Status](https://travis-ci.org/DeclareDesign/randomizr.svg?branch=master)](https://travis-ci.org/DeclareDesign/randomizr)
+[![Travis-CI Build Status](https://travis-ci.org/DeclareDesign/randomizr.svg?branch=master)](https://travis-ci.org/DeclareDesign/randomizr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/randomizr?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/randomizr) [![Coverage Status](https://coveralls.io/repos/github/DeclareDesign/randomizr/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/randomizr?branch=master)
 
 randomizr is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process.
 
@@ -40,14 +40,14 @@ Z <- cluster_ra(clust_var=clust_var, m_each = c(7, 7, 12),
 table(Z, clust_var)
 #>            clust_var
 #> Z            a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u
-#>   control    1  2  0  0  0  0  0  0  0  0 11 12 13  0  0  0  0  0 19  0  0
-#>   placebo    0  0  3  0  5  0  0  8  0  0  0  0  0 14  0  0  0 18  0 20  0
-#>   treatment  0  0  0  4  0  6  7  0  9 10  0  0  0  0 15 16 17  0  0  0 21
+#>   control    0  2  0  4  0  0  7  0  0  0  0  0  0 14  0  0  0 18  0  0  0
+#>   placebo    0  0  0  0  0  6  0  8  9  0  0  0  0  0 15  0 17  0  0  0 21
+#>   treatment  1  0  3  0  5  0  0  0  0 10 11 12 13  0  0 16  0  0 19 20  0
 #>            clust_var
 #> Z            v  w  x  y  z
-#>   control    0  0  0 25  0
-#>   placebo    0  0 24  0  0
-#>   treatment 22 23  0  0 26
+#>   control    0  0 24 25  0
+#>   placebo   22  0  0  0  0
+#>   treatment  0 23  0  0 26
 ```
 
 Happy randomizing!
