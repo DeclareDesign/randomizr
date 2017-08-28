@@ -90,7 +90,7 @@ m_each / (sum(m_each))
 complete_ra(5, prob = .1)
 complete_ra_probabilities(5, prob = .1)
 
-Z_mat <- replicate(n = 10000, complete_ra(5, prob = .1))
+Z_mat <- replicate(n = 100, complete_ra(5, prob = .1))
 mean(Z_mat)
 
 ceiling(5*.1)
