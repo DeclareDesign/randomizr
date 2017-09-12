@@ -159,6 +159,9 @@ multinomial_coefficient <-
     # https://www.statlect.com/mathematical-tools/partitions
     if (N != sum(m_each)) {
       stop("the sum of m_each must equal N.")
+    } 
+    if (lfactorial(N) > 300){
+      return(Inf) # this is a hack!
     }
     factorial(N) / prod(factorial(m_each))
   }

@@ -171,3 +171,9 @@ rowMeans(perms)
 perms %*% perm_probs
 
 
+declaration <- declare_ra(N = 958, m = 479)
+
+obtain_num_permutations(declaration)
+obtain_permutation_matrix(declaration)
+
+
