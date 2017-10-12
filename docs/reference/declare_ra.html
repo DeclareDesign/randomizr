@@ -23,7 +23,8 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-
+  
+  
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -191,8 +192,7 @@
 
 <span class='co'># 1. To obtain some basic facts about a randomization:</span>
 <span class='no'>declaration</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>m_each</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>30</span>, <span class='fl'>30</span>, <span class='fl'>40</span>))
-<span class='no'>declaration</span></div><div class='output co'>#&gt; 
-#&gt; Random assignment procedure: Complete random assignment 
+<span class='no'>declaration</span></div><div class='output co'>#&gt; Random assignment procedure: Complete random assignment 
 #&gt; Number of units: 100 
 #&gt; Number of treatment arms: 3 
 #&gt; The possible treatment categories are T1 and T2 and T3.
@@ -212,38 +212,32 @@
 #&gt;   0.4  0  0 40</div><div class='input'>
 <span class='co'># Simple Random Assignment Declarations</span>
 
-<span class='fu'>declare_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; 
-#&gt; Random assignment procedure: Simple random assignment 
+<span class='fu'>declare_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; Random assignment procedure: Simple random assignment 
 #&gt; Number of units: 100 
 #&gt; Number of treatment arms: 2 
 #&gt; The possible treatment categories are 0 and 1.
-#&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.4</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; 
-#&gt; Random assignment procedure: Simple random assignment 
+#&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.4</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; Random assignment procedure: Simple random assignment 
 #&gt; Number of units: 100 
 #&gt; Number of treatment arms: 2 
 #&gt; The possible treatment categories are 0 and 1.
 #&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>prob_each</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>0.3</span>, <span class='fl'>0.3</span>, <span class='fl'>0.4</span>),
-           <span class='kw'>condition_names</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>), <span class='kw'>simple</span><span class='kw'>=</span><span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; 
-#&gt; Random assignment procedure: Simple random assignment 
+           <span class='kw'>condition_names</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>), <span class='kw'>simple</span><span class='kw'>=</span><span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; Random assignment procedure: Simple random assignment 
 #&gt; Number of units: 100 
 #&gt; Number of treatment arms: 3 
 #&gt; The possible treatment categories are control and placebo and treatment.
 #&gt; The probabilities of assignment are constant across units.</div><div class='input'>
 <span class='co'># Complete Random Assignment Declarations</span>
 
-<span class='fu'>declare_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>)</div><div class='output co'>#&gt; 
-#&gt; Random assignment procedure: Complete random assignment 
+<span class='fu'>declare_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>)</div><div class='output co'>#&gt; Random assignment procedure: Complete random assignment 
 #&gt; Number of units: 100 
 #&gt; Number of treatment arms: 2 
 #&gt; The possible treatment categories are 0 and 1.
 #&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>30</span>, <span class='fl'>70</span>),
-           <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"treatment"</span>))</div><div class='output co'>#&gt; 
-#&gt; Random assignment procedure: Complete random assignment 
+           <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"treatment"</span>))</div><div class='output co'>#&gt; Random assignment procedure: Complete random assignment 
 #&gt; Number of units: 100 
 #&gt; Number of treatment arms: 2 
 #&gt; The possible treatment categories are control and treatment.
-#&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>m_each</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>30</span>, <span class='fl'>30</span>, <span class='fl'>40</span>))</div><div class='output co'>#&gt; 
-#&gt; Random assignment procedure: Complete random assignment 
+#&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>m_each</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>30</span>, <span class='fl'>30</span>, <span class='fl'>40</span>))</div><div class='output co'>#&gt; Random assignment procedure: Complete random assignment 
 #&gt; Number of units: 100 
 #&gt; Number of treatment arms: 3 
 #&gt; The possible treatment categories are T1 and T2 and T3.
@@ -256,8 +250,7 @@
 <span class='no'>block_m_each</span> <span class='kw'>&lt;-</span> <span class='fu'>rbind</span>(<span class='fu'>c</span>(<span class='fl'>10</span>, <span class='fl'>40</span>),
                  <span class='fu'>c</span>(<span class='fl'>30</span>, <span class='fl'>70</span>),
                  <span class='fu'>c</span>(<span class='fl'>50</span>, <span class='fl'>150</span>))
-<span class='fu'>declare_ra</span>(<span class='kw'>block_var</span> <span class='kw'>=</span> <span class='no'>block_var</span>, <span class='kw'>block_m_each</span> <span class='kw'>=</span> <span class='no'>block_m_each</span>)</div><div class='output co'>#&gt; 
-#&gt; Random assignment procedure: Block random assignment 
+<span class='fu'>declare_ra</span>(<span class='kw'>block_var</span> <span class='kw'>=</span> <span class='no'>block_var</span>, <span class='kw'>block_m_each</span> <span class='kw'>=</span> <span class='no'>block_m_each</span>)</div><div class='output co'>#&gt; Random assignment procedure: Block random assignment 
 #&gt; Number of units: 350 
 #&gt; Number of blocks: 3 
 #&gt; Number of treatment arms: 2 
@@ -267,14 +260,12 @@
 <span class='co'># Cluster Random Assignment Declarations</span>
 
 <span class='no'>clust_var</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>26</span>)
-<span class='fu'>declare_ra</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>)</div><div class='output co'>#&gt; 
-#&gt; Random assignment procedure: Cluster random assignment 
+<span class='fu'>declare_ra</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>)</div><div class='output co'>#&gt; Random assignment procedure: Cluster random assignment 
 #&gt; Number of units: 351 
 #&gt; Number of clusters: 26 
 #&gt; Number of treatment arms: 2 
 #&gt; The possible treatment categories are 0 and 1.
-#&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>7</span>, <span class='fl'>7</span>, <span class='fl'>12</span>))</div><div class='output co'>#&gt; 
-#&gt; Random assignment procedure: Cluster random assignment 
+#&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>7</span>, <span class='fl'>7</span>, <span class='fl'>12</span>))</div><div class='output co'>#&gt; Random assignment procedure: Cluster random assignment 
 #&gt; Number of units: 351 
 #&gt; Number of clusters: 26 
 #&gt; Number of treatment arms: 3 
@@ -304,15 +295,13 @@
 #&gt;   block_3  0  0  0
 #&gt;   block_4  0  0  0
 #&gt;   block_5 24 25 26</div><div class='input'>
-<span class='fu'>declare_ra</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>block_var</span> <span class='kw'>=</span> <span class='no'>block_var</span>)</div><div class='output co'>#&gt; 
-#&gt; Random assignment procedure: Blocked and clustered random assignment 
+<span class='fu'>declare_ra</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>block_var</span> <span class='kw'>=</span> <span class='no'>block_var</span>)</div><div class='output co'>#&gt; Random assignment procedure: Blocked and clustered random assignment 
 #&gt; Number of units: 351 
 #&gt; Number of blocks: 5 
 #&gt; Number of clusters: 26 
 #&gt; Number of treatment arms: 2 
 #&gt; The possible treatment categories are 0 and 1.
-#&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>block_var</span> <span class='kw'>=</span> <span class='no'>block_var</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>.2</span>, <span class='fl'>.5</span>, <span class='fl'>.3</span>))</div><div class='output co'>#&gt; 
-#&gt; Random assignment procedure: Blocked and clustered random assignment 
+#&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>block_var</span> <span class='kw'>=</span> <span class='no'>block_var</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>.2</span>, <span class='fl'>.5</span>, <span class='fl'>.3</span>))</div><div class='output co'>#&gt; Random assignment procedure: Blocked and clustered random assignment 
 #&gt; Number of units: 351 
 #&gt; Number of blocks: 5 
 #&gt; Number of clusters: 26 

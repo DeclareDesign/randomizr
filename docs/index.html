@@ -84,7 +84,7 @@
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"randomizr"</span>)</code></pre></div>
 <p>If you’d like to install the most current development release, use the following code:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"devtools"</span>)
-devtools::<span class="kw">install_github</span>(<span class="st">"DeclareDesign/randomizr"</span>)</code></pre></div>
+devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"DeclareDesign/randomizr"</span>)</code></pre></div>
 <p>There are five main random assignment functions in randomizr: <code><a href="reference/simple_ra.html">simple_ra()</a></code>, <code><a href="reference/complete_ra.html">complete_ra()</a></code>, <code><a href="reference/block_ra.html">block_ra()</a></code>, <code><a href="reference/cluster_ra.html">cluster_ra()</a></code>, and <code><a href="reference/block_and_cluster_ra.html">block_and_cluster_ra()</a></code>, which correspond to common experimental designs.</p>
 <p><code><a href="reference/complete_ra.html">complete_ra()</a></code> is the workhorse function that will be most appropriate for a large number of experimental situations: it assigns m of N units to treatment:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(randomizr)
@@ -95,33 +95,37 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/complete_ra.
 <span class="co">#&gt; 50 50</span></code></pre></div>
 <p>A more complicated design that, for example, assigns different numbers of clusters to three different treatments can be accomodated like this:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># This makes a cluster variable: one unit in cluster "a", two in "b"...</span>
-clust_var &lt;-<span class="st"> </span><span class="kw">rep</span>(letters, <span class="dt">times =</span> <span class="dv">1</span>:<span class="dv">26</span>)
+clust_var &lt;-<span class="st"> </span><span class="kw">rep</span>(letters, <span class="dt">times =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">26</span>)
 
-Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/cluster_ra.html">cluster_ra</a></span>(<span class="dt">clust_var=</span>clust_var, <span class="dt">m_each =</span> <span class="kw">c</span>(<span class="dv">7</span>, <span class="dv">7</span>, <span class="dv">12</span>),
-                <span class="dt">condition_names=</span><span class="kw">c</span>(<span class="st">"control"</span>, <span class="st">"placebo"</span>, <span class="st">"treatment"</span>))
+Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/cluster_ra.html">cluster_ra</a></span>(
+  <span class="dt">clust_var =</span> clust_var,
+  <span class="dt">m_each =</span> <span class="kw">c</span>(<span class="dv">7</span>, <span class="dv">7</span>, <span class="dv">12</span>),
+  <span class="dt">condition_names =</span> <span class="kw">c</span>(<span class="st">"control"</span>, <span class="st">"placebo"</span>, <span class="st">"treatment"</span>)
+  )
 <span class="kw">table</span>(Z, clust_var)
 <span class="co">#&gt;            clust_var</span>
 <span class="co">#&gt; Z            a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u</span>
-<span class="co">#&gt;   control    0  0  0  0  0  0  7  0  0 10 11  0 13 14  0  0  0  0 19  0  0</span>
-<span class="co">#&gt;   placebo    0  0  0  4  0  6  0  0  0  0  0  0  0  0  0 16 17 18  0 20  0</span>
-<span class="co">#&gt;   treatment  1  2  3  0  5  0  0  8  9  0  0 12  0  0 15  0  0  0  0  0 21</span>
+<span class="co">#&gt;   control    0  2  0  0  0  6  0  0  0  0 11  0  0  0  0  0  0 18  0 20  0</span>
+<span class="co">#&gt;   placebo    0  0  0  0  0  0  0  8  9  0  0 12  0 14 15  0  0  0  0  0 21</span>
+<span class="co">#&gt;   treatment  1  0  3  4  5  0  7  0  0 10  0  0 13  0  0 16 17  0 19  0  0</span>
 <span class="co">#&gt;            clust_var</span>
 <span class="co">#&gt; Z            v  w  x  y  z</span>
-<span class="co">#&gt;   control    0 23  0  0  0</span>
+<span class="co">#&gt;   control    0  0 24 25  0</span>
 <span class="co">#&gt;   placebo   22  0  0  0  0</span>
-<span class="co">#&gt;   treatment  0  0 24 25 26</span></code></pre></div>
+<span class="co">#&gt;   treatment  0 23  0  0 26</span></code></pre></div>
 <p>Happy randomizing!</p>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Links</h2>
+    <h2 class="hasAnchor">
+<a href="#sidebar" class="anchor"></a>Links</h2>
 <ul class="list-unstyled">
 <li>Download from CRAN at <br><a href="https://cran.r-project.org/package=randomizr">https://​cran.r-project.org/​package=randomizr</a>
 </li>
 </ul>
 <h2>License</h2>
-<p><a href="https://www.r-project.org/Licenses/GPL-3">GPL-3</a></p>
+<p><a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE.html">LICENSE</a></p>
 <h2>Developers</h2>
 <ul class="list-unstyled">
 <li>Alexander Coppock <br><small class="roles"> Author, maintainer </small> </li>
@@ -130,6 +134,8 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/cluster_ra.h
 <h2>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://travis-ci.org/DeclareDesign/randomizr"><img src="https://travis-ci.org/DeclareDesign/randomizr.svg?branch=master" alt="Travis-CI Build Status"></a></li>
+<li><a href="https://ci.appveyor.com/project/DeclareDesign/randomizr"><img src="https://ci.appveyor.com/api/projects/status/github/DeclareDesign/randomizr?branch=master&amp;svg=true" alt="AppVeyor Build Status"></a></li>
+<li><a href="https://coveralls.io/github/DeclareDesign/randomizr?branch=master"><img src="https://coveralls.io/repos/github/DeclareDesign/randomizr/badge.svg?branch=master" alt="Coverage Status"></a></li>
 </ul>
 </div>
 
