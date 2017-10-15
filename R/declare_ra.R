@@ -102,9 +102,11 @@ declare_ra <- function(N = NULL,
                        num_arms = NULL,
                        condition_names = NULL,
                        simple = FALSE,
+                       permutation_matrix = NULL,
                        check_inputs = TRUE) {
   input_check <- NULL
-  if (check_inputs) {
+  
+  if (check_inputs & is.null(permutation_matrix)) {
     input_check <- check_randomizr_arguments(
       N = N,
       block_var = block_var,
@@ -135,6 +137,9 @@ declare_ra <- function(N = NULL,
   }
   if (!is.null(block_var) & !is.null(clust_var)) {
     ra_type <- "blocked_and_clustered"
+  }
+  if (!is.null(permutation_matrix)){
+    ra_type <- "custom"
   }
   
   if (ra_type == "simple" & is.null(clust_var)) {
@@ -300,10 +305,26 @@ declare_ra <- function(N = NULL,
     
   }
   
+  if (ra_type == "custom"){
+    ra_function <- function(){
+      permutation_matrix[,sample(ncol(permutation_matrix), 1)]
+    }
+    condition_names <- sort(unique(c(permutation_matrix)))
+    
+    probabilities_matrix <- 
+      sapply(condition_names, 
+             FUN = function(x) apply(permutation_matrix, MARGIN = 1, FUN = function(y) mean(y == x)))
+    
+    colnames(probabilities_matrix) <- paste0("prob_", condition_names)
+    
+  }
+  
+  
   return_object <- list(
     ra_function = ra_function,
     ra_type = ra_type,
     probabilities_matrix = probabilities_matrix,
+    permutation_matrix = permutation_matrix,
     block_var = block_var,
     clust_var = clust_var,
     original_call = match.call(),

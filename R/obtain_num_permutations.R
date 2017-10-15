@@ -146,6 +146,10 @@ obtain_num_permutations <-
       
     }
     
+    if (declaration$ra_type == "custom") {
+      num_permutations <- ncol(declaration$permutation_matrix)
+    }
+    
     return(num_permutations)
     
   }
