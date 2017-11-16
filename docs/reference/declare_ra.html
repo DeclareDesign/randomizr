@@ -51,8 +51,20 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li>
-  <a href="../articles/randomizr_vignette.html">Getting Started</a>
+        <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Getting Started
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/randomizr_vignette.html">Using R</a>
+    </li>
+    <li>
+      <a href="../articles/strandomizr_vignette.html">Using Stata</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="../reference/">Reference</a>
@@ -110,7 +122,7 @@
   <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>block_m</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>block_m_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>block_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>block_prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+  <span class='kw'>permutation_matrix</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
