@@ -1,0 +1,618 @@
+<h1 id="randomizr-vignette">randomizr vignette</h1>
+<p>randomizr is a small pacakge for Stata that simplifies the design and analysis of randomized experiments. In particular, it makes the random assignment procedure transparent, flexible, and most importantly reproduceable. By the time that many experiments are written up and made public, the process by which some units recieved treatments is lost or imprecisely described. The randomizr package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.</p>
+<p>A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage. First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a cluster. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of average causal effects and the uncertainty attending to them may be incorrect.</p>
+<h2 id="a-hypothetical-experiment">A Hypothetical Experiment</h2>
+<p>Throughout this vignette, we'll pretend we're conducting an experiment among the 592 individuals in R's HairEyeColor dataset. As we'll see, there are many ways to randomly assign subjects to treatments. We'll step through five common designs, each associated with one of the five randomizr functions: simple_ra, complete_ra, block_ra, cluster_ra, and block_and_cluster_ra.</p>
+<p>Typically, researchers know some basic information about their subjects before deploying treatment. For example, they usually know how many subjects there are in the experimental sample (N), and they usually know some basic demographic information about each subject.</p>
+<p>Our new dataset has 592 subjects. We have three pretreatment covariates, Hair, Eye, and Sex, which describe the hair color, eye color, and gender of each subject. We also have potential outcomes. We call the untreated outcome Y0 and we call the treated outcome Y1.</p>
+<pre><code>      . clear all
+
+
+      . use HairEyeColor
+      (Written by R.              )
+
+      . des
+
+      Contains data from HairEyeColor.dta
+        obs:           592                          Written by R.              
+       vars:             6                          28 Aug 2017 01:24
+       size:        18,944                          
+      -----------------------------------------------------------------------------------
+                    storage   display    value
+      variable name   type    format     label      variable label
+      -----------------------------------------------------------------------------------
+      Hair            long    %9.0g      Hair       Hair
+      Eye             long    %9.0g      Eye        Eye
+      Sex             long    %9.0g      Sex        Sex
+      Y1              double  %9.0g                 Y1
+      Y0              double  %9.0g                 Y0
+      id              float   %9.0g                 
+      -----------------------------------------------------------------------------------
+      Sorted by: 
+
+      . list in 1/5
+
+           +---------------------------------------------------+
+           |  Hair     Eye    Sex          Y1          Y0   id |
+           |---------------------------------------------------|
+        1. | Black   Brown   Male   -2.983882   -14.98388    1 |
+        2. | Black   Brown   Male    6.616561   -5.383439    2 |
+        3. | Black   Brown   Male    4.711323   -7.288677    3 |
+        4. | Black   Brown   Male   -.2332402   -12.23324    4 |
+        5. | Black   Brown   Male    1.940893   -10.05911    5 |
+           +---------------------------------------------------+
+
+      . set seed 324437641</code></pre>
+<p>Imagine that in the absence of any intervention, the outcome (Y0) is correlated with out pretreatment covariates. Imagine further that the effectiveness of the program varies according to these covariates, i.e., the difference between Y1 and Y0 is correlated with the pretreatment covariates.</p>
+<p>If we were really running an experiment, we would only observe either Y0 or Y1 for each subject, but since we are simulating, we have both. Our inferential target is the average treatment effect (ATE), which is defined as the average difference between Y0 and Y1.</p>
+<h2 id="simple-random-assignment">Simple Random Assignment</h2>
+<p>Simple random assignment assigns all subjects to treatment with an equal probability by flipping a (weighted) coin for each subject. The main trouble with simple random assignment is that the number of subjects assigned to treatment is itself a random number - depending on the random assignment, a different number of subjects might be assigned to each group.</p>
+<p>The simple_ra function has no required arguments. If no other arguments are specified, simple_ra assumes a two-group design and a 0.50 probability of assignment.</p>
+<pre><code>      . simple_ra Z
+
+
+      . tab Z
+
+                Z |      Freq.     Percent        Cum.
+      ------------+-----------------------------------
+                0 |        294       49.66       49.66
+                1 |        298       50.34      100.00
+      ------------+-----------------------------------
+            Total |        592      100.00</code></pre>
+<p>To change the probability of assignment, specify the prob argument:</p>
+<pre><code>      . simple_ra Z, replace prob(.3)
+
+
+      . tab Z
+
+                Z |      Freq.     Percent        Cum.
+      ------------+-----------------------------------
+                0 |        423       71.45       71.45
+                1 |        169       28.55      100.00
+      ------------+-----------------------------------
+            Total |        592      100.00</code></pre>
+<p>If you specify num_arms without changing prob_each, simple_ra will assume equal probabilities across all arms.</p>
+<pre><code>      . simple_ra Z, replace num_arms(3)
+
+
+      . tab Z
+
+                Z |      Freq.     Percent        Cum.
+      ------------+-----------------------------------
+                1 |        186       31.42       31.42
+                2 |        193       32.60       64.02
+                3 |        213       35.98      100.00
+      ------------+-----------------------------------
+            Total |        592      100.00</code></pre>
+<p>You can also just specify the probabilites of your multiple arms. The probabilities must sum to 1.</p>
+<pre><code>      . simple_ra Z, replace prob_each(.2 .2 .6)
+
+
+      . tab Z
+
+                Z |      Freq.     Percent        Cum.
+      ------------+-----------------------------------
+                1 |        138       23.31       23.31
+                2 |        110       18.58       41.89
+                3 |        344       58.11      100.00
+      ------------+-----------------------------------
+            Total |        592      100.00</code></pre>
+<p>You can also name your treatment arms.</p>
+<pre><code>      . simple_ra Z, replace prob_each(.2 .2 .6) condition_names(control placebo treatment)
+
+
+      . tab Z
+
+                Z |      Freq.     Percent        Cum.
+      ------------+-----------------------------------
+          control |        105       17.74       17.74
+          placebo |        119       20.10       37.84
+        treatment |        368       62.16      100.00
+      ------------+-----------------------------------
+            Total |        592      100.00</code></pre>
+<h2 id="complete-random-assignment">Complete Random Assignment</h2>
+<p>Complete random assignment is very similar to simple random assignment, except that the researcher can specify exactly how many units are assigned to each condition.</p>
+<p>The syntax for complete_ra is very similar to that of simple_ra. The argument m is the number of units assigned to treatment in two-arm designs; it is analogous to simple_ra's prob. Similarly, the argument m_each is analogous to prob_each.</p>
+<p>If you specify no arguments in complete_ra, it assigns exactly half of the subjects to treatment.</p>
+<pre><code>      . complete_ra Z, replace
+
+      . tab Z
+
+                Z |      Freq.     Percent        Cum.
+      ------------+-----------------------------------
+                0 |        296       50.00       50.00
+                1 |        296       50.00      100.00
+      ------------+-----------------------------------
+            Total |        592      100.00</code></pre>
+<p>To change the number of units assigned, specify the m argument:</p>
+<pre><code>      . complete_ra Z, m(200) replace
+
+      . tab Z
+
+                Z |      Freq.     Percent        Cum.
+      ------------+-----------------------------------
+                0 |        392       66.22       66.22
+                1 |        200       33.78      100.00
+      ------------+-----------------------------------
+            Total |        592      100.00</code></pre>
+<p>If you specify multiple arms, complete_ra will assign an equal (within rounding) number of units to treatment.</p>
+<pre><code>      . complete_ra Z, num_arms(3) replace
+
+
+      . tab Z
+
+                Z |      Freq.     Percent        Cum.
+      ------------+-----------------------------------
+                1 |        197       33.28       33.28
+                2 |        197       33.28       66.55
+                3 |        198       33.45      100.00
+      ------------+-----------------------------------
+            Total |        592      100.00</code></pre>
+<p>You can also specify exactly how many units should be assigned to each arm. The total of m_each must equal N.</p>
+<pre><code>      . complete_ra Z, m_each(100 200 292) replace
+
+
+      . tab Z
+
+                Z |      Freq.     Percent        Cum.
+      ------------+-----------------------------------
+                1 |        100       16.89       16.89
+                2 |        200       33.78       50.68
+                3 |        292       49.32      100.00
+      ------------+-----------------------------------
+            Total |        592      100.00</code></pre>
+<p>You can also name your treatment arms.</p>
+<pre><code>      . complete_ra Z, m_each(100 200 292) replace condition_names(control placebo treatment)
+
+
+      . tab Z
+
+                Z |      Freq.     Percent        Cum.
+      ------------+-----------------------------------
+          control |        100       16.89       16.89
+          placebo |        200       33.78       50.68
+        treatment |        292       49.32      100.00
+      ------------+-----------------------------------
+            Total |        592      100.00</code></pre>
+<h3 id="simple-and-complete-random-assignment-compared">Simple and Complete Random Assignment Compared</h3>
+<p>When should you use simple_ra versus complete_ra? Basically, if the number of units is known beforehand, complete_ra is always preferred, for two reasons: 1. Researchers can plan exactly how many treatments will be deployed. 2. The standard errors associated with complete random assignment are generally smaller, increasing experimental power. See this guide on EGAP for more on experimental power.</p>
+<p>Since you need to know N beforehand in order to use simple_ra(), it may seem like a useless function. Sometimes, however, the random assignment isn't directly in the researcher's control. For example, when deploying a survey exeriment on a platform like Qualtrics, simple random assignment is the only possibility due to the inflexibility of the built-in random assignment tools. When reconstructing the random assignment for analysis after the experiment has been conducted, simple_ra() provides a convenient way to do so.</p>
+<p>To demonstrate how complete_ra() is superior to simple_ra(), let's conduct a small simulation with our HairEyeColor dataset.</p>
+<pre><code>      . local sims=1000
+
+      . matrix simple_ests=J(`sims&#39;,1,.)        
+
+      . matrix complete_ests=J(`sims&#39;,1,.)
+
+      . forval i=1/`sims&#39; {
+      . local seed=32430641+`i&#39;
+      . set seed `seed&#39;
+      . qui simple_ra Z_simple, replace
+      . qui complete_ra Z_complete, replace
+      . qui tempvar Y_simple Y_complete
+      . qui gen `Y_simple&#39; = Y1*Z_simple + Y0*(1-Z_simple)
+      . qui gen `Y_complete&#39; = Y1*Z_complete + Y0*(1-Z_complete)
+      . qui reg `Y_simple&#39; Z_simple
+      . qui matrix simple_ests[`i&#39;,1]=_b[Z_simple]
+      . qui reg `Y_complete&#39; Z_complete
+      . qui matrix complete_ests[`i&#39;,1]=_b[Z_complete]
+      . }</code></pre>
+<p>The standard error of an estimate is defined as the standard deviation of the sampling distribution of the estimator. When standard errors are estimated (i.e., by using the summary() command on a model fit), they are estimated using some approximation. This simulation allows us to measure the standard error directly, since the vectors simple_ests and complete_ests describe the sampling distribution of each design.</p>
+<pre><code>      . mata: st_numscalar(&quot;simple_var&quot;,variance(st_matrix(&quot;simple_ests&quot;)))
+
+
+      . mata: st_numscalar(&quot;complete_var&quot;,variance(st_matrix(&quot;complete_ests&quot;)))
+
+
+      . disp &quot;Simple RA S.D.: &quot; sqrt(simple_var)
+      Simple RA S.D.: .62489587
+
+      . disp &quot;Complete RA S.D.: &quot;sqrt(complete_var)
+      Complete RA S.D.: .60401434</code></pre>
+<p>In this simulation complete random assignment led to a</p>
+<pre><code>      . disp round(((simple_var) - (complete_var))/(simple_var)*100, 2)
+      6</code></pre>
+<p>% decrease in sampling variability. This decrease was obtained with a small design tweak that costs the researcher essentially nothing.</p>
+<h2 id="block-random-assignment">Block Random Assignment</h2>
+<p>Block random assignment (sometimes known as stratified random assignment) is a powerful tool when used well. In this design, subjects are sorted into blocks (strata) according to their pre-treatment covariates, and then complete random assignment is conducted within each block. For example, a researcher might block on gender, assigning exactly half of the men and exactly half of the women to treatment.</p>
+<p>Why block? The first reason is to signal to future readers that treatment effect heterogeneity may be of interest: is the treatment effect different for men versus women? Of course, such heterogeneity could be explored if complete random assignment had been used, but blocking on a covariate defends a researcher (somewhat) against claims of data dredging. The second reason is to increase precision. If the blocking variables are predicitive of the outcome (i.e., they are correlated with the outcome), then blocking may help to decrease sampling variability. It's important, however, not to overstate these advantages. The gains from a blocked design can often be realized through covariate adjustment alone.</p>
+<p>Blocking can also produce complications for estimation. Blocking can produce different probabilities of assignment for different subjects. This complication is typically addressed in one of two ways: &quot;controlling for blocks&quot; in a regression context, or inverse probabilitity weights (IPW), in which units are weighted by the inverse of the probability that the unit is in the condition that it is in.</p>
+<p>The only required argument to block_ra is block_var, which is a variable that describes which block a unit belongs to. block_var can be a string or numeric variable. If no other arguments are specified, block_ra assigns an approximately equal proportion of each block to treatment.</p>
+<pre><code>      . block_ra Z, block_var(Hair) replace
+
+      . tab Z Hair
+
+                 |                    Hair
+               Z |     Black      Brown        Red      Blond |     Total
+      -----------+--------------------------------------------+----------
+               0 |        54        143         35         64 |       296 
+               1 |        54        143         36         63 |       296 
+      -----------+--------------------------------------------+----------
+           Total |       108        286         71        127 |       592 </code></pre>
+<p>For multiple treatment arms, use the num_arms argument, with or without the condition_names argument</p>
+<pre><code>      . block_ra Z, block_var(Hair) num_arms(3) replace
+
+      . tab Z Hair
+
+                 |                    Hair
+               Z |     Black      Brown        Red      Blond |     Total
+      -----------+--------------------------------------------+----------
+               1 |        36         95         24         43 |       198 
+               2 |        36         96         24         42 |       198 
+               3 |        36         95         23         42 |       196 
+      -----------+--------------------------------------------+----------
+           Total |       108        286         71        127 |       592 
+
+
+      . block_ra Z, block_var(Hair) condition_names(Control Placebo Treatment) replace
+
+      . tab Z Hair
+
+                 |                    Hair
+               Z |     Black      Brown        Red      Blond |     Total
+      -----------+--------------------------------------------+----------
+         Control |        36         96         23         42 |       197 
+         Placebo |        36         95         23         43 |       197 
+       Treatment |        36         95         25         42 |       198 
+      -----------+--------------------------------------------+----------
+           Total |       108        286         71        127 |       592 </code></pre>
+<p>block_ra provides a number of ways to adjust the number of subjects assigned to each conditions. The prob_each argument describes what proportion of each block should be assigned to treatment arm. Note of course, that block_ra still uses complete random assignment within each block; the appropriate number of units to assign to treatment within each block is automatically determined.</p>
+<pre><code>      . block_ra Z, block_var(Hair) prob_each(.3 .7) replace
+
+      . tab Z Hair
+
+                 |                    Hair
+               Z |     Black      Brown        Red      Blond |     Total
+      -----------+--------------------------------------------+----------
+               0 |        75        201         49         88 |       413 
+               1 |        33         85         22         39 |       179 
+      -----------+--------------------------------------------+----------
+           Total |       108        286         71        127 |       592 </code></pre>
+<p>For finer control, use the block_m_each argument, which takes a matrix with as many rows as there are blocks, and as many columns as there are treatment conditions. Remember that the rows are in the same order as seen in tab block_var, a command that is good to run before constructing a block_m_each matrix. The matrix can either be defined using the matrix define command or be inputted directly into the block_m_each option.</p>
+<pre><code>      . tab Hair 
+
+             Hair |      Freq.     Percent        Cum.
+      ------------+-----------------------------------
+            Black |        108       18.24       18.24
+            Brown |        286       48.31       66.55
+              Red |         71       11.99       78.55
+            Blond |        127       21.45      100.00
+      ------------+-----------------------------------
+            Total |        592      100.00
+
+      . matrix define block_m_each=(78, 30\186, 100\51, 20\87,40)
+
+      . matrix list block_m_each
+
+      block_m_each[4,2]
+           c1   c2
+      r1   78   30
+      r2  186  100
+      r3   51   20
+      r4   87   40
+
+      . block_ra Z, replace block_var(Hair) block_m_each(block_m_each)
+
+
+      . tab Z Hair 
+
+                 |                    Hair
+               Z |     Black      Brown        Red      Blond |     Total
+      -----------+--------------------------------------------+----------
+               0 |        30        100         20         40 |       190 
+               1 |        78        186         51         87 |       402 
+      -----------+--------------------------------------------+----------
+           Total |       108        286         71        127 |       592 
+
+
+      . block_ra Z, replace block_var(Hair) block_m_each(78, 30\186, 100\51, 20\87,40)
+
+
+      . tab Z Hair      
+
+                 |                    Hair
+               Z |     Black      Brown        Red      Blond |     Total
+      -----------+--------------------------------------------+----------
+               0 |        30        100         20         40 |       190 
+               1 |        78        186         51         87 |       402 
+      -----------+--------------------------------------------+----------
+           Total |       108        286         71        127 |       592 </code></pre>
+<h2 id="clustered-assignment">Clustered Assignment</h2>
+<p>Clustered assignment is unfortunate. If you can avoid assigning subjects to treatments by cluster, you should. Sometimes, clustered assignment is unavoidable. Some common situations include:</p>
+<ol style="list-style-type: decimal">
+<li>Housemates in households: whole households are assigned to treatment or control</li>
+<li>Students in classrooms: whole classrooms are assigned to treatment or control</li>
+<li>Residents in towns or villages: whole communities are assigned to treatment or control</li>
+</ol>
+<p>Clustered assignment decreases the effective sample size of an experiment. In the extreme case when outcomes are perfectly correlated with clusters, the experiment has an effective sample size equal to the number of clusters. When outcomes are perfectly uncorrelated with clusters, the effective sample size is equal to the number of subjects. Almost all cluster-assigned experiments fall somewhere in the middle of these two extremes.</p>
+<p>The only required argument for the cluster_ra function is the clust_var argument, which indicates which cluster each subject belongs to. Let's pretend that for some reason, we have to assign treatments according to the unique combinations of hair color, eye color, and gender.</p>
+<pre><code>      . egen clust_var=group(Hair Eye Sex)
+
+      . tab clust_var
+
+       group(Hair |
+         Eye Sex) |      Freq.     Percent        Cum.
+      ------------+-----------------------------------
+                1 |         32        5.41        5.41
+                2 |         36        6.08       11.49
+                3 |         11        1.86       13.34
+                4 |          9        1.52       14.86
+                5 |         10        1.69       16.55
+                6 |          5        0.84       17.40
+                7 |          3        0.51       17.91
+                8 |          2        0.34       18.24
+                9 |         53        8.95       27.20
+               10 |         66       11.15       38.34
+               11 |         50        8.45       46.79
+               12 |         34        5.74       52.53
+               13 |         25        4.22       56.76
+               14 |         29        4.90       61.66
+               15 |         15        2.53       64.19
+               16 |         14        2.36       66.55
+               17 |         10        1.69       68.24
+               18 |         16        2.70       70.95
+               19 |         10        1.69       72.64
+               20 |          7        1.18       73.82
+               21 |          7        1.18       75.00
+               22 |          7        1.18       76.18
+               23 |          7        1.18       77.36
+               24 |          7        1.18       78.55
+               25 |          3        0.51       79.05
+               26 |          4        0.68       79.73
+               27 |         30        5.07       84.80
+               28 |         64       10.81       95.61
+               29 |          5        0.84       96.45
+               30 |          5        0.84       97.30
+               31 |          8        1.35       98.65
+               32 |          8        1.35      100.00
+      ------------+-----------------------------------
+            Total |        592      100.00
+
+      . cluster_ra Z_clust, cluster_var(clust_var) 
+
+      . tab clust_var Z_clust
+
+      group(Hair |        Z_clust
+        Eye Sex) |         0          1 |     Total
+      -----------+----------------------+----------
+               1 |        32          0 |        32 
+               2 |        36          0 |        36 
+               3 |        11          0 |        11 
+               4 |         9          0 |         9 
+               5 |         0         10 |        10 
+               6 |         5          0 |         5 
+               7 |         0          3 |         3 
+               8 |         2          0 |         2 
+               9 |        53          0 |        53 
+              10 |         0         66 |        66 
+              11 |        50          0 |        50 
+              12 |         0         34 |        34 
+              13 |         0         25 |        25 
+              14 |         0         29 |        29 
+              15 |         0         15 |        15 
+              16 |        14          0 |        14 
+              17 |         0         10 |        10 
+              18 |         0         16 |        16 
+              19 |         0         10 |        10 
+              20 |         0          7 |         7 
+              21 |         0          7 |         7 
+              22 |         7          0 |         7 
+              23 |         7          0 |         7 
+              24 |         7          0 |         7 
+              25 |         0          3 |         3 
+              26 |         4          0 |         4 
+              27 |        30          0 |        30 
+              28 |        64          0 |        64 
+              29 |         5          0 |         5 
+              30 |         0          5 |         5 
+              31 |         0          8 |         8 
+              32 |         0          8 |         8 
+      -----------+----------------------+----------
+           Total |       336        256 |       592 </code></pre>
+<p>This shows that each cluster is either assigned to treatment or control. No two units within the same cluster are assigned to different conditions.</p>
+<p>As with all functions in randomizr, you can specify multiple treatment arms in a variety of ways:</p>
+<pre><code>      . cluster_ra Z_clust, cluster_var(clust_var) num_arms(3) replace
+
+
+      . tab clust_var Z_clust
+
+      group(Hair |             Z_clust
+        Eye Sex) |         1          2          3 |     Total
+      -----------+---------------------------------+----------
+               1 |        32          0          0 |        32 
+               2 |        36          0          0 |        36 
+               3 |         0          0         11 |        11 
+               4 |         9          0          0 |         9 
+               5 |        10          0          0 |        10 
+               6 |         0          0          5 |         5 
+               7 |         0          3          0 |         3 
+               8 |         0          0          2 |         2 
+               9 |         0         53          0 |        53 
+              10 |        66          0          0 |        66 
+              11 |         0         50          0 |        50 
+              12 |         0         34          0 |        34 
+              13 |         0          0         25 |        25 
+              14 |         0          0         29 |        29 
+              15 |         0         15          0 |        15 
+              16 |        14          0          0 |        14 
+              17 |         0          0         10 |        10 
+              18 |         0          0         16 |        16 
+              19 |         0         10          0 |        10 
+              20 |         0          7          0 |         7 
+              21 |         7          0          0 |         7 
+              22 |         7          0          0 |         7 
+              23 |         0          0          7 |         7 
+              24 |         0          0          7 |         7 
+              25 |         3          0          0 |         3 
+              26 |         0          4          0 |         4 
+              27 |         0         30          0 |        30 
+              28 |        64          0          0 |        64 
+              29 |         0          0          5 |         5 
+              30 |         0          5          0 |         5 
+              31 |         0          0          8 |         8 
+              32 |         0          8          0 |         8 
+      -----------+---------------------------------+----------
+           Total |       248        219        125 |       592 </code></pre>
+<p>...or using condition_names.</p>
+<pre><code>      . cluster_ra Z_clust, cluster_var(clust_var) condition_names(control placebo treatment)  replace
+
+
+      . tab clust_var Z_clust
+
+      group(Hair |             Z_clust
+        Eye Sex) |   control    placebo  treatment |     Total
+      -----------+---------------------------------+----------
+               1 |        32          0          0 |        32 
+               2 |         0          0         36 |        36 
+               3 |         0          0         11 |        11 
+               4 |         0          0          9 |         9 
+               5 |        10          0          0 |        10 
+               6 |         0          0          5 |         5 
+               7 |         3          0          0 |         3 
+               8 |         0          2          0 |         2 
+               9 |         0         53          0 |        53 
+              10 |         0         66          0 |        66 
+              11 |        50          0          0 |        50 
+              12 |        34          0          0 |        34 
+              13 |        25          0          0 |        25 
+              14 |         0         29          0 |        29 
+              15 |         0          0         15 |        15 
+              16 |         0         14          0 |        14 
+              17 |         0          0         10 |        10 
+              18 |         0         16          0 |        16 
+              19 |         0         10          0 |        10 
+              20 |         7          0          0 |         7 
+              21 |         0          7          0 |         7 
+              22 |         0          7          0 |         7 
+              23 |         7          0          0 |         7 
+              24 |         0          0          7 |         7 
+              25 |         3          0          0 |         3 
+              26 |         0          0          4 |         4 
+              27 |         0          0         30 |        30 
+              28 |        64          0          0 |        64 
+              29 |         5          0          0 |         5 
+              30 |         0          5          0 |         5 
+              31 |         0          0          8 |         8 
+              32 |         0          8          0 |         8 
+      -----------+---------------------------------+----------
+           Total |       240        217        135 |       592 </code></pre>
+<p>... or using m_each, which describes how many clusters should be assigned to each condition. m_each must sum to the number of clusters.</p>
+<pre><code>      . cluster_ra Z_clust, cluster_var(clust_var) m_each(5 15 12) replace
+
+
+      . tab clust_var Z_clust
+
+      group(Hair |             Z_clust
+        Eye Sex) |         1          2          3 |     Total
+      -----------+---------------------------------+----------
+               1 |         0         32          0 |        32 
+               2 |         0          0         36 |        36 
+               3 |         0          0         11 |        11 
+               4 |         0          0          9 |         9 
+               5 |         0         10          0 |        10 
+               6 |         5          0          0 |         5 
+               7 |         0          0          3 |         3 
+               8 |         0          2          0 |         2 
+               9 |         0         53          0 |        53 
+              10 |         0         66          0 |        66 
+              11 |         0          0         50 |        50 
+              12 |         0          0         34 |        34 
+              13 |         0          0         25 |        25 
+              14 |         0          0         29 |        29 
+              15 |         0         15          0 |        15 
+              16 |         0          0         14 |        14 
+              17 |         0          0         10 |        10 
+              18 |         0          0         16 |        16 
+              19 |         0         10          0 |        10 
+              20 |         0          7          0 |         7 
+              21 |         0          7          0 |         7 
+              22 |         7          0          0 |         7 
+              23 |         0          7          0 |         7 
+              24 |         7          0          0 |         7 
+              25 |         0          3          0 |         3 
+              26 |         4          0          0 |         4 
+              27 |         0         30          0 |        30 
+              28 |         0          0         64 |        64 
+              29 |         0          5          0 |         5 
+              30 |         5          0          0 |         5 
+              31 |         0          8          0 |         8 
+              32 |         0          8          0 |         8 
+      -----------+---------------------------------+----------
+           Total |        28        263        301 |       592 </code></pre>
+<h2 id="block-and-clustered-assignment">Block and Clustered Assignment</h2>
+<p>The power of clustered experiments can sometimes be improved through blocking. In this scenario, whole clusters are members of a particular block -- imagine villages nested within discrete regions, or classrooms nested within discrete schools.</p>
+<p>As an example, let's group our clusters into blocks by size</p>
+<pre><code>      . bysort clust_var: egen cluster_size=count(_n)
+
+      . block_and_cluster_ra Z, block_var(cluster_size) cluster_var(clust_var) replace
+
+      . tab clust_var Z
+
+      group(Hair |           Z
+        Eye Sex) |         0          1 |     Total
+      -----------+----------------------+----------
+               1 |        32          0 |        32 
+               2 |         0         36 |        36 
+               3 |         0         11 |        11 
+               4 |         0          9 |         9 
+               5 |        10          0 |        10 
+               6 |         0          5 |         5 
+               7 |         0          3 |         3 
+               8 |         0          2 |         2 
+               9 |        53          0 |        53 
+              10 |         0         66 |        66 
+              11 |         0         50 |        50 
+              12 |         0         34 |        34 
+              13 |         0         25 |        25 
+              14 |        29          0 |        29 
+              15 |         0         15 |        15 
+              16 |        14          0 |        14 
+              17 |         0         10 |        10 
+              18 |        16          0 |        16 
+              19 |         0         10 |        10 
+              20 |         7          0 |         7 
+              21 |         0          7 |         7 
+              22 |         7          0 |         7 
+              23 |         0          7 |         7 
+              24 |         7          0 |         7 
+              25 |         3          0 |         3 
+              26 |         4          0 |         4 
+              27 |        30          0 |        30 
+              28 |         0         64 |        64 
+              29 |         0          5 |         5 
+              30 |         5          0 |         5 
+              31 |         0          8 |         8 
+              32 |         8          0 |         8 
+      -----------+----------------------+----------
+           Total |       225        367 |       592 
+
+
+      . tab cluster_size Z 
+
+      cluster_si |           Z
+              ze |         0          1 |     Total
+      -----------+----------------------+----------
+               2 |         0          2 |         2 
+               3 |         3          3 |         6 
+               4 |         4          0 |         4 
+               5 |         5         10 |        15 
+               7 |        21         14 |        35 
+               8 |         8          8 |        16 
+               9 |         0          9 |         9 
+              10 |        10         20 |        30 
+              11 |         0         11 |        11 
+              14 |        14          0 |        14 
+              15 |         0         15 |        15 
+              16 |        16          0 |        16 
+              25 |         0         25 |        25 
+              29 |        29          0 |        29 
+              30 |        30          0 |        30 
+              32 |        32          0 |        32 
+              34 |         0         34 |        34 
+              36 |         0         36 |        36 
+              50 |         0         50 |        50 
+              53 |        53          0 |        53 
+              64 |         0         64 |        64 
+              66 |         0         66 |        66 
+      -----------+----------------------+----------
+           Total |       225        367 |       592 </code></pre>
