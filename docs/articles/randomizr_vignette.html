@@ -36,15 +36,15 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/randomizr_vignette.html">Using R</a>
+      <a href="../articles/randomizr_vignette.html">Getting Started in R</a>
     </li>
     <li>
-      <a href="../articles/strandomizr_vignette.html">Using Stata</a>
+      <a href="../articles/srandomizr_vignette.html">Getting Started in Stata</a>
     </li>
   </ul>
 </li>
 <li>
-  <a href="../reference/">Reference</a>
+  <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -54,7 +54,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="https://declaredesign.org">DeclareDesign</a>
+      <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
       <a href="http://randomizr.declaredesign.org">randomizr</a>
@@ -71,10 +71,17 @@
   <a href="http://discuss.declaredesign.org">Discussion Board</a>
 </li>
 <li>
-  <a href="https://declaredesign.org">DeclareDesign home</a>
+  <a href="http://declaredesign.org">DeclareDesign home</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/DeclareDesign/randomizr">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -89,13 +96,12 @@
       <h1>Design and Analysis of Experiments with Randomizr</h1>
                         <h4 class="author">Alexander Coppock</h4>
             
-            <h4 class="date">2017-11-16</h4>
           </div>
 
     
     
 <div class="contents">
-<p><code>randomizr</code> is a small package for r that simplifies the design and analysis of randomized experiments. In particular, it makes the random assignment <strong>procedure</strong> transparent, flexible, and most importantly reproduceable. By the time that many experiments are written up and made public, the process by which some units recieved treatments is lost or imprecisely described. The <code>randomizr</code> package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.</p>
+<p><strong>randomizr</strong> is a small package for r that simplifies the design and analysis of randomized experiments. In particular, it makes the random assignment <strong>procedure</strong> transparent, flexible, and most importantly reproduceable. By the time that many experiments are written up and made public, the process by which some units recieved treatments is lost or imprecisely described. The <strong>randomizr</strong> package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.</p>
 <p>A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage. First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a <strong>cluster</strong>. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of average causal effects and the uncertainty attending to them may be incorrect.</p>
 <div id="a-hypothetical-experiment" class="section level1">
 <h1 class="hasAnchor">
@@ -210,9 +216,10 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra
 <pre><code>## Z
 ##   control   placebo treatment 
 ##       100       200       292</code></pre>
-<div id="simple-and-complete-random-assignment-compared" class="section level2">
-<h2 class="hasAnchor">
-<a href="#simple-and-complete-random-assignment-compared" class="anchor"></a>Simple and Complete Random Assignment Compared</h2>
+</div>
+<div id="simple-and-complete-random-assignment-compared" class="section level1">
+<h1 class="hasAnchor">
+<a href="#simple-and-complete-random-assignment-compared" class="anchor"></a>Simple and Complete Random Assignment Compared</h1>
 <p>When should you use <code><a href="../reference/simple_ra.html">simple_ra()</a></code> versus <code><a href="../reference/complete_ra.html">complete_ra()</a></code>? Basically, if the number of units is known beforehand, <code><a href="../reference/complete_ra.html">complete_ra()</a></code> is always preferred, for two reasons: 1. Researchers can plan exactly how many treatments will be deployed. 2. The standard errors associated with complete random assignment are generally smaller, increasing experimental power. See this guide on <a href="http://egap.org/">EGAP</a> for more on <a href="http://egap.org/resources/guides/power/">experimental power</a>.</p>
 <p>Since you need to know <code>N</code> beforehand in order to use <code><a href="../reference/simple_ra.html">simple_ra()</a></code>, it may seem like a useless function. Sometimes, however, the random assignment isn’t directly in the researcher’s control. For example, when deploying a survey exeriment on a platform like Qualtrics, simple random assignment is the only possibility due to the inflexibility of the built-in random assignment tools. When reconstructing the random assignment for analysis after the experiment has been conducted, <code><a href="../reference/simple_ra.html">simple_ra()</a></code> provides a convenient way to do so.</p>
 <p>To demonstrate how <code><a href="../reference/complete_ra.html">complete_ra()</a></code> is superior to <code><a href="../reference/simple_ra.html">simple_ra()</a></code>, let’s conduct a small simulation with our <code>HairEyeColor</code> dataset.</p>
@@ -249,7 +256,6 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sd</span>(complete_ests)</code></pre></div>
 <pre><code>## [1] 0.5929085</code></pre>
 <p>In this simulation complete random assignment led to a 2% decrease in sampling variability. This decrease was obtained with a small design tweak that costs the researcher essentially nothing.</p>
-</div>
 </div>
 <div id="block-random-assignment" class="section level1">
 <h1 class="hasAnchor">
@@ -488,9 +494,8 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 <a href="#blocked-and-clustered-assignment" class="anchor"></a>Blocked and clustered assignment</h1>
 <p>The power of clustered experiments can sometimes be improved through blocking. In this scenario, whole clusters are members of a particular block – imagine villages nested within discrete regions, or classrooms nested within discrete schools.</p>
 <p>As an example, let’s group our clusters into blocks by size using <code>dplyr</code></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">suppressMessages</span>(<span class="kw">library</span>(dplyr))</code></pre></div>
-<pre><code>## Warning: package 'dplyr' was built under R version 3.4.2</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cluster_level_df &lt;-<span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">suppressMessages</span>(<span class="kw">library</span>(dplyr))
+cluster_level_df &lt;-<span class="st"> </span>
 <span class="st">  </span>hec <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(clust_var) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span>(<span class="dt">cluster_size =</span> <span class="kw"><a href="http://dplyr.tidyverse.org/reference/n.html">n</a></span>()) <span class="op">%&gt;%</span>
@@ -650,11 +655,8 @@ Z &lt;-<span class="st"> </span><span class="kw">school_ra</span>(<span class="d
       </ul>
 </li>
       <li><a href="#simple-random-assignment">Simple Random Assignment</a></li>
-      <li>
-<a href="#complete-random-assignment">Complete Random Assignment</a><ul class="nav nav-pills nav-stacked">
-<li><a href="#simple-and-complete-random-assignment-compared">Simple and Complete Random Assignment Compared</a></li>
-      </ul>
-</li>
+      <li><a href="#complete-random-assignment">Complete Random Assignment</a></li>
+      <li><a href="#simple-and-complete-random-assignment-compared">Simple and Complete Random Assignment Compared</a></li>
       <li><a href="#block-random-assignment">Block Random Assignment</a></li>
       <li><a href="#clustered-assignment">Clustered assignment</a></li>
       <li><a href="#blocked-and-clustered-assignment">Blocked and clustered assignment</a></li>
@@ -673,8 +675,9 @@ Z &lt;-<span class="st"> </span><span class="kw">school_ra</span>(<span class="d
 </div>
 
 
-      <footer><div class="copyright">
-  <p>Developed by Alexander Coppock.</p>
+      <footer><div class="copyright" style="flex:2;">
+  <p>Developed by Alexander Coppock, Jasper Cooper.</p>
+  <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 
 <div class="pkgdown">

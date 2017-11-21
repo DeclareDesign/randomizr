@@ -8,7 +8,7 @@ declare_ra(N = NULL, block_var = NULL, clust_var = NULL, m = NULL,
   m_each = NULL, prob = NULL, prob_each = NULL, block_m = NULL,
   block_m_each = NULL, block_prob = NULL, block_prob_each = NULL,
   num_arms = NULL, condition_names = NULL, simple = FALSE,
-  check_inputs = TRUE)
+  permutation_matrix = NULL, check_inputs = TRUE)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
