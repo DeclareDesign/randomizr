@@ -1,0 +1,60 @@
+---
+output: github_document
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# randomizr: Easy to Use Tools for Common Forms of Random Assignment and Sampling
+
+**randomizr** is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. **randomizr** automates all of these processes and assists scientists in doing transparent, replicable science.
+
+# Installing randomizr
+
+Installing the latest production-ready version of **randomizr** in `R` is simple.
+
+```{r,eval=FALSE}
+install.packages("randomizr")
+```
+
+If you would like to use the current development release of **randomizr** (please be aware that development releases may include bugs or syntax changes), run the following code:
+
+```{r,eval=FALSE}
+install.packages("devtools")
+devtools::install_github("DeclareDesign/randomizr")
+```
+
+# Getting started
+
+**randomizr** has five main random assignment functions, corresponding to the common experimental designs listed above. You can read more about using each of these functions in our [reference library](reference/index.html) or by clicking on the function names: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`.
+
+`complete_ra()` (Complete randomization) is the function that will be most appropriate for a large number of experimental situations: when you want to assign a fixed `m` units out of a population of `N` units to treatment:
+
+```{r}
+library(randomizr)
+Z <- complete_ra(N = 100, m = 50)
+table(Z)
+```
+
+A more complicated design that, for example, assigns different numbers of clusters to three different treatments, makes use of `cluster_ra()` (Cluster randomization):
+
+```{r}
+# This makes a cluster variable: one unit in cluster "a", two in "b"...
+clust_var <- rep(letters, times = 1:26)
+
+Z <- cluster_ra(
+  clust_var = clust_var,
+  m_each = c(7, 7, 12),
+  condition_names = c("control", "placebo", "treatment")
+  )
+table(Z, clust_var)
+```
+
+For more information about all of **randomizr**'s functionality, please see our [online tutorial](articles/randomizr_vignette.html)
+
+Happy randomizing!

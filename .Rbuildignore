@@ -1,6 +1,9 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^README\.Rmd$
+README.Rmd
+README.md
+index.Rmd
+index.md
 ^README-.*\.png$
 ^cran-comments\.md$
 ^R/randomizr_tests\.r$
@@ -8,6 +11,7 @@
 ^README\.md$
 ^\.travis\.yml$
 ^docs$
+^docs/templates/.*$
 deploy.sh
 _pkgdown.yml
 appveyor.yml

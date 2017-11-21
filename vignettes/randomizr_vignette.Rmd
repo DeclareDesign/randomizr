@@ -1,7 +1,6 @@
 ---
 title: "Design and Analysis of Experiments with Randomizr"
 author: "Alexander Coppock"
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Design and Analysis of Experiments with Randomizr}
@@ -9,7 +8,7 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-`randomizr` is a small package for r that simplifies the design and analysis of randomized experiments. In particular, it makes the random assignment **procedure** transparent, flexible, and most importantly reproduceable. By the time that many experiments are written up and made public, the process by which some units recieved treatments is lost or imprecisely described. The `randomizr` package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.
+**randomizr** is a small package for r that simplifies the design and analysis of randomized experiments. In particular, it makes the random assignment **procedure** transparent, flexible, and most importantly reproduceable. By the time that many experiments are written up and made public, the process by which some units recieved treatments is lost or imprecisely described. The **randomizr** package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.
 
 A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage. First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a **cluster**. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of average causal effects and the uncertainty attending to them may be incorrect.
 
@@ -142,7 +141,7 @@ Z <- complete_ra(N = N, m_each = c(100, 200, 292),
 table(Z)
 ```
 
-## Simple and Complete Random Assignment Compared
+# Simple and Complete Random Assignment Compared
 When should you use `simple_ra()` versus `complete_ra()`? Basically, if the number of units is known beforehand, `complete_ra()` is always preferred, for two reasons: 1. Researchers can plan exactly how many treatments will be deployed. 2. The standard errors associated with complete random assignment are generally smaller, increasing experimental power. See this guide on [EGAP](http://egap.org/) for more on [experimental power](http://egap.org/resources/guides/power/).
 
 Since you need to know `N` beforehand in order to use `simple_ra()`, it may seem like a useless function. Sometimes, however, the random assignment isn't directly in the researcher's control. For example, when deploying a survey exeriment on a platform like Qualtrics, simple random assignment is the only possibility due to the inflexibility of the built-in random assignment tools. When reconstructing the random assignment for analysis after the experiment has been conducted, `simple_ra()` provides a convenient way to do so.  

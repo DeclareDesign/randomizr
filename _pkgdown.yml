@@ -1,14 +1,21 @@
+template:
+  path: "docs/templates"
+
 navbar:
   type: default
   left:
   - text: "Getting Started"
-    href: articles/randomizr_vignette.html
+    menu:
+      - text: Getting Started in R
+        href: articles/randomizr_vignette.html
+      - text: Getting Started in Stata
+        href: articles/srandomizr_vignette.html
   - text: Reference
-    href: reference/
+    href: reference/index.html
   - text: "Packages"
     menu:
       - text: DeclareDesign
-        href: https://declaredesign.org
+        href: http://declaredesign.org
       - text: randomizr
         href: http://randomizr.declaredesign.org
       - text: fabricatr
@@ -18,4 +25,4 @@ navbar:
   - text: "Discussion Board"
     href: http://discuss.declaredesign.org
   - text: "DeclareDesign home"
-    href: https://declaredesign.org
+    href: http://declaredesign.org

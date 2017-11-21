@@ -5,6 +5,8 @@ Authors@R: c(person("Alexander", "Coppock", email = "acoppock@gmail.com", role =
              person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("ctb")))
 Description: Generates random assignments for common experimental designs and 
 	    random samples for common sampling designs.
+URL: http://randomizr.declaredesign.org, https://github.com/DeclareDesign/randomizr
+BugReports: https://github.com/DeclareDesign/randomizr/issues
 Depends:
     R (>= 2.10.0)
 Imports:
