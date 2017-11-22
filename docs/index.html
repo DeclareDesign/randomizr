@@ -101,19 +101,18 @@
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#randomizr-easy-to-use-tools-for-common-forms-of-random-assignment-and-sampling" class="anchor"></a>randomizr: Easy to Use Tools for Common Forms of Random Assignment and Sampling</h1></div>
 <p><strong>randomizr</strong> is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. <strong>randomizr</strong> automates all of these processes and assists scientists in doing transparent, replicable science.</p>
-</div>
-<div id="installing-randomizr" class="section level1">
-<h1 class="hasAnchor">
-<a href="#installing-randomizr" class="anchor"></a>Installing randomizr</h1>
+<div id="installing-randomizr" class="section level3">
+<h3 class="hasAnchor">
+<a href="#installing-randomizr" class="anchor"></a>Installing randomizr</h3>
 <p>Installing the latest production-ready version of <strong>randomizr</strong> in <code>R</code> is simple.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"randomizr"</span>)</code></pre></div>
 <p>If you would like to use the current development release of <strong>randomizr</strong> (please be aware that development releases may include bugs or syntax changes), run the following code:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"devtools"</span>)
 devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"DeclareDesign/randomizr"</span>)</code></pre></div>
 </div>
-<div id="getting-started" class="section level1">
-<h1 class="hasAnchor">
-<a href="#getting-started" class="anchor"></a>Getting started</h1>
+<div id="getting-started" class="section level3">
+<h3 class="hasAnchor">
+<a href="#getting-started" class="anchor"></a>Getting started</h3>
 <p><strong>randomizr</strong> has five main random assignment functions, corresponding to the common experimental designs listed above. You can read more about using each of these functions in our <a href="reference/index.html">reference library</a> or by clicking on the function names: <code><a href="reference/simple_ra.html">simple_ra()</a></code>, <code><a href="reference/complete_ra.html">complete_ra()</a></code>, <code><a href="reference/block_ra.html">block_ra()</a></code>, <code><a href="reference/cluster_ra.html">cluster_ra()</a></code>, and <code><a href="reference/block_and_cluster_ra.html">block_and_cluster_ra()</a></code>.</p>
 <p><code><a href="reference/complete_ra.html">complete_ra()</a></code> (Complete randomization) is the function that will be most appropriate for a large number of experimental situations: when you want to assign a fixed <code>m</code> units out of a population of <code>N</code> units to treatment:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(randomizr)
@@ -144,6 +143,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/cluster_ra.h
 <span class="co">#&gt;   treatment  0 23 24 25 26</span></code></pre></div>
 <p>For more information about all of <strong>randomizr</strong>’s functionality, please see our <a href="articles/randomizr_vignette.html">online tutorial</a></p>
 <p>Happy randomizing!</p>
+</div>
 </div>
 </div>
   </div>
