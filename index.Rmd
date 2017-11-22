@@ -3,6 +3,8 @@ output: github_document
 ---
 
 ```{r, echo = FALSE}
+set.seed(17760701)
+
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
