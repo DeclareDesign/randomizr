@@ -1,9 +1,9 @@
 ---
-title: "Design and Analysis of Experiments with Randomizr (Stata)"
+title: "Design and analysis of experiments with randomizr (Stata)"
 author: "Alexander Coppock"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Design and Analysis of Experiments with Randomizr}
+  %\VignetteIndexEntry{Design and Analysis of Experiments with randomizr}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Design and Analysis of Experiments with Randomizr • randomizr</title>
+<title>Design and analysis of experiments with randomizr • randomizr</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
@@ -93,7 +93,7 @@
       </header><div class="row">
   <div class="col-md-9">
     <div class="page-header toc-ignore">
-      <h1>Design and Analysis of Experiments with Randomizr</h1>
+      <h1>Design and analysis of experiments with randomizr</h1>
                         <h4 class="author">Alexander Coppock</h4>
             
           </div>
@@ -105,7 +105,7 @@
 <p>A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage. First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a <strong>cluster</strong>. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of average causal effects and the uncertainty attending to them may be incorrect.</p>
 <div id="a-hypothetical-experiment" class="section level1">
 <h1 class="hasAnchor">
-<a href="#a-hypothetical-experiment" class="anchor"></a>A Hypothetical Experiment</h1>
+<a href="#a-hypothetical-experiment" class="anchor"></a>A hypothetical experiment</h1>
 <p>Throughout this vignette, we’ll pretend we’re conducting an experiment among the 592 individuals in the built-in <code>HairEyeColor</code> dataset. As we’ll see, there are many ways to randomly assign subjects to treatments. We’ll step through five common designs, each associated with one of the five <code>randomizr</code> functions: <code><a href="../reference/simple_ra.html">simple_ra()</a></code>, <code><a href="../reference/complete_ra.html">complete_ra()</a></code>, <code><a href="../reference/block_ra.html">block_ra()</a></code>, <code><a href="../reference/cluster_ra.html">cluster_ra()</a></code>, and <code><a href="../reference/block_and_cluster_ra.html">block_and_cluster_ra()</a></code>.</p>
 <p>We first need to transform the dataset, which has each row describe a <strong>type</strong> of subject, to a new dataset in which each row describes an individual subject.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load built-in dataset</span>
@@ -138,10 +138,9 @@ hec &lt;-<span class="st"> </span><span class="kw">within</span>(hec,{
 <span class="kw">with</span>(hec, <span class="kw">mean</span>(Y1 <span class="op">-</span><span class="st"> </span>Y0))
 <span class="co">#&gt; [1] 25</span></code></pre></div>
 <p>We are now ready to allocate treatment assignments to subjects. Let’s start by contrasting simple and complete random assignment.</p>
-</div>
-<div id="simple-random-assignment" class="section level1">
-<h1 class="hasAnchor">
-<a href="#simple-random-assignment" class="anchor"></a>Simple Random Assignment</h1>
+<div id="simple-random-assignment" class="section level2">
+<h2 class="hasAnchor">
+<a href="#simple-random-assignment" class="anchor"></a>Simple random assignment</h2>
 <p>Simple random assignment assigns all subjects to treatment with an equal probability by flipping a (weighted) coin for each subject. The main trouble with simple random assignment is that the number of subjects assigned to treatment is itself a random number - depending on the random assignment, a different number of subjects might be assigned to each group.</p>
 <p>The <code><a href="../reference/simple_ra.html">simple_ra()</a></code> function has one required argument <code>N</code>, the total number of subjects. If no other arguments are specified, <code><a href="../reference/simple_ra.html">simple_ra()</a></code> assumes a two-group design and a 0.50 probability of assignment.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(randomizr)
@@ -217,9 +216,9 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra
 </tr></tbody>
 </table>
 </div>
-<div id="complete-random-assignment" class="section level1">
-<h1 class="hasAnchor">
-<a href="#complete-random-assignment" class="anchor"></a>Complete Random Assignment</h1>
+<div id="complete-random-assignment" class="section level2">
+<h2 class="hasAnchor">
+<a href="#complete-random-assignment" class="anchor"></a>Complete random assignment</h2>
 <p>Complete random assignment is very similar to simple random assignment, except that the researcher can specify <em>exactly</em> how many units are assigned to each condition.</p>
 <p>The syntax for <code><a href="../reference/complete_ra.html">complete_ra()</a></code> is very similar to that of <code><a href="../reference/simple_ra.html">simple_ra()</a></code>. The argument <code>m</code> is the number of units assigned to treatment in two-arm designs; it is analogous to <code><a href="../reference/simple_ra.html">simple_ra()</a></code>’s <code>prob</code>. Similarly, the argument <code>m_each</code> is analogous to <code>prob_each</code>.</p>
 <p>If you only specify <code>N</code>, <code><a href="../reference/complete_ra.html">complete_ra()</a></code> assigns exactly half of the subjects to treatment.</p>
@@ -295,9 +294,9 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra
 </tr></tbody>
 </table>
 </div>
-<div id="simple-and-complete-random-assignment-compared" class="section level1">
-<h1 class="hasAnchor">
-<a href="#simple-and-complete-random-assignment-compared" class="anchor"></a>Simple and Complete Random Assignment Compared</h1>
+<div id="simple-and-complete-random-assignment-compared" class="section level2">
+<h2 class="hasAnchor">
+<a href="#simple-and-complete-random-assignment-compared" class="anchor"></a>Simple and Complete random assignment compared</h2>
 <p>When should you use <code><a href="../reference/simple_ra.html">simple_ra()</a></code> versus <code><a href="../reference/complete_ra.html">complete_ra()</a></code>? Basically, if the number of units is known beforehand, <code><a href="../reference/complete_ra.html">complete_ra()</a></code> is always preferred, for two reasons: 1. Researchers can plan exactly how many treatments will be deployed. 2. The standard errors associated with complete random assignment are generally smaller, increasing experimental power. See this guide on <a href="http://egap.org/">EGAP</a> for more on <a href="http://egap.org/resources/guides/power/">experimental power</a>.</p>
 <p>Since you need to know <code>N</code> beforehand in order to use <code><a href="../reference/simple_ra.html">simple_ra()</a></code>, it may seem like a useless function. Sometimes, however, the random assignment isn’t directly in the researcher’s control. For example, when deploying a survey exeriment on a platform like Qualtrics, simple random assignment is the only possibility due to the inflexibility of the built-in random assignment tools. When reconstructing the random assignment for analysis after the experiment has been conducted, <code><a href="../reference/simple_ra.html">simple_ra()</a></code> provides a convenient way to do so.<br>
 To demonstrate how <code><a href="../reference/complete_ra.html">complete_ra()</a></code> is superior to <code><a href="../reference/simple_ra.html">simple_ra()</a></code>, let’s conduct a small simulation with our <code>HairEyeColor</code> dataset.</p>
@@ -335,9 +334,9 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 <span class="co">#&gt; [1] 0.59</span></code></pre></div>
 <p>In this simulation complete random assignment led to a 2% decrease in sampling variability. This decrease was obtained with a small design tweak that costs the researcher essentially nothing.</p>
 </div>
-<div id="block-random-assignment" class="section level1">
-<h1 class="hasAnchor">
-<a href="#block-random-assignment" class="anchor"></a>Block Random Assignment</h1>
+<div id="block-random-assignment" class="section level2">
+<h2 class="hasAnchor">
+<a href="#block-random-assignment" class="anchor"></a>Block random assignment</h2>
 <p>Block random assignment (sometimes known as stratified random assignment) is a powerful tool when used well. In this design, subjects are sorted into blocks (strata) according to their pre-treatment covariates, and then complete random assignment is conducted within each block. For example, a researcher might block on gender, assigning exactly half of the men and exactly half of the women to treatment.</p>
 <p>Why block? The first reason is to signal to future readers that treatment effect heterogeneity may be of interest: is the treatment effect different for men versus women? Of course, such heterogeneity could be explored if complete random assignment had been used, but blocking on a covariate defends a researcher (somewhat) against claims of data dredging. The second reason is to increase precision. If the blocking variables are predicitive of the outcome (i.e., they are correlated with the outcome), then blocking may help to decrease sampling variability. It’s important, however, not to overstate these advantages. The gains from a blocked design can often be realized through covariate adjustment alone.</p>
 <p>Blocking can also produce complications for estimation. Blocking can produce different probabilities of assignment for different subjects. This complication is typically addressed in one of two ways: “controlling for blocks” in a regression context, or inverse probabilitity weights (IPW), in which units are weighted by the inverse of the probability that the unit is in the condition that it is in.</p>
@@ -768,9 +767,9 @@ Z_blocked &lt;-<span class="st"> </span><span class="kw"><a href="../reference/b
 </table>
 <p>A note for <code>blockTools</code> users: that package also has an assignment function. My preference is to extract the blocking variable, then conduct the assignment with <code><a href="../reference/block_ra.html">block_ra()</a></code>, so that fewer steps are required to reconstruct the random assignment or generate new random assignments for a randomization inference procedure.</p>
 </div>
-<div id="clustered-assignment" class="section level1">
-<h1 class="hasAnchor">
-<a href="#clustered-assignment" class="anchor"></a>Clustered assignment</h1>
+<div id="clustered-assignment" class="section level2">
+<h2 class="hasAnchor">
+<a href="#clustered-assignment" class="anchor"></a>Clustered assignment</h2>
 <p>Clustered assignment is unfortunate. If you can avoid assigning subjects to treatments by cluster, you should. Sometimes, clustered assignment is unavoidable. Some common situations include:</p>
 <ol style="list-style-type: decimal">
 <li>Housemates in households: whole households are assigned to treatment or control</li>
@@ -974,9 +973,9 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 </tbody>
 </table>
 </div>
-<div id="blocked-and-clustered-assignment" class="section level1">
-<h1 class="hasAnchor">
-<a href="#blocked-and-clustered-assignment" class="anchor"></a>Blocked and clustered assignment</h1>
+<div id="blocked-and-clustered-assignment" class="section level2">
+<h2 class="hasAnchor">
+<a href="#blocked-and-clustered-assignment" class="anchor"></a>Blocked and clustered assignment</h2>
 <p>The power of clustered experiments can sometimes be improved through blocking. In this scenario, whole clusters are members of a particular block – imagine villages nested within discrete regions, or classrooms nested within discrete schools.</p>
 <p>As an example, let’s group our clusters into blocks by size using <code>dplyr</code></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">suppressMessages</span>(<span class="kw">library</span>(dplyr))
@@ -1090,9 +1089,9 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_and
 </tbody>
 </table>
 </div>
-<div id="calculating-probabilities-of-assignment" class="section level1">
-<h1 class="hasAnchor">
-<a href="#calculating-probabilities-of-assignment" class="anchor"></a>Calculating probabilities of assignment</h1>
+<div id="calculating-probabilities-of-assignment" class="section level2">
+<h2 class="hasAnchor">
+<a href="#calculating-probabilities-of-assignment" class="anchor"></a>Calculating probabilities of assignment</h2>
 <p>All five random assignment functions in <code>randomizr</code> assign units to treatment with known (if sometimes complicated) probabilities. The <code><a href="../reference/declare_ra.html">declare_ra()</a></code> and <code><a href="../reference/obtain_condition_probabilities.html">obtain_condition_probabilities()</a></code> functions calculate these probabilities according to the parameters of your experimental design.</p>
 <p>Let’s take a look at the block random assignment we used before.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">block_m_each &lt;-<span class="st"> </span>
@@ -1225,6 +1224,7 @@ prob_mat &lt;-<span class="st"> </span>declaration<span class="op">$</span>proba
 </tbody>
 </table>
 </div>
+</div>
 <div id="best-practices" class="section level1">
 <h1 class="hasAnchor">
 <a href="#best-practices" class="anchor"></a>Best practices</h1>
@@ -1305,14 +1305,17 @@ Z &lt;-<span class="st"> </span><span class="kw">school_ra</span>(<span class="d
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#a-hypothetical-experiment">A Hypothetical Experiment</a></li>
-      <li><a href="#simple-random-assignment">Simple Random Assignment</a></li>
-      <li><a href="#complete-random-assignment">Complete Random Assignment</a></li>
-      <li><a href="#simple-and-complete-random-assignment-compared">Simple and Complete Random Assignment Compared</a></li>
-      <li><a href="#block-random-assignment">Block Random Assignment</a></li>
+<li>
+<a href="#a-hypothetical-experiment">A hypothetical experiment</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#simple-random-assignment">Simple random assignment</a></li>
+      <li><a href="#complete-random-assignment">Complete random assignment</a></li>
+      <li><a href="#simple-and-complete-random-assignment-compared">Simple and Complete random assignment compared</a></li>
+      <li><a href="#block-random-assignment">Block random assignment</a></li>
       <li><a href="#clustered-assignment">Clustered assignment</a></li>
       <li><a href="#blocked-and-clustered-assignment">Blocked and clustered assignment</a></li>
       <li><a href="#calculating-probabilities-of-assignment">Calculating probabilities of assignment</a></li>
+      </ul>
+</li>
       <li>
 <a href="#best-practices">Best practices</a><ul class="nav nav-pills nav-stacked">
 <li><a href="#random-assignment-procedure-random-assignment-function">Random assignment procedure = Random assignment <strong>function</strong></a></li>
