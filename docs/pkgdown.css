@@ -1,3 +1,8 @@
+/* Custom overrides */
+.nav-pills > li > a {
+	padding: 7px 10px;
+}
+
 /* Sticker footer */
 body > .container {
   display: flex;

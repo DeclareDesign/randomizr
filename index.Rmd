@@ -10,9 +10,10 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "README-"
 )
+options(digits = 2)
 ```
 
-# randomizr: Easy to Use Tools for Common Forms of Random Assignment and Sampling
+# randomizr: Easy to use tools for common forms of random assignment and sampling
 
 **randomizr** is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. **randomizr** automates all of these processes and assists scientists in doing transparent, replicable science.
 
@@ -37,24 +38,30 @@ devtools::install_github("DeclareDesign/randomizr")
 
 `complete_ra()` (Complete randomization) is the function that will be most appropriate for a large number of experimental situations: when you want to assign a fixed `m` units out of a population of `N` units to treatment:
 
-```{r}
+```{r echo=TRUE, results="hide"}
 library(randomizr)
 Z <- complete_ra(N = 100, m = 50)
 table(Z)
 ```
+```{r echo=FALSE}
+knitr::kable(t(as.matrix(table(Z))))
+```
 
 A more complicated design that, for example, assigns different numbers of clusters to three different treatments, makes use of `cluster_ra()` (Cluster randomization):
 
-```{r}
+```{r echo=TRUE, results="hide"}
 # This makes a cluster variable: one unit in cluster "a", two in "b"...
-clust_var <- rep(letters, times = 1:26)
+clust_var <- rep(letters[1:15], times = 1:15)
 
 Z <- cluster_ra(
   clust_var = clust_var,
-  m_each = c(7, 7, 12),
+  m_each = c(4, 4, 7),
   condition_names = c("control", "placebo", "treatment")
   )
 table(Z, clust_var)
+```
+```{r echo=FALSE}
+knitr::kable(table(Z, clust_var))
 ```
 
 For more information about all of **randomizr**'s functionality, please see our [online tutorial](articles/randomizr_vignette.html)

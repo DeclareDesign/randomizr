@@ -99,7 +99,7 @@
 <div class="contents">
 <div id="randomizr-easy-to-use-tools-for-common-forms-of-random-assignment-and-sampling" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
-<a href="#randomizr-easy-to-use-tools-for-common-forms-of-random-assignment-and-sampling" class="anchor"></a>randomizr: Easy to Use Tools for Common Forms of Random Assignment and Sampling</h1></div>
+<a href="#randomizr-easy-to-use-tools-for-common-forms-of-random-assignment-and-sampling" class="anchor"></a>randomizr: Easy to use tools for common forms of random assignment and sampling</h1></div>
 <p><strong>randomizr</strong> is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. <strong>randomizr</strong> automates all of these processes and assists scientists in doing transparent, replicable science.</p>
 <div id="installing-randomizr" class="section level3">
 <h3 class="hasAnchor">
@@ -117,30 +117,103 @@ devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocument
 <p><code><a href="reference/complete_ra.html">complete_ra()</a></code> (Complete randomization) is the function that will be most appropriate for a large number of experimental situations: when you want to assign a fixed <code>m</code> units out of a population of <code>N</code> units to treatment:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(randomizr)
 Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/complete_ra.html">complete_ra</a></span>(<span class="dt">N =</span> <span class="dv">100</span>, <span class="dt">m =</span> <span class="dv">50</span>)
-<span class="kw">table</span>(Z)
-<span class="co">#&gt; Z</span>
-<span class="co">#&gt;  0  1 </span>
-<span class="co">#&gt; 50 50</span></code></pre></div>
+<span class="kw">table</span>(Z)</code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="right">0</th>
+<th align="right">1</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="right">50</td>
+<td align="right">50</td>
+</tr></tbody>
+</table>
 <p>A more complicated design that, for example, assigns different numbers of clusters to three different treatments, makes use of <code><a href="reference/cluster_ra.html">cluster_ra()</a></code> (Cluster randomization):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># This makes a cluster variable: one unit in cluster "a", two in "b"...</span>
-clust_var &lt;-<span class="st"> </span><span class="kw">rep</span>(letters, <span class="dt">times =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">26</span>)
+clust_var &lt;-<span class="st"> </span><span class="kw">rep</span>(letters[<span class="dv">1</span><span class="op">:</span><span class="dv">15</span>], <span class="dt">times =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">15</span>)
 
 Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/cluster_ra.html">cluster_ra</a></span>(
   <span class="dt">clust_var =</span> clust_var,
-  <span class="dt">m_each =</span> <span class="kw">c</span>(<span class="dv">7</span>, <span class="dv">7</span>, <span class="dv">12</span>),
+  <span class="dt">m_each =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">7</span>),
   <span class="dt">condition_names =</span> <span class="kw">c</span>(<span class="st">"control"</span>, <span class="st">"placebo"</span>, <span class="st">"treatment"</span>)
   )
-<span class="kw">table</span>(Z, clust_var)
-<span class="co">#&gt;            clust_var</span>
-<span class="co">#&gt; Z            a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u</span>
-<span class="co">#&gt;   control    0  0  3  0  0  0  0  8  9  0  0  0 13  0 15  0  0 18  0 20  0</span>
-<span class="co">#&gt;   placebo    0  2  0  0  0  0  7  0  0 10  0  0  0 14  0  0 17  0 19  0  0</span>
-<span class="co">#&gt;   treatment  1  0  0  4  5  6  0  0  0  0 11 12  0  0  0 16  0  0  0  0 21</span>
-<span class="co">#&gt;            clust_var</span>
-<span class="co">#&gt; Z            v  w  x  y  z</span>
-<span class="co">#&gt;   control    0  0  0  0  0</span>
-<span class="co">#&gt;   placebo   22  0  0  0  0</span>
-<span class="co">#&gt;   treatment  0 23 24 25 26</span></code></pre></div>
+<span class="kw">table</span>(Z, clust_var)</code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th></th>
+<th align="right">a</th>
+<th align="right">b</th>
+<th align="right">c</th>
+<th align="right">d</th>
+<th align="right">e</th>
+<th align="right">f</th>
+<th align="right">g</th>
+<th align="right">h</th>
+<th align="right">i</th>
+<th align="right">j</th>
+<th align="right">k</th>
+<th align="right">l</th>
+<th align="right">m</th>
+<th align="right">n</th>
+<th align="right">o</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>control</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">7</td>
+<td align="right">8</td>
+<td align="right">9</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>placebo</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">5</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">13</td>
+<td align="right">14</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>treatment</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">0</td>
+<td align="right">6</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">10</td>
+<td align="right">11</td>
+<td align="right">12</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">15</td>
+</tr>
+</tbody>
+</table>
 <p>For more information about all of <strong>randomizr</strong>’s functionality, please see our <a href="articles/randomizr_vignette.html">online tutorial</a></p>
 <p>Happy randomizing!</p>
 </div>
