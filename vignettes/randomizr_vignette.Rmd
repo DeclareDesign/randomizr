@@ -218,10 +218,14 @@ for(i in 1:sims){
 
 The standard error of an estimate is defined as the standard deviation of the sampling distribution of the estimator. When standard errors are estimated (i.e., by using the `summary()` command on a model fit), they are estimated using some approximation.  This simulation allows us to measure the standard error directly, since the vectors `simple_ests` and `complete_ests` describe the sampling distribution of each design.
 
-```{r}
+```{r echo=TRUE, results="hide"}
 sd(simple_ests)
+```
+`r sd(simple_ests)`
+```{r echo=TRUE, results="hide"}
 sd(complete_ests)
 ```
+`r sd(complete_ests)`
 
 In this simulation complete random assignment led to a `r round((var(simple_ests) - var(complete_ests))/var(simple_ests) * 100, 2)`% decrease in sampling variability. This decrease was obtained with a small design tweak that costs the researcher essentially nothing.  
 
@@ -482,6 +486,9 @@ Z <- block_ra(block_var = hec$Hair,
 table(hec$Hair, Z)
 ```
 ```{r echo=FALSE}
+junk = table(hec$Hair, Z)
+junk[, 1] = round(junk[, 1], 2)
+
 knitr::kable(table(hec$Hair, Z))
 ```
 
@@ -506,7 +513,11 @@ cond_prob <- obtain_condition_probabilities(declaration, Z)
 table(cond_prob, Z)
 ```
 ```{r echo=FALSE}
-knitr::kable(table(cond_prob, Z))
+# Hack to override that the digits parameter won't work because table sets rownames
+# to a character vector version of the numbers before output.
+junk = table(cond_prob, Z)
+rownames(junk) = as.character(round(as.numeric(rownames(junk)), 2))
+knitr::kable(junk)
 ```
 
 # Best practices

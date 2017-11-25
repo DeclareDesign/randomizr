@@ -328,10 +328,10 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
   complete_ests[i] &lt;-<span class="st"> </span><span class="kw">coef</span>(fit_complete)[<span class="dv">2</span>]
 }</code></pre></div>
 <p>The standard error of an estimate is defined as the standard deviation of the sampling distribution of the estimator. When standard errors are estimated (i.e., by using the <code>summary()</code> command on a model fit), they are estimated using some approximation. This simulation allows us to measure the standard error directly, since the vectors <code>simple_ests</code> and <code>complete_ests</code> describe the sampling distribution of each design.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sd</span>(simple_ests)
-<span class="co">#&gt; [1] 0.6</span>
-<span class="kw">sd</span>(complete_ests)
-<span class="co">#&gt; [1] 0.59</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sd</span>(simple_ests)</code></pre></div>
+<p>0.6</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sd</span>(complete_ests)</code></pre></div>
+<p>0.59</p>
 <p>In this simulation complete random assignment led to a 2% decrease in sampling variability. This decrease was obtained with a small design tweak that costs the researcher essentially nothing.</p>
 </div>
 <div id="block-random-assignment" class="section level2">
@@ -1182,42 +1182,42 @@ prob_mat &lt;-<span class="st"> </span>declaration<span class="op">$</span>proba
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>0.277777777777778</td>
+<td>0.28</td>
 <td align="right">0</td>
 <td align="right">30</td>
 </tr>
 <tr class="even">
-<td>0.28169014084507</td>
+<td>0.28</td>
 <td align="right">0</td>
 <td align="right">20</td>
 </tr>
 <tr class="odd">
-<td>0.31496062992126</td>
+<td>0.31</td>
 <td align="right">0</td>
 <td align="right">40</td>
 </tr>
 <tr class="even">
-<td>0.34965034965035</td>
+<td>0.35</td>
 <td align="right">0</td>
 <td align="right">100</td>
 </tr>
 <tr class="odd">
-<td>0.65034965034965</td>
+<td>0.65</td>
 <td align="right">186</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td>0.68503937007874</td>
+<td>0.69</td>
 <td align="right">87</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td>0.71830985915493</td>
+<td>0.72</td>
 <td align="right">51</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td>0.722222222222222</td>
+<td>0.72</td>
 <td align="right">78</td>
 <td align="right">0</td>
 </tr>
@@ -1282,7 +1282,7 @@ Z &lt;-<span class="st"> </span><span class="kw">school_ra</span>(<span class="d
 </ol>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z_matrix &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">1000</span>, <span class="kw">school_ra</span>(<span class="dv">200</span>))
 <span class="kw">plot</span>(<span class="kw">rowMeans</span>(Z_matrix))</code></pre></div>
-<p><img src="randomizr_vignette_files/figure-html/unnamed-chunk-66-1.png" width="672"></p>
+<p><img src="randomizr_vignette_files/figure-html/unnamed-chunk-67-1.png" width="672"></p>
 <p>This plot shows that the students who have a sibling in the lottery have a higher probability of assignment. The more simulations, the more precise the estimate of the probability of assignment.</p>
 </div>
 <div id="save-your-random-assignment" class="section level2">
