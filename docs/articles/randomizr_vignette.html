@@ -28,23 +28,17 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Getting Started
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/randomizr_vignette.html">Getting Started in R</a>
-    </li>
-    <li>
-      <a href="../articles/srandomizr_vignette.html">Getting Started in Stata</a>
-    </li>
-  </ul>
+  <a href="../articles/randomizr_vignette.html">Getting Started in R</a>
+</li>
+<li>
+  <a href="../articles/srandomizr_vignette.html">Getting Started in Stata</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li>
+  <a href="http://discuss.declaredesign.org">Ask for Help</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -66,9 +60,6 @@
       <a href="http://estimatr.declaredesign.org">estimatr</a>
     </li>
   </ul>
-</li>
-<li>
-  <a href="http://discuss.declaredesign.org">Discussion Board</a>
 </li>
 <li>
   <a href="http://declaredesign.org">DeclareDesign home</a>
@@ -979,6 +970,7 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 <p>The power of clustered experiments can sometimes be improved through blocking. In this scenario, whole clusters are members of a particular block – imagine villages nested within discrete regions, or classrooms nested within discrete schools.</p>
 <p>As an example, let’s group our clusters into blocks by size using <code>dplyr</code></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">suppressMessages</span>(<span class="kw">library</span>(dplyr))
+<span class="co">#&gt; Warning: package 'dplyr' was built under R version 3.4.2</span>
 cluster_level_df &lt;-<span class="st"> </span>
 <span class="st">  </span>hec <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(clust_var) <span class="op">%&gt;%</span>
@@ -1331,7 +1323,7 @@ Z &lt;-<span class="st"> </span><span class="kw">school_ra</span>(<span class="d
 
 
       <footer><div class="copyright" style="flex:2;">
-  <p>Developed by Alexander Coppock, Jasper Cooper.</p>
+  <p>Developed by Alexander Coppock.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 

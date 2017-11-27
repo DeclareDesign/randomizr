@@ -4,12 +4,10 @@ template:
 navbar:
   type: default
   left:
-  - text: "Getting Started"
-    menu:
-      - text: Getting Started in R
-        href: articles/randomizr_vignette.html
-      - text: Getting Started in Stata
-        href: articles/srandomizr_vignette.html
+  - text: "Getting Started in R"
+    href: articles/randomizr_vignette.html
+  - text: "Getting Started in Stata"
+    href: articles/srandomizr_vignette.html
   - text: Reference
     href: reference/index.html
   - text: "Ask for Help"
