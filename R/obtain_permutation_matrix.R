@@ -5,8 +5,6 @@
 #'
 #' @return a matrix of all possible (or a random sample of all possible) random assignments consistent with a declaration.
 #' @importFrom utils combn
-#' @importFrom partitions restrictedparts
-#' @importFrom partitions restrictedparts
 #' @export
 #'
 #' @examples
@@ -61,17 +59,16 @@ obtain_permutation_matrix <-
     if (declaration$ra_type == "simple")  {
       N = nrow(declaration$probabilities_matrix)
       prob_each = declaration$probabilities_matrix[1, ]
-      r_parts <- partitions::restrictedparts(N, length(prob_each))
-      perms <- permutations(length(prob_each))
+      r_parts <- restrictedparts(N, length(prob_each))
+      perms <- t( permutations(length(prob_each)) )
       
-      r_parts_perms <-
-        sapply(1:ncol(r_parts),
-               function(i) {
-                 apply(perms, 1, function(x)
-                   r_parts[, i][x])
-               }, simplify = FALSE)
-      
-      m_eaches <- unique(do.call(cbind, r_parts_perms), MARGIN = 2)
+      r_parts_perms3 <- vapply(r_parts, `[`, perms, perms)  
+      dim(r_parts_perms3) <- local({
+        d <- dim(r_parts_perms3)
+        c(d[1], prod(d[-1])) # pivot third dimension to columns inplace
+      })
+            
+      m_eaches <- unique(r_parts_perms3, MARGIN = 2)
       
       perms_list <- sapply(1:ncol(m_eaches), function(j) {
         permutations_m_each(m_each = m_eaches[, j], declaration$cleaned_arguments$condition_names)
@@ -361,3 +358,8 @@ expand_matrix <-
     return(do.call(cbind, mat_list))
     
   }
+
+
+#' @useDynLib randomizr
+restrictedparts <- function(n, m) .Call("randomizr_restrictedparts", as.integer(n), as.integer(m), PACKAGE="randomizr")
+

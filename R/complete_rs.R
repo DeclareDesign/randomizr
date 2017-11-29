@@ -15,8 +15,6 @@
 #' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
 #' @export
 #'
-#' @importFrom stats rbinom
-#'
 #' @examples
 #' S <- complete_rs(N = 100)
 #' table(S)

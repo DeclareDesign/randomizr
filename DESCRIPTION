@@ -2,13 +2,13 @@ Package: randomizr
 Title: Easy to Use Tools for Common Forms of Random Assignment and Sampling
 Version: 0.7.0
 Authors@R: c(person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut", "cre")),
-             person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("ctb")))
+             person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("ctb")),
+             person("Neal", "Fultz", email = "nfultz@gmail.com", role = c("ctb"), comment="C version of restricted partitions")
+             )
 Description: Generates random assignments for common experimental designs and 
 	    random samples for common sampling designs.
 Depends:
     R (>= 2.10.0)
-Imports:
-    partitions
 License: MIT + file LICENSE
 LazyData: true
 Suggests:

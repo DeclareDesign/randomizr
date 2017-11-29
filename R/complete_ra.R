@@ -20,8 +20,6 @@
 #' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by condition_names) in a multi-arm trial.
 #' @export
 #'
-#' @importFrom stats rbinom
-#'
 #' @examples
 #' # Two-arm Designs
 #' Z <- complete_ra(N = 100)

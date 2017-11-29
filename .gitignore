@@ -13,3 +13,5 @@ vignettes/.*
 tests/testthat/*.pdf
 .DS_Store
 inst/doc
+src/*.so
+src/*.o
