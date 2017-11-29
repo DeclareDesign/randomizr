@@ -46,21 +46,21 @@ SEXP randomizr_restrictedparts(SEXP n, SEXP m) {
   SEXP out = PROTECT(allocVector(VECSXP, 256)); 
 
   // Initial state is (N,0,0,...,0)
-  SEXP IP = PROTECT(allocVector(INTSXP, INTEGER(m)[0]));
-  INTEGER(IP)[0] = INTEGER(n)[0];  
-  for(int i = 1; i < length(IP); i++){
-    INTEGER(IP)[i] = 0;
+  SEXP succ = PROTECT(allocVector(INTSXP, INTEGER(m)[0]));
+  INTEGER(succ)[0] = INTEGER(n)[0];  
+  for(int i = 1; i < length(succ); i++){
+    INTEGER(succ)[i] = 0;
   }  
   
   int jj; //used at end to slice to correct size
-  for (jj = 0; IP != NULL; IP = successor(IP), jj++) {
+  for (jj = 0; succ != NULL; succ = successor(succ), jj++) {
     
     if(jj == length(out)) {
       //Rprintf("Growing to jj=%d\n", jj);
       out = lengthgets(out, jj*2);
     }
     
-    SET_VECTOR_ELT(out, jj, IP);
+    SET_VECTOR_ELT(out, jj, succ);
   } 
 
   //no reason to reallocate here
@@ -88,8 +88,7 @@ restrictedparts <- function(n,m){
   }
   
   out <- list()
-  jj <- 0
-  
+
   succ <- integer(m) * 0L
   succ[1] <- n
   
