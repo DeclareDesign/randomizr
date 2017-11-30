@@ -24,7 +24,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">randomizr</a>
+      <a class="navbar-brand" href="">randomizr</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -67,10 +67,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/DeclareDesign/randomizr">
-    <span class="fa fa-github fa-lg"></span>
-     
-  </a>
+  <a></a>
 </li>
       </ul>
 </div>
@@ -91,19 +88,22 @@
 <div id="randomizr-easy-to-use-tools-for-common-forms-of-random-assignment-and-sampling" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#randomizr-easy-to-use-tools-for-common-forms-of-random-assignment-and-sampling" class="anchor"></a>randomizr: Easy to use tools for common forms of random assignment and sampling</h1></div>
-<p><strong>randomizr</strong> is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. <strong>randomizr</strong> automates all of these processes and assists scientists in doing transparent, replicable science.</p>
-<div id="installing-randomizr" class="section level3">
+<p><strong>randomizr</strong> is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. <strong>randomizr</strong> automates all of these processes and assists scientists in doing transparent, replicable science. We offer <strong>randomizr</strong> for both <code>R</code> and <code>Stata</code>.</p>
+<div id="randomizr-for-r" class="section level2">
+<h2 class="hasAnchor">
+<a href="#randomizr-for-r" class="anchor"></a>randomizr for R</h2>
+<div id="installing-randomizr-for-r" class="section level3">
 <h3 class="hasAnchor">
-<a href="#installing-randomizr" class="anchor"></a>Installing randomizr</h3>
+<a href="#installing-randomizr-for-r" class="anchor"></a>Installing randomizr for R</h3>
 <p>Installing the latest production-ready version of <strong>randomizr</strong> in <code>R</code> is simple.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"randomizr"</span>)</code></pre></div>
 <p>If you would like to use the current development release of <strong>randomizr</strong> (please be aware that development releases may include bugs or syntax changes), run the following code:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"devtools"</span>)
 devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"DeclareDesign/randomizr"</span>)</code></pre></div>
 </div>
-<div id="getting-started" class="section level3">
+<div id="getting-started-with-randomizr-for-r" class="section level3">
 <h3 class="hasAnchor">
-<a href="#getting-started" class="anchor"></a>Getting started</h3>
+<a href="#getting-started-with-randomizr-for-r" class="anchor"></a>Getting started with randomizr for R</h3>
 <p><strong>randomizr</strong> has five main random assignment functions, corresponding to the common experimental designs listed above. You can read more about using each of these functions in our <a href="reference/index.html">reference library</a> or by clicking on the function names: <code><a href="reference/simple_ra.html">simple_ra()</a></code>, <code><a href="reference/complete_ra.html">complete_ra()</a></code>, <code><a href="reference/block_ra.html">block_ra()</a></code>, <code><a href="reference/cluster_ra.html">cluster_ra()</a></code>, and <code><a href="reference/block_and_cluster_ra.html">block_and_cluster_ra()</a></code>.</p>
 <p><code><a href="reference/complete_ra.html">complete_ra()</a></code> (Complete randomization) is the function that will be most appropriate for a large number of experimental situations: when you want to assign a fixed <code>m</code> units out of a population of <code>N</code> units to treatment:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(randomizr)
@@ -206,6 +206,24 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/cluster_ra.h
 </tbody>
 </table>
 <p>For more information about all of <strong>randomizr</strong>’s functionality, please see our <a href="articles/randomizr_vignette.html">online tutorial</a></p>
+</div>
+</div>
+<div id="randomizr-for-stata" class="section level2">
+<h2 class="hasAnchor">
+<a href="#randomizr-for-stata" class="anchor"></a>randomizr for Stata</h2>
+<p>Installing the latest production-ready version of <strong>randomizr</strong> from ssc is easy:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ssc install randomizr</code></pre></div>
+<p>If you would like to install the latest development release directly from GitHub, run the following code:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">net install randomizr, <span class="kw">from</span>(https<span class="op">:</span><span class="er">//</span>raw.githubusercontent.com<span class="op">/</span>DeclareDesign<span class="op">/</span>strandomizr<span class="op">/</span>master<span class="op">/</span>) replace</code></pre></div>
+</div>
+<div id="getting-started-with-randomizr-for-stata" class="section level2">
+<h2 class="hasAnchor">
+<a href="#getting-started-with-randomizr-for-stata" class="anchor"></a>Getting started with randomizr for Stata</h2>
+<p><code>complete_ra</code> (complete randomization) is the workhorse function that will be most appropriate for a large number of experimental situations: it assigns m of N units to treatment:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ssc install randomizr
+set obs <span class="dv">100</span>
+complete_ra, <span class="kw">m</span>(<span class="dv">50</span>)</code></pre></div>
+<p>A Stata version of our <a href="articles/srandomizr_vignette.html">online tutorial</a> is also available.</p>
 <p>Happy randomizing!</p>
 </div>
 </div>
@@ -213,30 +231,32 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/cluster_ra.h
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2 class="hasAnchor">
-<a href="#sidebar" class="anchor"></a>Links</h2>
+    <div id="sidebar_links">
+<h2 class="hasAnchor">
+<a href="#sidebar_links" class="anchor"></a>Links</h2>
 <ul class="list-unstyled">
-<li>Download from CRAN at <br><a href="https://cran.r-project.org/package=randomizr">https://​cran.r-project.org/​package=randomizr</a>
-</li>
-<li>Browse source code at <br><a href="https://github.com/DeclareDesign/randomizr">https://​github.com/​DeclareDesign/​randomizr</a>
-</li>
-<li>Report a bug at <br><a href="https://github.com/DeclareDesign/randomizr/issues">https://​github.com/​DeclareDesign/​randomizr/​issues</a>
-</li>
-</ul>
-<h2>License</h2>
-<p><a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE.html">LICENSE</a></p>
-<h2>Developers</h2>
-<ul class="list-unstyled">
-<li>Alexander Coppock <br><small class="roles"> Author, maintainer </small> </li>
-<li><a href="authors.html">All authors...</a></li>
+<li><a href="https://cran.r-project.org/package=randomizr">Download from CRAN</a></li>
+<li><a href="https://github.com/DeclareDesign/randomizr">Help develop randomizr</a></li>
+<li><a href="https://github.com/DeclareDesign/randomizr/issues">Report a bug</a></li>
 </ul>
 </div>
+<div id="sidebar_authors">
+<h2 class="hasAnchor">
+<a href="#sidebar_authors" class="anchor"></a>Developers</h2>
+<ul class="list-unstyled">
+<li>Alexander Coppock <br><small class="roles"> Author, maintainer </small> </li>
+<li>Jasper Cooper <br><small class="roles"> Contributor </small> </li>
+<li>Neal Fultz <br><small class="roles"> Contributor </small> <br><small>(C version of restricted partitions)</small>
+</li>
+</ul>
+</div>
+      </div>
 
 </div>
 
 
       <footer><div class="copyright" style="flex:2;">
-  <p>Developed by Alexander Coppock.</p>
+  <p>Developed by Alexander Coppock, Jasper Cooper, Neal Fultz.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 

@@ -1,5 +1,21 @@
 template:
   path: "docs/templates"
+  
+home:
+  sections:
+    - links
+    - citation
+    - authors
+  link_order:
+    - repo
+    - github
+    - bug_report  
+
+roles_include:
+  - aut
+  - cre
+  - fnd
+  - ctb
 
 navbar:
   type: default
@@ -25,3 +41,5 @@ navbar:
 
   - text: "DeclareDesign home"
     href: http://declaredesign.org
+  right:
+  - text: 

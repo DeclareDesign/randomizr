@@ -15,9 +15,11 @@ options(digits = 2)
 
 # randomizr: Easy to use tools for common forms of random assignment and sampling
 
-**randomizr** is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. **randomizr** automates all of these processes and assists scientists in doing transparent, replicable science.
+**randomizr** is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. **randomizr** automates all of these processes and assists scientists in doing transparent, replicable science. We offer **randomizr** for both `R` and `Stata`.
 
-### Installing randomizr
+## randomizr for R
+
+### Installing randomizr for R
 
 Installing the latest production-ready version of **randomizr** in `R` is simple.
 
@@ -32,7 +34,7 @@ install.packages("devtools")
 devtools::install_github("DeclareDesign/randomizr")
 ```
 
-### Getting started
+### Getting started with randomizr for R
 
 **randomizr** has five main random assignment functions, corresponding to the common experimental designs listed above. You can read more about using each of these functions in our [reference library](reference/index.html) or by clicking on the function names: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`.
 
@@ -65,5 +67,32 @@ knitr::kable(table(Z, clust_var))
 ```
 
 For more information about all of **randomizr**'s functionality, please see our [online tutorial](articles/randomizr_vignette.html)
+
+## randomizr for Stata
+
+Installing the latest production-ready version of **randomizr** from ssc is easy:
+
+```{r eval=FALSE}
+ssc install randomizr
+```
+
+If you would like to install the latest development release directly from GitHub, run the following code:
+
+```{r eval=FALSE}
+net install randomizr, from(https://raw.githubusercontent.com/DeclareDesign/strandomizr/master/) replace
+```
+
+## Getting started with randomizr for Stata
+
+`complete_ra` (complete randomization) is the workhorse function that will be most appropriate for a large number of experimental situations: it assigns m of N units to treatment:
+
+```{r eval=FALSE}
+ssc install randomizr
+set obs 100
+complete_ra, m(50)
+```
+
+A Stata version of our [online tutorial](articles/srandomizr_vignette.html) is also available.
+
 
 Happy randomizing!
