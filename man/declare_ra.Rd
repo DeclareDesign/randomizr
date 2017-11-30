@@ -39,6 +39,8 @@ declare_ra(N = NULL, block_var = NULL, clust_var = NULL, m = NULL,
 
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.}
 
+\item{permutation_matrix}{for custom random assignment procedures.}
+
 \item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{

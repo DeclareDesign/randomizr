@@ -28,18 +28,16 @@ obtain_permutation_probabilities <-
 
       N = nrow(declaration$probabilities_matrix)
       prob_each = declaration$probabilities_matrix[1, ]
-      r_parts <- partitions::restrictedparts(N, length(prob_each))
-      perms <- permutations(length(prob_each))
+      r_parts <- restrictedparts(N, length(prob_each))
+      perms <- t( permutations(length(prob_each)) )
       
-      r_parts_perms <-
-        sapply(1:ncol(r_parts),
-               function(i) {
-                 apply(perms, 1, function(x)
-                   r_parts[, i][x])
-               }, simplify = FALSE)
+      r_parts_perms3 <- vapply(r_parts, `[`, perms, perms)  
+      dim(r_parts_perms3) <- local({
+        d <- dim(r_parts_perms3)
+        c(d[1], prod(d[-1])) # pivot third dimension to columns inplace
+      })
       
-      m_eaches <- unique(do.call(cbind, r_parts_perms), MARGIN = 2)
-      
+      m_eaches <- unique(r_parts_perms3, MARGIN = 2)      
       probs <-
         sapply(1:ncol(m_eaches), function(j) {
           prod(prob_each ^ m_eaches[, j])

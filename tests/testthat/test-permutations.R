@@ -142,11 +142,18 @@ obtain_num_permutations(declaration)
 
 mine <- obtain_permutation_matrix(declaration = declaration)
 rowMeans(mine) - declaration$probabilities_matrix[,2]
-theirs <- ri::genperms(df$Z, df$block, df$cluster)
 
-duplicated(mine, MARGIN = 2)
-duplicated(theirs, MARGIN = 2)
-duplicated(cbind(mine, theirs), MARGIN = 2)
+test_that("matches ri package", {
+  skip_if_not_installed("ri")
+  theirs <- ri::genperms(df$Z, df$block, df$cluster)
+
+  expect_equal(anyDuplicated(mine, MARGIN = 2),   0)
+  expect_equal(anyDuplicated(theirs, MARGIN = 2), 0)
+  expect_identical(
+    sort(apply(mine,  2, paste, sep="", collapse="")),
+    sort(apply(theirs,2, paste, sep="", collapse=""))
+  )
+})
 
 # test big numbers
 
