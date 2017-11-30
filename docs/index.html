@@ -88,6 +88,7 @@
 <div id="randomizr-easy-to-use-tools-for-common-forms-of-random-assignment-and-sampling" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#randomizr-easy-to-use-tools-for-common-forms-of-random-assignment-and-sampling" class="anchor"></a>randomizr: Easy to use tools for common forms of random assignment and sampling</h1></div>
+
 <p><strong>randomizr</strong> is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. <strong>randomizr</strong> automates all of these processes and assists scientists in doing transparent, replicable science. We offer <strong>randomizr</strong> for both <code>R</code> and <code>Stata</code>.</p>
 <div id="randomizr-for-r" class="section level2">
 <h2 class="hasAnchor">
@@ -104,7 +105,7 @@ devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocument
 <div id="getting-started-with-randomizr-for-r" class="section level3">
 <h3 class="hasAnchor">
 <a href="#getting-started-with-randomizr-for-r" class="anchor"></a>Getting started with randomizr for R</h3>
-<p><strong>randomizr</strong> has five main random assignment functions, corresponding to the common experimental designs listed above. You can read more about using each of these functions in our <a href="reference/index.html">reference library</a> or by clicking on the function names: <code><a href="reference/simple_ra.html">simple_ra()</a></code>, <code><a href="reference/complete_ra.html">complete_ra()</a></code>, <code><a href="reference/block_ra.html">block_ra()</a></code>, <code><a href="reference/cluster_ra.html">cluster_ra()</a></code>, and <code><a href="reference/block_and_cluster_ra.html">block_and_cluster_ra()</a></code>.</p>
+<p><strong>randomizr</strong> has five main random assignment functions, corresponding to the common experimental designs listed above. You can read more about using each of these functions in our <a href="http://randomizr.declaredesign.org/reference/index.html">reference library</a> or by clicking on the function names: <code><a href="reference/simple_ra.html">simple_ra()</a></code>, <code><a href="reference/complete_ra.html">complete_ra()</a></code>, <code><a href="reference/block_ra.html">block_ra()</a></code>, <code><a href="reference/cluster_ra.html">cluster_ra()</a></code>, and <code><a href="reference/block_and_cluster_ra.html">block_and_cluster_ra()</a></code>.</p>
 <p><code><a href="reference/complete_ra.html">complete_ra()</a></code> (Complete randomization) is the function that will be most appropriate for a large number of experimental situations: when you want to assign a fixed <code>m</code> units out of a population of <code>N</code> units to treatment:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(randomizr)
 Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/complete_ra.html">complete_ra</a></span>(<span class="dt">N =</span> <span class="dv">100</span>, <span class="dt">m =</span> <span class="dv">50</span>)
@@ -205,7 +206,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/cluster_ra.h
 </tr>
 </tbody>
 </table>
-<p>For more information about all of <strong>randomizr</strong>’s functionality, please see our <a href="articles/randomizr_vignette.html">online tutorial</a></p>
+<p>For more information about all of <strong>randomizr</strong>’s functionality, please see our <a href="http://randomizr.declaredesign.org/articles/randomizr_vignette.html">online tutorial</a></p>
 </div>
 </div>
 <div id="randomizr-for-stata" class="section level2">
@@ -223,7 +224,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/cluster_ra.h
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ssc install randomizr
 set obs <span class="dv">100</span>
 complete_ra, <span class="kw">m</span>(<span class="dv">50</span>)</code></pre></div>
-<p>A Stata version of our <a href="articles/srandomizr_vignette.html">online tutorial</a> is also available.</p>
+<p>A Stata version of our <a href="http://randomizr.declaredesign.org/articles/srandomizr_vignette.html">online tutorial</a> is also available.</p>
 <p>Happy randomizing!</p>
 </div>
 </div>
