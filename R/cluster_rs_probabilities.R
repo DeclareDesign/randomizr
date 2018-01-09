@@ -7,32 +7,34 @@
 #' @examples
 #'
 #' # Two Group Designs
-#' clust_var <- rep(letters, times = 1:26)
-#' probs <- cluster_rs_probabilities(clust_var = clust_var)
-#' table(probs, clust_var)
+#' clusters <- rep(letters, times = 1:26)
+#' probs <- cluster_rs_probabilities(clusters = clusters)
+#' table(probs, clusters)
 #'
-#' prob_mat <- cluster_rs_probabilities(clust_var = clust_var, n = 10)
-#' table(probs, clust_var)
+#' prob_mat <- cluster_rs_probabilities(clusters = clusters, n = 10)
+#' table(probs, clusters)
 #'
-#' prob_mat <- cluster_rs_probabilities(clust_var = clust_var, prob = .3)
-#' table(probs, clust_var)
+#' prob_mat <- cluster_rs_probabilities(clusters = clusters, prob = .3)
+#' table(probs, clusters)
 #'
 #'
 #' @export
 cluster_rs_probabilities <-
-  function(clust_var,
+  function(clusters = clust_var,
            n = NULL,
            prob = NULL,
            simple = FALSE,
-           check_inputs = TRUE) {
+           check_inputs = TRUE,
+           clust_var = NULL) {
+    warn_deprecated_args(clust_var=clust_var)
     if (check_inputs) {
       input_check <-
         check_samplr_arguments(n = n,
-                               clust_var = clust_var,
+                               clusters = clusters,
                                prob = prob)
     }
     
-    n_per_clust <- tapply(clust_var, clust_var, length)
+    n_per_clust <- tapply(clusters, clusters, length)
     unique_clust <- names(n_per_clust)
     n_clust <- length(unique_clust)
     
@@ -50,6 +52,6 @@ cluster_rs_probabilities <-
     
     prob_vec <- rep(probs_clust, n_per_clust)
     prob_vec <-
-      prob_vec[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
+      prob_vec[order(unlist(split(1:length(clusters), clusters), FALSE, FALSE))]
     return(prob_vec)
   }

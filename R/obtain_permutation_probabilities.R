@@ -66,7 +66,7 @@ obtain_permutation_probabilities <-
       block_prob_each_local <-
         by(
           declaration$probabilities_matrix,
-          INDICES = declaration$block_var,
+          INDICES = declaration$blocks,
           FUN = function(x) {
             x[1, ]
           }
@@ -75,8 +75,8 @@ obtain_permutation_probabilities <-
         lapply(block_prob_each_local, as.vector, mode = "numeric")
       
       ns_per_block_list <-
-        lapply(split(declaration$block_var,
-                     declaration$block_var),
+        lapply(split(declaration$blocks,
+                     declaration$blocks),
                length)
       
       condition_names_list <- lapply(1:length(ns_per_block_list),
@@ -99,7 +99,7 @@ obtain_permutation_probabilities <-
         declaration$probabilities_matrix[1, ]
       
       n_per_clust <-
-        tapply(declaration$clust_var, declaration$clust_var, length)
+        tapply(declaration$clusters, declaration$clusters, length)
       n_clust <- length(n_per_clust)
       
       permutation_probabilities <-
@@ -115,17 +115,17 @@ obtain_permutation_probabilities <-
     if (declaration$ra_type == "blocked_and_clustered") {
       # Setup: obtain unique clusters
       n_per_clust <-
-        tapply(declaration$clust_var, declaration$clust_var, length)
+        tapply(declaration$clusters, declaration$clusters, length)
       n_clust <- length(n_per_clust)
       
       # get the block for each cluster
       clust_blocks <-
-        tapply(declaration$block_var, declaration$clust_var, unique)
+        tapply(declaration$blocks, declaration$clusters, unique)
       
       block_prob_each_local <-
         by(
           declaration$probabilities_matrix,
-          INDICES = declaration$block_var,
+          INDICES = declaration$blocks,
           FUN = function(x) {
             x[1, ]
           }

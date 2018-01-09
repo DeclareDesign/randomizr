@@ -18,16 +18,16 @@
 #'
 #' # blocked
 #'
-#' block_var <- c("A", "A", "B", "B", "C", "C", "C")
-#' declaration <- declare_ra(block_var = block_var)
+#' blocks <- c("A", "A", "B", "B", "C", "C", "C")
+#' declaration <- declare_ra(blocks = blocks)
 #' perms <- obtain_permutation_matrix(declaration)
 #' dim(perms)
 #' obtain_num_permutations(declaration)
 #'
 #' # clustered
 #'
-#' clust_var <- c("A", "B", "A", "B", "C", "C", "C")
-#' declaration <- declare_ra(clust_var = clust_var)
+#' clusters <- c("A", "B", "A", "B", "C", "C", "C")
+#' declaration <- declare_ra(clusters = clusters)
 #' perms <- obtain_permutation_matrix(declaration)
 #' dim(perms)
 #' obtain_num_permutations(declaration)
@@ -89,12 +89,12 @@ obtain_permutation_matrix <-
     
     if (declaration$ra_type == "blocked") {
       block_spots <-
-        unlist(split(1:length(declaration$block_var), declaration$block_var), FALSE, FALSE)
+        unlist(split(1:length(declaration$blocks), declaration$blocks), FALSE, FALSE)
       
       block_prob_each_local <-
         by(
           declaration$probabilities_matrix,
-          INDICES = declaration$block_var,
+          INDICES = declaration$blocks,
           FUN = function(x) {
             x[1,]
           }
@@ -103,8 +103,8 @@ obtain_permutation_matrix <-
         lapply(block_prob_each_local, as.vector, mode = "numeric")
       
       ns_per_block_list <-
-        lapply(split(declaration$block_var,
-                     declaration$block_var),
+        lapply(split(declaration$blocks,
+                     declaration$blocks),
                length)
       
       condition_names_list <- lapply(1:length(ns_per_block_list),
@@ -129,7 +129,7 @@ obtain_permutation_matrix <-
         declaration$probabilities_matrix[1,]
       
       n_per_clust <-
-        tapply(declaration$clust_var, declaration$clust_var, length)
+        tapply(declaration$clusters, declaration$clusters, length)
       n_clust <- length(n_per_clust)
       
       perms <-
@@ -144,7 +144,7 @@ obtain_permutation_matrix <-
       # arrange
       perms <-
         perms[order(unlist(split(
-          1:length(declaration$clust_var), declaration$clust_var
+          1:length(declaration$clusters), declaration$clusters
         ), FALSE, FALSE)), ]
       
     }
@@ -152,17 +152,17 @@ obtain_permutation_matrix <-
     if (declaration$ra_type == "blocked_and_clustered") {
       # Setup: obtain unique clusters
       n_per_clust <-
-        tapply(declaration$clust_var, declaration$clust_var, length)
+        tapply(declaration$clusters, declaration$clusters, length)
       n_clust <- length(n_per_clust)
       
       # get the block for each cluster
       clust_blocks <-
-        tapply(declaration$block_var, declaration$clust_var, unique)
+        tapply(declaration$blocks, declaration$clusters, unique)
       
       block_prob_each_local <-
         by(
           declaration$probabilities_matrix,
-          INDICES = declaration$block_var,
+          INDICES = declaration$blocks,
           FUN = function(x) {
             x[1,]
           }
@@ -200,7 +200,7 @@ obtain_permutation_matrix <-
       # arrange
       perms <-
         perms[order(unlist(split(
-          1:length(declaration$clust_var), declaration$clust_var
+          1:length(declaration$clusters), declaration$clusters
         ), FALSE, FALSE)), ]
       
     }

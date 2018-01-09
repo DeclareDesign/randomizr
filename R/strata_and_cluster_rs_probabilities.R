@@ -6,60 +6,63 @@
 #'
 #' @examples
 #'
-#' clust_var <- rep(letters, times = 1:26)
+#' clusters <- rep(letters, times = 1:26)
 #'
-#' strata_var <- rep(NA, length(clust_var))
-#' strata_var[clust_var %in% letters[1:5]] <- "stratum_1"
-#' strata_var[clust_var %in% letters[6:10]] <- "stratum_2"
-#' strata_var[clust_var %in% letters[11:15]] <- "stratum_3"
-#' strata_var[clust_var %in% letters[16:20]] <- "stratum_4"
-#' strata_var[clust_var %in% letters[21:26]] <- "stratum_5"
+#' strata <- rep(NA, length(clusters))
+#' strata[clusters %in% letters[1:5]] <- "stratum_1"
+#' strata[clusters %in% letters[6:10]] <- "stratum_2"
+#' strata[clusters %in% letters[11:15]] <- "stratum_3"
+#' strata[clusters %in% letters[16:20]] <- "stratum_4"
+#' strata[clusters %in% letters[21:26]] <- "stratum_5"
 #'
-#' table(strata_var, clust_var)
+#' table(strata, clusters)
 #'
-#' probs <- strata_and_cluster_rs_probabilities(strata_var = strata_var,
-#'                                          clust_var = clust_var)
+#' probs <- strata_and_cluster_rs_probabilities(strata = strata,
+#'                                          clusters = clusters)
 #'
-#' table(probs, strata_var)
-#' table(probs, clust_var)
+#' table(probs, strata)
+#' table(probs, clusters)
 #'
 #'
-#' probs <- strata_and_cluster_rs_probabilities(clust_var = clust_var,
-#'                                          strata_var = strata_var,
+#' probs <- strata_and_cluster_rs_probabilities(clusters = clusters,
+#'                                          strata = strata,
 #'                                          prob = .5)
 #'
-#' table(probs, clust_var)
-#' table(probs, strata_var)
+#' table(probs, clusters)
+#' table(probs, strata)
 #'
-#' probs <- strata_and_cluster_rs_probabilities(clust_var = clust_var,
-#'                                          strata_var = strata_var,
+#' probs <- strata_and_cluster_rs_probabilities(clusters = clusters,
+#'                                          strata = strata,
 #'                                          strata_n = c(2, 3, 2, 3, 2))
 #'
-#' table(probs, clust_var)
-#' table(probs, strata_var)
+#' table(probs, clusters)
+#' table(probs, strata)
 #'
-#' probs <- strata_and_cluster_rs_probabilities(clust_var = clust_var,
-#'                                          strata_var = strata_var,
+#' probs <- strata_and_cluster_rs_probabilities(clusters = clusters,
+#'                                          strata = strata,
 #'                                          strata_prob = c(.1, .2, .3, .4, .5))
 #'
-#' table(probs, clust_var)
-#' table(probs, strata_var)
+#' table(probs, clusters)
+#' table(probs, strata)
 #'
 #'
 #' @export
 strata_and_cluster_rs_probabilities <-
-  function(strata_var,
-           clust_var,
+  function(strata = strata_var,
+           clusters = clust_var,
            prob = NULL,
            n = NULL,
            strata_n = NULL,
            strata_prob = NULL,
-           check_inputs = TRUE) {
+           check_inputs = TRUE,
+           strata_var = NULL,
+           clust_var = NULL) {
+    warn_deprecated_args(NULL, clust_var, strata_var)
     if (check_inputs) {
       input_check <-
         check_samplr_arguments(
-          strata_var = strata_var,
-          clust_var = clust_var,
+          strata = strata,
+          clusters = clusters,
           prob = prob,
           n = n,
           strata_n = strata_n,
@@ -68,13 +71,13 @@ strata_and_cluster_rs_probabilities <-
     }
     
     # Setup: obtain unique clusters
-    n_per_clust <- tapply(clust_var, clust_var, length)
+    n_per_clust <- tapply(clusters, clusters, length)
     
     # get the stratum for each cluster
-    clust_strata <- tapply(strata_var, clust_var, unique)
+    clust_strata <- tapply(strata, clusters, unique)
     
     probs_clust <- strata_rs_probabilities(
-      strata_var = clust_strata,
+      strata = clust_strata,
       prob = prob,
       n = n,
       strata_n = strata_n,
@@ -84,6 +87,6 @@ strata_and_cluster_rs_probabilities <-
     
     prob_vec <- rep(probs_clust, n_per_clust)
     prob_vec <-
-      prob_vec[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
+      prob_vec[order(unlist(split(1:length(clusters), clusters), FALSE, FALSE))]
     return(prob_vec)
   }
