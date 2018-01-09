@@ -4,12 +4,12 @@
 \alias{cluster_ra}
 \title{Cluster Random Assignment}
 \usage{
-cluster_ra(clust_var, m = NULL, m_each = NULL, prob = NULL,
+cluster_ra(clusters = clust_var, m = NULL, m_each = NULL, prob = NULL,
   prob_each = NULL, num_arms = NULL, condition_names = NULL,
-  simple = FALSE, check_inputs = TRUE)
+  simple = FALSE, check_inputs = TRUE, clust_var = NULL)
 }
 \arguments{
-\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{m}{Use for a two-arm design in which m clusters are assigned to treatment and N-m clusters are assigned to control. (optional)}
 
@@ -26,6 +26,8 @@ cluster_ra(clust_var, m = NULL, m_each = NULL, prob = NULL,
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment of clusters to conditions is used. When simple = TRUE, please do not specify m or m_each.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
+
+\item{clust_var}{deprecated}
 }
 \value{
 A vector of length N that indicates the treatment condition of each unit.
@@ -35,30 +37,30 @@ cluster_ra implements a random assignment procedure in which groups of units are
 }
 \examples{
 # Two Group Designs
-clust_var <- rep(letters, times=1:26)
+clusters <- rep(letters, times=1:26)
 
-Z <- cluster_ra(clust_var = clust_var)
-table(Z, clust_var)
+Z <- cluster_ra(clusters = clusters)
+table(Z, clusters)
 
-Z <- cluster_ra(clust_var = clust_var, m = 13)
-table(Z, clust_var)
+Z <- cluster_ra(clusters = clusters, m = 13)
+table(Z, clusters)
 
-Z <- cluster_ra(clust_var = clust_var, m_each = c(10, 16),
+Z <- cluster_ra(clusters = clusters, m_each = c(10, 16),
                 condition_names = c("control", "treatment"))
-table(Z, clust_var)
+table(Z, clusters)
 
 # Multi-arm Designs
-Z <- cluster_ra(clust_var = clust_var, num_arms = 3)
-table(Z, clust_var)
+Z <- cluster_ra(clusters = clusters, num_arms = 3)
+table(Z, clusters)
 
-Z <- cluster_ra(clust_var = clust_var, m_each = c(7, 7, 12))
-table(Z, clust_var)
+Z <- cluster_ra(clusters = clusters, m_each = c(7, 7, 12))
+table(Z, clusters)
 
-Z <- cluster_ra(clust_var = clust_var, m_each = c(7, 7, 12),
+Z <- cluster_ra(clusters = clusters, m_each = c(7, 7, 12),
                 condition_names = c("control", "placebo", "treatment"))
-table(Z, clust_var)
+table(Z, clusters)
 
-Z <- cluster_ra(clust_var = clust_var,
+Z <- cluster_ra(clusters = clusters,
                 condition_names = c("control", "placebo", "treatment"))
-table(Z, clust_var)
+table(Z, clusters)
 }

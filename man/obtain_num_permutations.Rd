@@ -26,16 +26,16 @@ obtain_num_permutations(declaration)
 
 # blocked 
 
-block_var <- c("A", "A", "B", "B", "C", "C", "C")
-declaration <- declare_ra(block_var = block_var)
+blocks <- c("A", "A", "B", "B", "C", "C", "C")
+declaration <- declare_ra(blocks = blocks)
 perms <- obtain_permutation_matrix(declaration)
 dim(perms)
 obtain_num_permutations(declaration)
 
 # clustered
 
-clust_var <- c("A", "B", "A", "B", "C", "C", "C")
-declaration <- declare_ra(clust_var = clust_var)
+clusters <- c("A", "B", "A", "B", "C", "C", "C")
+declaration <- declare_ra(clusters = clusters)
 perms <- obtain_permutation_matrix(declaration)
 dim(perms)
 obtain_num_permutations(declaration)

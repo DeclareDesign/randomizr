@@ -4,13 +4,15 @@
 \alias{strata_and_cluster_rs_probabilities}
 \title{Inclusion Probabilities: Stratified and Clustered Random Sampling}
 \usage{
-strata_and_cluster_rs_probabilities(strata_var, clust_var, prob = NULL,
-  n = NULL, strata_n = NULL, strata_prob = NULL, check_inputs = TRUE)
+strata_and_cluster_rs_probabilities(strata = strata_var,
+  clusters = clust_var, prob = NULL, n = NULL, strata_n = NULL,
+  strata_prob = NULL, check_inputs = TRUE, strata_var = NULL,
+  clust_var = NULL)
 }
 \arguments{
-\item{strata_var}{A vector of length N that indicates which stratum each unit belongs to.}
+\item{strata}{A vector of length N that indicates which stratum each unit belongs to.}
 
-\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{prob}{Use for a design in which either floor(N_clusters_stratum*prob) or ceiling(N_clusters_stratum*prob) clusters are sampled within each stratum. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters_stratum*prob) clusters will be sampled and with probability prob, ceiling(N_clusters_stratum*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
 
@@ -21,6 +23,10 @@ strata_and_cluster_rs_probabilities(strata_var, clust_var, prob = NULL,
 \item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
+
+\item{strata_var}{deprecated}
+
+\item{clust_var}{deprecated}
 }
 \value{
 A vector length N indicating the probability of being sampled.
@@ -30,44 +36,44 @@ Inclusion Probabilities: Stratified and Clustered Random Sampling
 }
 \examples{
 
-clust_var <- rep(letters, times = 1:26)
+clusters <- rep(letters, times = 1:26)
 
-strata_var <- rep(NA, length(clust_var))
-strata_var[clust_var \%in\% letters[1:5]] <- "stratum_1"
-strata_var[clust_var \%in\% letters[6:10]] <- "stratum_2"
-strata_var[clust_var \%in\% letters[11:15]] <- "stratum_3"
-strata_var[clust_var \%in\% letters[16:20]] <- "stratum_4"
-strata_var[clust_var \%in\% letters[21:26]] <- "stratum_5"
+strata <- rep(NA, length(clusters))
+strata[clusters \%in\% letters[1:5]] <- "stratum_1"
+strata[clusters \%in\% letters[6:10]] <- "stratum_2"
+strata[clusters \%in\% letters[11:15]] <- "stratum_3"
+strata[clusters \%in\% letters[16:20]] <- "stratum_4"
+strata[clusters \%in\% letters[21:26]] <- "stratum_5"
 
-table(strata_var, clust_var)
+table(strata, clusters)
 
-probs <- strata_and_cluster_rs_probabilities(strata_var = strata_var,
-                                         clust_var = clust_var)
+probs <- strata_and_cluster_rs_probabilities(strata = strata,
+                                         clusters = clusters)
 
-table(probs, strata_var)
-table(probs, clust_var)
+table(probs, strata)
+table(probs, clusters)
 
 
-probs <- strata_and_cluster_rs_probabilities(clust_var = clust_var,
-                                         strata_var = strata_var,
+probs <- strata_and_cluster_rs_probabilities(clusters = clusters,
+                                         strata = strata,
                                          prob = .5)
 
-table(probs, clust_var)
-table(probs, strata_var)
+table(probs, clusters)
+table(probs, strata)
 
-probs <- strata_and_cluster_rs_probabilities(clust_var = clust_var,
-                                         strata_var = strata_var,
+probs <- strata_and_cluster_rs_probabilities(clusters = clusters,
+                                         strata = strata,
                                          strata_n = c(2, 3, 2, 3, 2))
 
-table(probs, clust_var)
-table(probs, strata_var)
+table(probs, clusters)
+table(probs, strata)
 
-probs <- strata_and_cluster_rs_probabilities(clust_var = clust_var,
-                                         strata_var = strata_var,
+probs <- strata_and_cluster_rs_probabilities(clusters = clusters,
+                                         strata = strata,
                                          strata_prob = c(.1, .2, .3, .4, .5))
 
-table(probs, clust_var)
-table(probs, strata_var)
+table(probs, clusters)
+table(probs, strata)
 
 
 }

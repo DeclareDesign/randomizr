@@ -4,18 +4,19 @@
 \alias{declare_ra}
 \title{Declare a random assignment procedure.}
 \usage{
-declare_ra(N = NULL, block_var = NULL, clust_var = NULL, m = NULL,
+declare_ra(N = NULL, blocks = block_var, clusters = clust_var, m = NULL,
   m_each = NULL, prob = NULL, prob_each = NULL, block_m = NULL,
   block_m_each = NULL, block_prob = NULL, block_prob_each = NULL,
   num_arms = NULL, condition_names = NULL, simple = FALSE,
-  permutation_matrix = NULL, check_inputs = TRUE)
+  permutation_matrix = NULL, check_inputs = TRUE, block_var = NULL,
+  clust_var = NULL)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
 
-\item{block_var}{A vector of length N that indicates which block each unit belongs to.}
+\item{blocks}{A vector of length N that indicates which block each unit belongs to.}
 
-\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{m}{Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. In a blocked design, exactly m units in each block will be treated. (optional)}
 
@@ -27,11 +28,11 @@ declare_ra(N = NULL, block_var = NULL, clust_var = NULL, m = NULL,
 
 \item{block_m}{Use for a two-arm design in which block_m describes the number of units to assign to treatment within each block. Note that in previous versions of randomizr, block_m behaved like block_m_each.}
 
-\item{block_m_each}{Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.}
+\item{block_m_each}{Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of condition_names, if specified.}
 
 \item{block_prob}{Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Differs from prob in that the probability of assignment can vary across blocks.}
 
-\item{block_prob_each}{Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.}
+\item{block_prob_each}{Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.}
 
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
@@ -42,14 +43,18 @@ declare_ra(N = NULL, block_var = NULL, clust_var = NULL, m = NULL,
 \item{permutation_matrix}{for custom random assignment procedures.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
+
+\item{block_var}{deprecated}
+
+\item{clust_var}{deprecated}
 }
 \value{
 A list of class "declaration".  The list has five entries:
   $ra_function, a function that generates random assignments according to the declaration.
   $ra_type, a string indicating the type of random assignment used
   $probabilities_matrix, a matrix with N rows and num_arms columns, describing each unit's probabilities of assignment to conditions.
-  $block_var, the blocking variable.
-  $clust_var, the clustering variable.
+  $blocks, the blocking variable.
+  $clusters, the clustering variable.
 }
 \description{
 Declare a random assignment procedure.
@@ -88,33 +93,33 @@ declare_ra(N=100, m_each=c(30, 30, 40))
 
 # Block Random Assignment Declarations
 
-block_var <- rep(c("A", "B","C"), times = c(50, 100, 200))
+blocks <- rep(c("A", "B","C"), times = c(50, 100, 200))
 
 block_m_each <- rbind(c(10, 40),
                  c(30, 70),
                  c(50, 150))
-declare_ra(block_var = block_var, block_m_each = block_m_each)
+declare_ra(blocks = blocks, block_m_each = block_m_each)
 
 
 # Cluster Random Assignment Declarations
 
-clust_var <- rep(letters, times = 1:26)
-declare_ra(clust_var = clust_var)
-declare_ra(clust_var = clust_var, m_each = c(7, 7, 12))
+clusters <- rep(letters, times = 1:26)
+declare_ra(clusters = clusters)
+declare_ra(clusters = clusters, m_each = c(7, 7, 12))
 
 # Blocked and Clustered Random Assignment Declarations
 
-clust_var <- rep(letters, times=1:26)
-block_var <- rep(NA, length(clust_var))
-block_var[clust_var \%in\% letters[1:5]] <- "block_1"
-block_var[clust_var \%in\% letters[6:10]] <- "block_2"
-block_var[clust_var \%in\% letters[11:15]] <- "block_3"
-block_var[clust_var \%in\% letters[16:20]] <- "block_4"
-block_var[clust_var \%in\% letters[21:26]] <- "block_5"
+clusters <- rep(letters, times=1:26)
+blocks <- rep(NA, length(clusters))
+blocks[clusters \%in\% letters[1:5]] <- "block_1"
+blocks[clusters \%in\% letters[6:10]] <- "block_2"
+blocks[clusters \%in\% letters[11:15]] <- "block_3"
+blocks[clusters \%in\% letters[16:20]] <- "block_4"
+blocks[clusters \%in\% letters[21:26]] <- "block_5"
 
-table(block_var, clust_var)
+table(blocks, clusters)
 
-declare_ra(clust_var = clust_var, block_var = block_var)
-declare_ra(clust_var = clust_var, block_var = block_var, prob_each = c(.2, .5, .3))
+declare_ra(clusters = clusters, blocks = blocks)
+declare_ra(clusters = clusters, blocks = blocks, prob_each = c(.2, .5, .3))
 
 }

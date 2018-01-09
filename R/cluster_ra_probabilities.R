@@ -7,33 +7,33 @@
 #' @examples
 #'
 #' # Two Group Designs
-#' clust_var <- rep(letters, times = 1:26)
-#' prob_mat <- cluster_ra_probabilities(clust_var = clust_var)
+#' clusters <- rep(letters, times = 1:26)
+#' prob_mat <- cluster_ra_probabilities(clusters = clusters)
 #' head(prob_mat)
 #'
-#' prob_mat <- cluster_ra_probabilities(clust_var = clust_var, m = 10)
+#' prob_mat <- cluster_ra_probabilities(clusters = clusters, m = 10)
 #' head(prob_mat)
 #'
-#' prob_mat <- cluster_ra_probabilities(clust_var = clust_var,
+#' prob_mat <- cluster_ra_probabilities(clusters = clusters,
 #'                                      m_each = c(9, 17),
 #'                                      condition_names = c("control", "treatment"))
 #'
 #' # Multi-arm Designs
-#' prob_mat <- cluster_ra_probabilities(clust_var = clust_var, num_arms = 3)
+#' prob_mat <- cluster_ra_probabilities(clusters = clusters, num_arms = 3)
 #' head(prob_mat)
 #'
-#' prob_mat <- cluster_ra_probabilities(clust_var = clust_var, m_each = c(7, 7, 12))
+#' prob_mat <- cluster_ra_probabilities(clusters = clusters, m_each = c(7, 7, 12))
 #' head(prob_mat)
 #'
-#' prob_mat <- cluster_ra_probabilities(clust_var = clust_var, m_each = c(7, 7, 12),
+#' prob_mat <- cluster_ra_probabilities(clusters = clusters, m_each = c(7, 7, 12),
 #'                          condition_names=c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
-#' prob_mat <- cluster_ra_probabilities(clust_var = clust_var,
+#' prob_mat <- cluster_ra_probabilities(clusters = clusters,
 #'                          condition_names=c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
-#' prob_mat <- cluster_ra_probabilities(clust_var = clust_var,
+#' prob_mat <- cluster_ra_probabilities(clusters = clusters,
 #'                                      prob_each = c(.1, .2, .7))
 #' head(prob_mat)
 #'
@@ -41,7 +41,7 @@
 #'
 #' @export
 cluster_ra_probabilities <-
-  function(clust_var,
+  function(clusters = clust_var,
            m = NULL,
            m_each = NULL,
            prob = NULL,
@@ -49,18 +49,23 @@ cluster_ra_probabilities <-
            num_arms = NULL,
            condition_names = NULL,
            simple = FALSE,
-           check_inputs = TRUE) {
+           check_inputs = TRUE,
+           clust_var = NULL) {
+  
+    warn_deprecated_args(clust_var=clust_var)
+    
+    
     if (check_inputs) {
       input_check <-
         check_randomizr_arguments(
-          clust_var = clust_var,
+          clusters = clusters,
           prob = prob,
           prob_each = prob_each,
           num_arms = num_arms,
           condition_names = condition_names
         )
     }
-    n_per_clust <- tapply(clust_var, clust_var, length)
+    n_per_clust <- tapply(clusters, clusters, length)
     unique_clust <- names(n_per_clust)
     n_clust <- length(unique_clust)
     
@@ -90,6 +95,6 @@ cluster_ra_probabilities <-
     prob_mat <-
       probs_clust[rep(1:n_clust, n_per_clust), , drop = FALSE]
     prob_mat <-
-      prob_mat[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE)), , drop = FALSE]
+      prob_mat[order(unlist(split(1:length(clusters), clusters), FALSE, FALSE)), , drop = FALSE]
     return(prob_mat)
   }

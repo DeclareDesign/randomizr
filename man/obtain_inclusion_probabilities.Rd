@@ -5,7 +5,7 @@
 \title{Obtain inclusion probabilities}
 \usage{
 obtain_inclusion_probabilities(declaration = NULL, N = NULL,
-  strata_var = NULL, clust_var = NULL, n = NULL, prob = NULL,
+  strata = NULL, clusters = NULL, n = NULL, prob = NULL,
   strata_n = NULL, strata_prob = NULL, simple = FALSE)
 }
 \arguments{
@@ -13,9 +13,9 @@ obtain_inclusion_probabilities(declaration = NULL, N = NULL,
 
 \item{N}{The number of units. N must be a positive integer. (required)}
 
-\item{strata_var}{A vector of length N that indicates which stratum each unit belongs to.}
+\item{strata}{A vector of length N that indicates which stratum each unit belongs to.}
 
-\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{n}{Use for a design in which n units (or clusters) are sampled. In a stratified design, exactly n units in each stratum will be sampled. (optional)}
 
@@ -34,20 +34,20 @@ This function is especially useful when units have different inclusion probabilt
 \examples{
 
 # Draw a stratified random sample
-strata_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
+strata <- rep(c("A", "B","C"), times=c(50, 100, 200))
 
-declaration <- declare_rs(strata_var = strata_var)
+declaration <- declare_rs(strata = strata)
 
 observed_probabilities <-
    obtain_inclusion_probabilities(declaration = declaration)
 
-table(strata_var, observed_probabilities)
+table(strata, observed_probabilities)
 
 
 # Sometimes it is convenient to skip the declaration step
 observed_probabilities <-
-   obtain_inclusion_probabilities(strata_var = strata_var)
+   obtain_inclusion_probabilities(strata = strata)
 
-table(strata_var, observed_probabilities)
+table(strata, observed_probabilities)
 
 }

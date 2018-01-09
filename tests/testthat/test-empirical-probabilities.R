@@ -2,7 +2,7 @@ library(randomizr)
 
 # Test against empiricial probabilities -----------------------------------
 
-block_var <- c("A", "A", "A", "B", "B", "C")
+blocks <- c("A", "A", "A", "B", "B", "C")
 prob_each <- c(.1, .2, .7)
 
 analytic_probs <- 
@@ -27,7 +27,7 @@ analytic_probs <-
 
 # construct analytic probs from randomizr arguments
 num_arms <- length(prob_each)
-N_per_block <- table(block_var)
+N_per_block <- table(blocks)
 
 for_sure_allocations <- floor(N_per_block %*% t(prob_each))
 possible_allocations <- matrix(1/num_arms, nrow = length(N_per_block), ncol = num_arms)
@@ -38,7 +38,7 @@ final_probs <- for_sure_probs + possible_probs
 
 # 
 # # Conduct Simulation
-# perm_mat <- replicate(1000, block_ra(block_var = block_var, prob_each = prob_each))
+# perm_mat <- replicate(1000, block_ra(blocks = blocks, prob_each = prob_each))
 # 
 # prop.table(table(perm_mat))
 # prob_T1 <- apply(perm_mat, 1, function(x)mean(x=="T1"))
@@ -47,17 +47,17 @@ final_probs <- for_sure_probs + possible_probs
 # 
 # simulated_probs <- 
 # cbind(
-#   tapply(prob_T1, block_var, mean),
-#   tapply(prob_T2, block_var, mean),
-#   tapply(prob_T3, block_var, mean)
+#   tapply(prob_T1, blocks, mean),
+#   tapply(prob_T2, blocks, mean),
+#   tapply(prob_T3, blocks, mean)
 # )
 # 
 # 
 # simulated_probs
 
 
-dec <- declare_ra(block_var = block_var, prob_each = prob_each)
-block_ra_probabilities(block_var = block_var, prob_each = prob_each)
+dec <- declare_ra(blocks = blocks, prob_each = prob_each)
+block_ra_probabilities(blocks = blocks, prob_each = prob_each)
 
 dec$probabilities_matrix
 

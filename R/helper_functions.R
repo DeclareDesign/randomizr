@@ -1,17 +1,23 @@
 # randomizr input cleaning and helper functions
 
+warn_deprecated_args <- function(block_var=NULL, clust_var=NULL, strata_var=NULL) {
+  if(!is.null(block_var)){warning(simpleCondition("block_var is deprecated, use blocks instead", call=sys.call(1)))}
+  if(!is.null(clust_var)){warning(simpleCondition("clust_var is deprecated, use clusters instead", call=sys.call(1)))}
+  if(!is.null(strata_var)){warning(simpleCondition("strata_var is deprecated, use strata instead", call=sys.call(1)))}
+}
+
 check_randomizr_arguments <-
   function(N = NULL,
            prob = NULL,
            m = NULL,
            m_each = NULL,
            prob_each = NULL,
-           block_var = NULL,
+           blocks = NULL,
            block_m = NULL,
            block_m_each = NULL,
            block_prob = NULL,
            block_prob_each = NULL,
-           clust_var = NULL,
+           clusters = NULL,
            num_arms = NULL,
            condition_names = NULL) {
     conflict_args <- list(
@@ -26,8 +32,8 @@ check_randomizr_arguments <-
     )
     
     
-    if (!is.null(clust_var)) {
-      N <- length(unique(clust_var))
+    if (!is.null(clusters)) {
+      N <- length(unique(clusters))
     }
     
     
@@ -62,7 +68,7 @@ check_randomizr_arguments <-
       }
     }
     
-    if (!is.null(m) & is.null(block_var)) {
+    if (!is.null(m) & is.null(blocks)) {
       if (m < 0) {
         stop("If specified, the number of units assigned to treatment (m) must be nonnegative.")
       }
@@ -224,27 +230,27 @@ check_randomizr_arguments <-
     
     # Blocked Design Checks
     N_per_block <- NULL
-    if (!is.null(block_var)) {
-      N_per_block <- tapply(block_var, block_var, length)
+    if (!is.null(blocks)) {
+      N_per_block <- tapply(blocks, blocks, length)
       attributes(N_per_block) <- NULL
       N_blocks <- length(N_per_block)
       
       if (!is.null(block_m)) {
         if (length(block_m) != N_blocks) {
           stop(
-            "If specified, block_m should have the same length as there are unique blocks in block_var."
+            "If specified, block_m should have the same length as there are unique blocks in blocks."
           )
         }
       }
       if (!is.null(block_prob)) {
         if (length(block_prob) != N_blocks) {
           stop(
-            "If specified, block_prob should have the same length as there are unique blocks in block_var."
+            "If specified, block_prob should have the same length as there are unique blocks in blocks."
           )
         }
       }
       
-      if(!is.null(m) & !is.null(block_var)){
+      if(!is.null(m) & !is.null(blocks)){
         block_m <- rep(m, length(N_per_block))
       }
       
@@ -260,10 +266,10 @@ check_randomizr_arguments <-
       if (!is.null(block_m_each)) {
         if (nrow(block_m_each) != N_blocks) {
           stop(
-            "If specified, block_m_each should have the same number of rows as there are unique blocks in block_var."
+            "If specified, block_m_each should have the same number of rows as there are unique blocks in blocks."
           )
         }
-        if (is.null(clust_var) &
+        if (is.null(clusters) &
             !all(apply(block_m_each, 1, sum) == N_per_block)) {
           stop(
             "If specified, each row of block_m_each must sum to the number of units in the corresponding block."
@@ -275,17 +281,17 @@ check_randomizr_arguments <-
       if (!is.null(block_prob_each)) {
         if (nrow(block_prob_each) != N_blocks) {
           stop(
-            "If specified, block_prob_each should have the same number of rows as there are unique blocks in block_var"
+            "If specified, block_prob_each should have the same number of rows as there are unique blocks in blocks"
           )
         }
-        if (is.null(clust_var) &
+        if (is.null(clusters) &
             !isTRUE(all.equal(apply(block_prob_each, 1, sum), rep(1, N_blocks), check.attributes = FALSE))) {
           stop("If specified, each row of block_prob_each must sum to 1.")
         }
       }
       
-      if (!is.null(clust_var)) {
-        if (!all(tapply(block_var, clust_var, function(x)
+      if (!is.null(clusters)) {
+        if (!all(tapply(blocks, clusters, function(x)
           all(x == x[1])))) {
           stop("All units within a cluster must be in the same block.")
         }
@@ -345,10 +351,10 @@ check_samplr_arguments <-
   function(N = NULL,
            prob = NULL,
            n = NULL,
-           strata_var = NULL,
+           strata = NULL,
            strata_n = NULL,
            strata_prob = NULL,
-           clust_var = NULL) {
+           clusters = NULL) {
     conflict_args <- list(
       prob = prob,
       n = n,
@@ -357,8 +363,8 @@ check_samplr_arguments <-
     )
     
     
-    if (!is.null(clust_var)) {
-      N <- length(unique(clust_var))
+    if (!is.null(clusters)) {
+      N <- length(unique(clusters))
     }
     
     specified_args <- !sapply(conflict_args, is.null)
@@ -391,7 +397,7 @@ check_samplr_arguments <-
       }
     }
     
-    if (!is.null(n) & is.null(strata_var)) {
+    if (!is.null(n) & is.null(strata)) {
       if (n < 0) {
         stop("If specified, the number of units sampled (n) must be nonnegative.")
       }
@@ -404,22 +410,22 @@ check_samplr_arguments <-
     
     # stratified Design Checks
     N_per_stratum <- NULL
-    if (!is.null(strata_var)) {
-      N_per_stratum <- tapply(strata_var, strata_var, length)
+    if (!is.null(strata)) {
+      N_per_stratum <- tapply(strata, strata, length)
       attributes(N_per_stratum) <- NULL
       N_strata <- length(N_per_stratum)
       
       if (!is.null(strata_n)) {
         if (length(strata_n) != N_strata) {
           stop(
-            "If specified, strata_n should have the same length as there are unique strata in strata_var."
+            "If specified, strata_n should have the same length as there are unique strata in strata."
           )
         }
       }
       if (!is.null(strata_prob)) {
         if (length(strata_prob) != N_strata) {
           stop(
-            "If specified, strata_prob should have the same length as there are unique strata in strata_var."
+            "If specified, strata_prob should have the same length as there are unique strata in strata."
           )
         }
       }
@@ -432,8 +438,8 @@ check_samplr_arguments <-
         }
       }
       
-      if (!is.null(clust_var)) {
-        if (!all(tapply(strata_var, clust_var, function(x)
+      if (!is.null(clusters)) {
+        if (!all(tapply(strata, clusters, function(x)
           all(x == x[1])))) {
           stop("All units within a cluster must be in the same stratum.")
         }

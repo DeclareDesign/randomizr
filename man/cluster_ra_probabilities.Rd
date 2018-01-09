@@ -4,12 +4,13 @@
 \alias{cluster_ra_probabilities}
 \title{Probabilties of assignment: Cluster Random Assignment}
 \usage{
-cluster_ra_probabilities(clust_var, m = NULL, m_each = NULL, prob = NULL,
-  prob_each = NULL, num_arms = NULL, condition_names = NULL,
-  simple = FALSE, check_inputs = TRUE)
+cluster_ra_probabilities(clusters = clust_var, m = NULL, m_each = NULL,
+  prob = NULL, prob_each = NULL, num_arms = NULL,
+  condition_names = NULL, simple = FALSE, check_inputs = TRUE,
+  clust_var = NULL)
 }
 \arguments{
-\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{m}{Use for a two-arm design in which m clusters are assigned to treatment and N-m clusters are assigned to control. (optional)}
 
@@ -26,6 +27,8 @@ cluster_ra_probabilities(clust_var, m = NULL, m_each = NULL, prob = NULL,
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment of clusters to conditions is used. When simple = TRUE, please do not specify m or m_each.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
+
+\item{clust_var}{deprecated}
 }
 \value{
 A matrix of probabilities of assignment
@@ -36,33 +39,33 @@ Probabilties of assignment: Cluster Random Assignment
 \examples{
 
 # Two Group Designs
-clust_var <- rep(letters, times = 1:26)
-prob_mat <- cluster_ra_probabilities(clust_var = clust_var)
+clusters <- rep(letters, times = 1:26)
+prob_mat <- cluster_ra_probabilities(clusters = clusters)
 head(prob_mat)
 
-prob_mat <- cluster_ra_probabilities(clust_var = clust_var, m = 10)
+prob_mat <- cluster_ra_probabilities(clusters = clusters, m = 10)
 head(prob_mat)
 
-prob_mat <- cluster_ra_probabilities(clust_var = clust_var,
+prob_mat <- cluster_ra_probabilities(clusters = clusters,
                                      m_each = c(9, 17),
                                      condition_names = c("control", "treatment"))
 
 # Multi-arm Designs
-prob_mat <- cluster_ra_probabilities(clust_var = clust_var, num_arms = 3)
+prob_mat <- cluster_ra_probabilities(clusters = clusters, num_arms = 3)
 head(prob_mat)
 
-prob_mat <- cluster_ra_probabilities(clust_var = clust_var, m_each = c(7, 7, 12))
+prob_mat <- cluster_ra_probabilities(clusters = clusters, m_each = c(7, 7, 12))
 head(prob_mat)
 
-prob_mat <- cluster_ra_probabilities(clust_var = clust_var, m_each = c(7, 7, 12),
+prob_mat <- cluster_ra_probabilities(clusters = clusters, m_each = c(7, 7, 12),
                          condition_names=c("control", "placebo", "treatment"))
 head(prob_mat)
 
-prob_mat <- cluster_ra_probabilities(clust_var = clust_var,
+prob_mat <- cluster_ra_probabilities(clusters = clusters,
                          condition_names=c("control", "placebo", "treatment"))
 head(prob_mat)
 
-prob_mat <- cluster_ra_probabilities(clust_var = clust_var,
+prob_mat <- cluster_ra_probabilities(clusters = clusters,
                                      prob_each = c(.1, .2, .7))
 head(prob_mat)
 

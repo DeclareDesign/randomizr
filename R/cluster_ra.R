@@ -2,7 +2,7 @@
 #'
 #' cluster_ra implements a random assignment procedure in which groups of units are assigned together (as a cluster) to treatment conditions. This function conducts complete random assignment at the cluster level, unless simple = TRUE, in which case \code{\link{simple_ra}} analogues are used.
 #'
-#' @param clust_var A vector of length N that indicates which cluster each unit belongs to.
+#' @param clusters A vector of length N that indicates which cluster each unit belongs to.
 #' @param m Use for a two-arm design in which m clusters are assigned to treatment and N-m clusters are assigned to control. (optional)
 #' @param m_each Use for a multi-arm design in which the values of m_each determine the number of clusters assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many clusters should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)
 #' @param prob Use for a two-arm design in which either floor(N_clusters*prob) or ceiling(N_clusters*prob) clusters are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_clusters*prob) clusters will be assigned to treatment and with probability prob, ceiling(N_clusters*prob) clusters will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
@@ -11,38 +11,39 @@
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment of clusters to conditions is used. When simple = TRUE, please do not specify m or m_each.
 #' @param check_inputs logical. Defaults to TRUE.
+#' @param clust_var deprecated
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #' @export
 #' @examples
 #' # Two Group Designs
-#' clust_var <- rep(letters, times=1:26)
+#' clusters <- rep(letters, times=1:26)
 #'
-#' Z <- cluster_ra(clust_var = clust_var)
-#' table(Z, clust_var)
+#' Z <- cluster_ra(clusters = clusters)
+#' table(Z, clusters)
 #'
-#' Z <- cluster_ra(clust_var = clust_var, m = 13)
-#' table(Z, clust_var)
+#' Z <- cluster_ra(clusters = clusters, m = 13)
+#' table(Z, clusters)
 #'
-#' Z <- cluster_ra(clust_var = clust_var, m_each = c(10, 16),
+#' Z <- cluster_ra(clusters = clusters, m_each = c(10, 16),
 #'                 condition_names = c("control", "treatment"))
-#' table(Z, clust_var)
+#' table(Z, clusters)
 #'
 #' # Multi-arm Designs
-#' Z <- cluster_ra(clust_var = clust_var, num_arms = 3)
-#' table(Z, clust_var)
+#' Z <- cluster_ra(clusters = clusters, num_arms = 3)
+#' table(Z, clusters)
 #'
-#' Z <- cluster_ra(clust_var = clust_var, m_each = c(7, 7, 12))
-#' table(Z, clust_var)
+#' Z <- cluster_ra(clusters = clusters, m_each = c(7, 7, 12))
+#' table(Z, clusters)
 #'
-#' Z <- cluster_ra(clust_var = clust_var, m_each = c(7, 7, 12),
+#' Z <- cluster_ra(clusters = clusters, m_each = c(7, 7, 12),
 #'                 condition_names = c("control", "placebo", "treatment"))
-#' table(Z, clust_var)
+#' table(Z, clusters)
 #'
-#' Z <- cluster_ra(clust_var = clust_var,
+#' Z <- cluster_ra(clusters = clusters,
 #'                 condition_names = c("control", "placebo", "treatment"))
-#' table(Z, clust_var)
-cluster_ra <- function(clust_var,
+#' table(Z, clusters)
+cluster_ra <- function(clusters = clust_var,
                        m = NULL,
                        m_each = NULL,
                        prob = NULL,
@@ -50,11 +51,13 @@ cluster_ra <- function(clust_var,
                        num_arms = NULL,
                        condition_names = NULL,
                        simple = FALSE,
-                       check_inputs = TRUE) {
+                       check_inputs = TRUE,
+                       clust_var = NULL) {
+  warn_deprecated_args(clust_var = clust_var)
   if (check_inputs) {
     input_check <-
       check_randomizr_arguments(
-        clust_var = clust_var,
+        clusters = clusters,
         prob = prob,
         prob_each = prob_each,
         num_arms = num_arms,
@@ -62,7 +65,7 @@ cluster_ra <- function(clust_var,
       )
   }
   
-  n_per_clust <- tapply(clust_var, clust_var, length)
+  n_per_clust <- tapply(clusters, clusters, length)
   n_clust <- length(n_per_clust)
   
   if (simple) {
@@ -96,6 +99,6 @@ cluster_ra <- function(clust_var,
   
   assignment <- rep(z_clust, n_per_clust)
   assignment <-
-    assignment[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
+    assignment[order(unlist(split(1:length(clusters), clusters), FALSE, FALSE))]
   return(assignment)
 }
