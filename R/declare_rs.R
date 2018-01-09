@@ -9,6 +9,8 @@
 #' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.
 #' @param simple logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.
 #' @param check_inputs logical. Defaults to TRUE.
+#' @param strata_var deprecated
+#' @param clust_var deprecated
 #'
 #' @return A list of class "declaration".  The list has five entries:
 #'   $rs_function, a function that generates random samplings according to the declaration.

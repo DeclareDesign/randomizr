@@ -4,18 +4,18 @@
 \alias{draw_rs}
 \title{Draw a random sample}
 \usage{
-draw_rs(declaration = NULL, N = NULL, strata_var = NULL,
-  clust_var = NULL, n = NULL, prob = NULL, strata_n = NULL,
-  strata_prob = NULL, simple = FALSE)
+draw_rs(declaration = NULL, N = NULL, strata = NULL, clusters = NULL,
+  n = NULL, prob = NULL, strata_n = NULL, strata_prob = NULL,
+  simple = FALSE)
 }
 \arguments{
 \item{declaration}{A random sampling declaration, created by \code{\link{declare_rs}}.}
 
 \item{N}{The number of units. N must be a positive integer. (required)}
 
-\item{strata_var}{A vector of length N that indicates which stratum each unit belongs to.}
+\item{strata}{A vector of length N that indicates which stratum each unit belongs to.}
 
-\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{n}{Use for a design in which n units (or clusters) are sampled. In a stratified design, exactly n units in each stratum will be sampled. (optional)}
 

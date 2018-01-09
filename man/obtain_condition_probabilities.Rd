@@ -5,7 +5,7 @@
 \title{Obtain the probabilities of units being in the conditions that they are in.}
 \usage{
 obtain_condition_probabilities(declaration = NULL, assignment, N = NULL,
-  block_var = NULL, clust_var = NULL, m = NULL, m_each = NULL,
+  blocks = NULL, clusters = NULL, m = NULL, m_each = NULL,
   prob = NULL, prob_each = NULL, block_m = NULL, block_m_each = NULL,
   block_prob = NULL, block_prob_each = NULL, num_arms = NULL,
   condition_names = NULL, simple = FALSE)
@@ -17,9 +17,9 @@ obtain_condition_probabilities(declaration = NULL, assignment, N = NULL,
 
 \item{N}{The number of units. N must be a positive integer. (required)}
 
-\item{block_var}{A vector of length N that indicates which block each unit belongs to.}
+\item{blocks}{A vector of length N that indicates which block each unit belongs to.}
 
-\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{m}{Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. In a blocked design, exactly m units in each block will be treated. (optional)}
 
@@ -31,11 +31,11 @@ obtain_condition_probabilities(declaration = NULL, assignment, N = NULL,
 
 \item{block_m}{Use for a two-arm design in which block_m describes the number of units to assign to treatment within each block. Note that in previous versions of randomizr, block_m behaved like block_m_each.}
 
-\item{block_m_each}{Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.}
+\item{block_m_each}{Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of condition_names, if specified.}
 
 \item{block_prob}{Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Differs from prob in that the probability of assignment can vary across blocks.}
 
-\item{block_prob_each}{Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.}
+\item{block_prob_each}{Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.}
 
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
@@ -50,32 +50,32 @@ This function is especially useful when units have different probabilties of ass
 \examples{
 
 # Conduct a block random assignment
-block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
+blocks <- rep(c("A", "B","C"), times=c(50, 100, 200))
 block_m_each <- rbind(c(10, 40),
                  c(30, 70),
                  c(50, 150))
-declaration <- declare_ra(block_var = block_var, block_m_each = block_m_each)
+declaration <- declare_ra(blocks = blocks, block_m_each = block_m_each)
 Z <- conduct_ra(declaration = declaration)
-table(Z, block_var)
+table(Z, blocks)
 
 observed_probabilities <-
    obtain_condition_probabilities(declaration = declaration, assignment = Z)
 
 
 # Probabilities in the control group:
-table(observed_probabilities[Z == 0], block_var[Z == 0])
+table(observed_probabilities[Z == 0], blocks[Z == 0])
 
 # Probabilities in the treatment group:
-table(observed_probabilities[Z == 1], block_var[Z == 1])
+table(observed_probabilities[Z == 1], blocks[Z == 1])
 
 
 # Sometimes it is convenient to skip the declaration step
-Z <- conduct_ra(block_var = block_var, block_m_each = block_m_each)
+Z <- conduct_ra(blocks = blocks, block_m_each = block_m_each)
 observed_probabilities <-
    obtain_condition_probabilities(assignment = Z,
-                                  block_var = block_var,
+                                  blocks = blocks,
                                   block_m_each = block_m_each)
-table(observed_probabilities[Z == 0], block_var[Z == 0])
-table(observed_probabilities[Z == 1], block_var[Z == 1])
+table(observed_probabilities[Z == 0], blocks[Z == 0])
+table(observed_probabilities[Z == 1], blocks[Z == 1])
 
 }

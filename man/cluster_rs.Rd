@@ -4,11 +4,11 @@
 \alias{cluster_rs}
 \title{Cluster Random Sampling}
 \usage{
-cluster_rs(clust_var, n = NULL, prob = NULL, simple = FALSE,
-  check_inputs = TRUE)
+cluster_rs(clusters = clust_var, n = NULL, prob = NULL, simple = FALSE,
+  check_inputs = TRUE, clust_var = NULL)
 }
 \arguments{
-\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{n}{Use for a design in which n clusters are sampled. (optional)}
 
@@ -17,6 +17,8 @@ cluster_rs(clust_var, n = NULL, prob = NULL, simple = FALSE,
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling of clusters. When simple = TRUE, please do not specify n.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
+
+\item{clust_var}{deprecated}
 }
 \value{
 A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
@@ -25,12 +27,12 @@ A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
 cluster_rs implements a random sampling procedure in which groups of units are sampled together (as a cluster). This function conducts complete random sampling at the cluster level, unless simple = TRUE, in which case \code{\link{simple_rs}} analogues are used.
 }
 \examples{
-clust_var <- rep(letters, times=1:26)
+clusters <- rep(letters, times=1:26)
 
-S <- cluster_rs(clust_var = clust_var)
-table(S, clust_var)
+S <- cluster_rs(clusters = clusters)
+table(S, clusters)
 
-S <- cluster_rs(clust_var = clust_var, n = 13)
-table(S, clust_var)
+S <- cluster_rs(clusters = clusters, n = 13)
+table(S, clusters)
 
 }

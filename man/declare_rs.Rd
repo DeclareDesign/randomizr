@@ -4,16 +4,17 @@
 \alias{declare_rs}
 \title{Declare a random sampling procedure.}
 \usage{
-declare_rs(N = NULL, strata_var = NULL, clust_var = NULL, n = NULL,
-  prob = NULL, strata_n = NULL, strata_prob = NULL, simple = FALSE,
-  check_inputs = TRUE)
+declare_rs(N = NULL, strata = strata_var, clusters = clust_var,
+  n = NULL, prob = NULL, strata_n = NULL, strata_prob = NULL,
+  simple = FALSE, check_inputs = TRUE, strata_var = NULL,
+  clust_var = NULL)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
 
-\item{strata_var}{A vector of length N that indicates which stratum each unit belongs to.}
+\item{strata}{A vector of length N that indicates which stratum each unit belongs to.}
 
-\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{n}{Use for a design in which n units (or clusters) are sampled. In a stratified design, exactly n units in each stratum will be sampled. (optional)}
 
@@ -26,14 +27,18 @@ declare_rs(N = NULL, strata_var = NULL, clust_var = NULL, n = NULL,
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
+
+\item{strata_var}{deprecated}
+
+\item{clust_var}{deprecated}
 }
 \value{
 A list of class "declaration".  The list has five entries:
   $rs_function, a function that generates random samplings according to the declaration.
   $rs_type, a string indicating the type of random sampling used
   $probabilities_vector, A vector length N indicating the probability of being sampled.
-  $strata_var, the stratification variable.
-  $clust_var, the clustering variable.
+  $strata, the stratification variable.
+  $clusters, the clustering variable.
 }
 \description{
 Declare a random sampling procedure.
@@ -67,30 +72,30 @@ declare_rs(N = 100, n = 30)
 
 # Stratified Random Sampling Declarations
 
-strata_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
-declare_rs(strata_var = strata_var)
-declare_rs(strata_var = strata_var, prob = .5)
+strata <- rep(c("A", "B","C"), times=c(50, 100, 200))
+declare_rs(strata = strata)
+declare_rs(strata = strata, prob = .5)
 
 
 # Cluster Random Sampling Declarations
 
-clust_var <- rep(letters, times = 1:26)
-declare_rs(clust_var = clust_var)
-declare_rs(clust_var = clust_var, n = 10)
+clusters <- rep(letters, times = 1:26)
+declare_rs(clusters = clusters)
+declare_rs(clusters = clusters, n = 10)
 
 # Stratified and Clustered Random Sampling Declarations
 
-clust_var <- rep(letters, times = 1:26)
-strata_var <- rep(NA, length(clust_var))
-strata_var[clust_var \%in\% letters[1:5]] <- "stratum_1"
-strata_var[clust_var \%in\% letters[6:10]] <- "stratum_2"
-strata_var[clust_var \%in\% letters[11:15]] <- "stratum_3"
-strata_var[clust_var \%in\% letters[16:20]] <- "stratum_4"
-strata_var[clust_var \%in\% letters[21:26]] <- "stratum_5"
+clusters <- rep(letters, times = 1:26)
+strata <- rep(NA, length(clusters))
+strata[clusters \%in\% letters[1:5]] <- "stratum_1"
+strata[clusters \%in\% letters[6:10]] <- "stratum_2"
+strata[clusters \%in\% letters[11:15]] <- "stratum_3"
+strata[clusters \%in\% letters[16:20]] <- "stratum_4"
+strata[clusters \%in\% letters[21:26]] <- "stratum_5"
 
-table(strata_var, clust_var)
+table(strata, clusters)
 
-declare_rs(clust_var = clust_var, strata_var = strata_var)
-declare_rs(clust_var = clust_var, strata_var = strata_var, prob = .3)
+declare_rs(clusters = clusters, strata = strata)
+declare_rs(clusters = clusters, strata = strata, prob = .3)
 
 }

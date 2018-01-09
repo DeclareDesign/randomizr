@@ -11,6 +11,7 @@
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment of clusters to conditions is used. When simple = TRUE, please do not specify m or m_each.
 #' @param check_inputs logical. Defaults to TRUE.
+#' @param clust_var deprecated
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #' @export

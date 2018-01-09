@@ -16,6 +16,8 @@
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.
 #' @param permutation_matrix for custom random assignment procedures.
 #' @param check_inputs logical. Defaults to TRUE.
+#' @param block_var deprecated
+#' @param clust_var deprecated
 #'
 #' @return A list of class "declaration".  The list has five entries:
 #'   $ra_function, a function that generates random assignments according to the declaration.
