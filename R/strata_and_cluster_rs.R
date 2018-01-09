@@ -66,7 +66,7 @@ strata_and_cluster_rs <-
            check_inputs = TRUE,
            strata_var = NULL,
            clust_var = NULL) {
-    warn_deprecated_args(NULL, clust_var, strata)
+    warn_deprecated_args(NULL, clust_var, strata_var)
     
     if (check_inputs) {
       input_check <-
