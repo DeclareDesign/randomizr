@@ -5,10 +5,11 @@
 \title{Obtain the probabilities of units being in the conditions that they are in.}
 \usage{
 obtain_condition_probabilities(declaration = NULL, assignment, N = NULL,
-  blocks = NULL, clusters = NULL, m = NULL, m_each = NULL,
+  blocks = block_var, clusters = clust_var, m = NULL, m_each = NULL,
   prob = NULL, prob_each = NULL, block_m = NULL, block_m_each = NULL,
   block_prob = NULL, block_prob_each = NULL, num_arms = NULL,
-  condition_names = NULL, simple = FALSE)
+  condition_names = NULL, simple = FALSE, block_var = NULL,
+  clust_var = NULL)
 }
 \arguments{
 \item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
@@ -42,6 +43,10 @@ obtain_condition_probabilities(declaration = NULL, assignment, N = NULL,
 \item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
 
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.}
+
+\item{block_var}{deprecated}
+
+\item{clust_var}{deprecated}
 }
 \description{
 You can either give obtain_condition_probabilities() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.\cr \cr
