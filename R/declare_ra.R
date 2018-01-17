@@ -360,8 +360,8 @@ declare_ra <- function(N = NULL,
 #' @export
 conduct_ra <- function(declaration = NULL,
                        N = NULL,
-                       blocks = NULL,
-                       clusters = NULL,
+                       blocks = block_var,
+                       clusters = clust_var,
                        m = NULL,
                        m_each = NULL,
                        prob = NULL,
@@ -373,7 +373,7 @@ conduct_ra <- function(declaration = NULL,
                        num_arms = NULL,
                        condition_names = NULL,
                        simple = FALSE,
-                       check_inputs = TRUE) {
+                       check_inputs = TRUE, block_var=NULL, clust_var=NULL) {
   if (!is.null(declaration)) {
     if (class(declaration) != "ra_declaration") {
       stop("You must provide a random assignment declaration created by declare_ra().")
@@ -448,8 +448,8 @@ obtain_condition_probabilities <-
   function(declaration = NULL,
            assignment,
            N = NULL,
-           blocks = NULL,
-           clusters = NULL,
+           blocks = block_var,
+           clusters = clust_var,
            m = NULL,
            m_each = NULL,
            prob = NULL,
@@ -460,7 +460,7 @@ obtain_condition_probabilities <-
            block_prob_each = NULL,
            num_arms = NULL,
            condition_names = NULL,
-           simple = FALSE) {
+           simple = FALSE, block_var=NULL, clust_var=NULL) {
     # checks
     if (!is.null(declaration)) {
       if (class(declaration) != "ra_declaration") {
