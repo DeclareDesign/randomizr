@@ -129,37 +129,34 @@ declare_ra <- function(N = NULL,
     )
   }
   # Determine ra_type
-  if (simple == FALSE) {
-    ra_type <- "complete"
-  } else{
-    ra_type <- "simple"
-  }
-  if (!is.null(blocks) & is.null(clusters)) {
-    ra_type <- "blocked"
-  }
-  if (is.null(blocks) & !is.null(clusters)) {
-    ra_type <- "clustered"
-  }
-  if (!is.null(blocks) & !is.null(clusters)) {
-    ra_type <- "blocked_and_clustered"
-  }
   if (!is.null(permutation_matrix)){
     ra_type <- "custom"
-  }
-  
-  if (ra_type == "simple" & is.null(clusters)) {
+  } else  if (!is.null(blocks) && !is.null(clusters)) {
+    ra_type <- "blocked_and_clustered"
+  } else  if (!is.null(clusters)) {
+    ra_type <- "clustered"
+  } else  if (!is.null(blocks)) {
+    ra_type <- "blocked"
+    if (simple) stop("You can't specify 'simple' when using blocked assignment")
+  } else  if (simple == FALSE) {
+    ra_type <- "complete"
+  } else {
+    ra_type <- "simple"
+    
     if (!is.null(m)) {
       stop("You can't specify 'm' when using simple random assignment.")
     }
     if (!is.null(m_each)) {
       stop("You can't specify 'm_each' when using simple random assignment.")
     }
-    if (!is.null(blocks)) {
-      stop("You can't specify 'blocks' when using simple random assignment.")
-    }
     if (!is.null(block_m_each)) {
       stop("You can't specify 'block_m_each' when using simple random assignment.")
     }
+    
+  }
+
+  
+  if (ra_type == "simple") {
     
     ra_function <- function() {
       simple_ra(
