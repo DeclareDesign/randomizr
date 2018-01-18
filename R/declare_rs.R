@@ -257,13 +257,13 @@ declare_rs <- function(N = NULL,
 #' @export
 draw_rs <- function(declaration = NULL,
                     N = NULL,
-                    strata = NULL,
-                    clusters = NULL,
+                    strata = strata_var,
+                    clusters = clust_var,
                     n = NULL,
                     prob = NULL,
                     strata_n = NULL,
                     strata_prob = NULL,
-                    simple = FALSE) {
+                    simple = FALSE, strata_var = NULL, clust_var = NULL) {
   if (!is.null(declaration)) {
     if (class(declaration) != "rs_declaration") {
       stop("You must provide a random sampling declaration created by declare_rs().")
@@ -317,13 +317,13 @@ draw_rs <- function(declaration = NULL,
 obtain_inclusion_probabilities <-
   function(declaration = NULL,
            N = NULL,
-           strata = NULL,
-           clusters = NULL,
+           strata = strata_var,
+           clusters = clust_var,
            n = NULL,
            prob = NULL,
            strata_n = NULL,
            strata_prob = NULL,
-           simple = FALSE) {
+           simple = FALSE, strata_var = NULL, clust_var = NULL) {
     # checks
     if (!is.null(declaration)) {
       if (class(declaration) != "rs_declaration") {

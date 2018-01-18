@@ -4,11 +4,12 @@
 \alias{conduct_ra}
 \title{Conduct a random assignment}
 \usage{
-conduct_ra(declaration = NULL, N = NULL, blocks = NULL, clusters = NULL,
-  m = NULL, m_each = NULL, prob = NULL, prob_each = NULL,
-  block_m = NULL, block_m_each = NULL, block_prob = NULL,
-  block_prob_each = NULL, num_arms = NULL, condition_names = NULL,
-  simple = FALSE, check_inputs = TRUE)
+conduct_ra(declaration = NULL, N = NULL, blocks = block_var,
+  clusters = clust_var, m = NULL, m_each = NULL, prob = NULL,
+  prob_each = NULL, block_m = NULL, block_m_each = NULL,
+  block_prob = NULL, block_prob_each = NULL, num_arms = NULL,
+  condition_names = NULL, simple = FALSE, check_inputs = TRUE,
+  block_var = NULL, clust_var = NULL)
 }
 \arguments{
 \item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
@@ -42,6 +43,10 @@ conduct_ra(declaration = NULL, N = NULL, blocks = NULL, clusters = NULL,
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
+
+\item{block_var}{deprecated}
+
+\item{clust_var}{deprecated}
 }
 \description{
 You can either give conduct_ra() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.
