@@ -104,29 +104,24 @@ declare_rs <- function(N = NULL,
     
   }
   # Determine rs_type
-  if (simple == FALSE) {
-    rs_type <- "complete"
-  } else{
-    rs_type <- "simple"
-  }
-  if (!is.null(strata) & is.null(clusters)) {
-    rs_type <- "stratified"
-  }
-  if (is.null(strata) & !is.null(clusters)) {
-    rs_type <- "clustered"
-  }
-  if (!is.null(strata) & !is.null(clusters)) {
+  if (!is.null(strata) && !is.null(clusters)) {
     rs_type <- "stratified_and_clustered"
-  }
-  
-  if (rs_type == "simple" & is.null(clusters)) {
+  } else if (!is.null(clusters)) {
+    rs_type <- "clustered"
+  } else if (!is.null(strata)) {
+    rs_type <- "stratified"
+    if(simple) stop("You can't specify 'simple' with strata.")
+  } else if (simple == FALSE) {
+    rs_type <- "complete"
+  } else {
+    rs_type <- "simple"
     if (!is.null(n)) {
       stop("You can't specify 'n' when using simple random sampling.")
     }
-    if (!is.null(strata)) {
-      stop("You can't specify 'strata' when using simple random sampling.")
-    }
-    
+  }
+  
+  if (rs_type == "simple") {
+
     rs_function <- function() {
       simple_rs(N = N,
                 prob = prob,
