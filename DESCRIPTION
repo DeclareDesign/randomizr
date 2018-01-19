@@ -1,5 +1,5 @@
 Package: randomizr
-Title: Easy to use tools for common forms of random assignment and sampling
+Title: Easy-to-Use Tools for Common Forms of Random Assignment and Sampling
 Version: 0.8.0
 Authors@R: c(person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut", "cre")),
              person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("ctb")),
