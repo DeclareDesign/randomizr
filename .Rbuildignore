@@ -17,3 +17,4 @@ _pkgdown.yml
 appveyor.yml
 CONDUCT.md
 ^_pkgdown\.yml$
+^randomizr_.*\.tar\.gz$
