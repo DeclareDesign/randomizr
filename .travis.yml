@@ -25,9 +25,9 @@ env:
 r_github_packages:
 - hadley/pkgdown
 - DeclareDesign/DDtools
+- nfultz/drat
 r_packages:
 - covr
-- drat
 - git2r
 after_success:
 - test $TRAVIS_OS_NAME == "linux" && Rscript -e 'covr::coveralls()'
