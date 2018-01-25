@@ -220,13 +220,13 @@
 #&gt; [5,]          0.2            0.8
 #&gt; [6,]          0.2            0.8</div><div class='input'>
 <span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>block_ra_probabilities</span>(<span class='kw'>blocks</span> <span class='kw'>=</span> <span class='no'>blocks</span>, <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='fl'>3</span>)
-<span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;           prob_T1      prob_T2      prob_T3
-#&gt; [1,] 0.3333333333 0.3333333333 0.3333333333
-#&gt; [2,] 0.3333333333 0.3333333333 0.3333333333
-#&gt; [3,] 0.3333333333 0.3333333333 0.3333333333
-#&gt; [4,] 0.3333333333 0.3333333333 0.3333333333
-#&gt; [5,] 0.3333333333 0.3333333333 0.3333333333
-#&gt; [6,] 0.3333333333 0.3333333333 0.3333333333</div><div class='input'>
+<span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;        prob_T1   prob_T2   prob_T3
+#&gt; [1,] 0.3333333 0.3333333 0.3333333
+#&gt; [2,] 0.3333333 0.3333333 0.3333333
+#&gt; [3,] 0.3333333 0.3333333 0.3333333
+#&gt; [4,] 0.3333333 0.3333333 0.3333333
+#&gt; [5,] 0.3333333 0.3333333 0.3333333
+#&gt; [6,] 0.3333333 0.3333333 0.3333333</div><div class='input'>
 <span class='no'>block_m_each</span> <span class='kw'>&lt;-</span> <span class='fu'>rbind</span>(<span class='fu'>c</span>(<span class='fl'>10</span>, <span class='fl'>20</span>, <span class='fl'>20</span>),
                  <span class='fu'>c</span>(<span class='fl'>30</span>, <span class='fl'>50</span>, <span class='fl'>20</span>),
                  <span class='fu'>c</span>(<span class='fl'>50</span>, <span class='fl'>75</span>, <span class='fl'>75</span>))
