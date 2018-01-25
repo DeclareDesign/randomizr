@@ -177,13 +177,13 @@
 #&gt; [6,]          0.3            0.7</div><div class='input'>
 <span class='co'># Multi-arm Designs</span>
 <span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra_probabilities</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>num_arms</span><span class='kw'>=</span><span class='fl'>3</span>)
-<span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;        prob_T1   prob_T2   prob_T3
-#&gt; [1,] 0.3333333 0.3333333 0.3333333
-#&gt; [2,] 0.3333333 0.3333333 0.3333333
-#&gt; [3,] 0.3333333 0.3333333 0.3333333
-#&gt; [4,] 0.3333333 0.3333333 0.3333333
-#&gt; [5,] 0.3333333 0.3333333 0.3333333
-#&gt; [6,] 0.3333333 0.3333333 0.3333333</div><div class='input'>
+<span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;           prob_T1      prob_T2      prob_T3
+#&gt; [1,] 0.3333333333 0.3333333333 0.3333333333
+#&gt; [2,] 0.3333333333 0.3333333333 0.3333333333
+#&gt; [3,] 0.3333333333 0.3333333333 0.3333333333
+#&gt; [4,] 0.3333333333 0.3333333333 0.3333333333
+#&gt; [5,] 0.3333333333 0.3333333333 0.3333333333
+#&gt; [6,] 0.3333333333 0.3333333333 0.3333333333</div><div class='input'>
 <span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra_probabilities</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>prob_each</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>0.3</span>, <span class='fl'>0.3</span>, <span class='fl'>0.4</span>))
 <span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;      prob_T1 prob_T2 prob_T3
 #&gt; [1,]     0.3     0.3     0.4
@@ -203,12 +203,12 @@
 #&gt; [6,]          0.3          0.3            0.4</div><div class='input'>
 <span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra_probabilities</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>condition_names</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;      prob_control prob_placebo prob_treatment
-#&gt; [1,]    0.3333333    0.3333333      0.3333333
-#&gt; [2,]    0.3333333    0.3333333      0.3333333
-#&gt; [3,]    0.3333333    0.3333333      0.3333333
-#&gt; [4,]    0.3333333    0.3333333      0.3333333
-#&gt; [5,]    0.3333333    0.3333333      0.3333333
-#&gt; [6,]    0.3333333    0.3333333      0.3333333</div><div class='input'>
+#&gt; [1,] 0.3333333333 0.3333333333   0.3333333333
+#&gt; [2,] 0.3333333333 0.3333333333   0.3333333333
+#&gt; [3,] 0.3333333333 0.3333333333   0.3333333333
+#&gt; [4,] 0.3333333333 0.3333333333   0.3333333333
+#&gt; [5,] 0.3333333333 0.3333333333   0.3333333333
+#&gt; [6,] 0.3333333333 0.3333333333   0.3333333333</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

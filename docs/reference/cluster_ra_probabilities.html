@@ -111,15 +111,16 @@
     <p>Probabilties of assignment: Cluster Random Assignment</p>
     
 
-    <pre class="usage"><span class='fu'>cluster_ra_probabilities</span>(<span class='no'>clust_var</span>, <span class='kw'>m</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>m</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>clust_var</th>
+      <th>clusters</th>
       <td><p>A vector of length N that indicates which cluster each unit belongs to.</p></td>
     </tr>
     <tr>
@@ -154,6 +155,10 @@
       <th>check_inputs</th>
       <td><p>logical. Defaults to TRUE.</p></td>
     </tr>
+    <tr>
+      <th>clust_var</th>
+      <td><p>deprecated</p></td>
+    </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -164,8 +169,8 @@
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
 <span class='co'># Two Group Designs</span>
-<span class='no'>clust_var</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>26</span>)
-<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>)
+<span class='no'>clusters</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>26</span>)
+<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>)
 <span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;      prob_0 prob_1
 #&gt; [1,]    0.5    0.5
 #&gt; [2,]    0.5    0.5
@@ -173,54 +178,54 @@
 #&gt; [4,]    0.5    0.5
 #&gt; [5,]    0.5    0.5
 #&gt; [6,]    0.5    0.5</div><div class='input'>
-<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>m</span> <span class='kw'>=</span> <span class='fl'>10</span>)
-<span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;         prob_0    prob_1
-#&gt; [1,] 0.6153846 0.3846154
-#&gt; [2,] 0.6153846 0.3846154
-#&gt; [3,] 0.6153846 0.3846154
-#&gt; [4,] 0.6153846 0.3846154
-#&gt; [5,] 0.6153846 0.3846154
-#&gt; [6,] 0.6153846 0.3846154</div><div class='input'>
-<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>,
+<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>m</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+<span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;            prob_0       prob_1
+#&gt; [1,] 0.6153846154 0.3846153846
+#&gt; [2,] 0.6153846154 0.3846153846
+#&gt; [3,] 0.6153846154 0.3846153846
+#&gt; [4,] 0.6153846154 0.3846153846
+#&gt; [5,] 0.6153846154 0.3846153846
+#&gt; [6,] 0.6153846154 0.3846153846</div><div class='input'>
+<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>,
                                      <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>9</span>, <span class='fl'>17</span>),
                                      <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"treatment"</span>))
 
 <span class='co'># Multi-arm Designs</span>
-<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='fl'>3</span>)
-<span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;        prob_T1   prob_T2   prob_T3
-#&gt; [1,] 0.3333333 0.3333333 0.3333333
-#&gt; [2,] 0.3333333 0.3333333 0.3333333
-#&gt; [3,] 0.3333333 0.3333333 0.3333333
-#&gt; [4,] 0.3333333 0.3333333 0.3333333
-#&gt; [5,] 0.3333333 0.3333333 0.3333333
-#&gt; [6,] 0.3333333 0.3333333 0.3333333</div><div class='input'>
-<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>7</span>, <span class='fl'>7</span>, <span class='fl'>12</span>))
-<span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;        prob_T1   prob_T2   prob_T3
-#&gt; [1,] 0.2692308 0.2692308 0.4615385
-#&gt; [2,] 0.2692308 0.2692308 0.4615385
-#&gt; [3,] 0.2692308 0.2692308 0.4615385
-#&gt; [4,] 0.2692308 0.2692308 0.4615385
-#&gt; [5,] 0.2692308 0.2692308 0.4615385
-#&gt; [6,] 0.2692308 0.2692308 0.4615385</div><div class='input'>
-<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>7</span>, <span class='fl'>7</span>, <span class='fl'>12</span>),
+<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='fl'>3</span>)
+<span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;           prob_T1      prob_T2      prob_T3
+#&gt; [1,] 0.3333333333 0.3333333333 0.3333333333
+#&gt; [2,] 0.3333333333 0.3333333333 0.3333333333
+#&gt; [3,] 0.3333333333 0.3333333333 0.3333333333
+#&gt; [4,] 0.3333333333 0.3333333333 0.3333333333
+#&gt; [5,] 0.3333333333 0.3333333333 0.3333333333
+#&gt; [6,] 0.3333333333 0.3333333333 0.3333333333</div><div class='input'>
+<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>7</span>, <span class='fl'>7</span>, <span class='fl'>12</span>))
+<span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;           prob_T1      prob_T2      prob_T3
+#&gt; [1,] 0.2692307692 0.2692307692 0.4615384615
+#&gt; [2,] 0.2692307692 0.2692307692 0.4615384615
+#&gt; [3,] 0.2692307692 0.2692307692 0.4615384615
+#&gt; [4,] 0.2692307692 0.2692307692 0.4615384615
+#&gt; [5,] 0.2692307692 0.2692307692 0.4615384615
+#&gt; [6,] 0.2692307692 0.2692307692 0.4615384615</div><div class='input'>
+<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>7</span>, <span class='fl'>7</span>, <span class='fl'>12</span>),
                          <span class='kw'>condition_names</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;      prob_control prob_placebo prob_treatment
-#&gt; [1,]    0.2692308    0.2692308      0.4615385
-#&gt; [2,]    0.2692308    0.2692308      0.4615385
-#&gt; [3,]    0.2692308    0.2692308      0.4615385
-#&gt; [4,]    0.2692308    0.2692308      0.4615385
-#&gt; [5,]    0.2692308    0.2692308      0.4615385
-#&gt; [6,]    0.2692308    0.2692308      0.4615385</div><div class='input'>
-<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>,
+#&gt; [1,] 0.2692307692 0.2692307692   0.4615384615
+#&gt; [2,] 0.2692307692 0.2692307692   0.4615384615
+#&gt; [3,] 0.2692307692 0.2692307692   0.4615384615
+#&gt; [4,] 0.2692307692 0.2692307692   0.4615384615
+#&gt; [5,] 0.2692307692 0.2692307692   0.4615384615
+#&gt; [6,] 0.2692307692 0.2692307692   0.4615384615</div><div class='input'>
+<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>,
                          <span class='kw'>condition_names</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;      prob_control prob_placebo prob_treatment
-#&gt; [1,]    0.3333333    0.3333333      0.3333333
-#&gt; [2,]    0.3333333    0.3333333      0.3333333
-#&gt; [3,]    0.3333333    0.3333333      0.3333333
-#&gt; [4,]    0.3333333    0.3333333      0.3333333
-#&gt; [5,]    0.3333333    0.3333333      0.3333333
-#&gt; [6,]    0.3333333    0.3333333      0.3333333</div><div class='input'>
-<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>,
+#&gt; [1,] 0.3333333333 0.3333333333   0.3333333333
+#&gt; [2,] 0.3333333333 0.3333333333   0.3333333333
+#&gt; [3,] 0.3333333333 0.3333333333   0.3333333333
+#&gt; [4,] 0.3333333333 0.3333333333   0.3333333333
+#&gt; [5,] 0.3333333333 0.3333333333   0.3333333333
+#&gt; [6,] 0.3333333333 0.3333333333   0.3333333333</div><div class='input'>
+<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra_probabilities</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>,
                                      <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>.1</span>, <span class='fl'>.2</span>, <span class='fl'>.7</span>))
 <span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;      prob_T1 prob_T2 prob_T3
 #&gt; [1,]     0.1     0.2     0.7

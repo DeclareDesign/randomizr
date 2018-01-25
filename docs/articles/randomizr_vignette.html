@@ -118,7 +118,7 @@ N &lt;-<span class="st"> </span><span class="kw">nrow</span>(hec)
 
 <span class="co"># Create untreated and treated outcomes for all subjects</span>
 hec &lt;-<span class="st"> </span><span class="kw">within</span>(hec,{
-  Y0 &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dt">n =</span> N,<span class="dt">mean =</span> (<span class="dv">2</span><span class="op">*</span><span class="kw">as.numeric</span>(Hair) <span class="op">+</span><span class="st"> </span><span class="op">-</span><span class="dv">4</span><span class="op">*</span><span class="kw">as.numeric</span>(Eye) <span class="op">+</span><span class="st"> </span><span class="op">-</span><span class="dv">6</span><span class="op">*</span><span class="kw">as.numeric</span>(Sex)), <span class="dt">sd =</span> <span class="dv">5</span>)
+  Y0 &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dt">n =</span> N,<span class="dt">mean =</span> (<span class="dv">2</span><span class="op">*</span><span class="kw">as.numeric</span>(Hair) <span class="op">+</span><span class="st"> </span><span class="dv">-4</span><span class="op">*</span><span class="kw">as.numeric</span>(Eye) <span class="op">+</span><span class="st"> </span><span class="dv">-6</span><span class="op">*</span><span class="kw">as.numeric</span>(Sex)), <span class="dt">sd =</span> <span class="dv">5</span>)
   Y1 &lt;-<span class="st"> </span>Y0 <span class="op">+</span><span class="st"> </span><span class="dv">6</span><span class="op">*</span><span class="kw">as.numeric</span>(Hair) <span class="op">+</span><span class="st"> </span><span class="dv">4</span><span class="op">*</span><span class="kw">as.numeric</span>(Eye) <span class="op">+</span><span class="st"> </span><span class="dv">2</span><span class="op">*</span><span class="kw">as.numeric</span>(Sex)
 })
 
@@ -173,7 +173,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra
 </tr></tbody>
 </table>
 <p>You can also just specify the probabilites of your multiple arms. The probabilities must sum to 1.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra.html">simple_ra</a></span>(<span class="dt">N =</span> N, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">2</span>, .<span class="dv">2</span>, .<span class="dv">6</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra.html">simple_ra</a></span>(<span class="dt">N =</span> N, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">2</span>, <span class="fl">.2</span>, <span class="fl">.6</span>))
 <span class="kw">table</span>(Z)</code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -188,7 +188,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra
 </tr></tbody>
 </table>
 <p>You can also name your treatment arms.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra.html">simple_ra</a></span>(<span class="dt">N =</span> N, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">2</span>, .<span class="dv">2</span>, .<span class="dv">6</span>),
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra.html">simple_ra</a></span>(<span class="dt">N =</span> N, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">2</span>, <span class="fl">.2</span>, <span class="fl">.6</span>),
                <span class="dt">condition_names=</span><span class="kw">c</span>(<span class="st">"control"</span>, <span class="st">"placebo"</span>, <span class="st">"treatment"</span>))
 <span class="kw">table</span>(Z)</code></pre></div>
 <table class="table">
@@ -328,8 +328,8 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 <p>Block random assignment (sometimes known as stratified random assignment) is a powerful tool when used well. In this design, subjects are sorted into blocks (strata) according to their pre-treatment covariates, and then complete random assignment is conducted within each block. For example, a researcher might block on gender, assigning exactly half of the men and exactly half of the women to treatment.</p>
 <p>Why block? The first reason is to signal to future readers that treatment effect heterogeneity may be of interest: is the treatment effect different for men versus women? Of course, such heterogeneity could be explored if complete random assignment had been used, but blocking on a covariate defends a researcher (somewhat) against claims of data dredging. The second reason is to increase precision. If the blocking variables are predicitive of the outcome (i.e., they are correlated with the outcome), then blocking may help to decrease sampling variability. It’s important, however, not to overstate these advantages. The gains from a blocked design can often be realized through covariate adjustment alone.</p>
 <p>Blocking can also produce complications for estimation. Blocking can produce different probabilities of assignment for different subjects. This complication is typically addressed in one of two ways: “controlling for blocks” in a regression context, or inverse probabilitity weights (IPW), in which units are weighted by the inverse of the probability that the unit is in the condition that it is in.</p>
-<p>The only required argument to <code><a href="../reference/block_ra.html">block_ra()</a></code> is <code>block_var</code>, which is a vector of length <code>N</code> that describes which block a unit belongs to. <code>block_var</code> can be a factor, character, or numeric variable. If no other arguments are specified, <code><a href="../reference/block_ra.html">block_ra()</a></code> assigns an approximately equal proportion of each block to treatment.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">block_var =</span> hec<span class="op">$</span>Hair)
+<p>The only required argument to <code><a href="../reference/block_ra.html">block_ra()</a></code> is <code>blocks</code>, which is a vector of length <code>N</code> that describes which block a unit belongs to. <code>blocks</code> can be a factor, character, or numeric variable. If no other arguments are specified, <code><a href="../reference/block_ra.html">block_ra()</a></code> assigns an approximately equal proportion of each block to treatment.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair)
 <span class="kw">table</span>(Z, hec<span class="op">$</span>Hair)</code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -357,7 +357,7 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 </tbody>
 </table>
 <p>For multiple treatment arms, use the <code>num_arms</code> argument, with or without the <code>condition_names</code> argument</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">block_var =</span> hec<span class="op">$</span>Hair, <span class="dt">num_arms =</span> <span class="dv">3</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair, <span class="dt">num_arms =</span> <span class="dv">3</span>)
 <span class="kw">table</span>(Z, hec<span class="op">$</span>Hair)</code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -391,7 +391,7 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 </tr>
 </tbody>
 </table>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">block_var =</span> hec<span class="op">$</span>Hair, <span class="dt">condition_names =</span> <span class="kw">c</span>(<span class="st">"Control"</span>, <span class="st">"Placebo"</span>, <span class="st">"Treatment"</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair, <span class="dt">condition_names =</span> <span class="kw">c</span>(<span class="st">"Control"</span>, <span class="st">"Placebo"</span>, <span class="st">"Treatment"</span>))
 <span class="kw">table</span>(Z, hec<span class="op">$</span>Hair)</code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -426,7 +426,7 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 </tbody>
 </table>
 <p><code><a href="../reference/block_ra.html">block_ra()</a></code> provides a number of ways to adjust the number of subjects assigned to each conditions. The <code>prob_each</code> argument describes what proportion of each block should be assigned to treatment arm. Note of course, that <code><a href="../reference/block_ra.html">block_ra()</a></code> still uses complete random assignment within each block; the appropriate number of units to assign to treatment within each block is automatically determined.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">block_var =</span> hec<span class="op">$</span>Hair, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">3</span>, .<span class="dv">7</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">3</span>, <span class="fl">.7</span>))
 <span class="kw">table</span>(Z, hec<span class="op">$</span>Hair)</code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -453,7 +453,7 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 </tr>
 </tbody>
 </table>
-<p>For finer control, use the <code>block_m_each</code> argument, which takes a matrix with as many rows as there are blocks, and as many columns as there are treatment conditions. Remember that the rows are in the same order as <code>sort(unique(block_var))</code>, a command that is good to run before constructing a <code>block_m_each</code> matrix.</p>
+<p>For finer control, use the <code>block_m_each</code> argument, which takes a matrix with as many rows as there are blocks, and as many columns as there are treatment conditions. Remember that the rows are in the same order as <code>sort(unique(blocks))</code>, a command that is good to run before constructing a <code>block_m_each</code> matrix.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(<span class="kw">unique</span>(hec<span class="op">$</span>Hair))
 block_m_each &lt;-<span class="st"> </span><span class="kw">rbind</span>(<span class="kw">c</span>(<span class="dv">78</span>, <span class="dv">30</span>),
                       <span class="kw">c</span>(<span class="dv">186</span>, <span class="dv">100</span>),
@@ -461,7 +461,7 @@ block_m_each &lt;-<span class="st"> </span><span class="kw">rbind</span>(<span c
                       <span class="kw">c</span>(<span class="dv">87</span>,<span class="dv">40</span>))
 
 block_m_each
-Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">block_var =</span> hec<span class="op">$</span>Hair, <span class="dt">block_m_each =</span> block_m_each)
+Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair, <span class="dt">block_m_each =</span> block_m_each)
 <span class="kw">table</span>(Z, hec<span class="op">$</span>Hair)</code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -489,7 +489,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.
 </tbody>
 </table>
 <p>In the example above, the different blocks have different probabilities of assignment to treatment. In this case, people with Black hair have a 30/108 = 27.8% chance of being treated, those with Brown hair have 100/286 = 35.0% change, etc. Left unadressed, this discrepancy could bias treatment effects. We can see this directly with the <code><a href="../reference/declare_ra.html">declare_ra()</a></code> function.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">declaration &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_ra.html">declare_ra</a></span>(<span class="dt">block_var =</span> hec<span class="op">$</span>Hair, <span class="dt">block_m_each =</span> block_m_each)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">declaration &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_ra.html">declare_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair, <span class="dt">block_m_each =</span> block_m_each)
 
 <span class="co"># show the probability that each unit is assigned to each condition</span>
 <span class="kw">head</span>(declaration<span class="op">$</span>probabilities_matrix)</code></pre></div>
@@ -569,7 +569,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.
 <p>There are two common ways to address this problem: LSDV (Least-Squares Dummy Variable, also known as “control for blocks”) or IPW (Inverse-probability weights).</p>
 <p>The following code snippet shows how to use either the LSDV approach or the IPW approach. A note for scrupulous readers: the estimands of these two approaches are subtly different from one another. The LSDV approach estimates the average <strong>block-level</strong> treatment effect. The IPW approach estimates the average <strong>individual-level</strong> treatment effect. They can be different. Since the average block-level treatment effect is not what most people have in mind when thinking about causal effects, analysts using this approach should present both. The <code><a href="../reference/obtain_condition_probabilities.html">obtain_condition_probabilities()</a></code> function used to calculate the probabilities of assignment is explained below.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">hec &lt;-<span class="st"> </span><span class="kw">within</span>(hec,{
-  Z_blocked &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">block_var =</span> hec<span class="op">$</span>Hair,
+  Z_blocked &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair,
                         <span class="dt">block_m_each =</span> block_m_each)
   Y_blocked &lt;-<span class="st"> </span>Y1<span class="op">*</span>(Z_blocked) <span class="op">+</span><span class="st"> </span>Y0<span class="op">*</span>(<span class="dv">1</span><span class="op">-</span>Z_blocked)
   cond_prob &lt;-<span class="st"> </span><span class="kw"><a href="../reference/obtain_condition_probabilities.html">obtain_condition_probabilities</a></span>(declaration, Z_blocked)
@@ -653,9 +653,9 @@ fit_IPW &lt;-<span class="st"> </span><span class="kw">lm</span>(Y_blocked <span
 </tbody>
 </table>
 <p>How to create blocks? In the <code>HairEyeColor</code> dataset, we could make blocks for each unique combination of hair color, eye color, and sex.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">block_var &lt;-<span class="st"> </span><span class="kw">with</span>(hec, <span class="kw">paste</span>(Hair, Eye, Sex, <span class="dt">sep =</span> <span class="st">"_"</span>))
-Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">block_var =</span> block_var)
-<span class="kw">head</span>(<span class="kw">table</span>(block_var, Z))</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">blocks &lt;-<span class="st"> </span><span class="kw">with</span>(hec, <span class="kw">paste</span>(Hair, Eye, Sex, <span class="dt">sep =</span> <span class="st">"_"</span>))
+Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> blocks)
+<span class="kw">head</span>(<span class="kw">table</span>(blocks, Z))</code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th></th>
@@ -712,7 +712,7 @@ out &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocument
 hec<span class="op">$</span>block_id &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/blockTools/topics/createBlockIDs">createBlockIDs</a></span>(out, df_forBT, <span class="dt">id.var =</span> <span class="st">"id_var"</span>)
 
 <span class="co"># Conduct actual random assignment with randomizr</span>
-Z_blocked &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">block_var =</span> hec<span class="op">$</span>block_id, <span class="dt">num_arms =</span> <span class="dv">3</span>)
+Z_blocked &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>block_id, <span class="dt">num_arms =</span> <span class="dv">3</span>)
 <span class="kw">head</span>(<span class="kw">table</span>(hec<span class="op">$</span>block_id, Z_blocked))</code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -765,13 +765,13 @@ Z_blocked &lt;-<span class="st"> </span><span class="kw"><a href="../reference/b
 <li>Residents in towns or villages: whole communities are assigned to treatment or control</li>
 </ol>
 <p>Clustered assignment decreases the effective sample size of an experiment. In the extreme case when outcomes are perfectly correlated with clusters, the experiment has an effective sample size equal to the number of clusters. When outcomes are perfectly uncorrelated with clusters, the effective sample size is equal to the number of subjects. Almost all cluster-assigned experiments fall somewhere in the middle of these two extremes.</p>
-<p>The only required argument for the <code><a href="../reference/cluster_ra.html">cluster_ra()</a></code> function is the <code>clust_var</code> argument, which is a vector of length <code>N</code> that indicates which cluster each subject belongs to. Let’s pretend that for some reason, we have to assign treatments according to the unique combinations of hair color, eye color, and gender.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">clust_var &lt;-<span class="st"> </span><span class="kw">with</span>(hec, <span class="kw">paste</span>(Hair, Eye, Sex, <span class="dt">sep =</span> <span class="st">"_"</span>))
-hec<span class="op">$</span>clust_var &lt;-<span class="st"> </span>clust_var
+<p>The only required argument for the <code><a href="../reference/cluster_ra.html">cluster_ra()</a></code> function is the <code>clusters</code> argument, which is a vector of length <code>N</code> that indicates which cluster each subject belongs to. Let’s pretend that for some reason, we have to assign treatments according to the unique combinations of hair color, eye color, and gender.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">clusters &lt;-<span class="st"> </span><span class="kw">with</span>(hec, <span class="kw">paste</span>(Hair, Eye, Sex, <span class="dt">sep =</span> <span class="st">"_"</span>))
+hec<span class="op">$</span>clusters &lt;-<span class="st"> </span>clusters
 
-Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/cluster_ra.html">cluster_ra</a></span>(<span class="dt">clust_var =</span> clust_var)
+Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/cluster_ra.html">cluster_ra</a></span>(<span class="dt">clusters =</span> clusters)
 
-<span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z_clust))</code></pre></div>
+<span class="kw">head</span>(<span class="kw">table</span>(clusters, Z_clust))</code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th></th>
@@ -813,8 +813,8 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 </table>
 <p>This shows that each cluster is either assigned to treatment or control. No two units within the same cluster are assigned to different conditions.</p>
 <p>As with all functions in <code>randomizr</code>, you can specify multiple treatment arms in a variety of ways:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/cluster_ra.html">cluster_ra</a></span>(<span class="dt">clust_var =</span> clust_var, <span class="dt">num_arms =</span> <span class="dv">3</span>)
-<span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z_clust))</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/cluster_ra.html">cluster_ra</a></span>(<span class="dt">clusters =</span> clusters, <span class="dt">num_arms =</span> <span class="dv">3</span>)
+<span class="kw">head</span>(<span class="kw">table</span>(clusters, Z_clust))</code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th></th>
@@ -862,9 +862,9 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 </tbody>
 </table>
 <p>… or using <code>condition_names</code></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/cluster_ra.html">cluster_ra</a></span>(<span class="dt">clust_var=</span>clust_var, 
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/cluster_ra.html">cluster_ra</a></span>(<span class="dt">clusters=</span>clusters, 
                       <span class="dt">condition_names=</span><span class="kw">c</span>(<span class="st">"Control"</span>, <span class="st">"Placebo"</span>, <span class="st">"Treatment"</span>))
-<span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z_clust))</code></pre></div>
+<span class="kw">head</span>(<span class="kw">table</span>(clusters, Z_clust))</code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th></th>
@@ -912,8 +912,8 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 </tbody>
 </table>
 <p>… or using <code>m_each</code>, which describes how many clusters should be assigned to each condition. <code>m_each</code> must sum to the number of clusters.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/cluster_ra.html">cluster_ra</a></span>(<span class="dt">clust_var=</span>clust_var, <span class="dt">m_each=</span><span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">15</span>, <span class="dv">12</span>))
-<span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z_clust))</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/cluster_ra.html">cluster_ra</a></span>(<span class="dt">clusters=</span>clusters, <span class="dt">m_each=</span><span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">15</span>, <span class="dv">12</span>))
+<span class="kw">head</span>(<span class="kw">table</span>(clusters, Z_clust))</code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th></th>
@@ -969,21 +969,21 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">suppressMessages</span>(<span class="kw">library</span>(dplyr))
 cluster_level_df &lt;-<span class="st"> </span>
 <span class="st">  </span>hec <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(clust_var) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(clusters) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span>(<span class="dt">cluster_size =</span> <span class="kw"><a href="http://dplyr.tidyverse.org/reference/n.html">n</a></span>()) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(cluster_size) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(<span class="dt">block_var =</span> <span class="kw">paste0</span>(<span class="st">"block_"</span>, <span class="kw">sprintf</span>(<span class="st">"%02d"</span>,<span class="kw">rep</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">16</span>, <span class="dt">each=</span><span class="dv">2</span>))))
+<span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(<span class="dt">blocks =</span> <span class="kw">paste0</span>(<span class="st">"block_"</span>, <span class="kw">sprintf</span>(<span class="st">"%02d"</span>,<span class="kw">rep</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">16</span>, <span class="dt">each=</span><span class="dv">2</span>))))
 
 hec &lt;-<span class="st"> </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/join.html">left_join</a></span>(hec, cluster_level_df)
-<span class="co">#&gt; Joining, by = "clust_var"</span>
+<span class="co">#&gt; Joining, by = "clusters"</span>
 
 <span class="co"># Extract the cluster and block variables</span>
-clust_var &lt;-<span class="st"> </span>hec<span class="op">$</span>clust_var
-block_var &lt;-<span class="st"> </span>hec<span class="op">$</span>block_var
+clusters &lt;-<span class="st"> </span>hec<span class="op">$</span>clusters
+blocks &lt;-<span class="st"> </span>hec<span class="op">$</span>blocks
 
-Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_and_cluster_ra.html">block_and_cluster_ra</a></span>(<span class="dt">clust_var =</span> clust_var, <span class="dt">block_var =</span> block_var)
-<span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z))
-<span class="kw">head</span>(<span class="kw">table</span>(block_var, Z))</code></pre></div>
+Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_and_cluster_ra.html">block_and_cluster_ra</a></span>(<span class="dt">clusters =</span> clusters, <span class="dt">blocks =</span> blocks)
+<span class="kw">head</span>(<span class="kw">table</span>(clusters, Z))
+<span class="kw">head</span>(<span class="kw">table</span>(blocks, Z))</code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th></th>
@@ -1088,7 +1088,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_and
         <span class="kw">c</span>(<span class="dv">51</span>, <span class="dv">20</span>),
         <span class="kw">c</span>(<span class="dv">87</span>, <span class="dv">40</span>))
   
-Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">block_var =</span> hec<span class="op">$</span>Hair,
+Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair,
               <span class="dt">block_m_each =</span> block_m_each)
 
 <span class="kw">table</span>(hec<span class="op">$</span>Hair, Z)</code></pre></div>
@@ -1122,7 +1122,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.
 </tbody>
 </table>
 <p>In order to calculate the probabilities of assignment, we call the <code><a href="../reference/declare_ra.html">declare_ra()</a></code> function with the same exact arguments as we used for the <code><a href="../reference/block_ra.html">block_ra()</a></code> call. The <code>declaration</code> object contains a matrix of probabilities of assignment:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">declaration &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_ra.html">declare_ra</a></span>(<span class="dt">block_var =</span> hec<span class="op">$</span>Hair,
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">declaration &lt;-<span class="st"> </span><span class="kw"><a href="../reference/declare_ra.html">declare_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair,
                           <span class="dt">block_m_each =</span> block_m_each)
 prob_mat &lt;-<span class="st"> </span>declaration<span class="op">$</span>probabilities_matrix
 <span class="kw">head</span>(prob_mat)</code></pre></div>

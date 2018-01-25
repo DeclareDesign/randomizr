@@ -111,9 +111,10 @@
     <p>You can either give draw_rs() an declaration, as created by <code><a href='declare_rs.html'>declare_rs</a></code> or you can specify the other arguments to describe a random sampling procedure.</p>
     
 
-    <pre class="usage"><span class='fu'>draw_rs</span>(<span class='kw'>declaration</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>N</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>strata_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+    <pre class="usage"><span class='fu'>draw_rs</span>(<span class='kw'>declaration</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>N</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata_var</span>,
+  <span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>strata_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -127,11 +128,11 @@
       <td><p>The number of units. N must be a positive integer. (required)</p></td>
     </tr>
     <tr>
-      <th>strata_var</th>
+      <th>strata</th>
       <td><p>A vector of length N that indicates which stratum each unit belongs to.</p></td>
     </tr>
     <tr>
-      <th>clust_var</th>
+      <th>clusters</th>
       <td><p>A vector of length N that indicates which cluster each unit belongs to.</p></td>
     </tr>
     <tr>
@@ -153,6 +154,14 @@
     <tr>
       <th>simple</th>
       <td><p>logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.</p></td>
+    </tr>
+    <tr>
+      <th>strata_var</th>
+      <td><p>deprecated</p></td>
+    </tr>
+    <tr>
+      <th>clust_var</th>
+      <td><p>deprecated</p></td>
     </tr>
     </table>
     

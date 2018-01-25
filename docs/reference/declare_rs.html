@@ -111,9 +111,10 @@
     <p>Declare a random sampling procedure.</p>
     
 
-    <pre class="usage"><span class='fu'>declare_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>declare_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata_var</span>, <span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clust_var</span>,
+  <span class='kw'>n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -123,11 +124,11 @@
       <td><p>The number of units. N must be a positive integer. (required)</p></td>
     </tr>
     <tr>
-      <th>strata_var</th>
+      <th>strata</th>
       <td><p>A vector of length N that indicates which stratum each unit belongs to.</p></td>
     </tr>
     <tr>
-      <th>clust_var</th>
+      <th>clusters</th>
       <td><p>A vector of length N that indicates which cluster each unit belongs to.</p></td>
     </tr>
     <tr>
@@ -154,6 +155,14 @@
       <th>check_inputs</th>
       <td><p>logical. Defaults to TRUE.</p></td>
     </tr>
+    <tr>
+      <th>strata_var</th>
+      <td><p>deprecated</p></td>
+    </tr>
+    <tr>
+      <th>clust_var</th>
+      <td><p>deprecated</p></td>
+    </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -162,8 +171,8 @@
   $rs_function, a function that generates random samplings according to the declaration.
   $rs_type, a string indicating the type of random sampling used
   $probabilities_vector, A vector length N indicating the probability of being sampled.
-  $strata_var, the stratification variable.
-  $clust_var, the clustering variable.</p>
+  $strata, the stratification variable.
+  $clusters, the clustering variable.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -202,54 +211,54 @@
 #&gt; The inclusion probabilities are constant across units.</div><div class='input'>
 <span class='co'># Stratified Random Sampling Declarations</span>
 
-<span class='no'>strata_var</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='fu'>c</span>(<span class='st'>"A"</span>, <span class='st'>"B"</span>,<span class='st'>"C"</span>), <span class='kw'>times</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>50</span>, <span class='fl'>100</span>, <span class='fl'>200</span>))
-<span class='fu'>declare_rs</span>(<span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>strata_var</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified random sampling 
+<span class='no'>strata</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='fu'>c</span>(<span class='st'>"A"</span>, <span class='st'>"B"</span>,<span class='st'>"C"</span>), <span class='kw'>times</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>50</span>, <span class='fl'>100</span>, <span class='fl'>200</span>))
+<span class='fu'>declare_rs</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified random sampling 
 #&gt; Number of units: 350 
 #&gt; Number of strata: 3 
-#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>strata_var</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.5</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified random sampling 
+#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.5</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified random sampling 
 #&gt; Number of units: 350 
 #&gt; Number of strata: 3 
 #&gt; The inclusion probabilities are constant across units.</div><div class='input'>
 
 <span class='co'># Cluster Random Sampling Declarations</span>
 
-<span class='no'>clust_var</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>26</span>)
-<span class='fu'>declare_rs</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>)</div><div class='output co'>#&gt; Random sampling procedure: Cluster random sampling 
+<span class='no'>clusters</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>26</span>)
+<span class='fu'>declare_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>)</div><div class='output co'>#&gt; Random sampling procedure: Cluster random sampling 
 #&gt; Number of units: 351 
 #&gt; Number of clusters: 26 
-#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>10</span>)</div><div class='output co'>#&gt; Random sampling procedure: Cluster random sampling 
+#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>10</span>)</div><div class='output co'>#&gt; Random sampling procedure: Cluster random sampling 
 #&gt; Number of units: 351 
 #&gt; Number of clusters: 26 
 #&gt; The inclusion probabilities are constant across units.</div><div class='input'>
 <span class='co'># Stratified and Clustered Random Sampling Declarations</span>
 
-<span class='no'>clust_var</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>26</span>)
-<span class='no'>strata_var</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='fl'>NA</span>, <span class='fu'>length</span>(<span class='no'>clust_var</span>))
-<span class='no'>strata_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>1</span>:<span class='fl'>5</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_1"</span>
-<span class='no'>strata_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>6</span>:<span class='fl'>10</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_2"</span>
-<span class='no'>strata_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>11</span>:<span class='fl'>15</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_3"</span>
-<span class='no'>strata_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>16</span>:<span class='fl'>20</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_4"</span>
-<span class='no'>strata_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>21</span>:<span class='fl'>26</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_5"</span>
+<span class='no'>clusters</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>26</span>)
+<span class='no'>strata</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='fl'>NA</span>, <span class='fu'>length</span>(<span class='no'>clusters</span>))
+<span class='no'>strata</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>1</span>:<span class='fl'>5</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_1"</span>
+<span class='no'>strata</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>6</span>:<span class='fl'>10</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_2"</span>
+<span class='no'>strata</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>11</span>:<span class='fl'>15</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_3"</span>
+<span class='no'>strata</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>16</span>:<span class='fl'>20</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_4"</span>
+<span class='no'>strata</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>21</span>:<span class='fl'>26</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_5"</span>
 
-<span class='fu'>table</span>(<span class='no'>strata_var</span>, <span class='no'>clust_var</span>)</div><div class='output co'>#&gt;            clust_var
-#&gt; strata_var   a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v
+<span class='fu'>table</span>(<span class='no'>strata</span>, <span class='no'>clusters</span>)</div><div class='output co'>#&gt;            clusters
+#&gt; strata       a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v
 #&gt;   stratum_1  1  2  3  4  5  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
 #&gt;   stratum_2  0  0  0  0  0  6  7  8  9 10  0  0  0  0  0  0  0  0  0  0  0  0
 #&gt;   stratum_3  0  0  0  0  0  0  0  0  0  0 11 12 13 14 15  0  0  0  0  0  0  0
 #&gt;   stratum_4  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 16 17 18 19 20  0  0
 #&gt;   stratum_5  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 21 22
-#&gt;            clust_var
-#&gt; strata_var   w  x  y  z
+#&gt;            clusters
+#&gt; strata       w  x  y  z
 #&gt;   stratum_1  0  0  0  0
 #&gt;   stratum_2  0  0  0  0
 #&gt;   stratum_3  0  0  0  0
 #&gt;   stratum_4  0  0  0  0
 #&gt;   stratum_5 23 24 25 26</div><div class='input'>
-<span class='fu'>declare_rs</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>strata_var</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified and clustered random sampling 
+<span class='fu'>declare_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified and clustered random sampling 
 #&gt; Number of units: 351 
 #&gt; Number of strata: 5 
 #&gt; Number of clusters: 26 
-#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>strata_var</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.3</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified and clustered random sampling 
+#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.3</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified and clustered random sampling 
 #&gt; Number of units: 351 
 #&gt; Number of strata: 5 
 #&gt; Number of clusters: 26 
