@@ -2,7 +2,7 @@
 randomizr: Easy to use tools for common forms of random assignment and sampling
 ===============================================================================
 
-[![Travis-CI Build Status](https://travis-ci.org/DeclareDesign/randomizr.svg?branch=master)](https://travis-ci.org/DeclareDesign/randomizr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/randomizr?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/randomizr) [![Coverage Status](https://coveralls.io/repos/github/DeclareDesign/randomizr/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/randomizr?branch=master)
+[![CRAN Status](http://www.r-pkg.org/badges/version/randomizr)](https://cran.r-project.org/package=randomizr) [![Travis-CI Build Status](https://travis-ci.org/DeclareDesign/randomizr.svg?branch=master)](https://travis-ci.org/DeclareDesign/randomizr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/randomizr?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/randomizr) [![Coverage Status](https://coveralls.io/repos/github/DeclareDesign/randomizr/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/randomizr?branch=master) ![CRAN downloads](http://cranlogs.r-pkg.org/badges/grand-total/randomizr)
 
 **randomizr** is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. **randomizr** automates all of these processes and assists scientists in doing transparent, replicable science. We offer **randomizr** for both `R` and `Stata`.
 
@@ -11,17 +11,16 @@ randomizr for R
 
 ### Installing randomizr for R
 
-Installing the latest production-ready version of **randomizr** in `R` is simple.
+Installing the latest stable version of **randomizr** in `R`:.
 
 ``` r
 install.packages("randomizr")
 ```
 
-If you would like to use the current development release of **randomizr** (please be aware that development releases may include bugs or syntax changes), run the following code:
+If you would like to use the current development release of **randomizr** (please be aware that development releases may include bugs or syntax changes), run the following:
 
 ``` r
-install.packages("devtools")
-devtools::install_github("DeclareDesign/randomizr")
+install.packages("randomizr", repos="http://r.declaredesign.org")
 ```
 
 ### Getting started with randomizr for R
@@ -47,7 +46,7 @@ A more complicated design that, for example, assigns different numbers of cluste
 clust_var <- rep(letters[1:15], times = 1:15)
 
 Z <- cluster_ra(
-  clust_var = clust_var,
+  clusters = clust_var,
   m_each = c(4, 4, 7),
   condition_names = c("control", "placebo", "treatment")
   )
@@ -65,7 +64,7 @@ For more information about all of **randomizr**'s functionality, please see our 
 randomizr for Stata
 -------------------
 
-Installing the latest production-ready version of **randomizr** from ssc is easy:
+Installing the latest stable version of **randomizr** from ssc is easy:
 
 ``` r
 ssc install randomizr
