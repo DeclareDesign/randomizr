@@ -136,14 +136,14 @@
 <span class='fu'>dim</span>(<span class='no'>perms</span>)</div><div class='output co'>#&gt; [1] 4 6</div><div class='input'><span class='fu'>obtain_num_permutations</span>(<span class='no'>declaration</span>)</div><div class='output co'>#&gt; [1] 6</div><div class='input'>
 <span class='co'># blocked </span>
 
-<span class='no'>block_var</span> <span class='kw'>&lt;-</span> <span class='fu'>c</span>(<span class='st'>"A"</span>, <span class='st'>"A"</span>, <span class='st'>"B"</span>, <span class='st'>"B"</span>, <span class='st'>"C"</span>, <span class='st'>"C"</span>, <span class='st'>"C"</span>)
-<span class='no'>declaration</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_ra.html'>declare_ra</a></span>(<span class='kw'>block_var</span> <span class='kw'>=</span> <span class='no'>block_var</span>)
+<span class='no'>blocks</span> <span class='kw'>&lt;-</span> <span class='fu'>c</span>(<span class='st'>"A"</span>, <span class='st'>"A"</span>, <span class='st'>"B"</span>, <span class='st'>"B"</span>, <span class='st'>"C"</span>, <span class='st'>"C"</span>, <span class='st'>"C"</span>)
+<span class='no'>declaration</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_ra.html'>declare_ra</a></span>(<span class='kw'>blocks</span> <span class='kw'>=</span> <span class='no'>blocks</span>)
 <span class='no'>perms</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='obtain_permutation_matrix.html'>obtain_permutation_matrix</a></span>(<span class='no'>declaration</span>)
 <span class='fu'>dim</span>(<span class='no'>perms</span>)</div><div class='output co'>#&gt; [1]  7 24</div><div class='input'><span class='fu'>obtain_num_permutations</span>(<span class='no'>declaration</span>)</div><div class='output co'>#&gt; [1] 24</div><div class='input'>
 <span class='co'># clustered</span>
 
-<span class='no'>clust_var</span> <span class='kw'>&lt;-</span> <span class='fu'>c</span>(<span class='st'>"A"</span>, <span class='st'>"B"</span>, <span class='st'>"A"</span>, <span class='st'>"B"</span>, <span class='st'>"C"</span>, <span class='st'>"C"</span>, <span class='st'>"C"</span>)
-<span class='no'>declaration</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_ra.html'>declare_ra</a></span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>)
+<span class='no'>clusters</span> <span class='kw'>&lt;-</span> <span class='fu'>c</span>(<span class='st'>"A"</span>, <span class='st'>"B"</span>, <span class='st'>"A"</span>, <span class='st'>"B"</span>, <span class='st'>"C"</span>, <span class='st'>"C"</span>, <span class='st'>"C"</span>)
+<span class='no'>declaration</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='declare_ra.html'>declare_ra</a></span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>)
 <span class='no'>perms</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='obtain_permutation_matrix.html'>obtain_permutation_matrix</a></span>(<span class='no'>declaration</span>)
 <span class='fu'>dim</span>(<span class='no'>perms</span>)</div><div class='output co'>#&gt; [1] 7 6</div><div class='input'><span class='fu'>obtain_num_permutations</span>(<span class='no'>declaration</span>)</div><div class='output co'>#&gt; [1] 6</div><div class='input'>
 <span class='co'># large</span>

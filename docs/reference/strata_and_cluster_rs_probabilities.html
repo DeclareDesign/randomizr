@@ -111,18 +111,20 @@
     <p>Inclusion Probabilities: Stratified and Clustered Random Sampling</p>
     
 
-    <pre class="usage"><span class='fu'>strata_and_cluster_rs_probabilities</span>(<span class='no'>strata_var</span>, <span class='no'>clust_var</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>strata_and_cluster_rs_probabilities</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata_var</span>,
+  <span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>strata_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>strata_var</th>
+      <th>strata</th>
       <td><p>A vector of length N that indicates which stratum each unit belongs to.</p></td>
     </tr>
     <tr>
-      <th>clust_var</th>
+      <th>clusters</th>
       <td><p>A vector of length N that indicates which cluster each unit belongs to.</p></td>
     </tr>
     <tr>
@@ -145,6 +147,14 @@
       <th>check_inputs</th>
       <td><p>logical. Defaults to TRUE.</p></td>
     </tr>
+    <tr>
+      <th>strata_var</th>
+      <td><p>deprecated</p></td>
+    </tr>
+    <tr>
+      <th>clust_var</th>
+      <td><p>deprecated</p></td>
+    </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -154,89 +164,89 @@
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='no'>clust_var</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>26</span>)
+<span class='no'>clusters</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>26</span>)
 
-<span class='no'>strata_var</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='fl'>NA</span>, <span class='fu'>length</span>(<span class='no'>clust_var</span>))
-<span class='no'>strata_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>1</span>:<span class='fl'>5</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_1"</span>
-<span class='no'>strata_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>6</span>:<span class='fl'>10</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_2"</span>
-<span class='no'>strata_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>11</span>:<span class='fl'>15</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_3"</span>
-<span class='no'>strata_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>16</span>:<span class='fl'>20</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_4"</span>
-<span class='no'>strata_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>21</span>:<span class='fl'>26</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_5"</span>
+<span class='no'>strata</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='fl'>NA</span>, <span class='fu'>length</span>(<span class='no'>clusters</span>))
+<span class='no'>strata</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>1</span>:<span class='fl'>5</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_1"</span>
+<span class='no'>strata</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>6</span>:<span class='fl'>10</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_2"</span>
+<span class='no'>strata</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>11</span>:<span class='fl'>15</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_3"</span>
+<span class='no'>strata</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>16</span>:<span class='fl'>20</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_4"</span>
+<span class='no'>strata</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>21</span>:<span class='fl'>26</span>]] <span class='kw'>&lt;-</span> <span class='st'>"stratum_5"</span>
 
-<span class='fu'>table</span>(<span class='no'>strata_var</span>, <span class='no'>clust_var</span>)</div><div class='output co'>#&gt;            clust_var
-#&gt; strata_var   a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v
+<span class='fu'>table</span>(<span class='no'>strata</span>, <span class='no'>clusters</span>)</div><div class='output co'>#&gt;            clusters
+#&gt; strata       a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v
 #&gt;   stratum_1  1  2  3  4  5  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
 #&gt;   stratum_2  0  0  0  0  0  6  7  8  9 10  0  0  0  0  0  0  0  0  0  0  0  0
 #&gt;   stratum_3  0  0  0  0  0  0  0  0  0  0 11 12 13 14 15  0  0  0  0  0  0  0
 #&gt;   stratum_4  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 16 17 18 19 20  0  0
 #&gt;   stratum_5  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 21 22
-#&gt;            clust_var
-#&gt; strata_var   w  x  y  z
+#&gt;            clusters
+#&gt; strata       w  x  y  z
 #&gt;   stratum_1  0  0  0  0
 #&gt;   stratum_2  0  0  0  0
 #&gt;   stratum_3  0  0  0  0
 #&gt;   stratum_4  0  0  0  0
 #&gt;   stratum_5 23 24 25 26</div><div class='input'>
-<span class='no'>probs</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_and_cluster_rs_probabilities</span>(<span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>strata_var</span>,
-                                         <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>)
+<span class='no'>probs</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_and_cluster_rs_probabilities</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>,
+                                         <span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>)
 
-<span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>strata_var</span>)</div><div class='output co'>#&gt;      strata_var
+<span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>strata</span>)</div><div class='output co'>#&gt;      strata
 #&gt; probs stratum_1 stratum_2 stratum_3 stratum_4 stratum_5
-#&gt;   0.5        15        40        65        90       141</div><div class='input'><span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>clust_var</span>)</div><div class='output co'>#&gt;      clust_var
+#&gt;   0.5        15        40        65        90       141</div><div class='input'><span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>clusters</span>)</div><div class='output co'>#&gt;      clusters
 #&gt; probs  a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v  w  x
 #&gt;   0.5  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
-#&gt;      clust_var
+#&gt;      clusters
 #&gt; probs  y  z
 #&gt;   0.5 25 26</div><div class='input'>
 
-<span class='no'>probs</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_and_cluster_rs_probabilities</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>,
-                                         <span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>strata_var</span>,
+<span class='no'>probs</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_and_cluster_rs_probabilities</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>,
+                                         <span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>,
                                          <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.5</span>)
 
-<span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>clust_var</span>)</div><div class='output co'>#&gt;      clust_var
+<span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>clusters</span>)</div><div class='output co'>#&gt;      clusters
 #&gt; probs  a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v  w  x
 #&gt;   0.5  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
-#&gt;      clust_var
+#&gt;      clusters
 #&gt; probs  y  z
-#&gt;   0.5 25 26</div><div class='input'><span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>strata_var</span>)</div><div class='output co'>#&gt;      strata_var
+#&gt;   0.5 25 26</div><div class='input'><span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>strata</span>)</div><div class='output co'>#&gt;      strata
 #&gt; probs stratum_1 stratum_2 stratum_3 stratum_4 stratum_5
 #&gt;   0.5        15        40        65        90       141</div><div class='input'>
-<span class='no'>probs</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_and_cluster_rs_probabilities</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>,
-                                         <span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>strata_var</span>,
+<span class='no'>probs</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_and_cluster_rs_probabilities</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>,
+                                         <span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>,
                                          <span class='kw'>strata_n</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>2</span>, <span class='fl'>3</span>, <span class='fl'>2</span>, <span class='fl'>3</span>, <span class='fl'>2</span>))
 
-<span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>clust_var</span>)</div><div class='output co'>#&gt;                    clust_var
+<span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>clusters</span>)</div><div class='output co'>#&gt;                    clusters
 #&gt; probs                a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t
 #&gt;   0.333333333333333  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
 #&gt;   0.4                1  2  3  4  5  0  0  0  0  0 11 12 13 14 15  0  0  0  0  0
 #&gt;   0.6                0  0  0  0  0  6  7  8  9 10  0  0  0  0  0 16 17 18 19 20
-#&gt;                    clust_var
+#&gt;                    clusters
 #&gt; probs                u  v  w  x  y  z
 #&gt;   0.333333333333333 21 22 23 24 25 26
 #&gt;   0.4                0  0  0  0  0  0
-#&gt;   0.6                0  0  0  0  0  0</div><div class='input'><span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>strata_var</span>)</div><div class='output co'>#&gt;                    strata_var
+#&gt;   0.6                0  0  0  0  0  0</div><div class='input'><span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>strata</span>)</div><div class='output co'>#&gt;                    strata
 #&gt; probs               stratum_1 stratum_2 stratum_3 stratum_4 stratum_5
 #&gt;   0.333333333333333         0         0         0         0       141
 #&gt;   0.4                      15         0        65         0         0
 #&gt;   0.6                       0        40         0        90         0</div><div class='input'>
-<span class='no'>probs</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_and_cluster_rs_probabilities</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>,
-                                         <span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>strata_var</span>,
+<span class='no'>probs</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_and_cluster_rs_probabilities</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>,
+                                         <span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>,
                                          <span class='kw'>strata_prob</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>.1</span>, <span class='fl'>.2</span>, <span class='fl'>.3</span>, <span class='fl'>.4</span>, <span class='fl'>.5</span>))
 
-<span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>clust_var</span>)</div><div class='output co'>#&gt;      clust_var
+<span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>clusters</span>)</div><div class='output co'>#&gt;      clusters
 #&gt; probs  a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v  w  x
 #&gt;   0.1  1  2  3  4  5  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
 #&gt;   0.2  0  0  0  0  0  6  7  8  9 10  0  0  0  0  0  0  0  0  0  0  0  0  0  0
 #&gt;   0.3  0  0  0  0  0  0  0  0  0  0 11 12 13 14 15  0  0  0  0  0  0  0  0  0
 #&gt;   0.4  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 16 17 18 19 20  0  0  0  0
 #&gt;   0.5  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 21 22 23 24
-#&gt;      clust_var
+#&gt;      clusters
 #&gt; probs  y  z
 #&gt;   0.1  0  0
 #&gt;   0.2  0  0
 #&gt;   0.3  0  0
 #&gt;   0.4  0  0
-#&gt;   0.5 25 26</div><div class='input'><span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>strata_var</span>)</div><div class='output co'>#&gt;      strata_var
+#&gt;   0.5 25 26</div><div class='input'><span class='fu'>table</span>(<span class='no'>probs</span>, <span class='no'>strata</span>)</div><div class='output co'>#&gt;      strata
 #&gt; probs stratum_1 stratum_2 stratum_3 stratum_4 stratum_5
 #&gt;   0.1        15         0         0         0         0
 #&gt;   0.2         0        40         0         0         0

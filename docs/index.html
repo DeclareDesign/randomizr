@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Easy to use tools for common forms of random assignment and sampling • randomizr</title>
+<title>Easy-to-Use Tools for Common Forms of Random Assignment and Sampling • randomizr</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
@@ -88,7 +88,7 @@
 <div id="randomizr-easy-to-use-tools-for-common-forms-of-random-assignment-and-sampling" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#randomizr-easy-to-use-tools-for-common-forms-of-random-assignment-and-sampling" class="anchor"></a>randomizr: Easy to use tools for common forms of random assignment and sampling</h1></div>
-
+<p><a href="https://cran.r-project.org/package=randomizr"><img src="http://www.r-pkg.org/badges/version/randomizr" alt="CRAN Status"></a> <a href="https://travis-ci.org/DeclareDesign/randomizr"><img src="https://travis-ci.org/DeclareDesign/randomizr.svg?branch=master" alt="Travis-CI Build Status"></a> <a href="https://ci.appveyor.com/project/DeclareDesign/randomizr"><img src="https://ci.appveyor.com/api/projects/status/github/DeclareDesign/randomizr?branch=master&amp;svg=true" alt="AppVeyor Build Status"></a> <a href="https://coveralls.io/github/DeclareDesign/randomizr?branch=master"><img src="https://coveralls.io/repos/github/DeclareDesign/randomizr/badge.svg?branch=master" alt="Coverage Status"></a> <img src="http://cranlogs.r-pkg.org/badges/grand-total/randomizr" alt="CRAN downloads"></p>
 <p><strong>randomizr</strong> is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. <strong>randomizr</strong> automates all of these processes and assists scientists in doing transparent, replicable science. We offer <strong>randomizr</strong> for both <code>R</code> and <code>Stata</code>.</p>
 <div id="randomizr-for-r" class="section level2">
 <h2 class="hasAnchor">
@@ -96,11 +96,10 @@
 <div id="installing-randomizr-for-r" class="section level3">
 <h3 class="hasAnchor">
 <a href="#installing-randomizr-for-r" class="anchor"></a>Installing randomizr for R</h3>
-<p>Installing the latest production-ready version of <strong>randomizr</strong> in <code>R</code> is simple.</p>
+<p>Installing the latest stable version of <strong>randomizr</strong> in <code>R</code>:.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"randomizr"</span>)</code></pre></div>
-<p>If you would like to use the current development release of <strong>randomizr</strong> (please be aware that development releases may include bugs or syntax changes), run the following code:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"devtools"</span>)
-devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"DeclareDesign/randomizr"</span>)</code></pre></div>
+<p>If you would like to use the current development release of <strong>randomizr</strong> (please be aware that development releases may include bugs or syntax changes), run the following:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"randomizr"</span>, <span class="dt">repos=</span><span class="st">"http://r.declaredesign.org"</span>)</code></pre></div>
 </div>
 <div id="getting-started-with-randomizr-for-r" class="section level3">
 <h3 class="hasAnchor">
@@ -125,7 +124,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/complete_ra.
 clust_var &lt;-<span class="st"> </span><span class="kw">rep</span>(letters[<span class="dv">1</span><span class="op">:</span><span class="dv">15</span>], <span class="dt">times =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">15</span>)
 
 Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/cluster_ra.html">cluster_ra</a></span>(
-  <span class="dt">clust_var =</span> clust_var,
+  <span class="dt">clusters =</span> clust_var,
   <span class="dt">m_each =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">7</span>),
   <span class="dt">condition_names =</span> <span class="kw">c</span>(<span class="st">"control"</span>, <span class="st">"placebo"</span>, <span class="st">"treatment"</span>)
   )
@@ -212,7 +211,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/cluster_ra.h
 <div id="randomizr-for-stata" class="section level2">
 <h2 class="hasAnchor">
 <a href="#randomizr-for-stata" class="anchor"></a>randomizr for Stata</h2>
-<p>Installing the latest production-ready version of <strong>randomizr</strong> from ssc is easy:</p>
+<p>Installing the latest stable version of <strong>randomizr</strong> from ssc is easy:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ssc install randomizr</code></pre></div>
 <p>If you would like to install the latest development release directly from GitHub, run the following code:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">net install randomizr, <span class="kw">from</span>(https<span class="op">:</span><span class="er">//</span>raw.githubusercontent.com<span class="op">/</span>DeclareDesign<span class="op">/</span>strandomizr<span class="op">/</span>master<span class="op">/</span>) replace</code></pre></div>

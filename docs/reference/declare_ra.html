@@ -111,11 +111,12 @@
     <p>Declare a random assignment procedure.</p>
     
 
-    <pre class="usage"><span class='fu'>declare_ra</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>block_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>m</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+    <pre class="usage"><span class='fu'>declare_ra</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>blocks</span> <span class='kw'>=</span> <span class='no'>block_var</span>, <span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>m</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>block_m</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>block_m_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>block_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>block_prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>permutation_matrix</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+  <span class='kw'>permutation_matrix</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>block_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -125,11 +126,11 @@
       <td><p>The number of units. N must be a positive integer. (required)</p></td>
     </tr>
     <tr>
-      <th>block_var</th>
+      <th>blocks</th>
       <td><p>A vector of length N that indicates which block each unit belongs to.</p></td>
     </tr>
     <tr>
-      <th>clust_var</th>
+      <th>clusters</th>
       <td><p>A vector of length N that indicates which cluster each unit belongs to.</p></td>
     </tr>
     <tr>
@@ -154,7 +155,7 @@
     </tr>
     <tr>
       <th>block_m_each</th>
-      <td><p>Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.</p></td>
+      <td><p>Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of condition_names, if specified.</p></td>
     </tr>
     <tr>
       <th>block_prob</th>
@@ -162,7 +163,7 @@
     </tr>
     <tr>
       <th>block_prob_each</th>
-      <td><p>Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.</p></td>
+      <td><p>Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.</p></td>
     </tr>
     <tr>
       <th>num_arms</th>
@@ -184,6 +185,14 @@
       <th>check_inputs</th>
       <td><p>logical. Defaults to TRUE.</p></td>
     </tr>
+    <tr>
+      <th>block_var</th>
+      <td><p>deprecated</p></td>
+    </tr>
+    <tr>
+      <th>clust_var</th>
+      <td><p>deprecated</p></td>
+    </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -192,8 +201,8 @@
   $ra_function, a function that generates random assignments according to the declaration.
   $ra_type, a string indicating the type of random assignment used
   $probabilities_matrix, a matrix with N rows and num_arms columns, describing each unit's probabilities of assignment to conditions.
-  $block_var, the blocking variable.
-  $clust_var, the clustering variable.</p>
+  $blocks, the blocking variable.
+  $clusters, the clustering variable.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -254,12 +263,12 @@
 
 <span class='co'># Block Random Assignment Declarations</span>
 
-<span class='no'>block_var</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='fu'>c</span>(<span class='st'>"A"</span>, <span class='st'>"B"</span>,<span class='st'>"C"</span>), <span class='kw'>times</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>50</span>, <span class='fl'>100</span>, <span class='fl'>200</span>))
+<span class='no'>blocks</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='fu'>c</span>(<span class='st'>"A"</span>, <span class='st'>"B"</span>,<span class='st'>"C"</span>), <span class='kw'>times</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>50</span>, <span class='fl'>100</span>, <span class='fl'>200</span>))
 
 <span class='no'>block_m_each</span> <span class='kw'>&lt;-</span> <span class='fu'>rbind</span>(<span class='fu'>c</span>(<span class='fl'>10</span>, <span class='fl'>40</span>),
                  <span class='fu'>c</span>(<span class='fl'>30</span>, <span class='fl'>70</span>),
                  <span class='fu'>c</span>(<span class='fl'>50</span>, <span class='fl'>150</span>))
-<span class='fu'>declare_ra</span>(<span class='kw'>block_var</span> <span class='kw'>=</span> <span class='no'>block_var</span>, <span class='kw'>block_m_each</span> <span class='kw'>=</span> <span class='no'>block_m_each</span>)</div><div class='output co'>#&gt; Random assignment procedure: Block random assignment 
+<span class='fu'>declare_ra</span>(<span class='kw'>blocks</span> <span class='kw'>=</span> <span class='no'>blocks</span>, <span class='kw'>block_m_each</span> <span class='kw'>=</span> <span class='no'>block_m_each</span>)</div><div class='output co'>#&gt; Random assignment procedure: Block random assignment 
 #&gt; Number of units: 350 
 #&gt; Number of blocks: 3 
 #&gt; Number of treatment arms: 2 
@@ -268,13 +277,13 @@
 
 <span class='co'># Cluster Random Assignment Declarations</span>
 
-<span class='no'>clust_var</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>26</span>)
-<span class='fu'>declare_ra</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>)</div><div class='output co'>#&gt; Random assignment procedure: Cluster random assignment 
+<span class='no'>clusters</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>26</span>)
+<span class='fu'>declare_ra</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>)</div><div class='output co'>#&gt; Random assignment procedure: Cluster random assignment 
 #&gt; Number of units: 351 
 #&gt; Number of clusters: 26 
 #&gt; Number of treatment arms: 2 
 #&gt; The possible treatment categories are 0 and 1.
-#&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>7</span>, <span class='fl'>7</span>, <span class='fl'>12</span>))</div><div class='output co'>#&gt; Random assignment procedure: Cluster random assignment 
+#&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>7</span>, <span class='fl'>7</span>, <span class='fl'>12</span>))</div><div class='output co'>#&gt; Random assignment procedure: Cluster random assignment 
 #&gt; Number of units: 351 
 #&gt; Number of clusters: 26 
 #&gt; Number of treatment arms: 3 
@@ -282,35 +291,35 @@
 #&gt; The probabilities of assignment are constant across units.</div><div class='input'>
 <span class='co'># Blocked and Clustered Random Assignment Declarations</span>
 
-<span class='no'>clust_var</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span><span class='kw'>=</span><span class='fl'>1</span>:<span class='fl'>26</span>)
-<span class='no'>block_var</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='fl'>NA</span>, <span class='fu'>length</span>(<span class='no'>clust_var</span>))
-<span class='no'>block_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>1</span>:<span class='fl'>5</span>]] <span class='kw'>&lt;-</span> <span class='st'>"block_1"</span>
-<span class='no'>block_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>6</span>:<span class='fl'>10</span>]] <span class='kw'>&lt;-</span> <span class='st'>"block_2"</span>
-<span class='no'>block_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>11</span>:<span class='fl'>15</span>]] <span class='kw'>&lt;-</span> <span class='st'>"block_3"</span>
-<span class='no'>block_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>16</span>:<span class='fl'>20</span>]] <span class='kw'>&lt;-</span> <span class='st'>"block_4"</span>
-<span class='no'>block_var</span>[<span class='no'>clust_var</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>21</span>:<span class='fl'>26</span>]] <span class='kw'>&lt;-</span> <span class='st'>"block_5"</span>
+<span class='no'>clusters</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span><span class='kw'>=</span><span class='fl'>1</span>:<span class='fl'>26</span>)
+<span class='no'>blocks</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='fl'>NA</span>, <span class='fu'>length</span>(<span class='no'>clusters</span>))
+<span class='no'>blocks</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>1</span>:<span class='fl'>5</span>]] <span class='kw'>&lt;-</span> <span class='st'>"block_1"</span>
+<span class='no'>blocks</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>6</span>:<span class='fl'>10</span>]] <span class='kw'>&lt;-</span> <span class='st'>"block_2"</span>
+<span class='no'>blocks</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>11</span>:<span class='fl'>15</span>]] <span class='kw'>&lt;-</span> <span class='st'>"block_3"</span>
+<span class='no'>blocks</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>16</span>:<span class='fl'>20</span>]] <span class='kw'>&lt;-</span> <span class='st'>"block_4"</span>
+<span class='no'>blocks</span>[<span class='no'>clusters</span> <span class='kw'>%in%</span> <span class='no'>letters</span>[<span class='fl'>21</span>:<span class='fl'>26</span>]] <span class='kw'>&lt;-</span> <span class='st'>"block_5"</span>
 
-<span class='fu'>table</span>(<span class='no'>block_var</span>, <span class='no'>clust_var</span>)</div><div class='output co'>#&gt;          clust_var
-#&gt; block_var  a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v  w
+<span class='fu'>table</span>(<span class='no'>blocks</span>, <span class='no'>clusters</span>)</div><div class='output co'>#&gt;          clusters
+#&gt; blocks     a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v  w
 #&gt;   block_1  1  2  3  4  5  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
 #&gt;   block_2  0  0  0  0  0  6  7  8  9 10  0  0  0  0  0  0  0  0  0  0  0  0  0
 #&gt;   block_3  0  0  0  0  0  0  0  0  0  0 11 12 13 14 15  0  0  0  0  0  0  0  0
 #&gt;   block_4  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 16 17 18 19 20  0  0  0
 #&gt;   block_5  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 21 22 23
-#&gt;          clust_var
-#&gt; block_var  x  y  z
+#&gt;          clusters
+#&gt; blocks     x  y  z
 #&gt;   block_1  0  0  0
 #&gt;   block_2  0  0  0
 #&gt;   block_3  0  0  0
 #&gt;   block_4  0  0  0
 #&gt;   block_5 24 25 26</div><div class='input'>
-<span class='fu'>declare_ra</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>block_var</span> <span class='kw'>=</span> <span class='no'>block_var</span>)</div><div class='output co'>#&gt; Random assignment procedure: Blocked and clustered random assignment 
+<span class='fu'>declare_ra</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>blocks</span> <span class='kw'>=</span> <span class='no'>blocks</span>)</div><div class='output co'>#&gt; Random assignment procedure: Blocked and clustered random assignment 
 #&gt; Number of units: 351 
 #&gt; Number of blocks: 5 
 #&gt; Number of clusters: 26 
 #&gt; Number of treatment arms: 2 
 #&gt; The possible treatment categories are 0 and 1.
-#&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>block_var</span> <span class='kw'>=</span> <span class='no'>block_var</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>.2</span>, <span class='fl'>.5</span>, <span class='fl'>.3</span>))</div><div class='output co'>#&gt; Random assignment procedure: Blocked and clustered random assignment 
+#&gt; The probabilities of assignment are constant across units.</div><div class='input'><span class='fu'>declare_ra</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>blocks</span> <span class='kw'>=</span> <span class='no'>blocks</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>.2</span>, <span class='fl'>.5</span>, <span class='fl'>.3</span>))</div><div class='output co'>#&gt; Random assignment procedure: Blocked and clustered random assignment 
 #&gt; Number of units: 351 
 #&gt; Number of blocks: 5 
 #&gt; Number of clusters: 26 

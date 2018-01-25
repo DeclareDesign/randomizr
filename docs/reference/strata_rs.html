@@ -111,14 +111,14 @@
     <p>strata_rs implements a random sampling procedure in which units that are grouped into strata defined by covariates are sample using complete random sampling within stratum For example, imagine that 50 of 100 men are sampled and 75 of 200 women are sampled.</p>
     
 
-    <pre class="usage"><span class='fu'>strata_rs</span>(<span class='no'>strata_var</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>strata_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>strata_rs</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata_var</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>strata_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>strata_var</th>
+      <th>strata</th>
       <td><p>A vector of length N that indicates which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)</p></td>
     </tr>
     <tr>
@@ -141,6 +141,10 @@
       <th>check_inputs</th>
       <td><p>logical. Defaults to TRUE.</p></td>
     </tr>
+    <tr>
+      <th>strata_var</th>
+      <td><p>deprecated</p></td>
+    </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -150,37 +154,37 @@
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='no'>strata_var</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='fu'>c</span>(<span class='st'>"A"</span>, <span class='st'>"B"</span>,<span class='st'>"C"</span>), <span class='kw'>times</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>50</span>, <span class='fl'>100</span>, <span class='fl'>200</span>))
-<span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_rs</span>(<span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>strata_var</span>)
-<span class='fu'>table</span>(<span class='no'>strata_var</span>, <span class='no'>Z</span>)</div><div class='output co'>#&gt;           Z
-#&gt; strata_var   0   1
-#&gt;          A  25  25
-#&gt;          B  50  50
-#&gt;          C 100 100</div><div class='input'>
-<span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_rs</span>(<span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>strata_var</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.3</span>)
-<span class='fu'>table</span>(<span class='no'>strata_var</span>, <span class='no'>Z</span>)</div><div class='output co'>#&gt;           Z
-#&gt; strata_var   0   1
-#&gt;          A  35  15
-#&gt;          B  70  30
-#&gt;          C 140  60</div><div class='input'>
-<span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_rs</span>(<span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>strata_var</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>20</span>)
-<span class='fu'>table</span>(<span class='no'>strata_var</span>, <span class='no'>Z</span>)</div><div class='output co'>#&gt;           Z
-#&gt; strata_var   0   1
-#&gt;          A  30  20
-#&gt;          B  80  20
-#&gt;          C 180  20</div><div class='input'>
-<span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_rs</span>(<span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>strata_var</span>, <span class='kw'>strata_prob</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>.1</span>, <span class='fl'>.2</span>, <span class='fl'>.3</span>))
-<span class='fu'>table</span>(<span class='no'>strata_var</span>, <span class='no'>Z</span>)</div><div class='output co'>#&gt;           Z
-#&gt; strata_var   0   1
-#&gt;          A  45   5
-#&gt;          B  80  20
-#&gt;          C 140  60</div><div class='input'>
-<span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_rs</span>(<span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='no'>strata_var</span>, <span class='kw'>strata_n</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>20</span>, <span class='fl'>30</span>, <span class='fl'>40</span>))
-<span class='fu'>table</span>(<span class='no'>strata_var</span>, <span class='no'>Z</span>)</div><div class='output co'>#&gt;           Z
-#&gt; strata_var   0   1
-#&gt;          A  30  20
-#&gt;          B  70  30
-#&gt;          C 160  40</div><div class='input'>
+<span class='no'>strata</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='fu'>c</span>(<span class='st'>"A"</span>, <span class='st'>"B"</span>,<span class='st'>"C"</span>), <span class='kw'>times</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>50</span>, <span class='fl'>100</span>, <span class='fl'>200</span>))
+<span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_rs</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>)
+<span class='fu'>table</span>(<span class='no'>strata</span>, <span class='no'>Z</span>)</div><div class='output co'>#&gt;       Z
+#&gt; strata   0   1
+#&gt;      A  25  25
+#&gt;      B  50  50
+#&gt;      C 100 100</div><div class='input'>
+<span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_rs</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.3</span>)
+<span class='fu'>table</span>(<span class='no'>strata</span>, <span class='no'>Z</span>)</div><div class='output co'>#&gt;       Z
+#&gt; strata   0   1
+#&gt;      A  35  15
+#&gt;      B  70  30
+#&gt;      C 140  60</div><div class='input'>
+<span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_rs</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>20</span>)
+<span class='fu'>table</span>(<span class='no'>strata</span>, <span class='no'>Z</span>)</div><div class='output co'>#&gt;       Z
+#&gt; strata   0   1
+#&gt;      A  30  20
+#&gt;      B  80  20
+#&gt;      C 180  20</div><div class='input'>
+<span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_rs</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>, <span class='kw'>strata_prob</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>.1</span>, <span class='fl'>.2</span>, <span class='fl'>.3</span>))
+<span class='fu'>table</span>(<span class='no'>strata</span>, <span class='no'>Z</span>)</div><div class='output co'>#&gt;       Z
+#&gt; strata   0   1
+#&gt;      A  45   5
+#&gt;      B  80  20
+#&gt;      C 140  60</div><div class='input'>
+<span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>strata_rs</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>, <span class='kw'>strata_n</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>20</span>, <span class='fl'>30</span>, <span class='fl'>40</span>))
+<span class='fu'>table</span>(<span class='no'>strata</span>, <span class='no'>Z</span>)</div><div class='output co'>#&gt;       Z
+#&gt; strata   0   1
+#&gt;      A  30  20
+#&gt;      B  70  30
+#&gt;      C 160  40</div><div class='input'>
 
 </div></pre>
   </div>
