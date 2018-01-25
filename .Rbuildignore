@@ -18,3 +18,4 @@ appveyor.yml
 CONDUCT.md
 ^_pkgdown\.yml$
 ^randomizr_.*\.tar\.gz$
+^vignettes/srandomizr_vignette\.Rmd$
