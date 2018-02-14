@@ -126,7 +126,7 @@ You can also just specify the probabilites of your multiple arms. The probabilit
 
 You can also name your treatment arms.
 
-<pre><code>      . simple_ra Z, replace prob_each(.2 .2 .6) condition_names(control placebo treatment)
+<pre><code>      . simple_ra Z, replace prob_each(.2 .2 .6) conditions(control placebo treatment)
 
 
       . tab Z
@@ -203,7 +203,7 @@ You can also specify exactly how many units should be assigned to each arm. The 
 
 You can also name your treatment arms.
 
-<pre><code>      . complete_ra Z, m_each(100 200 292) replace condition_names(control placebo treatment)
+<pre><code>      . complete_ra Z, m_each(100 200 292) replace conditions(control placebo treatment)
 
 
       . tab Z
@@ -282,7 +282,7 @@ The only required argument to `block_ra` is block_var, which is a variable that 
       -----------+--------------------------------------------+----------
            Total |       108        286         71        127 |       592 </code></pre>
 
-For multiple treatment arms, use the num_arms argument, with or without the condition_names argument
+For multiple treatment arms, use the num_arms argument, with or without the conditions argument
 
 <pre><code>      . block_ra Z, block_var(Hair) num_arms(3) replace
 
@@ -298,7 +298,7 @@ For multiple treatment arms, use the num_arms argument, with or without the cond
            Total |       108        286         71        127 |       592 
 
 
-      . block_ra Z, block_var(Hair) condition_names(Control Placebo Treatment) replace
+      . block_ra Z, block_var(Hair) conditions(Control Placebo Treatment) replace
 
       . tab Z Hair
 
@@ -519,9 +519,9 @@ As with all functions in randomizr, you can specify multiple treatment arms in a
       -----------+---------------------------------+----------
            Total |       248        219        125 |       592 </code></pre>
            
-...or using condition_names.
+...or using conditions.
 
-<pre><code>      . cluster_ra Z_clust, cluster_var(clust_var) condition_names(control placebo treatment)  replace
+<pre><code>      . cluster_ra Z_clust, cluster_var(clust_var) conditions(control placebo treatment)  replace
 
 
       . tab clust_var Z_clust

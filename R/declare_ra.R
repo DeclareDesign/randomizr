@@ -8,11 +8,11 @@
 #' @param prob Use for a two-arm design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be assigned to treatment and with probability prob, ceiling(N*prob) units (or clusters) will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
 #' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
 #' @param block_m Use for a two-arm design in which block_m describes the number of units to assign to treatment within each block. Note that in previous versions of randomizr, block_m behaved like block_m_each.
-#' @param block_m_each Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of condition_names, if specified.
+#' @param block_m_each Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of conditions, if specified.
 #' @param block_prob Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Differs from prob in that the probability of assignment can vary across blocks.
 #' @param block_prob_each Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
-#' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
+#' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.
 #' @param permutation_matrix for custom random assignment procedures.
 #' @param check_inputs logical. Defaults to TRUE.
@@ -48,13 +48,13 @@
 #' declare_ra(N=100, simple = TRUE)
 #' declare_ra(N=100, prob = .4, simple = TRUE)
 #' declare_ra(N=100, prob_each=c(0.3, 0.3, 0.4),
-#'            condition_names=c("control", "placebo", "treatment"), simple=TRUE)
+#'            conditions=c("control", "placebo", "treatment"), simple=TRUE)
 #'
 #' # Complete Random Assignment Declarations
 #'
 #' declare_ra(N=100)
 #' declare_ra(N=100, m_each = c(30, 70),
-#'            condition_names = c("control", "treatment"))
+#'            conditions = c("control", "treatment"))
 #' declare_ra(N=100, m_each=c(30, 30, 40))
 #'
 #'
@@ -103,7 +103,7 @@ declare_ra <- function(N = NULL,
                        block_prob = NULL,
                        block_prob_each = NULL,
                        num_arms = NULL,
-                       condition_names = NULL,
+                       conditions = NULL,
                        simple = FALSE,
                        permutation_matrix = NULL,
                        check_inputs = TRUE, block_var=NULL, clust_var=NULL) {
@@ -125,7 +125,7 @@ declare_ra <- function(N = NULL,
       block_prob = block_prob,
       block_prob_each = block_prob_each,
       num_arms = num_arms,
-      condition_names = condition_names
+      conditions = conditions
     )
   }
   # Determine ra_type
@@ -164,7 +164,7 @@ declare_ra <- function(N = NULL,
         prob = prob,
         prob_each = prob_each,
         num_arms = num_arms,
-        condition_names = condition_names,
+        conditions = conditions,
         check_inputs = check_inputs
       )
     }
@@ -174,7 +174,7 @@ declare_ra <- function(N = NULL,
         prob = prob,
         prob_each = prob_each,
         num_arms = num_arms,
-        condition_names = condition_names,
+        conditions = conditions,
         check_inputs = check_inputs
       )
   }
@@ -188,7 +188,7 @@ declare_ra <- function(N = NULL,
         prob = prob,
         prob_each = prob_each,
         num_arms = num_arms,
-        condition_names = condition_names,
+        conditions = conditions,
         check_inputs = check_inputs
       )
     }
@@ -201,7 +201,7 @@ declare_ra <- function(N = NULL,
         prob = prob,
         prob_each = prob_each,
         num_arms = num_arms,
-        condition_names = condition_names,
+        conditions = conditions,
         check_inputs = check_inputs
       )
     
@@ -219,7 +219,7 @@ declare_ra <- function(N = NULL,
         prob_each = prob_each,
         block_prob = block_prob,
         block_prob_each = block_prob_each,
-        condition_names = condition_names,
+        conditions = conditions,
         check_inputs = check_inputs
       )
     }
@@ -235,7 +235,7 @@ declare_ra <- function(N = NULL,
         prob_each = prob_each,
         block_prob = block_prob,
         block_prob_each = block_prob_each,
-        condition_names = condition_names,
+        conditions = conditions,
         check_inputs = check_inputs
       )
   }
@@ -250,7 +250,7 @@ declare_ra <- function(N = NULL,
         prob = prob,
         prob_each = prob_each,
         num_arms = num_arms,
-        condition_names = condition_names,
+        conditions = conditions,
         simple = simple,
         check_inputs = check_inputs
       )
@@ -264,7 +264,7 @@ declare_ra <- function(N = NULL,
         prob = prob,
         prob_each = prob_each,
         num_arms = num_arms,
-        condition_names = condition_names,
+        conditions = conditions,
         simple = simple,
         check_inputs = check_inputs
       )
@@ -284,7 +284,7 @@ declare_ra <- function(N = NULL,
         block_m_each = block_m_each,
         block_prob = block_prob,
         block_prob_each = block_prob_each,
-        condition_names = condition_names,
+        conditions = conditions,
         check_inputs = check_inputs
       )
     }
@@ -301,7 +301,7 @@ declare_ra <- function(N = NULL,
         block_m_each = block_m_each,
         block_prob_each = block_prob_each,
         num_arms = num_arms,
-        condition_names = condition_names,
+        conditions = conditions,
         check_inputs = check_inputs
       )
     
@@ -311,13 +311,13 @@ declare_ra <- function(N = NULL,
     ra_function <- function(){
       permutation_matrix[,sample(ncol(permutation_matrix), 1)]
     }
-    condition_names <- sort(unique(c(permutation_matrix)))
+    conditions <- sort(unique(c(permutation_matrix)))
     
     probabilities_matrix <- 
-      sapply(condition_names, 
+      sapply(conditions, 
              FUN = function(x) apply(permutation_matrix, MARGIN = 1, FUN = function(y) mean(y == x)))
     
-    colnames(probabilities_matrix) <- paste0("prob_", condition_names)
+    colnames(probabilities_matrix) <- paste0("prob_", conditions)
     
   }
   
@@ -368,7 +368,7 @@ conduct_ra <- function(declaration = NULL,
                        block_prob = NULL,
                        block_prob_each = NULL,
                        num_arms = NULL,
-                       condition_names = NULL,
+                       conditions = NULL,
                        simple = FALSE,
                        check_inputs = TRUE, block_var=NULL, clust_var=NULL) {
   if (!is.null(declaration)) {
@@ -390,7 +390,7 @@ conduct_ra <- function(declaration = NULL,
         block_prob = block_prob,
         block_prob_each = block_prob_each,
         num_arms = num_arms,
-        condition_names = condition_names,
+        conditions = conditions,
         simple = simple,
         check_inputs = check_inputs
       )
@@ -456,7 +456,7 @@ obtain_condition_probabilities <-
            block_prob = NULL,
            block_prob_each = NULL,
            num_arms = NULL,
-           condition_names = NULL,
+           conditions = NULL,
            simple = FALSE, block_var=NULL, clust_var=NULL) {
     # checks
     if (!is.null(declaration)) {
@@ -481,7 +481,7 @@ obtain_condition_probabilities <-
           block_prob = block_prob,
           block_prob_each = block_prob_each,
           num_arms = num_arms,
-          condition_names = condition_names,
+          conditions = conditions,
           simple = simple
         )
     }
@@ -505,8 +505,8 @@ print.ra_declaration <- function(x, ...) {
   Z <- x$ra_function()
   n <- length(Z)
   
-  condition_names <- sort(unique(Z))
-  num_arms <- length(condition_names)
+  conditions <- sort(unique(Z))
+  num_arms <- length(conditions)
   constant_probabilities <-
     all(apply(
       x$probabilities_matrix,
@@ -539,7 +539,7 @@ print.ra_declaration <- function(x, ...) {
   cat("Number of treatment arms:", num_arms, "\n")
   cat(
     "The possible treatment categories are ",
-    paste(condition_names, collapse = " and "),
+    paste(conditions, collapse = " and "),
     ".",
     "\n",
     sep = ""

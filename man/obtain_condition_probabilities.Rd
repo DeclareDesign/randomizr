@@ -8,8 +8,7 @@ obtain_condition_probabilities(declaration = NULL, assignment, N = NULL,
   blocks = block_var, clusters = clust_var, m = NULL, m_each = NULL,
   prob = NULL, prob_each = NULL, block_m = NULL, block_m_each = NULL,
   block_prob = NULL, block_prob_each = NULL, num_arms = NULL,
-  condition_names = NULL, simple = FALSE, block_var = NULL,
-  clust_var = NULL)
+  conditions = NULL, simple = FALSE, block_var = NULL, clust_var = NULL)
 }
 \arguments{
 \item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
@@ -32,7 +31,7 @@ obtain_condition_probabilities(declaration = NULL, assignment, N = NULL,
 
 \item{block_m}{Use for a two-arm design in which block_m describes the number of units to assign to treatment within each block. Note that in previous versions of randomizr, block_m behaved like block_m_each.}
 
-\item{block_m_each}{Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of condition_names, if specified.}
+\item{block_m_each}{Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of conditions, if specified.}
 
 \item{block_prob}{Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Differs from prob in that the probability of assignment can vary across blocks.}
 
@@ -40,7 +39,7 @@ obtain_condition_probabilities(declaration = NULL, assignment, N = NULL,
 
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
-\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
+\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
 
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.}
 

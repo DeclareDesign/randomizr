@@ -5,7 +5,7 @@
 \title{Complete Random Assignment}
 \usage{
 complete_ra(N, m = NULL, m_each = NULL, prob = NULL, prob_each = NULL,
-  num_arms = NULL, condition_names = NULL, check_inputs = TRUE)
+  num_arms = NULL, conditions = NULL, check_inputs = TRUE)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
@@ -20,12 +20,12 @@ complete_ra(N, m = NULL, m_each = NULL, prob = NULL, prob_each = NULL,
 
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
-\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
+\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
-A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by condition_names) in a multi-arm trial.
+A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.
 }
 \description{
 complete_ra implements a random assignment procedure in which fixed numbers of units are assigned to treatment conditions. The canonical example of complete random assignment is a procedure in which exactly m of N units are assigned to treatment and N-m units are assigned to control.\cr \cr
@@ -46,7 +46,7 @@ table(Z)
 Z <- complete_ra(N = 100, prob = .111)
 table(Z)
 
-Z <- complete_ra(N = 100, condition_names = c("control", "treatment"))
+Z <- complete_ra(N = 100, conditions = c("control", "treatment"))
 table(Z)
 
 
@@ -60,11 +60,11 @@ table(Z)
 Z <- complete_ra(N = 100, prob_each = c(.1, .2, .7))
 table(Z)
 
-Z <- complete_ra(N = 100, condition_names = c("control", "placebo", "treatment"))
+Z <- complete_ra(N = 100, conditions = c("control", "placebo", "treatment"))
 table(Z)
 
 # Special Cases
-# Two-arm trial where the condition_names are by default "T1" and "T2"
+# Two-arm trial where the conditions are by default "T1" and "T2"
 Z <- complete_ra(N = 100, num_arms = 2)
 table(Z)
 

@@ -8,7 +8,7 @@ complete_ra_probabilities(N = 100, prob = .3)
 complete_ra_probabilities(
   N = 100,
   m_each = c(30, 70),
-  condition_names = c("control", "treatment")
+  conditions = c("control", "treatment")
 )
 
 # Multi-arm Designs
@@ -18,11 +18,11 @@ complete_ra_probabilities(N = 100, m_each = c(30, 30, 40))
 complete_ra_probabilities(
   N = 100,
   m_each = c(30, 30, 40),
-  condition_names = c("control", "placebo", "treatment")
+  conditions = c("control", "placebo", "treatment")
 )
 
 complete_ra_probabilities(N = 100,
-                          condition_names = c("control", "placebo", "treatment"))
+                          conditions = c("control", "placebo", "treatment"))
 complete_ra_probabilities(N = 100, prob_each = c(.2, .7, .1))
 
 complete_ra_probabilities(N = 101, prob_each = c(.2, .7, .1))
@@ -37,13 +37,13 @@ complete_ra_probabilities(N = 101, prob_each = c(.2, .7, .1))
 
 complete_ra(2,
             m_each = c(1, 0, 1),
-            condition_names = c("T1", "T2", "T3"))
+            conditions = c("T1", "T2", "T3"))
 complete_ra_probabilities(2,
                           m_each = c(1, 0, 1),
-                          condition_names = c("T1", "T2", "T3"))
+                          conditions = c("T1", "T2", "T3"))
 complete_ra_probabilities(2,
                           m_each = c(0, 0, 2),
-                          condition_names = c("T1", "T2", "T3"))
+                          conditions = c("T1", "T2", "T3"))
 
 
 
@@ -57,7 +57,7 @@ simple_ra_probabilities(N = 100, prob = 0.5)
 simple_ra_probabilities(
   N = 100,
   prob_each = c(0.3, 0.7),
-  condition_names = c("control", "treatment")
+  conditions = c("control", "treatment")
 )
 # Multi-arm Designs
 simple_ra_probabilities(N = 100, num_arms = 3)
@@ -65,10 +65,10 @@ simple_ra_probabilities(N = 100, prob_each = c(0.3, 0.3, 0.4))
 simple_ra_probabilities(
   N = 100,
   prob_each = c(0.3, 0.3, 0.4),
-  condition_names = c("control", "placebo", "treatment")
+  conditions = c("control", "placebo", "treatment")
 )
 simple_ra_probabilities(N = 100,
-                        condition_names = c("control", "placebo", "treatment"))
+                        conditions = c("control", "placebo", "treatment"))
 
 
 # Blocked Designs ---------------------------------------------------------
@@ -90,7 +90,7 @@ block_m_each <- rbind(c(10, 40),
 block_ra_probabilities(
   blocks = blocks,
   block_m_each = block_m_each,
-  condition_names = c("control", "treatment")
+  conditions = c("control", "treatment")
 )
 
 block_ra_probabilities(blocks = blocks, num_arms = 3)
@@ -104,7 +104,7 @@ block_ra_probabilities(blocks = blocks, block_m_each = block_m_each)
 block_ra_probabilities(
   blocks = blocks,
   block_m_each = block_m_each,
-  condition_names = c("control", "placebo", "treatment")
+  conditions = c("control", "placebo", "treatment")
 )
 
 block_ra_probabilities(blocks = blocks, prob_each = c(.1, .1, .8))
@@ -134,7 +134,7 @@ cluster_ra_probabilities(clusters = clusters, m = 10)
 cluster_ra_probabilities(
   clusters = clusters,
   m_each = c(9, 17),
-  condition_names = c("control", "treatment")
+  conditions = c("control", "treatment")
 )
 
 # Multi-arm Designs
@@ -144,12 +144,12 @@ cluster_ra_probabilities(clusters = clusters, m_each = c(7, 7, 12))
 cluster_ra_probabilities(
   clusters = clusters,
   m_each = c(7, 7, 12),
-  condition_names = c("control", "placebo", "treatment")
+  conditions = c("control", "placebo", "treatment")
 )
 
 cluster_ra_probabilities(
   clusters = clusters,
-  condition_names = c("control", "placebo", "treatment")
+  conditions = c("control", "placebo", "treatment")
 )
 
 cluster_ra_probabilities(clusters = clusters, prob_each = c(.1, .2, .7))

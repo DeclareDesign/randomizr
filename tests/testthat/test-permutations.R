@@ -21,37 +21,37 @@ test_that("Simple Random Assignment Procedures",{
 
 
 
-randomizr:::complete_ra_num_permutations(6, prob_each = c(.5, .5), condition_names = c(0, 1))
+randomizr:::complete_ra_num_permutations(6, prob_each = c(.5, .5), conditions = c(0, 1))
 choose(6, 3)
-perms <- randomizr:::complete_ra_permutations(6, prob_each = c(.5, .5), condition_names = c(0, 1))
+perms <- randomizr:::complete_ra_permutations(6, prob_each = c(.5, .5), conditions = c(0, 1))
 dim(perms)
-perm_probs <- randomizr:::complete_ra_permutation_probabilities(6, prob_each = c(.5, .5), condition_names = c(0, 1))
+perm_probs <- randomizr:::complete_ra_permutation_probabilities(6, prob_each = c(.5, .5), conditions = c(0, 1))
 length(perm_probs)
 sum(perm_probs)
 
-randomizr:::complete_ra_num_permutations(10, prob_each = c(.5, .5), condition_names = c(0, 1))
+randomizr:::complete_ra_num_permutations(10, prob_each = c(.5, .5), conditions = c(0, 1))
 choose(10, 5)
-perms <- randomizr:::complete_ra_permutations(10, prob_each = c(.5, .5), condition_names = c(0, 1))
+perms <- randomizr:::complete_ra_permutations(10, prob_each = c(.5, .5), conditions = c(0, 1))
 dim(perms)
-perm_probs <- randomizr:::complete_ra_permutation_probabilities(10, prob_each = c(.5, .5), condition_names = c(0, 1))
+perm_probs <- randomizr:::complete_ra_permutation_probabilities(10, prob_each = c(.5, .5), conditions = c(0, 1))
 length(perm_probs)
 sum(perm_probs)
 
 
-randomizr:::complete_ra_num_permutations(3, prob_each = c(.5, .5), condition_names = c(0, 1))
+randomizr:::complete_ra_num_permutations(3, prob_each = c(.5, .5), conditions = c(0, 1))
 choose(3, 1) + choose(3, 2)
-perms <- randomizr:::complete_ra_permutations(3, prob_each = c(.5, .5), condition_names = c(0, 1))
+perms <- randomizr:::complete_ra_permutations(3, prob_each = c(.5, .5), conditions = c(0, 1))
 dim(perms)
-perm_probs <- randomizr:::complete_ra_permutation_probabilities(3, prob_each = c(.5, .5), condition_names = c(0, 1))
+perm_probs <- randomizr:::complete_ra_permutation_probabilities(3, prob_each = c(.5, .5), conditions = c(0, 1))
 length(perm_probs)
 sum(perm_probs)
 
 
-randomizr:::complete_ra_num_permutations(10, prob_each = c(1/3, 1/3, 1/3), condition_names = c("T1", "T2", "T3"))
-perms <- randomizr:::complete_ra_permutations(10, prob_each = c(1/3, 1/3, 1/3), condition_names = c("T1", "T2", "T3"))
+randomizr:::complete_ra_num_permutations(10, prob_each = c(1/3, 1/3, 1/3), conditions = c("T1", "T2", "T3"))
+perms <- randomizr:::complete_ra_permutations(10, prob_each = c(1/3, 1/3, 1/3), conditions = c("T1", "T2", "T3"))
 dim(perms)
 dim(unique(perms))
-perm_probs <- randomizr:::complete_ra_permutation_probabilities(10, prob_each = c(1/3, 1/3, 1/3), condition_names = c("T1", "T2", "T3"))
+perm_probs <- randomizr:::complete_ra_permutation_probabilities(10, prob_each = c(1/3, 1/3, 1/3), conditions = c("T1", "T2", "T3"))
 length(perm_probs)
 sum(perm_probs)
 

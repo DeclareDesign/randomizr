@@ -22,7 +22,7 @@ obtain_condition_probabilities(declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
 declaration <- declare_ra(N=100, m_each = c(30, 70), 
-                          condition_names = c("control", "treatment"))
+                          conditions = c("control", "treatment"))
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(declaration = declaration, assignment = Z)
@@ -37,13 +37,13 @@ obtain_condition_probabilities(declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
 declaration <- declare_ra(N=100, m_each=c(30, 30, 40), 
-                          condition_names=c("control", "placebo", "treatment"))
+                          conditions=c("control", "placebo", "treatment"))
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
-declaration <- declare_ra(N=100, condition_names=c("control", "placebo", "treatment"))
+declaration <- declare_ra(N=100, conditions=c("control", "placebo", "treatment"))
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(declaration = declaration, assignment = Z)
@@ -74,7 +74,7 @@ obtain_condition_probabilities(declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
 declaration <- declare_ra(N=100, prob_each = c(0.3, 0.7), 
-                          condition_names = c("control", "treatment"), simple=TRUE)
+                          conditions = c("control", "treatment"), simple=TRUE)
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(declaration = declaration, assignment = Z)
@@ -93,13 +93,13 @@ obtain_condition_probabilities(declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
 declaration <- declare_ra(N=100, prob_each=c(0.3, 0.3, 0.4), 
-                          condition_names=c("control", "placebo", "treatment"), simple=TRUE)
+                          conditions=c("control", "placebo", "treatment"), simple=TRUE)
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
-declaration <- declare_ra(N=100, condition_names=c("control", "placebo", "treatment"), simple=TRUE)
+declaration <- declare_ra(N=100, conditions=c("control", "placebo", "treatment"), simple=TRUE)
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(declaration = declaration, assignment = Z)
@@ -136,7 +136,7 @@ obtain_condition_probabilities(declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
 declaration <- declare_ra(blocks=blocks, block_m_each=block_m_each, 
-                          condition_names=c("control", "treatment"))
+                          conditions=c("control", "treatment"))
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(declaration = declaration, assignment = Z)
@@ -160,7 +160,7 @@ obtain_condition_probabilities(declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
 declaration <- declare_ra(blocks=blocks, block_m_each=block_m_each, 
-                          condition_names=c("control", "placebo", "treatment"))
+                          conditions=c("control", "placebo", "treatment"))
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(declaration = declaration, assignment = Z)
@@ -192,7 +192,7 @@ obtain_condition_probabilities(declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
 declaration <- declare_ra(clusters=clusters, m_each = c(10, 16), 
-                condition_names = c("control", "treatment"))
+                conditions = c("control", "treatment"))
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(declaration = declaration, assignment = Z)
@@ -212,14 +212,14 @@ obtain_condition_probabilities(declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
 declaration <- declare_ra(clusters=clusters, m_each=c(7, 7, 12), 
-                condition_names=c("control", "placebo", "treatment"))
+                conditions=c("control", "placebo", "treatment"))
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(declaration = declaration, assignment = Z)
 declaration$probabilities_matrix
 
 declaration <- declare_ra(clusters=clusters, 
-                condition_names=c("control", "placebo", "treatment"))
+                conditions=c("control", "placebo", "treatment"))
 table(declaration$ra_function())
 Z <- conduct_ra(declaration)
 obtain_condition_probabilities(declaration = declaration, assignment = Z)

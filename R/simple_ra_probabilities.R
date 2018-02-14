@@ -12,7 +12,7 @@
 #' head(prob_mat)
 #'
 #' prob_mat <- simple_ra_probabilities(N=100, prob_each = c(0.3, 0.7),
-#'                         condition_names = c("control", "treatment"))
+#'                         conditions = c("control", "treatment"))
 #' head(prob_mat)
 #'
 #' # Multi-arm Designs
@@ -23,10 +23,10 @@
 #' head(prob_mat)
 #'
 #' prob_mat <- simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4),
-#'                         condition_names=c("control", "placebo", "treatment"))
+#'                         conditions=c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
-#' prob_mat <- simple_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
+#' prob_mat <- simple_ra_probabilities(N=100, conditions=c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
 #' @export
@@ -35,7 +35,7 @@ simple_ra_probabilities <-
            prob = NULL,
            prob_each = NULL,
            num_arms = NULL,
-           condition_names = NULL,
+           conditions = NULL,
            check_inputs = TRUE) {
     if (check_inputs) {
       input_check <-
@@ -44,10 +44,10 @@ simple_ra_probabilities <-
           prob = prob,
           prob_each = prob_each,
           num_arms = num_arms,
-          condition_names = condition_names
+          conditions = conditions
         )
       num_arms <- input_check$num_arms
-      condition_names <- input_check$condition_names
+      conditions <- input_check$conditions
       
     }
     
@@ -68,7 +68,7 @@ simple_ra_probabilities <-
       rep(condition_probabilities, N),
       byrow = TRUE,
       ncol = length(condition_probabilities),
-      dimnames = list(NULL,  paste0("prob_", condition_names))
+      dimnames = list(NULL,  paste0("prob_", conditions))
     )
     return(prob_mat)
     

@@ -19,7 +19,7 @@ check_randomizr_arguments <-
            block_prob_each = NULL,
            clusters = NULL,
            num_arms = NULL,
-           condition_names = NULL) {
+           conditions = NULL) {
     conflict_args <- list(
       prob = prob,
       m = m,
@@ -105,71 +105,71 @@ check_randomizr_arguments <-
     
     # Lengths
     
-    if (!is.null(condition_names)) {
-      if (length(unique(condition_names)) != length(condition_names)) {
-        stop("You must supply unique values to condition_names.")
+    if (!is.null(conditions)) {
+      if (length(unique(conditions)) != length(conditions)) {
+        stop("You must supply unique values to conditions.")
       }
       if (!is.null(m)) {
-        if (length(condition_names) != 2) {
+        if (length(conditions) != 2) {
           stop(
-            "If m and condition_names are specified together, condition_names must be of length 2."
+            "If m and conditions are specified together, conditions must be of length 2."
           )
         }
       }
       if (!is.null(block_m)) {
-        if (length(condition_names) != 2) {
+        if (length(conditions) != 2) {
           stop(
-            "If block_m and condition_names are specified together, condition_names must be of length 2."
+            "If block_m and conditions are specified together, conditions must be of length 2."
           )
         }
       }
       if (!is.null(prob)) {
-        if (length(condition_names) != 2) {
+        if (length(conditions) != 2) {
           stop(
-            "If prob and condition_names are specified together, condition_names must be of length 2."
+            "If prob and conditions are specified together, conditions must be of length 2."
           )
         }
       }
       if (!is.null(block_prob)) {
-        if (length(condition_names) != 2) {
+        if (length(conditions) != 2) {
           stop(
-            "If block_prob and condition_names are specified together, condition_names must be of length 2."
+            "If block_prob and conditions are specified together, conditions must be of length 2."
           )
         }
       }
       
       if (!is.null(prob_each)) {
-        if (length(prob_each) != length(condition_names)) {
+        if (length(prob_each) != length(conditions)) {
           stop(
-            "If prob_each and condition_names are specified together, they must be of the same length."
+            "If prob_each and conditions are specified together, they must be of the same length."
           )
         }
       }
       if (!is.null(m_each)) {
-        if (length(m_each) != length(condition_names)) {
+        if (length(m_each) != length(conditions)) {
           stop(
-            "If m_each and condition_names are specified together, they must be of the same length."
+            "If m_each and conditions are specified together, they must be of the same length."
           )
         }
       }
       if (!is.null(block_m_each)) {
-        if (ncol(block_m_each) != length(condition_names)) {
+        if (ncol(block_m_each) != length(conditions)) {
           stop(
-            "If both condition_names and block_m_each are specified, the length of condition_names must be equal to the number of columns of block_m_each."
+            "If both conditions and block_m_each are specified, the length of conditions must be equal to the number of columns of block_m_each."
           )
         }
       }
       if (!is.null(block_prob_each)) {
-        if (ncol(block_prob_each) != length(condition_names)) {
+        if (ncol(block_prob_each) != length(conditions)) {
           stop(
-            "If both condition_names and block_prob_each are specified, the length of condition_names must be equal to the number of columns of block_prob_each"
+            "If both conditions and block_prob_each are specified, the length of conditions must be equal to the number of columns of block_prob_each"
           )
         }
       }
       if (!is.null(num_arms)) {
-        if (num_arms != length(condition_names)) {
+        if (num_arms != length(conditions)) {
           stop(
-            "If both condition_names and num_arms are specified, the length of condition_names must be equal to num_arms."
+            "If both conditions and num_arms are specified, the length of conditions must be equal to num_arms."
           )
         }
       }
@@ -320,27 +320,27 @@ check_randomizr_arguments <-
       if (!is.null(block_prob_each)) {
         num_arms <- ncol(block_prob_each)
       }
-      if (!is.null(condition_names)) {
-        num_arms <- length(condition_names)
+      if (!is.null(conditions)) {
+        num_arms <- length(conditions)
       }
       num_arms_was_null <- TRUE
     } else{
       num_arms_was_null <- FALSE
     }
     
-    # obtain condition_names
-    if (is.null(condition_names)) {
+    # obtain conditions
+    if (is.null(conditions)) {
       if (num_arms == 2 & num_arms_was_null) {
-        condition_names = c(0, 1)
+        conditions = c(0, 1)
       } else{
-        condition_names <- paste0("T", 1:num_arms)
+        conditions <- paste0("T", 1:num_arms)
       }
     }
     
     return(
       list(
         num_arms = num_arms,
-        condition_names = condition_names,
+        conditions = conditions,
         N_per_block = N_per_block
       )
     )
@@ -449,7 +449,7 @@ check_samplr_arguments <-
     
     return(list(
       num_arms = 2,
-      condition_names =  c(0, 1),
+      conditions =  c(0, 1),
       N_per_stratum = N_per_stratum
     ))
     
@@ -457,10 +457,10 @@ check_samplr_arguments <-
 
 
 
-clean_condition_names <- function(assignment, condition_names) {
+clean_condition_names <- function(assignment, conditions) {
   
-  if(is.factor(condition_names)){
-    return(factor(assignment, levels = levels(condition_names)))
+  if(is.factor(conditions)){
+    return(factor(assignment, levels = levels(conditions)))
   }
   
   if (is.numeric(assignment)) {
@@ -471,5 +471,5 @@ clean_condition_names <- function(assignment, condition_names) {
     return(as.numeric(assignment))
   }    
   
-  return(factor(assignment, levels = condition_names))
+  return(factor(assignment, levels = conditions))
 }

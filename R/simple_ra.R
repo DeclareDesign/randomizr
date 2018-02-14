@@ -9,10 +9,10 @@
 #' @param prob Use for a two-arm design. prob is the probability of assignment to treatment and must be a real number between 0 and 1 inclusive. (optional)
 #' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1.  (optional)
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
-#' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
+#' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
 #' @param check_inputs logical. Defaults to TRUE.
 #'
-#' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by condition_names) in a multi-arm trial.
+#' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.
 #' @export
 #'
 #' @importFrom stats rbinom
@@ -27,7 +27,7 @@
 #' table(Z)
 #'
 #' Z <- simple_ra(N=100, prob_each = c(0.3, 0.7),
-#'                condition_names = c("control", "treatment"))
+#'                conditions = c("control", "treatment"))
 #' table(Z)
 #'
 #' # Multi-arm Designs
@@ -38,17 +38,17 @@
 #' table(Z)
 #'
 #' Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4),
-#'                condition_names=c("control", "placebo", "treatment"))
+#'                conditions=c("control", "placebo", "treatment"))
 #' table(Z)
 #'
-#' Z <- simple_ra(N=100, condition_names=c("control", "placebo", "treatment"))
+#' Z <- simple_ra(N=100, conditions=c("control", "placebo", "treatment"))
 #' table(Z)
 simple_ra <-
   function(N,
            prob = NULL,
            prob_each = NULL,
            num_arms = NULL,
-           condition_names = NULL,
+           conditions = NULL,
            check_inputs = TRUE) {
     if (check_inputs) {
       input_check <-
@@ -57,10 +57,10 @@ simple_ra <-
           prob = prob,
           prob_each = prob_each,
           num_arms = num_arms,
-          condition_names = condition_names
+          conditions = conditions
         )
       num_arms <- input_check$num_arms
-      condition_names <- input_check$condition_names
+      conditions <- input_check$conditions
     }
     
     if (!is.null(prob) & is.null(prob_each)) {
@@ -73,11 +73,11 @@ simple_ra <-
     
     assignment <-
       sample(
-        x = condition_names,
+        x = conditions,
         size = N,
         replace = TRUE,
         prob = prob_each
       )
-    assignment <- clean_condition_names(assignment, condition_names)
+    assignment <- clean_condition_names(assignment, conditions)
     return(assignment)
   }

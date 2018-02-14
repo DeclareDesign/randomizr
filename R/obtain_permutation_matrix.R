@@ -71,7 +71,7 @@ obtain_permutation_matrix <-
       m_eaches <- unique(r_parts_perms3, MARGIN = 2)
       
       perms_list <- sapply(1:ncol(m_eaches), function(j) {
-        permutations_m_each(m_each = m_eaches[, j], declaration$cleaned_arguments$condition_names)
+        permutations_m_each(m_each = m_eaches[, j], declaration$cleaned_arguments$conditions)
       })
         
       perms <- do.call(cbind, perms_list)
@@ -83,7 +83,7 @@ obtain_permutation_matrix <-
         complete_ra_permutations(
           N = nrow(declaration$probabilities_matrix),
           prob_each = declaration$probabilities_matrix[1,],
-          condition_names = declaration$cleaned_arguments$condition_names
+          conditions = declaration$cleaned_arguments$conditions
         )
     }
     
@@ -109,7 +109,7 @@ obtain_permutation_matrix <-
       
       condition_names_list <- lapply(1:length(ns_per_block_list),
                                      function(x)
-                                       declaration$cleaned_arguments$condition_names)
+                                       declaration$cleaned_arguments$conditions)
       
       perms_by_block <- mapply(FUN = complete_ra_permutations,
                                ns_per_block_list,
@@ -136,7 +136,7 @@ obtain_permutation_matrix <-
         complete_ra_permutations(
           N = n_clust,
           prob_each = declaration$probabilities_matrix[1,],
-          condition_names = declaration$cleaned_arguments$condition_names
+          conditions = declaration$cleaned_arguments$conditions
         )
       
       # expand
@@ -177,7 +177,7 @@ obtain_permutation_matrix <-
       
       condition_names_list <- lapply(1:length(ns_per_block_list),
                                      function(x)
-                                       declaration$cleaned_arguments$condition_names)
+                                       declaration$cleaned_arguments$conditions)
       
       perms_by_block <- mapply(FUN = complete_ra_permutations,
                                ns_per_block_list,
@@ -231,33 +231,33 @@ permutations <- function(n) {
 }
 
 complete_ra_permutations <-
-  function(N, prob_each, condition_names) {
+  function(N, prob_each, conditions) {
     m_each_floor <- floor(N * prob_each)
     N_floor <- sum(m_each_floor)
     N_remainder <- N - N_floor
     
     if (N_remainder == 0) {
       perms <-
-        permutations_m_each(m_each = m_each_floor, condition_names = condition_names)
+        permutations_m_each(m_each = m_each_floor, conditions = conditions)
       
     } else {
       prob_each_fix_up <- ((prob_each * N) - m_each_floor) / N_remainder
       
       fix_ups <-
-        expand.grid(replicate(N_remainder, condition_names, simplify = FALSE),
+        expand.grid(replicate(N_remainder, conditions, simplify = FALSE),
                     stringsAsFactors = FALSE)
       fix_ups_probs <-
         c(prob_each_fix_up %*% t(prob_each_fix_up))
       
       m_each_es <-
         t(apply(fix_ups, 1,  function(x) {
-          sapply(condition_names, function(i)
+          sapply(conditions, function(i)
             sum(x %in% i))
         })) + m_each_floor
       
       perms <-
         sapply(1:ncol(m_each_es), function(j)
-          permutations_m_each(m_each_es[, j], condition_names), simplify = FALSE)
+          permutations_m_each(m_each_es[, j], conditions), simplify = FALSE)
       
       perms <- do.call(cbind, perms)
     }
@@ -270,7 +270,7 @@ replace_with_cond <-
     return(vec)
   }
 
-permutations_m_each <- function(m_each, condition_names) {
+permutations_m_each <- function(m_each, conditions) {
   N <- sum(m_each)
   # intialize list
   
@@ -283,7 +283,7 @@ permutations_m_each <- function(m_each, condition_names) {
   ra_list <- mapply(replace_with_cond,
                     ra_list,
                     old_pos,
-                    cond = condition_names[1],
+                    cond = conditions[1],
                     SIMPLIFY = FALSE)
   
   
@@ -320,7 +320,7 @@ permutations_m_each <- function(m_each, condition_names) {
       ra_list <- mapply(replace_with_cond,
                         ra_list,
                         new_pos,
-                        cond = condition_names[j],
+                        cond = conditions[j],
                         SIMPLIFY = FALSE)
       
       old_pos <- new_pos
@@ -330,7 +330,7 @@ permutations_m_each <- function(m_each, condition_names) {
   
   ra_list <-
     lapply(ra_list, function(x) {
-      x[is.na(x)] <- condition_names[length(condition_names)]
+      x[is.na(x)] <- conditions[length(conditions)]
       return(x)
     })
   

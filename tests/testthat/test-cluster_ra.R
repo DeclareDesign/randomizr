@@ -9,7 +9,7 @@ table(Z, clusters)
 Z <- cluster_ra(clusters=clusters, m=13)
 table(Z, clusters)
 Z <- cluster_ra(clusters=clusters, m_each = c(10, 16), 
-                condition_names = c("control", "treatment"))
+                conditions = c("control", "treatment"))
 
 Z <- cluster_ra(clusters=clusters, prob = .5)
 table(Z, clusters)
@@ -26,11 +26,11 @@ Z <- cluster_ra(clusters=clusters, m_each=c(7, 7, 12))
 table(Z, clusters)
 
 Z <- cluster_ra(clusters=clusters, m_each=c(7, 7, 12), 
-                condition_names=c("control", "placebo", "treatment"))
+                conditions=c("control", "placebo", "treatment"))
 table(Z, clusters)
 
 Z <- cluster_ra(clusters=clusters, 
-                condition_names=c("control", "placebo", "treatment"))
+                conditions=c("control", "placebo", "treatment"))
 table(Z, clusters)
 
 Z <- cluster_ra(clusters=clusters, prob_each = c(.1, .2, .7))

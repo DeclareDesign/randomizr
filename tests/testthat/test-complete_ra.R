@@ -9,7 +9,7 @@ expect_error(complete_ra(100, m_each = c(20, 20, 20)))
 expect_error(complete_ra(
   100,
   m_each = c(20, 20, 60),
-  condition_names = c(1, 2)
+  conditions = c(1, 2)
 ))
 expect_error(complete_ra(100, prob_each = c(.2, .7)))
 expect_error(complete_ra(N = 100, m = 101))
@@ -20,17 +20,17 @@ expect_error(complete_ra(N = 1, m = 2))
 table(complete_ra(
   100,
   m = 30,
-  condition_names = c("Control", "Treatment")
+  conditions = c("Control", "Treatment")
 ))
 
 # should this be allowed?
 complete_ra(100, num_arms = 1)
 complete_ra(100, m_each = c(100))
-complete_ra(100, condition_names = c("Treatment"))
+complete_ra(100, conditions = c("Treatment"))
 
 
 table(complete_ra(1, num_arms = 2))
-table(complete_ra(1, num_arms = 2, condition_names = c(0, 1)))
+table(complete_ra(1, num_arms = 2, conditions = c(0, 1)))
 
 Z <- complete_ra(N = 100)
 expect_equal(sum(Z), 50)
@@ -46,7 +46,7 @@ expect_equal(sum(Z), 50)
 Z <- complete_ra(
   N = 100,
   m_each = c(30, 70),
-  condition_names = c("control", "treatment")
+  conditions = c("control", "treatment")
 )
 table(Z)
 
@@ -63,13 +63,13 @@ expect_equivalent(as.numeric(table(Z)), c(30, 30, 40))
 Z <- complete_ra(
   N = 100,
   m_each = c(30, 30, 40),
-  condition_names = c("control", "placebo", "treatment")
+  conditions = c("control", "placebo", "treatment")
 )
 expect_equivalent(as.numeric(table(Z)), c(30, 30, 40))
 
 Z <-
   complete_ra(N = 100,
-              condition_names = c("control", "placebo", "treatment"))
+              conditions = c("control", "placebo", "treatment"))
 
 expect_true(all(table(Z) %in% c(33, 34)))
 
@@ -79,7 +79,7 @@ expect_true(all(table(Z) %in% c(33, 34)))
 
 complete_ra(2,
             m_each = c(1, 0, 1),
-            condition_names = c("T1", "T2", "T3"))
+            conditions = c("T1", "T2", "T3"))
 
 
 expect_lt(sum(replicate(1000, complete_ra(1))), 600)
@@ -112,6 +112,6 @@ conditions <- factor(c("T1", "T2"), levels = c("T1", "T2", "T3"))
 complete_ra(
   N = 67,
   prob_each = c(.5, .5),
-  condition_names = conditions,
+  conditions = conditions,
   check_inputs = FALSE
 )

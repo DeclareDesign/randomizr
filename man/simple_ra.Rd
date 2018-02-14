@@ -5,7 +5,7 @@
 \title{Simple Random Assignment}
 \usage{
 simple_ra(N, prob = NULL, prob_each = NULL, num_arms = NULL,
-  condition_names = NULL, check_inputs = TRUE)
+  conditions = NULL, check_inputs = TRUE)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
@@ -16,12 +16,12 @@ simple_ra(N, prob = NULL, prob_each = NULL, num_arms = NULL,
 
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
-\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
+\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
 }
 \value{
-A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by condition_names) in a multi-arm trial.
+A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.
 }
 \description{
 simple_ra implements a random assignment procedure in which units are independently assigned to treatment conditions. Because units are assigned independently, the number of units that are assigned to each condition can vary from assignment to assignment. For most experimental applications in which the number of experimental units is known in advance, \code{\link{complete_ra}} is better because the number of units assigned to each condition is fixed across assignments.\cr\cr
@@ -38,7 +38,7 @@ Z <- simple_ra(N=100, prob=0.5)
 table(Z)
 
 Z <- simple_ra(N=100, prob_each = c(0.3, 0.7),
-               condition_names = c("control", "treatment"))
+               conditions = c("control", "treatment"))
 table(Z)
 
 # Multi-arm Designs
@@ -49,9 +49,9 @@ Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4))
 table(Z)
 
 Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4),
-               condition_names=c("control", "placebo", "treatment"))
+               conditions=c("control", "placebo", "treatment"))
 table(Z)
 
-Z <- simple_ra(N=100, condition_names=c("control", "placebo", "treatment"))
+Z <- simple_ra(N=100, conditions=c("control", "placebo", "treatment"))
 table(Z)
 }

@@ -52,7 +52,7 @@ obtain_num_permutations <-
         complete_ra_num_permutations(
           N = nrow(declaration$probabilities_matrix),
           prob_each = declaration$probabilities_matrix[1, ],
-          condition_names = declaration$cleaned_arguments$condition_names
+          conditions = declaration$cleaned_arguments$conditions
         )
       
     }
@@ -77,7 +77,7 @@ obtain_num_permutations <-
       
       condition_names_list <- lapply(1:length(ns_per_block_list),
                                      function(x)
-                                       declaration$cleaned_arguments$condition_names)
+                                       declaration$cleaned_arguments$conditions)
       
       num_permutations_by_block <- mapply(FUN = complete_ra_num_permutations,
                                           ns_per_block_list,
@@ -101,7 +101,7 @@ obtain_num_permutations <-
         complete_ra_num_permutations(
           N = n_clust,
           prob_each = declaration$probabilities_matrix[1, ],
-          condition_names = declaration$cleaned_arguments$condition_names
+          conditions = declaration$cleaned_arguments$conditions
         )
       
     }
@@ -134,7 +134,7 @@ obtain_num_permutations <-
       
       condition_names_list <- lapply(1:length(ns_per_block_list),
                                      function(x)
-                                       declaration$cleaned_arguments$condition_names)
+                                       declaration$cleaned_arguments$conditions)
       
       num_permutations_by_block <- mapply(FUN = complete_ra_num_permutations,
                                           ns_per_block_list,
@@ -171,7 +171,7 @@ multinomial_coefficient <-
   }
 
 complete_ra_num_permutations <-
-  function(N, prob_each, condition_names) {
+  function(N, prob_each, conditions) {
     m_each_floor <- floor(N * prob_each)
     N_floor <- sum(m_each_floor)
     N_remainder <- N - N_floor
@@ -184,7 +184,7 @@ complete_ra_num_permutations <-
       prob_each_fix_up <- ((prob_each * N) - m_each_floor) / N_remainder
       
       fix_ups <-
-        expand.grid(replicate(N_remainder, condition_names, simplify = FALSE),
+        expand.grid(replicate(N_remainder, conditions, simplify = FALSE),
                     stringsAsFactors = FALSE)
       fix_ups_probs <-
         c(prob_each_fix_up %*% t(prob_each_fix_up))
@@ -198,7 +198,7 @@ complete_ra_num_permutations <-
       
       m_eaches <-
         apply(fix_up_conditions, 2, function(x) {
-          sapply(condition_names, function(i)
+          sapply(conditions, function(i)
             sum(x %in% i)) + m_each_floor
         })
       

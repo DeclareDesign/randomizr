@@ -36,7 +36,7 @@ block_m_each <- rbind(c(10, 40),
                       c(50, 150))
 
 Z <- block_ra(blocks=blocks, block_m_each=block_m_each, 
-              condition_names=c("control", "treatment"))
+              conditions=c("control", "treatment"))
 table(blocks, Z)
 
 # Multi-arm Designs
@@ -61,7 +61,7 @@ Z <- block_ra(blocks=blocks, block_m_each=block_m_each )
 table(blocks, Z)
 
 Z <- block_ra(blocks=blocks, block_m_each=block_m_each, 
-              condition_names=c("control", "placebo", "treatment"))
+              conditions=c("control", "placebo", "treatment"))
 table(blocks, Z)
 
 Z <- block_ra(blocks=blocks, prob_each=c(.1, .1, .8))
@@ -118,15 +118,15 @@ expect_error(block_ra(blocks=blocks, num_arms = 2, block_prob_each = block_prob_
 expect_error(block_ra(blocks=blocks, num_arms = 2, prob_each = c(.2, .1, .7)))
 expect_error(block_ra(blocks=blocks, num_arms = 3, block_m_each=block_m_each))
 
-expect_error(block_ra(blocks=blocks, condition_names = c("1", "2"), block_prob_each = block_prob_each))
-expect_error(block_ra(blocks=blocks, condition_names = c("1", "2"), prob_each = c(.2, .1, .7)))
-expect_error(block_ra(blocks=blocks, condition_names = c("1", "2", "3"), block_m_each=block_m_each))
+expect_error(block_ra(blocks=blocks, conditions = c("1", "2"), block_prob_each = block_prob_each))
+expect_error(block_ra(blocks=blocks, conditions = c("1", "2"), prob_each = c(.2, .1, .7)))
+expect_error(block_ra(blocks=blocks, conditions = c("1", "2", "3"), block_m_each=block_m_each))
 
-expect_error(block_ra(blocks=blocks, condition_names = c("1", "2", "3"), num_arms = 2))
+expect_error(block_ra(blocks=blocks, conditions = c("1", "2", "3"), num_arms = 2))
 
 
 
 cookie_type <- rep(c("sugar", "chip"), c(36, 36))
-batch <- block_ra(blocks = cookie_type, block_m = c(18, 18), condition_names = c("batch_1", "batch_2"))
+batch <- block_ra(blocks = cookie_type, block_m = c(18, 18), conditions = c("batch_1", "batch_2"))
 
 

@@ -7,15 +7,15 @@
 #' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
 #' @param m Use for a two-arm design in which the scalar m describes the fixed number of units to assign in each block. This number does not vary across blocks.
 #' @param block_m Use for a two-arm design in which the vector block_m describes the number of units to assign to treatment within each block. block_m must be a numeric vector that is as long as the number of blocks. Note that in previous versions of randomizr, block_m behaved like block_m_each.
-#' @param block_m_each Use for a multi-arm design in which the values of block_m_each determine the number of units assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of condition_names, if specified.
+#' @param block_m_each Use for a multi-arm design in which the values of block_m_each determine the number of units assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of conditions, if specified.
 #' @param block_prob Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Differs from prob in that the probability of assignment can vary across blocks.
 #' @param block_prob_each Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
-#' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
+#' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
 #' @param check_inputs logical. Defaults to TRUE.
 #' @param block_var deprecated
 #'
-#' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by condition_names) in a multi-arm trial.
+#' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.
 #' @export
 #'
 #'
@@ -51,7 +51,7 @@
 #'                  c(50, 150))
 #'
 #' Z <- block_ra(blocks = blocks, block_m_each = block_m_each,
-#'               condition_names = c("control", "treatment"))
+#'               conditions = c("control", "treatment"))
 #' table(blocks, Z)
 #'
 #' # Multi-arm Designs
@@ -65,7 +65,7 @@
 #' table(blocks, Z)
 #'
 #' Z <- block_ra(blocks = blocks, block_m_each = block_m_each,
-#'               condition_names = c("control", "placebo", "treatment"))
+#'               conditions = c("control", "placebo", "treatment"))
 #' table(blocks, Z)
 #'
 #' Z <- block_ra(blocks = blocks, prob_each = c(.1, .1, .8))
@@ -82,7 +82,7 @@ block_ra <- function(blocks = block_var,
                      block_prob = NULL,
                      block_prob_each = NULL,
                      num_arms = NULL,
-                     condition_names = NULL,
+                     conditions = NULL,
                      check_inputs = TRUE,
                      block_var = NULL) {
   warn_deprecated_args(block_var)
@@ -98,10 +98,10 @@ block_ra <- function(blocks = block_var,
       block_prob = block_prob,
       block_prob_each = block_prob_each,
       num_arms = num_arms,
-      condition_names = condition_names
+      conditions = conditions
     )
     num_arms <- input_check$num_arms
-    condition_names <- input_check$condition_names
+    conditions <- input_check$conditions
     N_per_block <- input_check$N_per_block
     
   } else {
@@ -116,7 +116,7 @@ block_ra <- function(blocks = block_var,
     prob_each <- c(1 - prob, prob)
   }
   
-  # Setup: obtain number of arms and condition_names
+  # Setup: obtain number of arms and conditions
   
   # Case 0: m is specified
   
@@ -132,7 +132,7 @@ block_ra <- function(blocks = block_var,
         N = N_per_block,
         m = block_m,
         MoreArgs = list(
-          condition_names = condition_names,
+          conditions = conditions,
           num_arms = num_arms,
           check_inputs = FALSE
         ),
@@ -141,7 +141,7 @@ block_ra <- function(blocks = block_var,
     
     assignment <-
       unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assignment <- clean_condition_names(assignment, condition_names)
+    assignment <- clean_condition_names(assignment, conditions)
     return(assignment)
   }
   
@@ -153,7 +153,7 @@ block_ra <- function(blocks = block_var,
         N = N_per_block,
         prob = block_prob,
         MoreArgs = list(
-          condition_names = condition_names,
+          conditions = conditions,
           num_arms = num_arms,
           check_inputs = FALSE
         ),
@@ -162,7 +162,7 @@ block_ra <- function(blocks = block_var,
     
     assignment <-
       unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assignment <- clean_condition_names(assignment, condition_names)
+    assignment <- clean_condition_names(assignment, conditions)
     return(assignment)
   }
   
@@ -177,7 +177,7 @@ block_ra <- function(blocks = block_var,
         N = N_per_block,
         MoreArgs = list(
           prob_each = prob_each,
-          condition_names = condition_names,
+          conditions = conditions,
           num_arms = num_arms,
           check_inputs = FALSE
         ),
@@ -186,7 +186,7 @@ block_ra <- function(blocks = block_var,
     
     assignment <-
       unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assignment <- clean_condition_names(assignment, condition_names)
+    assignment <- clean_condition_names(assignment, conditions)
     return(assignment)
   }
   
@@ -203,7 +203,7 @@ block_ra <- function(blocks = block_var,
         N = N_per_block,
         m_each = block_m_each_list,
         MoreArgs = list(
-          condition_names = condition_names,
+          conditions = conditions,
           num_arms = num_arms,
           check_inputs = FALSE
         ),
@@ -212,7 +212,7 @@ block_ra <- function(blocks = block_var,
     
     assignment <-
       unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assignment <- clean_condition_names(assignment, condition_names)
+    assignment <- clean_condition_names(assignment, conditions)
     return(assignment)
   }
   
@@ -230,7 +230,7 @@ block_ra <- function(blocks = block_var,
         N = N_per_block,
         prob_each = block_prob_each_list,
         MoreArgs = list(
-          condition_names = condition_names,
+          conditions = conditions,
           num_arms = num_arms,
           check_inputs = FALSE
         ),
@@ -239,7 +239,7 @@ block_ra <- function(blocks = block_var,
     
     assignment <-
       unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assignment <- clean_condition_names(assignment, condition_names)
+    assignment <- clean_condition_names(assignment, conditions)
     return(assignment)
   }
 }
