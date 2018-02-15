@@ -112,7 +112,7 @@
     
 
     <pre class="usage"><span class='fu'>simple_ra_probabilities</span>(<span class='no'>N</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+  <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -134,7 +134,7 @@
       <td><p>The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)</p></td>
     </tr>
     <tr>
-      <th>condition_names</th>
+      <th>conditions</th>
       <td><p>A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)</p></td>
     </tr>
     <tr>
@@ -167,7 +167,7 @@
 #&gt; [5,]    0.5    0.5
 #&gt; [6,]    0.5    0.5</div><div class='input'>
 <span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra_probabilities</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0.3</span>, <span class='fl'>0.7</span>),
-                        <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"treatment"</span>))
+                        <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;      prob_control prob_treatment
 #&gt; [1,]          0.3            0.7
 #&gt; [2,]          0.3            0.7
@@ -193,7 +193,7 @@
 #&gt; [5,]     0.3     0.3     0.4
 #&gt; [6,]     0.3     0.3     0.4</div><div class='input'>
 <span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra_probabilities</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>prob_each</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>0.3</span>, <span class='fl'>0.3</span>, <span class='fl'>0.4</span>),
-                        <span class='kw'>condition_names</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
+                        <span class='kw'>conditions</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;      prob_control prob_placebo prob_treatment
 #&gt; [1,]          0.3          0.3            0.4
 #&gt; [2,]          0.3          0.3            0.4
@@ -201,7 +201,7 @@
 #&gt; [4,]          0.3          0.3            0.4
 #&gt; [5,]          0.3          0.3            0.4
 #&gt; [6,]          0.3          0.3            0.4</div><div class='input'>
-<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra_probabilities</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>condition_names</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
+<span class='no'>prob_mat</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra_probabilities</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>conditions</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>head</span>(<span class='no'>prob_mat</span>)</div><div class='output co'>#&gt;      prob_control prob_placebo prob_treatment
 #&gt; [1,]    0.3333333    0.3333333      0.3333333
 #&gt; [2,]    0.3333333    0.3333333      0.3333333

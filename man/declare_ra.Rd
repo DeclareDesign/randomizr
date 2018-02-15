@@ -7,9 +7,9 @@
 declare_ra(N = NULL, blocks = block_var, clusters = clust_var, m = NULL,
   m_each = NULL, prob = NULL, prob_each = NULL, block_m = NULL,
   block_m_each = NULL, block_prob = NULL, block_prob_each = NULL,
-  num_arms = NULL, conditions = NULL, simple = FALSE,
+  num_arms = NULL, conditions = condition_names, simple = FALSE,
   permutation_matrix = NULL, check_inputs = TRUE, block_var = NULL,
-  clust_var = NULL)
+  clust_var = NULL, condition_names = NULL)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
@@ -47,6 +47,8 @@ declare_ra(N = NULL, blocks = block_var, clusters = clust_var, m = NULL,
 \item{block_var}{deprecated}
 
 \item{clust_var}{deprecated}
+
+\item{condition_names}{deprecated}
 }
 \value{
 A list of class "declaration".  The list has five entries:

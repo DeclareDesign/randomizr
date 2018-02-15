@@ -5,8 +5,9 @@
 \title{Cluster Random Assignment}
 \usage{
 cluster_ra(clusters = clust_var, m = NULL, m_each = NULL, prob = NULL,
-  prob_each = NULL, num_arms = NULL, conditions = NULL, simple = FALSE,
-  check_inputs = TRUE, clust_var = NULL)
+  prob_each = NULL, num_arms = NULL, conditions = condition_names,
+  simple = FALSE, check_inputs = TRUE, clust_var = NULL,
+  condition_names = NULL)
 }
 \arguments{
 \item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
@@ -28,6 +29,8 @@ cluster_ra(clusters = clust_var, m = NULL, m_each = NULL, prob = NULL,
 \item{check_inputs}{logical. Defaults to TRUE.}
 
 \item{clust_var}{deprecated}
+
+\item{condition_names}{deprecated}
 }
 \value{
 A vector of length N that indicates the treatment condition of each unit.

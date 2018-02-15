@@ -114,7 +114,8 @@ If only N is specified, a two-arm trial with prob = 0.5 is assumed.</p>
     
 
     <pre class="usage"><span class='fu'>simple_ra</span>(<span class='no'>N</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+  <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='no'>condition_names</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -136,18 +137,22 @@ If only N is specified, a two-arm trial with prob = 0.5 is assumed.</p>
       <td><p>The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)</p></td>
     </tr>
     <tr>
-      <th>condition_names</th>
+      <th>conditions</th>
       <td><p>A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)</p></td>
     </tr>
     <tr>
       <th>check_inputs</th>
       <td><p>logical. Defaults to TRUE.</p></td>
     </tr>
+    <tr>
+      <th>condition_names</th>
+      <td><p>deprecated</p></td>
+    </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by condition_names) in a multi-arm trial.</p>
+    <p>A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -162,7 +167,7 @@ If only N is specified, a two-arm trial with prob = 0.5 is assumed.</p>
 #&gt;  0  1 
 #&gt; 46 54 </div><div class='input'>
 <span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0.3</span>, <span class='fl'>0.7</span>),
-               <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"treatment"</span>))
+               <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>table</span>(<span class='no'>Z</span>)</div><div class='output co'>#&gt; Z
 #&gt;   control treatment 
 #&gt;        31        69 </div><div class='input'>
@@ -176,11 +181,11 @@ If only N is specified, a two-arm trial with prob = 0.5 is assumed.</p>
 #&gt; T1 T2 T3 
 #&gt; 32 31 37 </div><div class='input'>
 <span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>prob_each</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>0.3</span>, <span class='fl'>0.3</span>, <span class='fl'>0.4</span>),
-               <span class='kw'>condition_names</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
+               <span class='kw'>conditions</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>table</span>(<span class='no'>Z</span>)</div><div class='output co'>#&gt; Z
 #&gt;   control   placebo treatment 
 #&gt;        29        34        37 </div><div class='input'>
-<span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>condition_names</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
+<span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>conditions</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>table</span>(<span class='no'>Z</span>)</div><div class='output co'>#&gt; Z
 #&gt;   control   placebo treatment 
 #&gt;        28        36        36 </div></pre>

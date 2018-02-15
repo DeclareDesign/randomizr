@@ -6,8 +6,8 @@
 \usage{
 block_ra(blocks = block_var, prob = NULL, prob_each = NULL, m = NULL,
   block_m = NULL, block_m_each = NULL, block_prob = NULL,
-  block_prob_each = NULL, num_arms = NULL, conditions = NULL,
-  check_inputs = TRUE, block_var = NULL)
+  block_prob_each = NULL, num_arms = NULL, conditions = condition_names,
+  check_inputs = TRUE, block_var = NULL, condition_names = NULL)
 }
 \arguments{
 \item{blocks}{A vector of length N that indicates which block each unit belongs to. Can be a character, factor, or numeric vector. (required)}
@@ -33,6 +33,8 @@ block_ra(blocks = block_var, prob = NULL, prob_each = NULL, m = NULL,
 \item{check_inputs}{logical. Defaults to TRUE.}
 
 \item{block_var}{deprecated}
+
+\item{condition_names}{deprecated}
 }
 \value{
 A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.

@@ -7,8 +7,8 @@
 block_and_cluster_ra(blocks = block_var, clusters = clust_var,
   prob = NULL, prob_each = NULL, m = NULL, block_m = NULL,
   block_m_each = NULL, block_prob = NULL, block_prob_each = NULL,
-  num_arms = NULL, conditions = NULL, check_inputs = TRUE,
-  block_var = NULL, clust_var = NULL)
+  num_arms = NULL, conditions = condition_names, check_inputs = TRUE,
+  block_var = NULL, clust_var = NULL, condition_names = NULL)
 }
 \arguments{
 \item{blocks}{A vector of length N that indicates which block each unit belongs to.}
@@ -38,6 +38,8 @@ block_and_cluster_ra(blocks = block_var, clusters = clust_var,
 \item{block_var}{deprecated}
 
 \item{clust_var}{deprecated}
+
+\item{condition_names}{deprecated}
 }
 \value{
 A vector of length N that indicates the treatment condition of each unit.
