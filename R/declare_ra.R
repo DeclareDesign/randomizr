@@ -18,6 +18,7 @@
 #' @param check_inputs logical. Defaults to TRUE.
 #' @param block_var deprecated
 #' @param clust_var deprecated
+#' @param condition_names deprecated
 #'
 #' @return A list of class "declaration".  The list has five entries:
 #'   $ra_function, a function that generates random assignments according to the declaration.
@@ -103,10 +104,13 @@ declare_ra <- function(N = NULL,
                        block_prob = NULL,
                        block_prob_each = NULL,
                        num_arms = NULL,
-                       conditions = NULL,
+                       conditions = condition_names,
                        simple = FALSE,
                        permutation_matrix = NULL,
-                       check_inputs = TRUE, block_var=NULL, clust_var=NULL) {
+                       check_inputs = TRUE, 
+                       block_var = NULL, 
+                       clust_var = NULL,
+                       condition_names = NULL) {
   input_check <- NULL
   
   warn_deprecated_args(block_var, clust_var)
@@ -368,9 +372,12 @@ conduct_ra <- function(declaration = NULL,
                        block_prob = NULL,
                        block_prob_each = NULL,
                        num_arms = NULL,
-                       conditions = NULL,
+                       conditions = condition_names,
                        simple = FALSE,
-                       check_inputs = TRUE, block_var=NULL, clust_var=NULL) {
+                       check_inputs = TRUE, 
+                       block_var = NULL, 
+                       clust_var = NULL,
+                       condition_names = NULL) {
   if (!is.null(declaration)) {
     if (class(declaration) != "ra_declaration") {
       stop("You must provide a random assignment declaration created by declare_ra().")
@@ -456,8 +463,11 @@ obtain_condition_probabilities <-
            block_prob = NULL,
            block_prob_each = NULL,
            num_arms = NULL,
-           conditions = NULL,
-           simple = FALSE, block_var=NULL, clust_var=NULL) {
+           conditions = condition_names,
+           simple = FALSE, 
+           block_var = NULL, 
+           clust_var = NULL,
+           condition_names = NULL) {
     # checks
     if (!is.null(declaration)) {
       if (class(declaration) != "ra_declaration") {

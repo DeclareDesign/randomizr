@@ -16,6 +16,7 @@
 #' @param check_inputs logical. Defaults to TRUE.
 #' @param block_var deprecated
 #' @param clust_var deprecated
+#' @param condition_names deprecated
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #'
@@ -74,10 +75,11 @@ block_and_cluster_ra <-
            block_prob = NULL,
            block_prob_each = NULL,
            num_arms = NULL,
-           conditions = NULL,
+           conditions = condition_names,
            check_inputs = TRUE,
            block_var = NULL,
-           clust_var = NULL) {
+           clust_var = NULL,
+           condition_names = NULL) {
     
     warn_deprecated_args(block_var, clust_var)
     

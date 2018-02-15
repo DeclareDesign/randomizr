@@ -12,6 +12,7 @@
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment of clusters to conditions is used. When simple = TRUE, please do not specify m or m_each.
 #' @param check_inputs logical. Defaults to TRUE.
 #' @param clust_var deprecated
+#' @param condition_names deprecated
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #' @export
@@ -49,10 +50,11 @@ cluster_ra <- function(clusters = clust_var,
                        prob = NULL,
                        prob_each = NULL,
                        num_arms = NULL,
-                       conditions = NULL,
+                       conditions = condition_names,
                        simple = FALSE,
                        check_inputs = TRUE,
-                       clust_var = NULL) {
+                       clust_var = NULL,
+                       condition_names = NULL) {
   warn_deprecated_args(clust_var = clust_var)
   if (check_inputs) {
     input_check <-

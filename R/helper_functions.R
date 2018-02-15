@@ -19,7 +19,8 @@ check_randomizr_arguments <-
            block_prob_each = NULL,
            clusters = NULL,
            num_arms = NULL,
-           conditions = NULL) {
+           conditions = condition_names,
+           condition_names = NULL) {
     conflict_args <- list(
       prob = prob,
       m = m,
