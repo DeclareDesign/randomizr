@@ -5,7 +5,7 @@
 \title{Probabilties of assignment: Simple Random Assignment}
 \usage{
 simple_ra_probabilities(N, prob = NULL, prob_each = NULL, num_arms = NULL,
-  condition_names = NULL, check_inputs = TRUE)
+  conditions = NULL, check_inputs = TRUE)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
@@ -16,7 +16,7 @@ simple_ra_probabilities(N, prob = NULL, prob_each = NULL, num_arms = NULL,
 
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
-\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
+\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
 }
@@ -35,7 +35,7 @@ prob_mat <- simple_ra_probabilities(N=100, prob=0.5)
 head(prob_mat)
 
 prob_mat <- simple_ra_probabilities(N=100, prob_each = c(0.3, 0.7),
-                        condition_names = c("control", "treatment"))
+                        conditions = c("control", "treatment"))
 head(prob_mat)
 
 # Multi-arm Designs
@@ -46,10 +46,10 @@ prob_mat <- simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4))
 head(prob_mat)
 
 prob_mat <- simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4),
-                        condition_names=c("control", "placebo", "treatment"))
+                        conditions=c("control", "placebo", "treatment"))
 head(prob_mat)
 
-prob_mat <- simple_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
+prob_mat <- simple_ra_probabilities(N=100, conditions=c("control", "placebo", "treatment"))
 head(prob_mat)
 
 }

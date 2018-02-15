@@ -7,11 +7,12 @@
 #' @param m_each Use for a multi-arm design in which the values of m_each determine the number of clusters assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many clusters should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)
 #' @param prob Use for a two-arm design in which either floor(N_clusters*prob) or ceiling(N_clusters*prob) clusters are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_clusters*prob) clusters will be assigned to treatment and with probability prob, ceiling(N_clusters*prob) clusters will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
 #' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of clusters assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
-#' @param num_arms The total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.
-#' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.
+#' @param num_arms The total number of treatment arms. If unspecified, will be determined from the length of m_each or conditions.
+#' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment of clusters to conditions is used. When simple = TRUE, please do not specify m or m_each.
 #' @param check_inputs logical. Defaults to TRUE.
 #' @param clust_var deprecated
+#' @param condition_names deprecated
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #' @export
@@ -26,7 +27,7 @@
 #' table(Z, clusters)
 #'
 #' Z <- cluster_ra(clusters = clusters, m_each = c(10, 16),
-#'                 condition_names = c("control", "treatment"))
+#'                 conditions = c("control", "treatment"))
 #' table(Z, clusters)
 #'
 #' # Multi-arm Designs
@@ -37,11 +38,11 @@
 #' table(Z, clusters)
 #'
 #' Z <- cluster_ra(clusters = clusters, m_each = c(7, 7, 12),
-#'                 condition_names = c("control", "placebo", "treatment"))
+#'                 conditions = c("control", "placebo", "treatment"))
 #' table(Z, clusters)
 #'
 #' Z <- cluster_ra(clusters = clusters,
-#'                 condition_names = c("control", "placebo", "treatment"))
+#'                 conditions = c("control", "placebo", "treatment"))
 #' table(Z, clusters)
 cluster_ra <- function(clusters = clust_var,
                        m = NULL,
@@ -49,10 +50,11 @@ cluster_ra <- function(clusters = clust_var,
                        prob = NULL,
                        prob_each = NULL,
                        num_arms = NULL,
-                       condition_names = NULL,
+                       conditions = condition_names,
                        simple = FALSE,
                        check_inputs = TRUE,
-                       clust_var = NULL) {
+                       clust_var = NULL,
+                       condition_names = NULL) {
   warn_deprecated_args(clust_var = clust_var)
   if (check_inputs) {
     input_check <-
@@ -61,7 +63,7 @@ cluster_ra <- function(clusters = clust_var,
         prob = prob,
         prob_each = prob_each,
         num_arms = num_arms,
-        condition_names = condition_names
+        conditions = conditions
       )
   }
   
@@ -80,7 +82,7 @@ cluster_ra <- function(clusters = clust_var,
       prob = prob,
       prob_each = prob_each,
       num_arms = num_arms,
-      condition_names = condition_names,
+      conditions = conditions,
       check_inputs = check_inputs
     )
     
@@ -92,7 +94,7 @@ cluster_ra <- function(clusters = clust_var,
       prob = prob,
       prob_each = prob_each,
       num_arms = num_arms,
-      condition_names = condition_names,
+      conditions = conditions,
       check_inputs = check_inputs
     )
   }

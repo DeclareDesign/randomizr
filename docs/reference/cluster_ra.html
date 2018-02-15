@@ -112,8 +112,9 @@
     
 
     <pre class="usage"><span class='fu'>cluster_ra</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>m</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+  <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='no'>condition_names</span>,
+  <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -140,10 +141,10 @@
     </tr>
     <tr>
       <th>num_arms</th>
-      <td><p>The total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.</p></td>
+      <td><p>The total number of treatment arms. If unspecified, will be determined from the length of m_each or conditions.</p></td>
     </tr>
     <tr>
-      <th>condition_names</th>
+      <th>conditions</th>
       <td><p>A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.</p></td>
     </tr>
     <tr>
@@ -156,6 +157,10 @@
     </tr>
     <tr>
       <th>clust_var</th>
+      <td><p>deprecated</p></td>
+    </tr>
+    <tr>
+      <th>condition_names</th>
       <td><p>deprecated</p></td>
     </tr>
     </table>
@@ -188,7 +193,7 @@
 #&gt;   0 26
 #&gt;   1  0</div><div class='input'>
 <span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>10</span>, <span class='fl'>16</span>),
-                <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"treatment"</span>))
+                <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>table</span>(<span class='no'>Z</span>, <span class='no'>clusters</span>)</div><div class='output co'>#&gt;            clusters
 #&gt; Z            a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v
 #&gt;   control    0  0  0  0  5  0  0  8  0  0  0  0 13 14 15 16 17  0  0  0  0 22
@@ -221,7 +226,7 @@
 #&gt;   T2 26
 #&gt;   T3  0</div><div class='input'>
 <span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>7</span>, <span class='fl'>7</span>, <span class='fl'>12</span>),
-                <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
+                <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>table</span>(<span class='no'>Z</span>, <span class='no'>clusters</span>)</div><div class='output co'>#&gt;            clusters
 #&gt; Z            a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v
 #&gt;   control    0  0  0  4  0  0  0  8  9  0  0  0 13  0  0  0  0 18  0  0 21  0
@@ -233,7 +238,7 @@
 #&gt;   placebo    0  0 25  0
 #&gt;   treatment 23 24  0  0</div><div class='input'>
 <span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_ra</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>,
-                <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
+                <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>table</span>(<span class='no'>Z</span>, <span class='no'>clusters</span>)</div><div class='output co'>#&gt;            clusters
 #&gt; Z            a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v
 #&gt;   control    1  0  0  0  5  0  0  0  0  0  0 12  0  0 15  0  0 18  0  0  0  0

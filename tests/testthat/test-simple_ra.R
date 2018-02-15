@@ -9,7 +9,7 @@ Z <- simple_ra(N=100, prob=0.5)
 table(Z)
 
 Z <- simple_ra(N=100, prob_each = c(0.3, 0.7), 
-               condition_names = c("control", "treatment"))
+               conditions = c("control", "treatment"))
 table(Z)
 
 # Multi-arm Designs
@@ -20,10 +20,10 @@ Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4))
 table(Z)
 
 Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4), 
-               condition_names=c("control", "placebo", "treatment"))
+               conditions=c("control", "placebo", "treatment"))
 table(Z)
 
-Z <- simple_ra(N=100, condition_names=c("control", "placebo", "treatment"))
+Z <- simple_ra(N=100, conditions=c("control", "placebo", "treatment"))
 table(Z)
 
 

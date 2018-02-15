@@ -114,8 +114,8 @@
     <pre class="usage"><span class='fu'>block_and_cluster_ra</span>(<span class='kw'>blocks</span> <span class='kw'>=</span> <span class='no'>block_var</span>, <span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clust_var</span>,
   <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>m</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>block_m</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>block_m_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>block_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>block_prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>block_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+  <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='no'>condition_names</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>block_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -146,7 +146,7 @@
     </tr>
     <tr>
       <th>block_m_each</th>
-      <td><p>Use for a multi-arm design in which the values of block_m_each determine the number of clusters assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of clusters to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of condition_names, if specified.</p></td>
+      <td><p>Use for a multi-arm design in which the values of block_m_each determine the number of clusters assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of clusters to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of conditions, if specified.</p></td>
     </tr>
     <tr>
       <th>block_prob</th>
@@ -161,7 +161,7 @@
       <td><p>The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)</p></td>
     </tr>
     <tr>
-      <th>condition_names</th>
+      <th>conditions</th>
       <td><p>A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)</p></td>
     </tr>
     <tr>
@@ -174,6 +174,10 @@
     </tr>
     <tr>
       <th>clust_var</th>
+      <td><p>deprecated</p></td>
+    </tr>
+    <tr>
+      <th>condition_names</th>
       <td><p>deprecated</p></td>
     </tr>
     </table>

@@ -116,7 +116,7 @@ You can also name your treatment arms.
 
 ```{r echo=TRUE, results="hide"}
 Z <- simple_ra(N = N, prob_each = c(.2, .2, .6),
-               condition_names=c("control", "placebo", "treatment"))
+               conditions=c("control", "placebo", "treatment"))
 table(Z)
 ```
 ```{r echo=FALSE}
@@ -173,7 +173,7 @@ You can also name your treatment arms.
 
 ```{r echo=TRUE, results="hide"}
 Z <- complete_ra(N = N, m_each = c(100, 200, 292),
-               condition_names = c("control", "placebo", "treatment"))
+               conditions = c("control", "placebo", "treatment"))
 table(Z)
 ```
 ```{r echo=FALSE}
@@ -247,7 +247,7 @@ table(Z, hec$Hair)
 knitr::kable(table(Z, hec$Hair))
 ```
 
-For multiple treatment arms, use the `num_arms` argument, with or without the `condition_names` argument
+For multiple treatment arms, use the `num_arms` argument, with or without the `conditions` argument
 
 ```{r echo=TRUE, results="hide"}
 Z <- block_ra(blocks = hec$Hair, num_arms = 3)
@@ -258,7 +258,7 @@ knitr::kable(table(Z, hec$Hair))
 ```
 
 ```{r echo=TRUE, results="hide"}
-Z <- block_ra(blocks = hec$Hair, condition_names = c("Control", "Placebo", "Treatment"))
+Z <- block_ra(blocks = hec$Hair, conditions = c("Control", "Placebo", "Treatment"))
 table(Z, hec$Hair)
 ```
 ```{r echo=FALSE}
@@ -416,11 +416,11 @@ head(table(clusters, Z_clust))
 knitr::kable(head(table(clusters, Z_clust)))
 ```
 
-... or using `condition_names`
+... or using `conditions`
 
 ```{r echo=TRUE, results="hide"}
 Z_clust <- cluster_ra(clusters=clusters, 
-                      condition_names=c("Control", "Placebo", "Treatment"))
+                      conditions=c("Control", "Placebo", "Treatment"))
 head(table(clusters, Z_clust))
 ```
 ```{r echo=FALSE}
@@ -582,7 +582,7 @@ Whenever you conduct a random assignment for use in an experiment, save it! At a
 ```{r,eval=FALSE}
 hec <- within(hec,{
   Z_blocked <- complete_ra(N = N, m_each = c(100, 200, 292),
-               condition_names = c("control", "placebo", "treatment"))
+               conditions = c("control", "placebo", "treatment"))
   id_var <- 1:nrow(hec)
 })
 write.csv(hec[,c("id_var", "Z_blocked")], file = "MyRandomAssignment.csv")

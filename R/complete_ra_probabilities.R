@@ -15,7 +15,7 @@
 #' head(prob_mat)
 #'
 #' prob_mat <- complete_ra_probabilities(N=100, m_each = c(30, 70),
-#'                           condition_names = c("control", "treatment"))
+#'                           conditions = c("control", "treatment"))
 #' head(prob_mat)
 #'
 #' # Multi-arm Designs
@@ -26,10 +26,10 @@
 #' head(prob_mat)
 #'
 #' prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40),
-#'                           condition_names=c("control", "placebo", "treatment"))
+#'                           conditions=c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
+#' prob_mat <- complete_ra_probabilities(N=100, conditions=c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
 #' prob_mat <- complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))
@@ -42,9 +42,9 @@ complete_ra_probabilities <- function(N,
                                       prob = NULL,
                                       prob_each = NULL,
                                       num_arms = NULL,
-                                      condition_names = NULL,
+                                      conditions = NULL,
                                       check_inputs = TRUE) {
-  # Setup: obtain number of arms and condition_names
+  # Setup: obtain number of arms and conditions
   if (check_inputs) {
     input_check <-
       check_randomizr_arguments(
@@ -54,21 +54,21 @@ complete_ra_probabilities <- function(N,
         prob = prob,
         prob_each = prob_each,
         num_arms = num_arms,
-        condition_names = condition_names
+        conditions = conditions
       )
     num_arms <- input_check$num_arms
-    condition_names <- input_check$condition_names
+    conditions <- input_check$conditions
   }
   
   if (is.null(m_each) &
-      is.null(prob_each) & length(condition_names) == 2) {
+      is.null(prob_each) & length(conditions) == 2) {
     if (N == 1) {
       if (is.null(m) & is.null(prob)) {
         prob_mat <- matrix(
           rep(c(.5, .5), N),
           byrow = TRUE,
           ncol = 2,
-          dimnames = list(NULL,  paste0("prob_", condition_names))
+          dimnames = list(NULL,  paste0("prob_", conditions))
         )
         return(prob_mat)
       }
@@ -83,7 +83,7 @@ complete_ra_probabilities <- function(N,
             rep(c(1, 0), N),
             byrow = TRUE,
             ncol = 2,
-            dimnames = list(NULL,  paste0("prob_", condition_names))
+            dimnames = list(NULL,  paste0("prob_", conditions))
           )
           return(prob_mat)
         }
@@ -92,7 +92,7 @@ complete_ra_probabilities <- function(N,
             rep(c(.5, .5), N),
             byrow = TRUE,
             ncol = 2,
-            dimnames = list(NULL,  paste0("prob_", condition_names))
+            dimnames = list(NULL,  paste0("prob_", conditions))
           )
           return(prob_mat)
         }
@@ -102,7 +102,7 @@ complete_ra_probabilities <- function(N,
           rep(c(1 - prob, prob), N),
           byrow = TRUE,
           ncol = 2,
-          dimnames = list(NULL,  paste0("prob_", condition_names))
+          dimnames = list(NULL,  paste0("prob_", conditions))
         )
         return(prob_mat)
       }
@@ -114,7 +114,7 @@ complete_ra_probabilities <- function(N,
           rep(c(.5, .5), N),
           byrow = TRUE,
           ncol = 2,
-          dimnames = list(NULL,  paste0("prob_", condition_names))
+          dimnames = list(NULL,  paste0("prob_", conditions))
         )
         return(prob_mat)
       }
@@ -124,7 +124,7 @@ complete_ra_probabilities <- function(N,
           rep(c(1 - prob, prob), N),
           byrow = TRUE,
           ncol = 2,
-          dimnames = list(NULL,  paste0("prob_", condition_names))
+          dimnames = list(NULL,  paste0("prob_", conditions))
         )
         return(prob_mat)
       }
@@ -139,7 +139,7 @@ complete_ra_probabilities <- function(N,
               rep(c(1 - (m / N), (m / N)), N),
               byrow = TRUE,
               ncol = 2,
-              dimnames = list(NULL,  paste0("prob_", condition_names))
+              dimnames = list(NULL,  paste0("prob_", conditions))
             )
           return(prob_mat)
         }
@@ -149,7 +149,7 @@ complete_ra_probabilities <- function(N,
             rep(c(1 - prob, prob), N),
             byrow = TRUE,
             ncol = 2,
-            dimnames = list(NULL,  paste0("prob_", condition_names))
+            dimnames = list(NULL,  paste0("prob_", conditions))
           )
         return(prob_mat)
       }
@@ -173,7 +173,7 @@ complete_ra_probabilities <- function(N,
     rep(condition_probabilities, N),
     byrow = TRUE,
     ncol = length(condition_probabilities),
-    dimnames = list(NULL,  paste0("prob_", condition_names))
+    dimnames = list(NULL,  paste0("prob_", conditions))
   )
   return(prob_mat)
   

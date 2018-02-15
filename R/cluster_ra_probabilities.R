@@ -16,7 +16,7 @@
 #'
 #' prob_mat <- cluster_ra_probabilities(clusters = clusters,
 #'                                      m_each = c(9, 17),
-#'                                      condition_names = c("control", "treatment"))
+#'                                      conditions = c("control", "treatment"))
 #'
 #' # Multi-arm Designs
 #' prob_mat <- cluster_ra_probabilities(clusters = clusters, num_arms = 3)
@@ -26,11 +26,11 @@
 #' head(prob_mat)
 #'
 #' prob_mat <- cluster_ra_probabilities(clusters = clusters, m_each = c(7, 7, 12),
-#'                          condition_names=c("control", "placebo", "treatment"))
+#'                          conditions=c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
 #' prob_mat <- cluster_ra_probabilities(clusters = clusters,
-#'                          condition_names=c("control", "placebo", "treatment"))
+#'                          conditions=c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
 #' prob_mat <- cluster_ra_probabilities(clusters = clusters,
@@ -47,7 +47,7 @@ cluster_ra_probabilities <-
            prob = NULL,
            prob_each = NULL,
            num_arms = NULL,
-           condition_names = NULL,
+           conditions = NULL,
            simple = FALSE,
            check_inputs = TRUE,
            clust_var = NULL) {
@@ -62,7 +62,7 @@ cluster_ra_probabilities <-
           prob = prob,
           prob_each = prob_each,
           num_arms = num_arms,
-          condition_names = condition_names
+          conditions = conditions
         )
     }
     n_per_clust <- tapply(clusters, clusters, length)
@@ -76,7 +76,7 @@ cluster_ra_probabilities <-
           prob = prob,
           prob_each = prob_each,
           num_arms = num_arms,
-          condition_names = condition_names,
+          conditions = conditions,
           check_inputs = check_inputs
         )
     } else{
@@ -88,7 +88,7 @@ cluster_ra_probabilities <-
           prob = prob,
           prob_each = prob_each,
           num_arms = num_arms,
-          condition_names = condition_names,
+          conditions = conditions,
           check_inputs = check_inputs
         )
     }

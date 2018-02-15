@@ -36,7 +36,7 @@ table(complete_ra(16, prob = .25))
 
 # Complete random assignment into 4 categories eg for factorial
 n <- 16
-table(complete_ra(16, prob_each = rep(.25, 4), condition_names = c("T00", "T01", "T10", "T11")))
+table(complete_ra(16, prob_each = rep(.25, 4), conditions = c("T00", "T01", "T10", "T11")))
 
 
 # Block examples
@@ -64,7 +64,7 @@ table(B, block_ra(blocks = B, prob_each =c(1/3,1/3,1/3)))
 B <- c(1,1,1,2,2,2,2,2,2, 3, 4, 4)
 
 table(B, block_ra(blocks = B, prob_each =c(1/6,1/6,1/6, 1/2), 
-                  condition_names = c("A", "B", "C", "D")))
+                  conditions = c("A", "B", "C", "D")))
 
 
 # Bonus trick to show balancing with block_prob_each

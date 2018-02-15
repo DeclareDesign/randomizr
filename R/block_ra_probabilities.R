@@ -29,7 +29,7 @@
 #'
 #' prob_mat <- block_ra_probabilities(blocks = blocks,
 #'                                    block_m_each = block_m_each,
-#'                                    condition_names = c("control", "treatment"))
+#'                                    conditions = c("control", "treatment"))
 #' head(prob_mat)
 #'
 #' prob_mat <- block_ra_probabilities(blocks = blocks, num_arms = 3)
@@ -42,7 +42,7 @@
 #' head(prob_mat)
 #'
 #' prob_mat <- block_ra_probabilities(blocks=blocks, block_m_each=block_m_each,
-#'                        condition_names=c("control", "placebo", "treatment"))
+#'                        conditions=c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
 #' prob_mat <- block_ra_probabilities(blocks=blocks, prob_each=c(.1, .1, .8))
@@ -58,7 +58,7 @@ block_ra_probabilities <- function(blocks = block_var,
                                    block_prob = NULL,
                                    block_prob_each = NULL,
                                    num_arms = NULL,
-                                   condition_names = NULL,
+                                   conditions = NULL,
                                    check_inputs = TRUE,
                                    block_var = NULL) {
   if (check_inputs) {
@@ -72,10 +72,10 @@ block_ra_probabilities <- function(blocks = block_var,
       block_prob = block_prob,
       block_prob_each = block_prob_each,
       num_arms = num_arms,
-      condition_names = condition_names
+      conditions = conditions
     )
     num_arms <- input_check$num_arms
-    condition_names <- input_check$condition_names
+    conditions <- input_check$conditions
     N_per_block <- input_check$N_per_block
     
   } else {
@@ -90,8 +90,8 @@ block_ra_probabilities <- function(blocks = block_var,
   prob_mat <- matrix(
     NA,
     nrow = length(blocks),
-    ncol = length(condition_names),
-    dimnames = list(NULL,  paste0("prob_", condition_names))
+    ncol = length(conditions),
+    dimnames = list(NULL,  paste0("prob_", conditions))
   )
   
   # Case 0: m is specified
@@ -109,7 +109,7 @@ block_ra_probabilities <- function(blocks = block_var,
         N = N_per_block,
         m = block_m,
         MoreArgs = list(
-          condition_names = condition_names,
+          conditions = conditions,
           num_arms = num_arms,
           check_inputs = FALSE
         ),
@@ -131,7 +131,7 @@ block_ra_probabilities <- function(blocks = block_var,
         N = N_per_block,
         prob = block_prob,
         MoreArgs = list(
-          condition_names = condition_names,
+          conditions = conditions,
           num_arms = num_arms,
           check_inputs = FALSE
         ),
@@ -161,7 +161,7 @@ block_ra_probabilities <- function(blocks = block_var,
         N = N_per_block,
         MoreArgs = list(
           prob_each = prob_each,
-          condition_names = condition_names,
+          conditions = conditions,
           num_arms = num_arms,
           check_inputs = FALSE
         ),
@@ -187,7 +187,7 @@ block_ra_probabilities <- function(blocks = block_var,
         N = N_per_block,
         m_each = block_m_each_list,
         MoreArgs = list(
-          condition_names = condition_names,
+          conditions = conditions,
           num_arms = num_arms,
           check_inputs = FALSE
         ),
@@ -213,7 +213,7 @@ block_ra_probabilities <- function(blocks = block_var,
         N = N_per_block,
         prob_each = block_prob_each_list,
         MoreArgs = list(
-          condition_names = condition_names,
+          conditions = conditions,
           num_arms = num_arms,
           check_inputs = FALSE
         ),

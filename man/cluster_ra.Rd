@@ -5,8 +5,9 @@
 \title{Cluster Random Assignment}
 \usage{
 cluster_ra(clusters = clust_var, m = NULL, m_each = NULL, prob = NULL,
-  prob_each = NULL, num_arms = NULL, condition_names = NULL,
-  simple = FALSE, check_inputs = TRUE, clust_var = NULL)
+  prob_each = NULL, num_arms = NULL, conditions = condition_names,
+  simple = FALSE, check_inputs = TRUE, clust_var = NULL,
+  condition_names = NULL)
 }
 \arguments{
 \item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
@@ -19,15 +20,17 @@ cluster_ra(clusters = clust_var, m = NULL, m_each = NULL, prob = NULL,
 
 \item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of clusters assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
 
-\item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.}
+\item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the length of m_each or conditions.}
 
-\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.}
+\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.}
 
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment of clusters to conditions is used. When simple = TRUE, please do not specify m or m_each.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
 
 \item{clust_var}{deprecated}
+
+\item{condition_names}{deprecated}
 }
 \value{
 A vector of length N that indicates the treatment condition of each unit.
@@ -46,7 +49,7 @@ Z <- cluster_ra(clusters = clusters, m = 13)
 table(Z, clusters)
 
 Z <- cluster_ra(clusters = clusters, m_each = c(10, 16),
-                condition_names = c("control", "treatment"))
+                conditions = c("control", "treatment"))
 table(Z, clusters)
 
 # Multi-arm Designs
@@ -57,10 +60,10 @@ Z <- cluster_ra(clusters = clusters, m_each = c(7, 7, 12))
 table(Z, clusters)
 
 Z <- cluster_ra(clusters = clusters, m_each = c(7, 7, 12),
-                condition_names = c("control", "placebo", "treatment"))
+                conditions = c("control", "placebo", "treatment"))
 table(Z, clusters)
 
 Z <- cluster_ra(clusters = clusters,
-                condition_names = c("control", "placebo", "treatment"))
+                conditions = c("control", "placebo", "treatment"))
 table(Z, clusters)
 }

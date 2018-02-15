@@ -58,7 +58,7 @@ strata_rs <- function(strata = strata_var,
   strata_spots <-
     unlist(split(1:length(strata), strata), FALSE, FALSE)
   
-  # Setup: obtain number of arms and condition_names
+  # Setup: obtain number of arms and conditions
   
   if (is.null(prob) & is.null(strata_n) & is.null(strata_prob) & is.null(n)) {
     prob <- 0.5

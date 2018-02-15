@@ -118,7 +118,7 @@ N &lt;-<span class="st"> </span><span class="kw">nrow</span>(hec)
 
 <span class="co"># Create untreated and treated outcomes for all subjects</span>
 hec &lt;-<span class="st"> </span><span class="kw">within</span>(hec,{
-  Y0 &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dt">n =</span> N,<span class="dt">mean =</span> (<span class="dv">2</span><span class="op">*</span><span class="kw">as.numeric</span>(Hair) <span class="op">+</span><span class="st"> </span><span class="dv">-4</span><span class="op">*</span><span class="kw">as.numeric</span>(Eye) <span class="op">+</span><span class="st"> </span><span class="dv">-6</span><span class="op">*</span><span class="kw">as.numeric</span>(Sex)), <span class="dt">sd =</span> <span class="dv">5</span>)
+  Y0 &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dt">n =</span> N,<span class="dt">mean =</span> (<span class="dv">2</span><span class="op">*</span><span class="kw">as.numeric</span>(Hair) <span class="op">+</span><span class="st"> </span><span class="op">-</span><span class="dv">4</span><span class="op">*</span><span class="kw">as.numeric</span>(Eye) <span class="op">+</span><span class="st"> </span><span class="op">-</span><span class="dv">6</span><span class="op">*</span><span class="kw">as.numeric</span>(Sex)), <span class="dt">sd =</span> <span class="dv">5</span>)
   Y1 &lt;-<span class="st"> </span>Y0 <span class="op">+</span><span class="st"> </span><span class="dv">6</span><span class="op">*</span><span class="kw">as.numeric</span>(Hair) <span class="op">+</span><span class="st"> </span><span class="dv">4</span><span class="op">*</span><span class="kw">as.numeric</span>(Eye) <span class="op">+</span><span class="st"> </span><span class="dv">2</span><span class="op">*</span><span class="kw">as.numeric</span>(Sex)
 })
 
@@ -173,7 +173,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra
 </tr></tbody>
 </table>
 <p>You can also just specify the probabilites of your multiple arms. The probabilities must sum to 1.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra.html">simple_ra</a></span>(<span class="dt">N =</span> N, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">2</span>, <span class="fl">.2</span>, <span class="fl">.6</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra.html">simple_ra</a></span>(<span class="dt">N =</span> N, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">2</span>, .<span class="dv">2</span>, .<span class="dv">6</span>))
 <span class="kw">table</span>(Z)</code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -188,8 +188,8 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra
 </tr></tbody>
 </table>
 <p>You can also name your treatment arms.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra.html">simple_ra</a></span>(<span class="dt">N =</span> N, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">2</span>, <span class="fl">.2</span>, <span class="fl">.6</span>),
-               <span class="dt">condition_names=</span><span class="kw">c</span>(<span class="st">"control"</span>, <span class="st">"placebo"</span>, <span class="st">"treatment"</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra.html">simple_ra</a></span>(<span class="dt">N =</span> N, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">2</span>, .<span class="dv">2</span>, .<span class="dv">6</span>),
+               <span class="dt">conditions=</span><span class="kw">c</span>(<span class="st">"control"</span>, <span class="st">"placebo"</span>, <span class="st">"treatment"</span>))
 <span class="kw">table</span>(Z)</code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -267,7 +267,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra
 </table>
 <p>You can also name your treatment arms.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/complete_ra.html">complete_ra</a></span>(<span class="dt">N =</span> N, <span class="dt">m_each =</span> <span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">292</span>),
-               <span class="dt">condition_names =</span> <span class="kw">c</span>(<span class="st">"control"</span>, <span class="st">"placebo"</span>, <span class="st">"treatment"</span>))
+               <span class="dt">conditions =</span> <span class="kw">c</span>(<span class="st">"control"</span>, <span class="st">"placebo"</span>, <span class="st">"treatment"</span>))
 <span class="kw">table</span>(Z)</code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -356,7 +356,7 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 </tr>
 </tbody>
 </table>
-<p>For multiple treatment arms, use the <code>num_arms</code> argument, with or without the <code>condition_names</code> argument</p>
+<p>For multiple treatment arms, use the <code>num_arms</code> argument, with or without the <code>conditions</code> argument</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair, <span class="dt">num_arms =</span> <span class="dv">3</span>)
 <span class="kw">table</span>(Z, hec<span class="op">$</span>Hair)</code></pre></div>
 <table class="table">
@@ -391,7 +391,7 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 </tr>
 </tbody>
 </table>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair, <span class="dt">condition_names =</span> <span class="kw">c</span>(<span class="st">"Control"</span>, <span class="st">"Placebo"</span>, <span class="st">"Treatment"</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair, <span class="dt">conditions =</span> <span class="kw">c</span>(<span class="st">"Control"</span>, <span class="st">"Placebo"</span>, <span class="st">"Treatment"</span>))
 <span class="kw">table</span>(Z, hec<span class="op">$</span>Hair)</code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -426,7 +426,7 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 </tbody>
 </table>
 <p><code><a href="../reference/block_ra.html">block_ra()</a></code> provides a number of ways to adjust the number of subjects assigned to each conditions. The <code>prob_each</code> argument describes what proportion of each block should be assigned to treatment arm. Note of course, that <code><a href="../reference/block_ra.html">block_ra()</a></code> still uses complete random assignment within each block; the appropriate number of units to assign to treatment within each block is automatically determined.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">3</span>, <span class="fl">.7</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.html">block_ra</a></span>(<span class="dt">blocks =</span> hec<span class="op">$</span>Hair, <span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">3</span>, .<span class="dv">7</span>))
 <span class="kw">table</span>(Z, hec<span class="op">$</span>Hair)</code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -861,9 +861,9 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 </tr>
 </tbody>
 </table>
-<p>… or using <code>condition_names</code></p>
+<p>… or using <code>conditions</code></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/cluster_ra.html">cluster_ra</a></span>(<span class="dt">clusters=</span>clusters, 
-                      <span class="dt">condition_names=</span><span class="kw">c</span>(<span class="st">"Control"</span>, <span class="st">"Placebo"</span>, <span class="st">"Treatment"</span>))
+                      <span class="dt">conditions=</span><span class="kw">c</span>(<span class="st">"Control"</span>, <span class="st">"Placebo"</span>, <span class="st">"Treatment"</span>))
 <span class="kw">head</span>(<span class="kw">table</span>(clusters, Z_clust))</code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -1279,7 +1279,7 @@ Z &lt;-<span class="st"> </span><span class="kw">school_ra</span>(<span class="d
 <p>Whenever you conduct a random assignment for use in an experiment, save it! At a minimum, the random assignment should be saved with an id variable in a csv.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">hec &lt;-<span class="st"> </span><span class="kw">within</span>(hec,{
   Z_blocked &lt;-<span class="st"> </span><span class="kw"><a href="../reference/complete_ra.html">complete_ra</a></span>(<span class="dt">N =</span> N, <span class="dt">m_each =</span> <span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">292</span>),
-               <span class="dt">condition_names =</span> <span class="kw">c</span>(<span class="st">"control"</span>, <span class="st">"placebo"</span>, <span class="st">"treatment"</span>))
+               <span class="dt">conditions =</span> <span class="kw">c</span>(<span class="st">"control"</span>, <span class="st">"placebo"</span>, <span class="st">"treatment"</span>))
   id_var &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(hec)
 })
 <span class="kw">write.csv</span>(hec[,<span class="kw">c</span>(<span class="st">"id_var"</span>, <span class="st">"Z_blocked"</span>)], <span class="dt">file =</span> <span class="st">"MyRandomAssignment.csv"</span>)</code></pre></div>

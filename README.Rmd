@@ -63,7 +63,7 @@ clust_var <- rep(letters[1:15], times = 1:15)
 Z <- cluster_ra(
   clusters = clust_var,
   m_each = c(4, 4, 7),
-  condition_names = c("control", "placebo", "treatment")
+  conditions = c("control", "placebo", "treatment")
   )
 table(Z, clust_var)
 ```
