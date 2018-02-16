@@ -342,6 +342,7 @@ check_randomizr_arguments <-
       list(
         num_arms = num_arms,
         conditions = conditions,
+        condition_names = conditions,
         N_per_block = N_per_block
       )
     )
@@ -451,6 +452,7 @@ check_samplr_arguments <-
     return(list(
       num_arms = 2,
       conditions =  c(0, 1),
+      condition_names = c(0, 1),
       N_per_stratum = N_per_stratum
     ))
     
