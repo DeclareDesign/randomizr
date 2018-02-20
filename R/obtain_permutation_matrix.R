@@ -271,70 +271,58 @@ replace_with_cond <-
   }
 
 permutations_m_each <- function(m_each, conditions) {
+  
+  conditions <- conditions[m_each > 0]
+  m_each <- m_each[m_each > 0]
+
   N <- sum(m_each)
-  # intialize list
+  k <- length(m_each)
   
-  old_pos <- combn(N, m_each[1], simplify = FALSE)
+    
+  if(k == 0) return(matrix(NA, 0, 0))
+  if(k == 1) return(matrix(conditions[1], N, 1))
   
-  ra_list <- replicate(n = length(old_pos),
-                       expr = rep(NA, N),
-                       simplify = FALSE)
+  # intialize matrix output to NA of appropriate class (int, double, character, etc)
+  my_na <- local({ 
+    conditions[1]  <- NA
+    conditions[1]
+  })
   
-  ra_list <- mapply(replace_with_cond,
-                    ra_list,
-                    old_pos,
-                    cond = conditions[1],
-                    SIMPLIFY = FALSE)
+  # Preinitialize output matrix to correct size
+  n_combs <- prod(choose(rev(cumsum(rev(m_each))), m_each))
+  out <- matrix(my_na, N, n_combs)
   
+  # First pass is easy - use combn callback directly
+  j <- 0;
+  combn(N, m_each[1], function(i) {
+    j <<- j + 1
+    out[i,j] <<- conditions[1]
+    NULL
+  }, FALSE)
   
-  if (length(m_each) > 2) {
-    for (j in 2:(length(m_each) - 1)) {
-      local_positions <-
-        combn(N - sum(m_each[1:(j - 1)]), m_each[j], simplify = FALSE)
-      
-      ra_list <-
-        lapply(
-          ra_list,
-          FUN = replicate,
-          n = length(local_positions),
-          simplify = FALSE
-        )
-      ra_list <- unlist(ra_list, recursive = FALSE)
-      
-      new_pos <-
-        sapply(1:length(local_positions),
-               function(i) {
-                 lapply(
-                   X = old_pos,
-                   FUN = function(x, y, N) {
-                     (1:N)[-x][y]
-                   },
-                   y = local_positions[[i]],
-                   N = N
-                 )
-               },
-               simplify = FALSE)
-      
-      new_pos <- unlist(new_pos, recursive = FALSE)
-      
-      ra_list <- mapply(replace_with_cond,
-                        ra_list,
-                        new_pos,
-                        cond = conditions[j],
-                        SIMPLIFY = FALSE)
-      
-      old_pos <- new_pos
-      
+  for (x in seq(k-1)[-1]) {
+    local_positions <- combn(sum(m_each[x:k]), m_each[x], simplify = FALSE)
+    
+    J <- j # Last column touched
+    K <- length(local_positions)
+    
+    # each combination of out / local_pos using rep(each) rep(times) idiom
+    out[,seq(J*K)] <- out[, rep(1:J, each=K), drop=FALSE]
+    local_positions <- local_positions[rep(1:K, times=J)]
+    
+    for(j in seq(J*K)){
+      available <- which(is.na(out[,j]))
+      which_row <- available[ local_positions[[j]] ]
+      out[which_row, j] <- conditions[x]
     }
+    
   }
   
-  ra_list <-
-    lapply(ra_list, function(x) {
-      x[is.na(x)] <- conditions[length(conditions)]
-      return(x)
-    })
   
-  return(do.call(cbind, ra_list))
+  # Final pass is easy
+  out[is.na(out)] <- conditions[k]
+  
+  out  
 }
 
 
