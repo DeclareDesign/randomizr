@@ -20,56 +20,117 @@ test_that("Simple Random Assignment Procedures",{
 })
 
 
+test_that("combinatorics are correct, 6 choose 3",{
+  
+  expect_equal(
+    randomizr:::complete_ra_num_permutations(6, prob_each = c(.5, .5), conditions = c(0, 1)),
+    choose(6, 3)
+  )
 
-randomizr:::complete_ra_num_permutations(6, prob_each = c(.5, .5), conditions = c(0, 1))
-choose(6, 3)
-perms <- randomizr:::complete_ra_permutations(6, prob_each = c(.5, .5), conditions = c(0, 1))
-dim(perms)
-perm_probs <- randomizr:::complete_ra_permutation_probabilities(6, prob_each = c(.5, .5), conditions = c(0, 1))
-length(perm_probs)
-sum(perm_probs)
+  perms <- randomizr:::complete_ra_permutations(6, prob_each = c(.5, .5), conditions = c(0, 1))
+  perm_probs <- randomizr:::complete_ra_permutation_probabilities(6, prob_each = c(.5, .5), conditions = c(0, 1))
 
-randomizr:::complete_ra_num_permutations(10, prob_each = c(.5, .5), conditions = c(0, 1))
-choose(10, 5)
-perms <- randomizr:::complete_ra_permutations(10, prob_each = c(.5, .5), conditions = c(0, 1))
-dim(perms)
-perm_probs <- randomizr:::complete_ra_permutation_probabilities(10, prob_each = c(.5, .5), conditions = c(0, 1))
-length(perm_probs)
-sum(perm_probs)
+  expect_equal(
+    dim(perms),
+    dim(unique(perms))
+  )
+  
+  
+  expect_equal(ncol(perms), length(perm_probs))
+  
+  expect_equal(sum(perm_probs), 1)
+})
+
+test_that("combinatorics are correct, 10 choose 5",{
+  
+  expect_equal(
+    randomizr:::complete_ra_num_permutations(10, prob_each = c(.5, .5), conditions = c(0, 1)),
+    choose(10, 5)
+  )  
+
+  
+  perms <- randomizr:::complete_ra_permutations(10, prob_each = c(.5, .5), conditions = c(0, 1))
+  perm_probs <- randomizr:::complete_ra_permutation_probabilities(10, prob_each = c(.5, .5), conditions = c(0, 1))
+  
+  expect_equal(
+    dim(perms),
+    dim(unique(perms))
+  )
+  
+  
+  expect_equal(ncol(perms), length(perm_probs))
+  
+  expect_equal(sum(perm_probs), 1)
+  
+})
 
 
-randomizr:::complete_ra_num_permutations(3, prob_each = c(.5, .5), conditions = c(0, 1))
-choose(3, 1) + choose(3, 2)
-perms <- randomizr:::complete_ra_permutations(3, prob_each = c(.5, .5), conditions = c(0, 1))
-dim(perms)
-perm_probs <- randomizr:::complete_ra_permutation_probabilities(3, prob_each = c(.5, .5), conditions = c(0, 1))
-length(perm_probs)
-sum(perm_probs)
 
 
-randomizr:::complete_ra_num_permutations(10, prob_each = c(1/3, 1/3, 1/3), conditions = c("T1", "T2", "T3"))
-perms <- randomizr:::complete_ra_permutations(10, prob_each = c(1/3, 1/3, 1/3), conditions = c("T1", "T2", "T3"))
-dim(perms)
-dim(unique(perms))
-perm_probs <- randomizr:::complete_ra_permutation_probabilities(10, prob_each = c(1/3, 1/3, 1/3), conditions = c("T1", "T2", "T3"))
-length(perm_probs)
-sum(perm_probs)
+test_that("combinatorics are correct, 3 / .5",{
+  
+  expect_equal(
+    randomizr:::complete_ra_num_permutations(3, prob_each = c(.5, .5), conditions = c(0, 1)),
+    choose(3, 1) + choose(3, 2)
+  )
+
+  perms <- randomizr:::complete_ra_permutations(3, prob_each = c(.5, .5), conditions = c(0, 1))
+  perm_probs <- randomizr:::complete_ra_permutation_probabilities(3, prob_each = c(.5, .5), conditions = c(0, 1))
+
+  expect_equal(
+    dim(perms),
+    dim(unique(perms))
+  )
+  
+  expect_equal(ncol(perms), length(perm_probs))
+  
+  expect_equal(sum(perm_probs), 1)
 
 
-declaration <- declare_ra(N = 4)
-perms <- obtain_permutation_matrix(declaration)
-dim(perms)
-obtain_num_permutations(declaration)
-obtain_permutation_probabilities(declaration)
+})
 
-# blocked, diff size group --------------------------------------------------
+test_that("combinatorics are correct, 10 / .3",{
+  
+  expect_equal(
+    randomizr:::complete_ra_num_permutations(10, prob_each = c(1/3, 1/3, 1/3), conditions = c("T1", "T2", "T3")),
+    choose(10,3) * choose(10,4) / 2
+  )
+  perms <- randomizr:::complete_ra_permutations(10, prob_each = c(1/3, 1/3, 1/3), conditions = c("T1", "T2", "T3"))
+  
+  perm_probs <- randomizr:::complete_ra_permutation_probabilities(10, prob_each = c(1/3, 1/3, 1/3), conditions = c("T1", "T2", "T3"))
 
-blocks <- c("A", "A", "B", "B", "C", "C", "C")
-declaration <- declare_ra(blocks = blocks)
-perms <- obtain_permutation_matrix(declaration)
-dim(perms)
-obtain_num_permutations(declaration)
-obtain_permutation_probabilities(declaration)
+  expect_equal(
+    dim(perms),
+    dim(unique(perms))
+  )
+  
+  
+  expect_equal(ncol(perms), length(perm_probs))
+  
+  expect_equal(sum(perm_probs), 1)
+  
+  
+})
+
+
+
+test_that("declare_ra(N=4)", {
+  declaration <- declare_ra(N = 4)
+  perms <- obtain_permutation_matrix(declaration)
+  dim(perms)
+  obtain_num_permutations(declaration)
+  obtain_permutation_probabilities(declaration)
+
+})
+
+test_that("blocked, diff size group", {
+  blocks <- c("A", "A", "B", "B", "C", "C", "C")
+  declaration <- declare_ra(blocks = blocks)
+  perms <- obtain_permutation_matrix(declaration)
+  dim(perms)
+  obtain_num_permutations(declaration)
+  obtain_permutation_probabilities(declaration)
+})
 
 # blocked, same size group --------------------------------------------------
 

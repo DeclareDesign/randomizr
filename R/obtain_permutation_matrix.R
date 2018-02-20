@@ -230,45 +230,34 @@ permutations <- function(n) {
   }
 }
 
-complete_ra_permutations <-
-  function(N, prob_each, conditions) {
-    m_each_floor <- floor(N * prob_each)
-    N_floor <- sum(m_each_floor)
-    N_remainder <- N - N_floor
-    
-    if (N_remainder == 0) {
-      perms <-
-        permutations_m_each(m_each = m_each_floor, conditions = conditions)
-      
-    } else {
-      prob_each_fix_up <- ((prob_each * N) - m_each_floor) / N_remainder
-      
-      fix_ups <-
-        expand.grid(replicate(N_remainder, conditions, simplify = FALSE),
-                    stringsAsFactors = FALSE)
-      fix_ups_probs <-
-        c(prob_each_fix_up %*% t(prob_each_fix_up))
-      
-      m_each_es <-
-        t(apply(fix_ups, 1,  function(x) {
-          sapply(conditions, function(i)
-            sum(x %in% i))
-        })) + m_each_floor
-      
-      perms <-
-        sapply(1:ncol(m_each_es), function(j)
-          permutations_m_each(m_each_es[, j], conditions), simplify = FALSE)
-      
-      perms <- do.call(cbind, perms)
-    }
-    return(perms)
+complete_ra_permutations <- function(N, prob_each, conditions) {
+  m_each_floor <- floor(N * prob_each)
+  N_floor <- sum(m_each_floor)
+  N_remainder <- N - N_floor
+  
+  if (N_remainder == 0) {
+    return(
+      permutations_m_each(m_each_floor, conditions)
+    )
+  } 
+  
+  prob_each_fix_up <- ((prob_each * N) - m_each_floor) / N_remainder
+  
+  # Matrix of each combn of expand.grid(1:k, 1:k, 1:k, ...)
+  k <- length(conditions)
+  fix_ups <- matrix(0, nrow = k^N_remainder, ncol = N_remainder)
+  for (i in 1:N_remainder) {
+    fix_ups[,i] <- rep(1:k, each=k^(i-1))
   }
+  
+  m_each_es <- apply(fix_ups, 1, tabulate, nbins=k) + m_each_floor
+  
+  perms <- lapply(1:ncol(m_each_es), function(i) permutations_m_each(m_each_es[,i], conditions)) 
 
-replace_with_cond <-
-  function(vec, pos, cond) {
-    vec[pos] <- cond
-    return(vec)
-  }
+  perms <- do.call(cbind, perms)
+  
+  perms
+}    
 
 permutations_m_each <- function(m_each, conditions) {
   
@@ -282,7 +271,7 @@ permutations_m_each <- function(m_each, conditions) {
   if(k == 0) return(matrix(NA, 0, 0))
   if(k == 1) return(matrix(conditions[1], N, 1))
   
-  # intialize matrix output to NA of appropriate class (int, double, character, etc)
+  # initialize matrix output to NA of appropriate class (int, double, character, etc)
   my_na <- local({ 
     conditions[1]  <- NA
     conditions[1]
