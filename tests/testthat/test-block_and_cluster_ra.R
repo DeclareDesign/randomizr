@@ -67,9 +67,8 @@ test_that("prob = .5",{
     
   
   Z <- block_and_cluster_ra(clusters = clusters, blocks = blocks, prob = .5)
+  expect_only_one_per_cluster(Z)
   
-  table(Z, clusters)
-  table(Z, blocks)
 })
 
 test_that("prob = 0",{
