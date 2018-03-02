@@ -202,7 +202,7 @@ test_that("Blocked 50/100/200 3 arms block_m_each", {
   mapply(expect_constCol,
           by(block_ra_probabilities(blocks = blocks, block_m_each = block_m_each),
              blocks, as.matrix),
-          apply(block_m_each, 1, function(x) as.list(x/sum(x))),
+          list(c(.2, .4, .4), c(.3,.5,.2), c(.25, .375, .375)),
           as.list(rowSums(block_m_each))
   )
     
@@ -214,7 +214,9 @@ test_that("Blocked 50/100/200 3 arms block_m_each", {
                                    block_m_each = block_m_each,
                                    conditions = c("control", "placebo", "treatment")),
             blocks, as.matrix),
-         apply(block_m_each, 1, function(x) as.list(x/sum(x))),
+         list(c(control=.2, placebo=.4, treatment=.4), 
+              c(control=.3,placebo=.5,treatment=.2),
+              c(control=.25, placebo=.375,treatment= .375)),
          as.list(rowSums(block_m_each))
   )
 })

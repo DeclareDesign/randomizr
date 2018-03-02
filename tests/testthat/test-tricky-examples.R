@@ -32,7 +32,7 @@ test_that("ABAD",{
   B <- c("A", "B", "A", "D")
   draw <- block_ra(blocks = B, prob_each = c(.33,.33,.33)/sum(c(.33,.33,.33)))
   
-  expect_true(all(table(B, draw) %in% 0:1))
+  expect_true(all(table(B, draw) %in% 0:2))
 })
 
 test_that("ABD",{
