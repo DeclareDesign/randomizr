@@ -43,7 +43,8 @@ test_that("Condition Names", {
 # factors -----------------------------------------------------------------
 
 test_that("Condition Names w/ factors", {
-    
+  N <- 32  
+  
   fact_1 <- factor(c("A", "B"), levels = c("A", "B"))
   fact_2 <- factor(c("A", "B"), levels = c("B", "A"))
     
