@@ -87,7 +87,8 @@ obtain_permutation_probabilities <-
         mapply(FUN = complete_ra_permutation_probabilities,
                ns_per_block_list,
                block_prob_each_local,
-               condition_names_list)
+               condition_names_list,
+               SIMPLIFY = FALSE)
       
       permutation_probabilities <-
         Reduce(f = expand_vector, x = permutation_probabilities_by_block)
@@ -146,7 +147,8 @@ obtain_permutation_probabilities <-
         mapply(FUN = complete_ra_permutation_probabilities,
                ns_per_block_list,
                block_prob_each_local,
-               condition_names_list)
+               condition_names_list,
+               SIMPLIFY = FALSE)
       
       permutation_probabilities <-
         Reduce(f = expand_vector, x = permutation_probabilities_by_block)
