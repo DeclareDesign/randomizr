@@ -2,7 +2,7 @@
 % Please edit documentation in R/cluster_ra_probabilities.R
 \name{cluster_ra_probabilities}
 \alias{cluster_ra_probabilities}
-\title{Probabilties of assignment: Cluster Random Assignment}
+\title{probabilities of assignment: Cluster Random Assignment}
 \usage{
 cluster_ra_probabilities(clusters = clust_var, m = NULL, m_each = NULL,
   prob = NULL, prob_each = NULL, num_arms = NULL, conditions = NULL,
@@ -17,7 +17,7 @@ cluster_ra_probabilities(clusters = clust_var, m = NULL, m_each = NULL,
 
 \item{prob}{Use for a two-arm design in which either floor(N_clusters*prob) or ceiling(N_clusters*prob) clusters are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_clusters*prob) clusters will be assigned to treatment and with probability prob, ceiling(N_clusters*prob) clusters will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of clusters assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
+\item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of clusters assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
 
 \item{num_arms}{The total number of treatment arms. If unspecified, will be determined from the length of m_each or conditions.}
 
@@ -33,7 +33,7 @@ cluster_ra_probabilities(clusters = clust_var, m = NULL, m_each = NULL,
 A matrix of probabilities of assignment
 }
 \description{
-Probabilties of assignment: Cluster Random Assignment
+probabilities of assignment: Cluster Random Assignment
 }
 \examples{
 

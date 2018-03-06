@@ -2,7 +2,7 @@
 % Please edit documentation in R/obtain_num_permutations.R
 \name{obtain_num_permutations}
 \alias{obtain_num_permutations}
-\title{Obtain the Number of Possible Peumuations from a Random Assignment Declaration}
+\title{Obtain the Number of Possible Permutations from a Random Assignment Declaration}
 \usage{
 obtain_num_permutations(declaration)
 }
@@ -13,7 +13,7 @@ obtain_num_permutations(declaration)
 a scalar
 }
 \description{
-Obtain the Number of Possible Peumuations from a Random Assignment Declaration
+Obtain the Number of Possible Permutations from a Random Assignment Declaration
 }
 \examples{
 

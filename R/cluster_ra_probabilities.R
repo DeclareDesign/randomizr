@@ -1,4 +1,4 @@
-#' Probabilties of assignment: Cluster Random Assignment
+#' probabilities of assignment: Cluster Random Assignment
 #'
 #' @inheritParams cluster_ra
 #'

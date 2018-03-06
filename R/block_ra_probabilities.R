@@ -2,7 +2,7 @@
 
 
 
-#' Probabilties of assignment: Block Random Assignment
+#' probabilities of assignment: Block Random Assignment
 #'
 #' @inheritParams block_ra
 #' @return A matrix of probabilities of assignment

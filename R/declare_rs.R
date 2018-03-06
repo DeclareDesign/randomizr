@@ -288,7 +288,7 @@ draw_rs <- function(declaration = NULL,
 #' Obtain inclusion probabilities
 #'
 #' You can either give obtain_inclusion_probabilities() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.\cr \cr
-#' This function is especially useful when units have different inclusion probabilties and the analyst plans to use inverse-probability weights.
+#' This function is especially useful when units have different inclusion probabilities and the analyst plans to use inverse-probability weights.
 #'
 #'
 #' @param declaration A random sampling declaration, created by \code{\link{declare_rs}}.

@@ -102,7 +102,7 @@ table(Z)
 knitr::kable(t(as.matrix(table(Z))))
 ```
 
-You can also just specify the probabilites of your multiple arms. The probabilities must sum to 1. 
+You can also just specify the probabilities of your multiple arms. The probabilities must sum to 1. 
 
 ```{r echo=TRUE, results="hide"}
 Z <- simple_ra(N = N, prob_each = c(.2, .2, .6))

@@ -1,4 +1,4 @@
-#' Obtain the Number of Possible Peumuations from a Random Assignment Declaration
+#' Obtain the Number of Possible Permutations from a Random Assignment Declaration
 #'
 #' @param declaration A random assignment declaration, created by \code{\link{declare_ra}}.
 #'

@@ -1,4 +1,4 @@
-#' Probabilties of assignment: Blocked and Clustered Random Assignment
+#' probabilities of assignment: Blocked and Clustered Random Assignment
 #'
 #' @inheritParams block_and_cluster_ra
 #'

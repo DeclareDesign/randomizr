@@ -2,7 +2,7 @@
 % Please edit documentation in R/block_ra_probabilities.R
 \name{block_ra_probabilities}
 \alias{block_ra_probabilities}
-\title{Probabilties of assignment: Block Random Assignment}
+\title{probabilities of assignment: Block Random Assignment}
 \usage{
 block_ra_probabilities(blocks = block_var, prob = NULL, prob_each = NULL,
   m = NULL, block_m = NULL, block_m_each = NULL, block_prob = NULL,
@@ -28,7 +28,7 @@ block_ra_probabilities(blocks = block_var, prob = NULL, prob_each = NULL,
 
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
-\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
+\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
 
@@ -38,7 +38,7 @@ block_ra_probabilities(blocks = block_var, prob = NULL, prob_each = NULL,
 A matrix of probabilities of assignment
 }
 \description{
-Probabilties of assignment: Block Random Assignment
+probabilities of assignment: Block Random Assignment
 }
 \examples{
 

@@ -1,4 +1,4 @@
-#' Probabilties of assignment: Complete Random Assignment
+#' probabilities of assignment: Complete Random Assignment
 #'
 #' @inheritParams complete_ra
 #' @return A matrix of probabilities of assignment

@@ -1,8 +1,8 @@
-#' Obtain the probabilities of permutuations
+#' Obtain the probabilities of permutations
 #'
 #' @param declaration A random assignment declaration, created by \code{\link{declare_ra}}.
 #'
-#' @return a vector of probabalities
+#' @return a vector of probabilities
 #' @export
 #'
 #' @examples

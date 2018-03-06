@@ -2,7 +2,7 @@
 % Please edit documentation in R/obtain_permutation_probabilities.R
 \name{obtain_permutation_probabilities}
 \alias{obtain_permutation_probabilities}
-\title{Obtain the probabilities of permutuations}
+\title{Obtain the probabilities of permutations}
 \usage{
 obtain_permutation_probabilities(declaration)
 }
@@ -10,10 +10,10 @@ obtain_permutation_probabilities(declaration)
 \item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
 }
 \value{
-a vector of probabalities
+a vector of probabilities
 }
 \description{
-Obtain the probabilities of permutuations
+Obtain the probabilities of permutations
 }
 \examples{
 

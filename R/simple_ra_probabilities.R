@@ -1,4 +1,4 @@
-#' Probabilties of assignment: Simple Random Assignment
+#' probabilities of assignment: Simple Random Assignment
 #'
 #' @inheritParams simple_ra
 #' @return A matrix of probabilities of assignment
