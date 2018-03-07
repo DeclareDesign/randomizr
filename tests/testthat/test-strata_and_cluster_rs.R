@@ -10,7 +10,7 @@ strata[clusters %in% letters[21:26]] <- "stratum_5"
 
 
 
-expect_only_one_per_cluster <- function(Z, w=1){
+expect_only_one_per_cluster <- function(Z, w = 1) {
   expect_true(all(colSums(table(Z, clusters) != 0) == w))
 }
 
@@ -51,8 +51,8 @@ test_that("prob = 0",{
                                                strata = strata,
                                                prob = 0)
   
-  expect(all(S == 0))
-  expect(all(probs == 0))
+  expect_true(all(S == 0))
+  expect_true(all(probs == 0))
 })
 
 test_that("prob = 1",{
@@ -63,8 +63,8 @@ test_that("prob = 1",{
                                                strata = strata,
                                                prob = 1)
   
-  expect(all(S == 1))
-  expect(all(probs == 1))
+  expect_true(all(S == 1))
+  expect_true(all(probs == 1))
 })
 
 test_that("strata_n",{
