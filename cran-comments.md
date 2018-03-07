@@ -1,6 +1,7 @@
-## Update randomizr to version 0.9.0
+## Update randomizr to version 0.12.0
 * update condition_names to conditions
 * small bug fixes
+* addressed restrictedparts error
 
 ## Test environments
 * local OS X install, R version 3.4.3 (Kite-Eating Tree)
