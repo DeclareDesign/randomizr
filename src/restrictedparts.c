@@ -42,14 +42,15 @@ SEXP successor(SEXP lambda) {
 
 SEXP randomizr_restrictedparts(SEXP n, SEXP m) {
 
+  PROTECT_INDEX ipx_out;
+  PROTECT_INDEX ipx_succ;
+  
+  SEXP out, succ;
   // Defaults to 1k buffer  
-  SEXP out = PROTECT(allocVector(VECSXP, 256)); 
+  PROTECT_WITH_INDEX(out = allocVector(VECSXP, 256), &ipx_out); 
 
   // Initial state is (N,0,0,...,0)
-  SEXP succ = PROTECT(allocVector(INTSXP, INTEGER(m)[0]));
-  
-  int to_unprotect = 2;
-  
+  PROTECT_WITH_INDEX(succ = allocVector(INTSXP, INTEGER(m)[0]), &ipx_succ);
   
   INTEGER(succ)[0] = INTEGER(n)[0];  
   for(int i = 1; i < length(succ); i++){
@@ -61,23 +62,18 @@ SEXP randomizr_restrictedparts(SEXP n, SEXP m) {
     
     if(jj == length(out)) {
       //Rprintf("Growing to jj=%d\n", jj);
-      SEXP new_out = PROTECT(lengthgets(out, jj*2));
-      if(new_out != out){
-        out = new_out;
-        to_unprotect++;
-      } 
+      REPROTECT(out = lengthgets(out, jj*2), ipx_out);
     }
     
     SET_VECTOR_ELT(out, jj, succ);
-    to_unprotect++;
-    succ = PROTECT(successor(succ));
+    REPROTECT(succ = successor(succ), ipx_succ);
   } 
 
   //no reason to reallocate here
   //out = lengthgets(out, jj);
   SETLENGTH(out, jj); 
   
-  UNPROTECT(to_unprotect);  
+  UNPROTECT(2);  
   
   return out;
 } 
