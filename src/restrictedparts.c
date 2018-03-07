@@ -62,7 +62,10 @@ SEXP randomizr_restrictedparts(SEXP n, SEXP m) {
     if(jj == length(out)) {
       //Rprintf("Growing to jj=%d\n", jj);
       SEXP new_out = PROTECT(lengthgets(out, jj*2));
-      if(new_out != out) to_unprotect++;
+      if(new_out != out){
+        out = new_out;
+        to_unprotect++;
+      } 
     }
     
     SET_VECTOR_ELT(out, jj, succ);
