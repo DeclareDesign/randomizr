@@ -53,7 +53,7 @@ SEXP randomizr_restrictedparts(SEXP n, SEXP m) {
   }  
   
   int jj; //used at end to slice to correct size
-  for (jj = 0; succ != NULL; succ = successor(succ), jj++) {
+  for (jj = 0; succ != NULL; jj++) {
     
     if(jj == length(out)) {
       //Rprintf("Growing to jj=%d\n", jj);
@@ -61,6 +61,8 @@ SEXP randomizr_restrictedparts(SEXP n, SEXP m) {
     }
     
     SET_VECTOR_ELT(out, jj, succ);
+    UNPROTECT(1);
+    succ = PROTECT(successor(succ));
   } 
 
   //no reason to reallocate here
