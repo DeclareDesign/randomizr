@@ -20,11 +20,18 @@ matrix:
   - os: osx
     r: release
     if: branch = master
+    r_github_packages:
+    - DeclareDesign/DDtools
+    - ropensci/git2r
+
 
   - os: osx
     osx_image: xcode6.4
     r: oldrel
     if: branch = master
+    r_github_packages:
+    - DeclareDesign/DDtools
+    - ropensci/git2r
 
 env:
   global:
