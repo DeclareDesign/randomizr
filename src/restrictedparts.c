@@ -47,6 +47,10 @@ SEXP randomizr_restrictedparts(SEXP n, SEXP m) {
 
   // Initial state is (N,0,0,...,0)
   SEXP succ = PROTECT(allocVector(INTSXP, INTEGER(m)[0]));
+  
+  int to_unprotect = 2;
+  
+  
   INTEGER(succ)[0] = INTEGER(n)[0];  
   for(int i = 1; i < length(succ); i++){
     INTEGER(succ)[i] = 0;
@@ -57,11 +61,12 @@ SEXP randomizr_restrictedparts(SEXP n, SEXP m) {
     
     if(jj == length(out)) {
       //Rprintf("Growing to jj=%d\n", jj);
-      out = lengthgets(out, jj*2);
+      out = PROTECT(lengthgets(out, jj*2));
+      to_unprotect++;
     }
     
     SET_VECTOR_ELT(out, jj, succ);
-    UNPROTECT(1);
+    to_unprotect++;
     succ = PROTECT(successor(succ));
   } 
 
@@ -69,7 +74,7 @@ SEXP randomizr_restrictedparts(SEXP n, SEXP m) {
   //out = lengthgets(out, jj);
   SETLENGTH(out, jj); 
   
-  UNPROTECT(2);  
+  UNPROTECT(to_unprotect);  
   
   return out;
 } 
