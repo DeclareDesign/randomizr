@@ -48,16 +48,14 @@
 #'
 #' @export
 strata_and_cluster_rs_probabilities <-
-  function(strata = strata_var,
-           clusters = clust_var,
+  function(strata = NULL,
+           clusters = NULL,
            prob = NULL,
            n = NULL,
            strata_n = NULL,
            strata_prob = NULL,
-           check_inputs = TRUE,
-           strata_var = NULL,
-           clust_var = NULL) {
-    warn_deprecated_args(NULL, clust_var, strata_var)
+           check_inputs = TRUE) {
+    
     if (check_inputs) {
       input_check <-
         check_samplr_arguments(

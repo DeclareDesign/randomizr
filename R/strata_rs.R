@@ -8,7 +8,6 @@
 #' @param strata_n Use for a design in which the numeric vector strata_n describes the number of units to sample within each stratum.
 #' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.
 #' @param check_inputs logical. Defaults to TRUE.
-#' @param strata_var deprecated
 #'
 #' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
 #' @export
@@ -32,14 +31,13 @@
 #' table(strata, Z)
 #'
 #'
-strata_rs <- function(strata = strata_var,
+strata_rs <- function(strata = NULL,
                       prob = NULL,
                       n = NULL,
                       strata_n = NULL,
                       strata_prob = NULL,
-                      check_inputs = TRUE,
-                      strata_var = NULL) {
-  warn_deprecated_args(strata_var=strata_var)
+                      check_inputs = TRUE) {
+  
   if (check_inputs) {
     input_check <- check_samplr_arguments(
       strata = strata,

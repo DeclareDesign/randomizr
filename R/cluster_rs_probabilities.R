@@ -20,13 +20,11 @@
 #'
 #' @export
 cluster_rs_probabilities <-
-  function(clusters = clust_var,
+  function(clusters = NULL,
            n = NULL,
            prob = NULL,
            simple = FALSE,
-           check_inputs = TRUE,
-           clust_var = NULL) {
-    warn_deprecated_args(clust_var=clust_var)
+           check_inputs = TRUE) {
     if (check_inputs) {
       input_check <-
         check_samplr_arguments(n = n,

@@ -4,8 +4,8 @@
 \alias{cluster_rs_probabilities}
 \title{Inclusion Probabilities: Cluster Sampling}
 \usage{
-cluster_rs_probabilities(clusters = clust_var, n = NULL, prob = NULL,
-  simple = FALSE, check_inputs = TRUE, clust_var = NULL)
+cluster_rs_probabilities(clusters = NULL, n = NULL, prob = NULL,
+  simple = FALSE, check_inputs = TRUE)
 }
 \arguments{
 \item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}

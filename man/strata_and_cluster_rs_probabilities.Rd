@@ -4,10 +4,9 @@
 \alias{strata_and_cluster_rs_probabilities}
 \title{Inclusion Probabilities: Stratified and Clustered Random Sampling}
 \usage{
-strata_and_cluster_rs_probabilities(strata = strata_var,
-  clusters = clust_var, prob = NULL, n = NULL, strata_n = NULL,
-  strata_prob = NULL, check_inputs = TRUE, strata_var = NULL,
-  clust_var = NULL)
+strata_and_cluster_rs_probabilities(strata = NULL, clusters = NULL,
+  prob = NULL, n = NULL, strata_n = NULL, strata_prob = NULL,
+  check_inputs = TRUE)
 }
 \arguments{
 \item{strata}{A vector of length N that indicates which stratum each unit belongs to.}
@@ -23,10 +22,6 @@ strata_and_cluster_rs_probabilities(strata = strata_var,
 \item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
-
-\item{strata_var}{deprecated}
-
-\item{clust_var}{deprecated}
 }
 \value{
 A vector length N indicating the probability of being sampled.
