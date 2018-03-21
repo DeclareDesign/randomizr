@@ -9,8 +9,6 @@
 #' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.
 #' @param simple logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.
 #' @param check_inputs logical. Defaults to TRUE.
-#' @param strata_var deprecated
-#' @param clust_var deprecated
 #'
 #' @return A list of class "declaration".  The list has five entries:
 #'   $rs_function, a function that generates random samplings according to the declaration.
@@ -76,32 +74,21 @@
 #'
 #' @export
 declare_rs <- function(N = NULL,
-                       strata = strata_var,
-                       clusters = clust_var,
+                       strata = NULL,
+                       clusters = NULL,
                        n = NULL,
                        prob = NULL,
                        strata_n = NULL,
                        strata_prob = NULL,
                        simple = FALSE,
-                       check_inputs = TRUE, 
-                       strata_var=NULL, 
-                       clust_var=NULL) {
+                       check_inputs = TRUE) {
 
-  warn_deprecated_args(NULL, clust_var, strata_var)
+  all_args <-  mget(names(formals(sys.function())))
   
   
   
   if (check_inputs) {
-    input_check <- check_samplr_arguments(
-      N = N,
-      strata = strata,
-      clusters = clusters,
-      n = n,
-      prob = prob,
-      strata_n = strata_n,
-      strata_prob = strata_prob
-    )
-    
+    input_check <- check_samplr_arguments_new(all_args)
   }
   # Determine rs_type
   if (!is.null(strata) && !is.null(clusters)) {
@@ -119,122 +106,24 @@ declare_rs <- function(N = NULL,
       stop("You can't specify 'n' when using simple random sampling.")
     }
   }
-  
-  if (rs_type == "simple") {
 
-    rs_function <- function() {
-      simple_rs(N = N,
-                prob = prob,
-                check_inputs = check_inputs)
-    }
-    probabilities_vector <-
-      simple_rs_probabilities(N = N,
-                              prob = prob,
-                              check_inputs = check_inputs)
-  }
-  
-  if (rs_type == "complete") {
-    rs_function <- function() {
-      complete_rs(
-        N = N,
-        n = n,
-        prob = prob,
-        check_inputs = check_inputs
-      )
-    }
-    
-    probabilities_vector <-
-      complete_rs_probabilities(
-        N = N,
-        n = n,
-        prob = prob,
-        check_inputs = check_inputs
-      )
-    
-  }
-  
-  if (rs_type == "stratified") {
-    rs_function <- function() {
-      strata_rs(
-        strata = strata,
-        n = n,
-        strata_n = strata_n,
-        prob = prob,
-        strata_prob = strata_prob,
-        check_inputs = check_inputs
-      )
-    }
-    
-    probabilities_vector <-
-      strata_rs_probabilities(
-        strata = strata,
-        n = n,
-        strata_n = strata_n,
-        prob = prob,
-        strata_prob = strata_prob,
-        check_inputs = check_inputs
-      )
-  }
+  all_args <- list2env(all_args)
+  class(all_args) <- paste0("rs_", rs_type)
   
   
-  if (rs_type == "clustered") {
-    rs_function <- function() {
-      cluster_rs(
-        clusters = clusters,
-        n = n,
-        prob = prob,
-        simple = simple,
-        check_inputs = check_inputs
-      )
-    }
-    
-    probabilities_vector <-
-      cluster_rs_probabilities(
-        clusters = clusters,
-        n = n,
-        prob = prob,
-        simple = simple,
-        check_inputs = check_inputs
-      )
-    
-  }
-  
-  if (rs_type == "stratified_and_clustered") {
-    rs_function <- function() {
-      strata_and_cluster_rs(
-        clusters = clusters,
-        strata = strata,
-        prob = prob,
-        n = n,
-        strata_n = strata_n,
-        strata_prob = strata_prob,
-        check_inputs = check_inputs
-      )
-    }
-    
-    probabilities_vector <-
-      strata_and_cluster_rs_probabilities(
-        clusters = clusters,
-        strata = strata,
-        prob = prob,
-        n = n,
-        strata_prob = strata_prob,
-        strata_n = strata_n,
-        check_inputs = check_inputs
-      )
-    
-  }
-  
-  return_object <- list(
-    rs_function = rs_function,
+  return_object <- list2env(list(
+    rs_function = function() rs_function(all_args),
     rs_type = rs_type,
-    probabilities_vector = probabilities_vector,
-    strata = strata,
-    clusters = clusters,
     check_inputs = check_inputs
-  )
+  ), parent=all_args)
   
-  class(return_object) <- "rs_declaration"
+  list2env(as.list.environment(all_args), return_object)
+  
+  delayedAssign("probabilities_vector", rs_prob(all_args), assign.env = return_object)
+  
+  class(return_object) <- c("rs_declaration",  paste0("rs_", rs_type))
+  attr(return_object, "call") <- match.call() 
+  
   return(return_object)
   
 }
@@ -265,7 +154,7 @@ draw_rs <- function(declaration = NULL,
                     strata_prob = NULL,
                     simple = FALSE, strata_var = NULL, clust_var = NULL) {
   if (!is.null(declaration)) {
-    if (class(declaration) != "rs_declaration") {
+    if (!inherits(declaration, "rs_declaration")) {
       stop("You must provide a random sampling declaration created by declare_rs().")
     }
   } else{
@@ -283,6 +172,23 @@ draw_rs <- function(declaration = NULL,
     
   }
   return(declaration$rs_function())
+}
+
+
+#' @export
+`[<-.rs_declaration` <- function(x, i, j, value ) stop("Cannot assign into rs_declaration")
+
+#' @export
+`$<-.rs_declaration` <- function(x, name, value ) stop("Cannot assign into rs_declaration")
+
+#' @export
+rs_function <- function(this) UseMethod("rs_function", this)
+
+rs_prob     <- function(this) UseMethod("rs_prob", this)
+
+#' @export
+rs_function.rs_declaration <- function(this){
+  rs_function(parent.env(this))
 }
 
 #' Obtain inclusion probabilities
@@ -326,7 +232,7 @@ obtain_inclusion_probabilities <-
            simple = FALSE, strata_var = NULL, clust_var = NULL) {
     # checks
     if (!is.null(declaration)) {
-      if (class(declaration) != "rs_declaration") {
+      if (!inherits(declaration, "rs_declaration")) {
         stop("You must provide a random sampling declaration created by declare_rs().")
       }
     } else{

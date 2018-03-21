@@ -12,14 +12,21 @@
 
 for (.f in ls(pattern=.pattern)) {
   
+  
+  
     .fclass <- sub(.pattern, "", .f)
     .fgeneric <- regmatches(.f, regexpr(.pattern, .f))
+    
+    if(.fclass %in% c("declare", "draw", "conduct")) next;
     
     .fclass <- switch(.fclass, 
                       block_and_cluster="blocked_and_clustered", 
                       block="blocked", 
                       cluster="clustered", 
+                      strata="stratified",
+                      strata_and_cluster="stratified_and_clustered",
                       .fclass)
+    
     
     .fgeneric <- switch(.fgeneric, 
                         "_ra"="ra_function.ra_", 

@@ -350,6 +350,10 @@ check_randomizr_arguments <-
     
   }
 
+check_samplr_arguments_new <- function(all_args){
+  do.call(check_samplr_arguments, all_args)
+}
+
 check_samplr_arguments <-
   function(N = NULL,
            prob = NULL,
@@ -357,7 +361,7 @@ check_samplr_arguments <-
            strata = NULL,
            strata_n = NULL,
            strata_prob = NULL,
-           clusters = NULL) {
+           clusters = NULL, ...) {
     conflict_args <- list(
       prob = prob,
       n = n,

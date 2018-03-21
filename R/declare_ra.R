@@ -111,22 +111,8 @@ declare_ra <- function(N = NULL,
   
   if (check_inputs && is.null(permutation_matrix)) {
     input_check <- check_randomizr_arguments_new(all_args)
-    # input_check <- check_randomizr_arguments(
-    #   N = N,
-    #   blocks = blocks,
-    #   clusters = clusters,
-    #   m = m,
-    #   m_each = m_each,
-    #   prob = prob,
-    #   prob_each = prob_each,
-    #   block_m = block_m,
-    #   block_m_each = block_m_each,
-    #   block_prob = block_prob,
-    #   block_prob_each = block_prob_each,
-    #   num_arms = num_arms,
-    #   conditions = conditions
-    # )
   }
+  
   # Determine ra_type
   if (!is.null(permutation_matrix)){
     ra_type <- "custom"
@@ -180,9 +166,6 @@ declare_ra <- function(N = NULL,
 
 #' @export
 `$<-.ra_declaration` <- function(x, name, value ) stop("Cannot assign into ra_declaration")
-
-#' @export
-`$.ra_declaration` <- function(x, name, value ) get(name, x)
 
 #' @export
 ra_function <- function(this) UseMethod("ra_function", this)
