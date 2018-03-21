@@ -497,16 +497,9 @@ obtain_condition_probabilities <-
     }
     
     probabilities_matrix <- declaration$probabilities_matrix
-    cond_Z <- paste0("prob_", assignment)
-    indicies <-
-      sapply(colnames(probabilities_matrix),
-             FUN = x <-
-               function(cond_name, cond_Z) {
-                 cond_Z == cond_name
-               },
-             cond_Z = cond_Z)
-    cond_probs <-
-      as.vector(t(probabilities_matrix))[as.vector(t(indicies))]
+    cond_Z     <- paste0("prob_", assignment)
+    indices   <- match(cond_Z, colnames(probabilities_matrix))
+    cond_probs <- probabilities_matrix[ cbind(seq_along(indices), indices) ]
     return(cond_probs)
   }
 
