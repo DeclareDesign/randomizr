@@ -11,7 +11,7 @@ test_that("custom RA yields inputs",{
   prob <- declaration_2$probabilities_matrix
   expect_equal(dim(prob), c(10,4))
   
-  Z <- declaration_2$ra_function()
+  Z <- conduct_ra(declaration_2)
   
   expect_identical(
     obtain_condition_probabilities(declaration = declaration_2, assignment = Z),

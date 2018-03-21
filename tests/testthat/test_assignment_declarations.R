@@ -3,9 +3,12 @@ context("Declarations: Complete Random Assignments")
 
 test_declaration <- function(declaration, esum, eprob, conditions){
   Z <- conduct_ra(declaration)
+  
+  if(!is.null(declaration$N)) expect_length(Z, declaration$N)
+  
   prob <- obtain_condition_probabilities(declaration = declaration, assignment = conditions)
   
-  expect_true(is.function(declaration$ra_function))
+  expect_true(is.numeric(prob))
   
   if(!is.na(esum))expect_equal(sum(Z), esum)
   if(!is.na(eprob))expect_true(all(prob == eprob))
@@ -192,6 +195,8 @@ test_that("blocks num_arms = 3 ",{
   
   declaration <- declare_ra(blocks=blocks, num_arms=3)
   test_declaration(declaration, NA, 1/3, "T1")
+  
+  expect_true(all(table(conduct_ra(declaration), blocks) > 10))
 })
 
 test_that("block_m_each named",{

@@ -143,7 +143,7 @@ declare_ra <- function(N = NULL,
   
   return_object <- list2env(all_args, parent = emptyenv())
 
-  return_object$ra_function = function() ra_function(return_object)
+  return_object$ra_function = function() ra_function(return_object) #todo
   return_object$ra_type = ra_type
   return_object$cleaned_arguments = input_check
 

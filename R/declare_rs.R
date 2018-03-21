@@ -213,6 +213,8 @@ obtain_inclusion_probabilities <- function(declaration = NULL) {
   declaration$probabilities_vector
 }
 
+formals(obtain_inclusion_probabilities) <- c(formals(obtain_inclusion_probabilities), formals(declare_rs))
+
 #' @export
 print.rs_declaration <- function(x, ...) {
   S <- x$rs_function()

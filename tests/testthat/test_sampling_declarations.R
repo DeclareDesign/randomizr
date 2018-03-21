@@ -4,8 +4,6 @@ test_declaration <- function(declaration, esum, eprob){
   S <- draw_rs(declaration)
   prob <- obtain_inclusion_probabilities(declaration = declaration)
 
-  expect_true(is.function(declaration$rs_function))
-  
   if(!is.na(esum))expect_equal(sum(S), esum)
   if(!is.na(eprob))expect_true(all(prob == eprob))
   
