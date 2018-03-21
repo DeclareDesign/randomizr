@@ -89,7 +89,9 @@ declare_rs <- function(N = NULL,
   
   if (check_inputs) {
     input_check <- check_samplr_arguments_new(all_args)
+    #all_args$check_inputs <- FALSE # don't need to recheck when generating samples
   }
+  
   # Determine rs_type
   if (!is.null(strata) && !is.null(clusters)) {
     rs_type <- "stratified_and_clustered"
@@ -107,19 +109,13 @@ declare_rs <- function(N = NULL,
     }
   }
 
-  all_args <- list2env(all_args)
-  class(all_args) <- paste0("rs_", rs_type)
+
+  return_object <- list2env(all_args, parent = emptyenv())
+  return_object$rs_function <- function() rs_function(return_object)
+  return_object$rs_type <- rs_type
+  return_object$cleaned_arguments <- input_check
   
-  
-  return_object <- list2env(list(
-    rs_function = function() rs_function(all_args),
-    rs_type = rs_type,
-    check_inputs = check_inputs
-  ), parent=all_args)
-  
-  list2env(as.list.environment(all_args), return_object)
-  
-  delayedAssign("probabilities_vector", rs_prob(all_args), assign.env = return_object)
+  delayedAssign("probabilities_vector", rs_prob(return_object), assign.env = return_object)
   
   class(return_object) <- c("rs_declaration",  paste0("rs_", rs_type))
   attr(return_object, "call") <- match.call() 

@@ -111,6 +111,7 @@ declare_ra <- function(N = NULL,
   
   if (check_inputs && is.null(permutation_matrix)) {
     input_check <- check_randomizr_arguments_new(all_args)
+    #all_args$check_inputs <- FALSE # don't need to recheck when using declaration
   }
   
   # Determine ra_type
@@ -140,21 +141,16 @@ declare_ra <- function(N = NULL,
     
   }
   
-  all_args <- list2env(all_args)
-  class(all_args) <- paste0("ra_", ra_type)
+  return_object <- list2env(all_args, parent = emptyenv())
 
-  
-  return_object <- list2env(list(
-    ra_function = function() ra_function(all_args),
-    ra_type = ra_type,
-    cleaned_arguments = input_check
-  ), parent=all_args)
-  
-  list2env(as.list.environment(all_args), return_object)
-  
-  delayedAssign("probabilities_matrix", ra_prob(all_args), assign.env = return_object)
-  
-  
+  return_object$ra_function = function() ra_function(return_object)
+  return_object$ra_type = ra_type
+  return_object$cleaned_arguments = input_check
+
+
+  delayedAssign("probabilities_matrix", ra_prob(return_object), assign.env = return_object)
+
+
   class(return_object) <- c("ra_declaration", paste0("ra_", ra_type))
   attr(return_object, "call") <- match.call() 
   return(return_object)
@@ -187,18 +183,22 @@ ra_function.default <- function(this){
   
 
 ra_function.ra_custom <- function(this){
-  with(this, permutation_matrix[,sample(ncol(permutation_matrix), 1)] )
+  P <- this$permutation_matrix
+  P[ , sample.int(ncol(P), 1)]
 }
 
 ra_prob.ra_custom <- function(this){
-  with(this,{
-    conditions <- sort(unique(c(permutation_matrix)))
-    probabilities_matrix <- sapply(conditions, 
-           FUN = function(x) apply(permutation_matrix, MARGIN = 1, FUN = function(y) mean(y == x)))
-  
-    colnames(probabilities_matrix) <- paste0("prob_", conditions)
-    probabilities_matrix
-  })
+   P <- as.factor(this$permutation_matrix)
+   dim(P) <- dim(this$permutation_matrix)
+
+   lvl <- levels(P)
+   
+   P <- apply(P, 1, tabulate, nlevels(P))  
+   
+   rownames(P) <- paste0("prob_", lvl)
+   P <- prop.table(P, 2)
+   t(P)
+   
 }
   
   
