@@ -6,6 +6,8 @@ warn_deprecated_args <- function(block_var=NULL, clust_var=NULL, strata_var=NULL
   if(!is.null(strata_var)){warning(simpleCondition("strata_var is deprecated, use strata instead", call=sys.call(1)))}
 }
 
+check_randomizr_arguments_new <- function(all_args) do.call(check_randomizr_arguments, all_args)
+
 check_randomizr_arguments <-
   function(N = NULL,
            prob = NULL,
@@ -19,8 +21,7 @@ check_randomizr_arguments <-
            block_prob_each = NULL,
            clusters = NULL,
            num_arms = NULL,
-           conditions = condition_names,
-           condition_names = NULL) {
+           conditions = NULL, ...) {
     conflict_args <- list(
       prob = prob,
       m = m,

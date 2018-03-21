@@ -65,21 +65,13 @@ simple_ra <-
       conditions <- input_check$conditions
     }
     
-    if (!is.null(prob) & is.null(prob_each)) {
-      prob_each <- c(1 - prob, prob)
+    if (is.null(prob_each)) {
+      prob_each <- if(is.numeric(prob)) c(1 - prob, prob) else 
+        rep(1 / num_arms, num_arms)
     }
     
-    if (is.null(prob) & is.null(prob_each)) {
-      prob_each <- rep(1 / num_arms, num_arms)
-    }
-    
-    assignment <-
-      sample(
-        x = conditions,
-        size = N,
-        replace = TRUE,
-        prob = prob_each
-      )
+
+    assignment <- sample(conditions, N, replace = TRUE, prob_each)
     assignment <- clean_condition_names(assignment, conditions)
     return(assignment)
   }

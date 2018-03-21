@@ -93,8 +93,8 @@
 #'
 #' @export
 declare_ra <- function(N = NULL,
-                       blocks = block_var,
-                       clusters = clust_var,
+                       blocks = NULL,
+                       clusters = NULL,
                        m = NULL,
                        m_each = NULL,
                        prob = NULL,
@@ -104,33 +104,32 @@ declare_ra <- function(N = NULL,
                        block_prob = NULL,
                        block_prob_each = NULL,
                        num_arms = NULL,
-                       conditions = condition_names,
+                       conditions = NULL,
                        simple = FALSE,
                        permutation_matrix = NULL,
-                       check_inputs = TRUE, 
-                       block_var = NULL, 
-                       clust_var = NULL,
-                       condition_names = NULL) {
+                       check_inputs = TRUE) {
   input_check <- NULL
+  call <- match.call()
+  all_args <-  lapply(setNames(nm=names(call)[-1]), get, environment())
+
   
-  warn_deprecated_args(block_var, clust_var)
-    
-  if (check_inputs & is.null(permutation_matrix)) {
-    input_check <- check_randomizr_arguments(
-      N = N,
-      blocks = blocks,
-      clusters = clusters,
-      m = m,
-      m_each = m_each,
-      prob = prob,
-      prob_each = prob_each,
-      block_m = block_m,
-      block_m_each = block_m_each,
-      block_prob = block_prob,
-      block_prob_each = block_prob_each,
-      num_arms = num_arms,
-      conditions = conditions
-    )
+  if (check_inputs && is.null(permutation_matrix)) {
+    input_check <- check_randomizr_arguments_new(all_args)
+    # input_check <- check_randomizr_arguments(
+    #   N = N,
+    #   blocks = blocks,
+    #   clusters = clusters,
+    #   m = m,
+    #   m_each = m_each,
+    #   prob = prob,
+    #   prob_each = prob_each,
+    #   block_m = block_m,
+    #   block_m_each = block_m_each,
+    #   block_prob = block_prob,
+    #   block_prob_each = block_prob_each,
+    #   num_arms = num_arms,
+    #   conditions = conditions
+    # )
   }
   # Determine ra_type
   if (!is.null(permutation_matrix)){
@@ -337,7 +336,7 @@ declare_ra <- function(N = NULL,
     cleaned_arguments = input_check
   )
   
-  class(return_object) <- "ra_declaration"
+  class(return_object) <- c("ra_declaration", paste0("ra_", ra_type))
   return(return_object)
   
 }
@@ -379,7 +378,7 @@ conduct_ra <- function(declaration = NULL,
                        clust_var = NULL,
                        condition_names = NULL) {
   if (!is.null(declaration)) {
-    if (class(declaration) != "ra_declaration") {
+    if (!inherits(declaration, "ra_declaration")) {
       stop("You must provide a random assignment declaration created by declare_ra().")
     }
   } else{
@@ -470,7 +469,7 @@ obtain_condition_probabilities <-
            condition_names = NULL) {
     # checks
     if (!is.null(declaration)) {
-      if (class(declaration) != "ra_declaration") {
+      if (!inherits(declaration, "ra_declaration")) {
         stop("You must provide a random assignment declaration created by declare_ra().")
       }
     } else{
