@@ -179,170 +179,7 @@ ra_function.ra_declaration <- function(this){
 
 
   
-#   function(this){
-#   with(this, 
-#        simple_ra(
-#           N = N,
-#           prob = prob,
-#           prob_each = prob_each,
-#           num_arms = num_arms,
-#           conditions = conditions,
-#           check_inputs = check_inputs
-#         ))
-# }
 
-# ra_prob.ra_simple <- function(this){
-#   with(this,
-#        simple_ra_probabilities(
-#          N = N,
-#          prob = prob,
-#          prob_each = prob_each,
-#          num_arms = num_arms,
-#          conditions = conditions,
-#          check_inputs = check_inputs
-#        )
-#   )
-#   
-# }
-  
-  
-# ra_function.ra_complete <- function(this) {
-#   with(this,
-#     complete_ra(
-#       N = N,
-#       m = m,
-#       m_each = m_each,
-#       prob = prob,
-#       prob_each = prob_each,
-#       num_arms = num_arms,
-#       conditions = conditions,
-#       check_inputs = check_inputs
-#     )
-#   )
-# }
-    
-# ra_prob.ra_complete <- function(this) {
-#   with(this,
-#     complete_ra_probabilities(
-#       N = N,
-#       m = m,
-#       m_each = m_each,
-#       prob = prob,
-#       prob_each = prob_each,
-#       num_arms = num_arms,
-#       conditions = conditions,
-#       check_inputs = check_inputs
-#     )
-#   )
-# }
-  
-# ra_function.ra_blocked <- function(this) {
-#   with(this,
-#     block_ra(
-#       blocks = blocks,
-#       num_arms = num_arms,
-#       m = m,
-#       block_m = block_m,
-#       block_m_each = block_m_each,
-#       prob = prob,
-#       prob_each = prob_each,
-#       block_prob = block_prob,
-#       block_prob_each = block_prob_each,
-#       conditions = conditions,
-#       check_inputs = check_inputs
-#     )
-#   )
-# }
-# 
-# ra_prob.ra_blocked <- function(this){
-#   with(this, 
-#       block_ra_probabilities(
-#         blocks = blocks,
-#         num_arms = num_arms,
-#         m = m,
-#         block_m = block_m,
-#         block_m_each = block_m_each,
-#         prob = prob,
-#         prob_each = prob_each,
-#         block_prob = block_prob,
-#         block_prob_each = block_prob_each,
-#         conditions = conditions,
-#         check_inputs = check_inputs
-#       )
-#   )
-# }
-#   
-#   
-# ra_function.ra_clustered <- function(this) {
-#   with(this,
-#     cluster_ra(
-#       clusters = clusters,
-#       m = m,
-#       m_each = m_each,
-#       prob = prob,
-#       prob_each = prob_each,
-#       num_arms = num_arms,
-#       conditions = conditions,
-#       simple = simple,
-#       check_inputs = check_inputs
-#     )
-#   )
-# }
-#     
-# ra_prob.ra_clustered <- function(this) {
-#   with(this, 
-#     cluster_ra_probabilities(
-#       clusters = clusters,
-#       m = m,
-#       m_each = m_each,
-#       prob = prob,
-#       prob_each = prob_each,
-#       num_arms = num_arms,
-#       conditions = conditions,
-#       simple = simple,
-#       check_inputs = check_inputs
-#     )
-#   )
-# }
-#   
-# ra_function.ra_blocked_and_clustered <- function(this) {
-#   with(this, 
-#       block_and_cluster_ra(
-#         clusters = clusters,
-#         blocks = blocks,
-#         num_arms = num_arms,
-#         prob = prob,
-#         prob_each = prob_each,
-#         m = m,
-#         block_m = block_m,
-#         block_m_each = block_m_each,
-#         block_prob = block_prob,
-#         block_prob_each = block_prob_each,
-#         conditions = conditions,
-#         check_inputs = check_inputs
-#       )
-#   )
-# }
-#     
-# ra_prob.ra_blocked_and_clustered <- function(this) {
-#    with(this,
-#       block_and_cluster_ra_probabilities(
-#         clusters = clusters,
-#         blocks = blocks,
-#         prob = prob,
-#         prob_each = prob_each,
-#         block_prob = block_prob,
-#         m = m,
-#         block_m = block_m,
-#         block_m_each = block_m_each,
-#         block_prob_each = block_prob_each,
-#         num_arms = num_arms,
-#         conditions = conditions,
-#         check_inputs = check_inputs
-#       )
-#     )
-# }
-  
 ra_function.ra_custom <- function(this){
   with(this, permutation_matrix[,sample(ncol(permutation_matrix), 1)] )
 }
@@ -379,49 +216,19 @@ ra_prob.ra_custom <- function(this){
 #' table(Z)
 #'
 #' @export
-conduct_ra <- function(declaration = NULL,
-                       N = NULL,
-                       blocks = NULL,
-                       clusters = NULL,
-                       m = NULL,
-                       m_each = NULL,
-                       prob = NULL,
-                       prob_each = NULL,
-                       block_m = NULL,
-                       block_m_each = NULL,
-                       block_prob = NULL,
-                       block_prob_each = NULL,
-                       num_arms = NULL,
-                       conditions = NULL,
-                       simple = FALSE,
-                       check_inputs = TRUE) {
+conduct_ra <- function(declaration = NULL) {
   if (!is.null(declaration)) {
     if (!inherits(declaration, "ra_declaration")) {
       stop("You must provide a random assignment declaration created by declare_ra().")
     }
-  } else{
-    declaration <-
-      declare_ra(
-        N = N,
-        blocks = blocks,
-        clusters = clusters,
-        m = m,
-        m_each = m_each,
-        prob = prob,
-        prob_each = prob_each,
-        block_m = block_m,
-        block_m_each = block_m_each,
-        block_prob = block_prob,
-        block_prob_each = block_prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        simple = simple,
-        check_inputs = check_inputs
-      )
-    
+  } else {
+    all_args <- mget(names(formals(declare_ra)))
+    declaration <- do.call(declare_ra, all_args) 
   }
   return(declaration$ra_function())
 }
+
+formals(conduct_ra) <- c(formals(conduct_ra), formals(declare_ra))
 
 #' Obtain the probabilities of units being in the conditions that they are in.
 #'
@@ -467,21 +274,7 @@ conduct_ra <- function(declaration = NULL,
 #' @export
 obtain_condition_probabilities <-
   function(declaration = NULL,
-           assignment,
-           N = NULL,
-           blocks = NULL,
-           clusters = NULL,
-           m = NULL,
-           m_each = NULL,
-           prob = NULL,
-           prob_each = NULL,
-           block_m = NULL,
-           block_m_each = NULL,
-           block_prob = NULL,
-           block_prob_each = NULL,
-           num_arms = NULL,
-           conditions = NULL,
-           simple = FALSE) {
+           assignment) {
     # checks
     if (!is.null(declaration)) {
       if (!inherits(declaration, "ra_declaration")) {
@@ -491,23 +284,8 @@ obtain_condition_probabilities <-
       if (is.null(N)) {
         N <- length(assignment)
       }
-      declaration <-
-        declare_ra(
-          N = N,
-          blocks = blocks,
-          clusters = clusters,
-          m = m,
-          m_each = m_each,
-          prob = prob,
-          prob_each = prob_each,
-          block_m = block_m,
-          block_m_each = block_m_each,
-          block_prob = block_prob,
-          block_prob_each = block_prob_each,
-          num_arms = num_arms,
-          conditions = conditions,
-          simple = simple
-        )
+      all_args <- mget(names(formals(declare_ra)))
+      declaration <- do.call(declare_ra, all_args) 
     }
     
     probabilities_matrix <- declaration$probabilities_matrix
@@ -523,6 +301,9 @@ obtain_condition_probabilities <-
       as.vector(t(probabilities_matrix))[as.vector(t(indicies))]
     return(cond_probs)
   }
+
+formals(obtain_condition_probabilities) <- c(formals(obtain_condition_probabilities), formals(declare_ra))
+
 
 #' @export
 print.ra_declaration <- function(x, ...) {

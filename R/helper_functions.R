@@ -1,10 +1,3 @@
-# randomizr input cleaning and helper functions
-
-warn_deprecated_args <- function(block_var=NULL, clust_var=NULL, strata_var=NULL) {
-  if(!is.null(block_var)){warning(simpleCondition("block_var is deprecated, use blocks instead", call=sys.call(1)))}
-  if(!is.null(clust_var)){warning(simpleCondition("clust_var is deprecated, use clusters instead", call=sys.call(1)))}
-  if(!is.null(strata_var)){warning(simpleCondition("strata_var is deprecated, use strata instead", call=sys.call(1)))}
-}
 
 check_randomizr_arguments_new <- function(all_args) do.call(check_randomizr_arguments, all_args)
 
