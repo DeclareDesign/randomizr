@@ -35,8 +35,8 @@ test_that("N=100, m=50",{
 test_that("N=100, m_each",{
   declaration <- declare_ra(N=100, m_each = c(30, 70), 
                             conditions = c("control", "treatment"))
-  test_declaration(declaration, NA, .3, 0)
-  test_declaration(declaration, NA, .7, 1)
+  test_declaration(declaration, NA, .3, "control")
+  test_declaration(declaration, NA, .7, "treatment")
 })
 
 
@@ -90,7 +90,7 @@ test_that("simple named prob each",{
   declaration <- declare_ra(N=100, prob_each = c(0.3, 0.7), 
                             conditions = c("control", "treatment"), simple=TRUE)
   test_declaration(declaration, NA, .3, "control")
-  test_declaration(declaration, NA, .7, 1)
+  test_declaration(declaration, NA, .7, "treatment")
 })
 
 test_that("simple num_arms = 3",{
@@ -149,7 +149,7 @@ test_that("block_m_each different",{
                    c(30, 70),
                    c(50, 150))
   declaration <- declare_ra(blocks=blocks, block_m_each=block_m_each)
-  test_declaration(declaration, 260, NA, 1)
+  test_declaration(declaration, 260, NA, "A")
   expect_equal(
     obtain_condition_probabilities(declaration = declaration, assignment = 1)[c(1, 88, 175)],
     c(.8, .7, .75)
@@ -202,7 +202,7 @@ test_that("block_m_each named",{
   
   declaration <- declare_ra(blocks=blocks, block_m_each=block_m_each, 
                             conditions=c("control", "placebo", "treatment"))
-  test_declaration(declaration, NA, 1/3, "Treatment")
+  test_declaration(declaration, NA, NA, "treatment")
 })
 
 
@@ -251,7 +251,7 @@ test_that("clusters m_each three arms",{
 test_that("clusters m_each three arms named",{
   declaration <- declare_ra(clusters=clusters, m_each=c(7, 7, 12), 
                   conditions=c("control", "placebo", "treatment"))
-  test_declaration(declaration, NA, 7/26, "T1")
+  test_declaration(declaration, NA, 7/26, "placebo")
 })
 
 test_that("clusters three conditons",{
