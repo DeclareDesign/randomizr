@@ -1,5 +1,14 @@
 
-.pattern <- "(_ra|_ra_probabilities|_rs|_rs_probabilities)$"
+.pattern <- "(_ra|_rs)(_probabilities)?$"
+
+.invoke <- function(f){
+  f <- match.fun(f)
+  function(this){
+    args <- mget(names(formals(f)), this)
+    do.call(f, args)    
+  }  
+}
+
 
 for (.f in ls(pattern=.pattern)) {
   
@@ -28,4 +37,4 @@ for (.f in ls(pattern=.pattern)) {
   
 }
 
-rm(.f, .f2, .fclass, .fgeneric, .pattern)
+rm(.f, .f2, .fclass, .fgeneric, .pattern, .invoke)

@@ -5,8 +5,7 @@
 \title{Simple Random Assignment}
 \usage{
 simple_ra(N, prob = NULL, prob_each = NULL, num_arms = NULL,
-  conditions = condition_names, check_inputs = TRUE,
-  condition_names = NULL)
+  conditions = NULL, check_inputs = TRUE)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}

@@ -17,8 +17,6 @@ cluster_rs_probabilities(clusters = clust_var, n = NULL, prob = NULL,
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling of clusters. When simple = TRUE, please do not specify n.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
-
-\item{clust_var}{deprecated}
 }
 \value{
 A vector length N indicating the probability of being sampled.
