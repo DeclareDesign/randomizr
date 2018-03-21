@@ -9,8 +9,6 @@
 #' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
 #' @export
 #'
-#' @importFrom stats rbinom
-#'
 #' @examples
 #'
 #' S <- simple_rs(N = 100)
@@ -34,6 +32,6 @@ simple_rs <-
       prob <- 0.5
     }
     
-    assignment <- rbinom(n = N, size = 1, prob = prob)
+    assignment <- sample(0:1, size = N, replace=TRUE, prob = c(1-prob, prob))
     return(assignment)
   }
