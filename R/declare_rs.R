@@ -144,36 +144,19 @@ declare_rs <- function(N = NULL,
 #' table(S)
 #'
 #' @export
-draw_rs <- function(declaration = NULL,
-                    N = NULL,
-                    strata = strata_var,
-                    clusters = clust_var,
-                    n = NULL,
-                    prob = NULL,
-                    strata_n = NULL,
-                    strata_prob = NULL,
-                    simple = FALSE, strata_var = NULL, clust_var = NULL) {
+draw_rs <- function(declaration = NULL, N = NULL) {
   if (!is.null(declaration)) {
     if (!inherits(declaration, "rs_declaration")) {
       stop("You must provide a random sampling declaration created by declare_rs().")
     }
   } else{
-    declaration <-
-      declare_rs(
-        N = N,
-        strata = strata,
-        clusters = clusters,
-        n = n,
-        prob = prob,
-        strata_n = strata_n,
-        strata_prob = strata_prob,
-        simple = simple
-      )
-    
+    all_args <- mget(names(formals(declare_rs)))
+    declaration <- do.call(declare_rs, all_args) 
   }
   return(declaration$rs_function())
 }
 
+formals(draw_rs) <- c(formals(draw_rs), formals(declare_rs))
 
 #' @export
 `[<-.rs_declaration` <- function(x, i, j, value ) stop("Cannot assign into rs_declaration")
@@ -221,32 +204,15 @@ rs_function.rs_declaration <- function(this){
 #'
 #' @export
 obtain_inclusion_probabilities <-
-  function(declaration = NULL,
-           N = NULL,
-           strata = strata_var,
-           clusters = clust_var,
-           n = NULL,
-           prob = NULL,
-           strata_n = NULL,
-           strata_prob = NULL,
-           simple = FALSE, strata_var = NULL, clust_var = NULL) {
+  function(declaration = NULL) {
     # checks
     if (!is.null(declaration)) {
       if (!inherits(declaration, "rs_declaration")) {
         stop("You must provide a random sampling declaration created by declare_rs().")
       }
-    } else{
-      declaration <-
-        declare_rs(
-          N = N,
-          strata = strata,
-          clusters = clusters,
-          n = n,
-          prob = prob,
-          strata_n = strata_n,
-          strata_prob = strata_prob,
-          simple = simple
-        )
+    } else {
+      all_args <- mget(names(formals(declare_rs)))
+      declaration <- do.call(declare_rs, all_args) 
     }
     
     probabilities_vector <- declaration$probabilities_vector
