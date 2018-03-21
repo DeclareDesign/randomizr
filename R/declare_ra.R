@@ -109,8 +109,7 @@ declare_ra <- function(N = NULL,
                        permutation_matrix = NULL,
                        check_inputs = TRUE) {
   input_check <- NULL
-  call <- match.call()
-  all_args <-  lapply(setNames(nm=names(call)[-1]), get, environment())
+  all_args <-  mget(names(formals(sys.function())))
 
   
   if (check_inputs && is.null(permutation_matrix)) {
@@ -157,77 +156,106 @@ declare_ra <- function(N = NULL,
     }
     
   }
+  
+  class(all_args) <- paste0("ra_", ra_type)
 
   
-  if (ra_type == "simple") {
-    
-    ra_function <- function() {
-      simple_ra(
-        N = N,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        check_inputs = check_inputs
-      )
-    }
-    probabilities_matrix <-
-      simple_ra_probabilities(
-        N = N,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        check_inputs = check_inputs
-      )
-  }
+  return_object <- list(
+    ra_function = function() ra_function(all_args),
+    ra_type = ra_type,
+    probabilities_matrix = ra_prob(all_args),
+    permutation_matrix = permutation_matrix,
+    blocks = blocks,
+    clusters = clusters,
+    original_call = match.call(),
+    cleaned_arguments = input_check
+  )
   
-  if (ra_type == "complete") {
-    ra_function <- function() {
-      complete_ra(
-        N = N,
-        m = m,
-        m_each = m_each,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        check_inputs = check_inputs
-      )
-    }
-    
-    probabilities_matrix <-
-      complete_ra_probabilities(
-        N = N,
-        m = m,
-        m_each = m_each,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        check_inputs = check_inputs
-      )
-    
-  }
+  class(return_object) <- c("ra_declaration", paste0("ra_", ra_type))
+  return(return_object)
   
-  if (ra_type == "blocked") {
-    ra_function <- function() {
-      block_ra(
-        blocks = blocks,
-        num_arms = num_arms,
-        m = m,
-        block_m = block_m,
-        block_m_each = block_m_each,
-        prob = prob,
-        prob_each = prob_each,
-        block_prob = block_prob,
-        block_prob_each = block_prob_each,
-        conditions = conditions,
-        check_inputs = check_inputs
-      )
-    }
+}
+  
+ra_function <- function(this) UseMethod("ra_function", this)
+ra_prob     <- function(this) UseMethod("ra_prob", this)
+
+ra_function.ra_simple <- function(this){
+  with(this, 
+       simple_ra(
+          N = N,
+          prob = prob,
+          prob_each = prob_each,
+          num_arms = num_arms,
+          conditions = conditions,
+          check_inputs = check_inputs
+        ))
+}
+
+ra_prob.ra_simple <- function(this){
+  with(this,
+       simple_ra_probabilities(
+         N = N,
+         prob = prob,
+         prob_each = prob_each,
+         num_arms = num_arms,
+         conditions = conditions,
+         check_inputs = check_inputs
+       )
+  )
+  
+}
+  
+  
+ra_function.ra_complete <- function(this) {
+  with(this,
+    complete_ra(
+      N = N,
+      m = m,
+      m_each = m_each,
+      prob = prob,
+      prob_each = prob_each,
+      num_arms = num_arms,
+      conditions = conditions,
+      check_inputs = check_inputs
+    )
+  )
+}
     
-    probabilities_matrix <-
+ra_prob.ra_complete <- function(this) {
+  with(this,
+    complete_ra_probabilities(
+      N = N,
+      m = m,
+      m_each = m_each,
+      prob = prob,
+      prob_each = prob_each,
+      num_arms = num_arms,
+      conditions = conditions,
+      check_inputs = check_inputs
+    )
+  )
+}
+  
+ra_function.ra_blocked <- function(this) {
+  with(this,
+    block_ra(
+      blocks = blocks,
+      num_arms = num_arms,
+      m = m,
+      block_m = block_m,
+      block_m_each = block_m_each,
+      prob = prob,
+      prob_each = prob_each,
+      block_prob = block_prob,
+      block_prob_each = block_prob_each,
+      conditions = conditions,
+      check_inputs = check_inputs
+    )
+  )
+}
+
+ra_prob.ra_blocked <- function(this){
+  with(this, 
       block_ra_probabilities(
         blocks = blocks,
         num_arms = num_arms,
@@ -241,41 +269,44 @@ declare_ra <- function(N = NULL,
         conditions = conditions,
         check_inputs = check_inputs
       )
-  }
+  )
+}
   
   
-  if (ra_type == "clustered") {
-    ra_function <- function() {
-      cluster_ra(
-        clusters = clusters,
-        m = m,
-        m_each = m_each,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        simple = simple,
-        check_inputs = check_inputs
-      )
-    }
+ra_function.ra_clustered <- function(this) {
+  with(this,
+    cluster_ra(
+      clusters = clusters,
+      m = m,
+      m_each = m_each,
+      prob = prob,
+      prob_each = prob_each,
+      num_arms = num_arms,
+      conditions = conditions,
+      simple = simple,
+      check_inputs = check_inputs
+    )
+  )
+}
     
-    probabilities_matrix <-
-      cluster_ra_probabilities(
-        clusters = clusters,
-        m = m,
-        m_each = m_each,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        simple = simple,
-        check_inputs = check_inputs
-      )
-    
-  }
+ra_prob.ra_clustered <- function(this) {
+  with(this, 
+    cluster_ra_probabilities(
+      clusters = clusters,
+      m = m,
+      m_each = m_each,
+      prob = prob,
+      prob_each = prob_each,
+      num_arms = num_arms,
+      conditions = conditions,
+      simple = simple,
+      check_inputs = check_inputs
+    )
+  )
+}
   
-  if (ra_type == "blocked_and_clustered") {
-    ra_function <- function() {
+ra_function.ra_blocked_and_clustered <- function(this) {
+  with(this, 
       block_and_cluster_ra(
         clusters = clusters,
         blocks = blocks,
@@ -290,9 +321,11 @@ declare_ra <- function(N = NULL,
         conditions = conditions,
         check_inputs = check_inputs
       )
-    }
+  )
+}
     
-    probabilities_matrix <-
+ra_prob.ra_blocked_and_clustered <- function(this) {
+   with(this,
       block_and_cluster_ra_probabilities(
         clusters = clusters,
         blocks = blocks,
@@ -307,39 +340,27 @@ declare_ra <- function(N = NULL,
         conditions = conditions,
         check_inputs = check_inputs
       )
-    
-  }
-  
-  if (ra_type == "custom"){
-    ra_function <- function(){
-      permutation_matrix[,sample(ncol(permutation_matrix), 1)]
-    }
-    conditions <- sort(unique(c(permutation_matrix)))
-    
-    probabilities_matrix <- 
-      sapply(conditions, 
-             FUN = function(x) apply(permutation_matrix, MARGIN = 1, FUN = function(y) mean(y == x)))
-    
-    colnames(probabilities_matrix) <- paste0("prob_", conditions)
-    
-  }
-  
-  
-  return_object <- list(
-    ra_function = ra_function,
-    ra_type = ra_type,
-    probabilities_matrix = probabilities_matrix,
-    permutation_matrix = permutation_matrix,
-    blocks = blocks,
-    clusters = clusters,
-    original_call = match.call(),
-    cleaned_arguments = input_check
-  )
-  
-  class(return_object) <- c("ra_declaration", paste0("ra_", ra_type))
-  return(return_object)
-  
+    )
 }
+  
+ra_function.ra_custom <- function(this){
+  with(this, permutation_matrix[,sample(ncol(permutation_matrix), 1)] )
+}
+
+ra_prob.ra_custom <- function(this){
+  with(this,{
+    conditions <- sort(unique(c(permutation_matrix)))
+    probabilities_matrix <- sapply(conditions, 
+           FUN = function(x) apply(permutation_matrix, MARGIN = 1, FUN = function(y) mean(y == x)))
+  
+    colnames(probabilities_matrix) <- paste0("prob_", conditions)
+    probabilities_matrix
+  })
+}
+  
+  
+  
+
 
 #' Conduct a random assignment
 #'
