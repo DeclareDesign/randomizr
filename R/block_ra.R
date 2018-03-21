@@ -74,7 +74,7 @@
 #'
 #'
 #'
-block_ra <- function(blocks = block_var,
+block_ra <- function(blocks = NULL,
                      prob = NULL,
                      prob_each = NULL,
                      m = NULL,
@@ -83,11 +83,8 @@ block_ra <- function(blocks = block_var,
                      block_prob = NULL,
                      block_prob_each = NULL,
                      num_arms = NULL,
-                     conditions = condition_names,
-                     check_inputs = TRUE,
-                     block_var = NULL,
-                     condition_names = NULL) {
-  warn_deprecated_args(block_var)
+                     conditions = NULL,
+                     check_inputs = TRUE) {
   input_check <- NULL
   if (check_inputs) {
     input_check <- check_randomizr_arguments(

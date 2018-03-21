@@ -49,7 +49,7 @@
 #' head(prob_mat)
 #'
 #' @export
-block_ra_probabilities <- function(blocks = block_var,
+block_ra_probabilities <- function(blocks = NULL,
                                    prob = NULL,
                                    prob_each = NULL,
                                    m = NULL,
@@ -59,8 +59,7 @@ block_ra_probabilities <- function(blocks = block_var,
                                    block_prob_each = NULL,
                                    num_arms = NULL,
                                    conditions = NULL,
-                                   check_inputs = TRUE,
-                                   block_var = NULL) {
+                                   check_inputs = TRUE) {
   if (check_inputs) {
     input_check <- check_randomizr_arguments(
       blocks = blocks,

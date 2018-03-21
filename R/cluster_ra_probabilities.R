@@ -41,7 +41,7 @@
 #'
 #' @export
 cluster_ra_probabilities <-
-  function(clusters = clust_var,
+  function(clusters = NULL,
            m = NULL,
            m_each = NULL,
            prob = NULL,
@@ -49,11 +49,9 @@ cluster_ra_probabilities <-
            num_arms = NULL,
            conditions = NULL,
            simple = FALSE,
-           check_inputs = TRUE,
-           clust_var = NULL) {
+           check_inputs = TRUE) {
   
-    warn_deprecated_args(clust_var=clust_var)
-    
+
     
     if (check_inputs) {
       input_check <-

@@ -11,8 +11,6 @@
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment of clusters to conditions is used. When simple = TRUE, please do not specify m or m_each.
 #' @param check_inputs logical. Defaults to TRUE.
-#' @param clust_var deprecated
-#' @param condition_names deprecated
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #' @export
@@ -44,18 +42,16 @@
 #' Z <- cluster_ra(clusters = clusters,
 #'                 conditions = c("control", "placebo", "treatment"))
 #' table(Z, clusters)
-cluster_ra <- function(clusters = clust_var,
+cluster_ra <- function(clusters = NULL,
                        m = NULL,
                        m_each = NULL,
                        prob = NULL,
                        prob_each = NULL,
                        num_arms = NULL,
-                       conditions = condition_names,
+                       conditions = NULL,
                        simple = FALSE,
-                       check_inputs = TRUE,
-                       clust_var = NULL,
-                       condition_names = NULL) {
-  warn_deprecated_args(clust_var = clust_var)
+                       check_inputs = TRUE) {
+  
   if (check_inputs) {
     input_check <-
       check_randomizr_arguments(

@@ -43,8 +43,8 @@
 #'
 #' @export
 block_and_cluster_ra_probabilities <-
-  function(blocks = block_var,
-           clusters = clust_var,
+  function(blocks = NULL,
+           clusters = NULL,
            prob = NULL,
            prob_each = NULL,
            m = NULL,
@@ -54,13 +54,9 @@ block_and_cluster_ra_probabilities <-
            block_prob_each = NULL,
            num_arms = NULL,
            conditions = NULL,
-           check_inputs = TRUE,
-           block_var = NULL,
-           clust_var = NULL) {
+           check_inputs = TRUE) {
     
-    warn_deprecated_args(block_var, clust_var)
-    
-    
+
     if (check_inputs) {
       input_check <-
         check_randomizr_arguments(

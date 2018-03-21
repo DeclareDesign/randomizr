@@ -14,9 +14,6 @@
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
 #' @param check_inputs logical. Defaults to TRUE.
-#' @param block_var deprecated
-#' @param clust_var deprecated
-#' @param condition_names deprecated
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #'
@@ -65,8 +62,8 @@
 #'
 #' @export
 block_and_cluster_ra <-
-  function(blocks = block_var,
-           clusters = clust_var,
+  function(blocks = NULL,
+           clusters = NULL,
            prob = NULL,
            prob_each = NULL,
            m = NULL,
@@ -75,13 +72,8 @@ block_and_cluster_ra <-
            block_prob = NULL,
            block_prob_each = NULL,
            num_arms = NULL,
-           conditions = condition_names,
-           check_inputs = TRUE,
-           block_var = NULL,
-           clust_var = NULL,
-           condition_names = NULL) {
-    
-    warn_deprecated_args(block_var, clust_var)
+           conditions = NULL,
+           check_inputs = TRUE) {
     
     if (check_inputs) {
       input_check <-

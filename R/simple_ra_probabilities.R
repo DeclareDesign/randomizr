@@ -73,3 +73,4 @@ simple_ra_probabilities <-
     return(prob_mat)
     
   }
+

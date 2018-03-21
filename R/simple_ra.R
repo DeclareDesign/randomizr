@@ -49,9 +49,8 @@ simple_ra <-
            prob = NULL,
            prob_each = NULL,
            num_arms = NULL,
-           conditions = condition_names,
-           check_inputs = TRUE,
-           condition_names = NULL) {
+           conditions = NULL,
+           check_inputs = TRUE) {
     if (check_inputs) {
       input_check <-
         check_randomizr_arguments(
@@ -75,3 +74,5 @@ simple_ra <-
     assignment <- clean_condition_names(assignment, conditions)
     return(assignment)
   }
+
+
