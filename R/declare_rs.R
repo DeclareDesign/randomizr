@@ -128,35 +128,6 @@ declare_rs <- function(N = NULL,
   
 }
 
-#' Draw a random sample
-#'
-#' You can either give draw_rs() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.
-#'
-#' @param declaration A random sampling declaration, created by \code{\link{declare_rs}}.
-#' @inheritParams declare_rs
-#' @examples
-#' declaration <- declare_rs(N = 100, n = 30)
-#' S <- draw_rs(declaration = declaration)
-#' table(S)
-#'
-#' # equivalent to
-#' S <- draw_rs(N = 100, n = 30)
-#' table(S)
-#'
-#' @export
-draw_rs <- function(declaration = NULL, N = NULL) {
-  if (!is.null(declaration)) {
-    if (!inherits(declaration, "rs_declaration")) {
-      stop("You must provide a random sampling declaration created by declare_rs().")
-    }
-  } else{
-    all_args <- mget(names(formals(declare_rs)))
-    declaration <- do.call(declare_rs, all_args) 
-  }
-  return(declaration$rs_function())
-}
-
-formals(draw_rs) <- c(formals(draw_rs), formals(declare_rs))
 
 #' @export
 `[<-.rs_declaration` <- function(x, i, j, value ) stop("Cannot assign into rs_declaration")
@@ -173,6 +144,39 @@ rs_prob     <- function(this) UseMethod("rs_prob", this)
 rs_function.rs_declaration <- function(this){
   rs_function(parent.env(this))
 }
+
+
+
+#' Draw a random sample
+#'
+#' You can either give draw_rs() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.
+#'
+#' @param declaration A random sampling declaration, created by \code{\link{declare_rs}}.
+#' @inheritParams declare_rs
+#' @examples
+#' declaration <- declare_rs(N = 100, n = 30)
+#' S <- draw_rs(declaration = declaration)
+#' table(S)
+#'
+#' # equivalent to
+#' S <- draw_rs(N = 100, n = 30)
+#' table(S)
+#'
+#' @export
+draw_rs <- function(declaration = NULL) {
+  if (!is.null(declaration)) {
+    if (!inherits(declaration, "rs_declaration")) {
+      stop("You must provide a random sampling declaration created by declare_rs().")
+    }
+  } else{
+    all_args <- mget(names(formals(declare_rs)))
+    declaration <- do.call(declare_rs, all_args) 
+  }
+  rs_function(declaration)
+}
+
+formals(draw_rs) <- c(formals(draw_rs), formals(declare_rs))
+
 
 #' Obtain inclusion probabilities
 #'
@@ -203,21 +207,19 @@ rs_function.rs_declaration <- function(this){
 #' table(strata, observed_probabilities)
 #'
 #' @export
-obtain_inclusion_probabilities <-
-  function(declaration = NULL) {
-    # checks
-    if (!is.null(declaration)) {
-      if (!inherits(declaration, "rs_declaration")) {
-        stop("You must provide a random sampling declaration created by declare_rs().")
-      }
-    } else {
-      all_args <- mget(names(formals(declare_rs)))
-      declaration <- do.call(declare_rs, all_args) 
+obtain_inclusion_probabilities <- function(declaration = NULL) {
+  # checks
+  if (!is.null(declaration)) {
+    if (!inherits(declaration, "rs_declaration")) {
+      stop("You must provide a random sampling declaration created by declare_rs().")
     }
-    
-    probabilities_vector <- declaration$probabilities_vector
-    return(probabilities_vector)
+  } else {
+    all_args <- mget(names(formals(declare_rs)))
+    declaration <- do.call(declare_rs, all_args) 
   }
+  
+  declaration$probabilities_vector
+}
 
 #' @export
 print.rs_declaration <- function(x, ...) {
