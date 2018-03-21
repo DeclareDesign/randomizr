@@ -1,3 +1,6 @@
+# For each _ra/_rs function,
+# generate a generic at time of build
+
 
 .pattern <- "(_ra|_rs)(_probabilities)?$"
 

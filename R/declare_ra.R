@@ -160,6 +160,10 @@ declare_ra <- function(N = NULL,
   return(return_object)
   
 }
+
+###############################################################################
+### RA declaration generics
+
   
 #' @export
 `[<-.ra_declaration` <- function(x, i, j, value ) stop("Cannot assign into ra_declaration")
@@ -173,11 +177,13 @@ ra_function <- function(this) UseMethod("ra_function", this)
 ra_prob     <- function(this) UseMethod("ra_prob", this)
 
 #' @export
-ra_function.ra_declaration <- function(this){
-  ra_function(parent.env(this))
+ra_function.default <- function(this){
+  stop("You must provide a random assignment declaration created by declare_ra().")
 }
 
-
+###############################################################################
+### Custom ra's do not have corresponding _ra and _ra_probability functions, 
+### so leaving them here
   
 
 ra_function.ra_custom <- function(this){
@@ -217,15 +223,11 @@ ra_prob.ra_custom <- function(this){
 #'
 #' @export
 conduct_ra <- function(declaration = NULL) {
-  if (!is.null(declaration)) {
-    if (!inherits(declaration, "ra_declaration")) {
-      stop("You must provide a random assignment declaration created by declare_ra().")
-    }
-  } else {
+  if (is.null(declaration)) {
     all_args <- mget(names(formals(declare_ra)))
     declaration <- do.call(declare_ra, all_args) 
   }
-  return(declaration$ra_function())
+  ra_function(declaration)
 }
 
 formals(conduct_ra) <- c(formals(conduct_ra), formals(declare_ra))
@@ -300,54 +302,34 @@ formals(obtain_condition_probabilities) <- c(formals(obtain_condition_probabilit
 
 #' @export
 print.ra_declaration <- function(x, ...) {
-  Z <- x$ra_function()
+  Z <- ra_function(x)
   n <- length(Z)
   
   conditions <- sort(unique(Z))
   num_arms <- length(conditions)
-  constant_probabilities <-
-    all(apply(
-      x$probabilities_matrix,
-      2,
-      FUN = function(x) {
-        all(x[1] == x)
+  constant_probabilities <- nrow(unique(x$probabilities_matrix)) == 1
+
+  cat("Random assignment procedure:" ,
+      switch(x$ra_type, 
+             "blocked"="Block",
+             "clustered"="Cluster",
+             "simple"="Simple",
+             "blocked_and_clustered"="Blocked and clustered",
+             "complete"="Complete"
+             ),
+      "random assignment", "\n",
+  
+      "Number of units:", n, "\n",
+      if (!is.null(x$blocks)) sprintf("Number of blocks: %d\n", length(unique(x$blocks))),
+      if (!is.null(x$clusters)) sprintf("Number of clusters: %d\n", length(unique(x$clusters))),
+      "Number of treatment arms:", num_arms, "\n",
+
+      sprintf("The possible treatment categories are %s.\n", paste(conditions, collapse = " and ") ),
+
+      if (constant_probabilities) {
+        "The probabilities of assignment are constant across units."
+      } else{
+          "The probabilities of assignment are NOT constant across units. Your analysis strategy must account for differential probabilities of assignment, typically by employing inverse probability weights."
       }
-    ))
-  
-  if (x$ra_type == "blocked")
-    cat("Random assignment procedure: Block random assignment", "\n")
-  if (x$ra_type == "clustered")
-    cat("Random assignment procedure: Cluster random assignment", "\n")
-  if (x$ra_type == "simple")
-    cat("Random assignment procedure: Simple random assignment", "\n")
-  if (x$ra_type == "blocked_and_clustered")
-    cat("Random assignment procedure: Blocked and clustered random assignment",
-        "\n")
-  if (x$ra_type == "complete")
-    cat("Random assignment procedure: Complete random assignment",
-        "\n")
-  cat("Number of units:", n, "\n")
-  if (!is.null(x$blocks)) {
-    cat("Number of blocks:", length(unique(x$blocks)), "\n")
-  }
-  if (!is.null(x$clusters)) {
-    cat("Number of clusters:", length(unique(x$clusters)), "\n")
-  }
-  
-  cat("Number of treatment arms:", num_arms, "\n")
-  cat(
-    "The possible treatment categories are ",
-    paste(conditions, collapse = " and "),
-    ".",
-    "\n",
-    sep = ""
   )
-  
-  if (constant_probabilities) {
-    cat("The probabilities of assignment are constant across units.")
-  } else{
-    cat(
-      "The probabilities of assignment are NOT constant across units. Your analysis strategy must account for differential probabilities of assignment, typically by employing inverse probability weights."
-    )
-  }
 }

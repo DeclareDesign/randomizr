@@ -128,6 +128,9 @@ declare_rs <- function(N = NULL,
   
 }
 
+###############################################################################
+### RS declaration generics
+
 
 #' @export
 `[<-.rs_declaration` <- function(x, i, j, value ) stop("Cannot assign into rs_declaration")
@@ -140,12 +143,9 @@ rs_function <- function(this) UseMethod("rs_function", this)
 
 rs_prob     <- function(this) UseMethod("rs_prob", this)
 
-#' @export
-rs_function.rs_declaration <- function(this){
-  rs_function(parent.env(this))
+rs_function.default <- function(this){
+  stop("You must provide an random sampling object created by declare_rs().")
 }
-
-
 
 #' Draw a random sample
 #'
@@ -164,11 +164,7 @@ rs_function.rs_declaration <- function(this){
 #'
 #' @export
 draw_rs <- function(declaration = NULL) {
-  if (!is.null(declaration)) {
-    if (!inherits(declaration, "rs_declaration")) {
-      stop("You must provide a random sampling declaration created by declare_rs().")
-    }
-  } else{
+  if (is.null(declaration)) {
     all_args <- mget(names(formals(declare_rs)))
     declaration <- do.call(declare_rs, all_args) 
   }
