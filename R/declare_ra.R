@@ -157,29 +157,6 @@ declare_ra <- function(N = NULL,
   
 }
 
-###############################################################################
-### RA declaration generics
-
-  
-#' @export
-`[<-.ra_declaration` <- function(x, i, j, value ) stop("Cannot assign into ra_declaration")
-
-#' @export
-`$<-.ra_declaration` <- function(x, name, value ) stop("Cannot assign into ra_declaration")
-
-#' @export
-ra_function <- function(this) UseMethod("ra_function", this)
-
-ra_prob     <- function(this) UseMethod("ra_prob", this)
-
-#' @export
-ra_function.default <- function(this){
-  stop("You must provide a random assignment declaration created by declare_ra().")
-}
- 
-  
-  
-
 
 #' Conduct a random assignment
 #'

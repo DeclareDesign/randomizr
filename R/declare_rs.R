@@ -124,24 +124,6 @@ declare_rs <- function(N = NULL,
   
 }
 
-###############################################################################
-### RS declaration generics
-
-
-#' @export
-`[<-.rs_declaration` <- function(x, i, j, value ) stop("Cannot assign into rs_declaration")
-
-#' @export
-`$<-.rs_declaration` <- function(x, name, value ) stop("Cannot assign into rs_declaration")
-
-#' @export
-rs_function <- function(this) UseMethod("rs_function", this)
-
-rs_prob     <- function(this) UseMethod("rs_prob", this)
-
-rs_function.default <- function(this){
-  stop("You must provide an random sampling object created by declare_rs().")
-}
 
 #' Draw a random sample
 #'
