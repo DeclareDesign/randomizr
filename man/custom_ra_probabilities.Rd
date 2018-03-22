@@ -6,6 +6,9 @@
 \usage{
 custom_ra_probabilities(permutation_matrix)
 }
+\arguments{
+\item{permutation_matrix}{deprecated}
+}
 \value{
 A matrix of probabilities of assignment
 }

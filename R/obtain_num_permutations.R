@@ -37,7 +37,9 @@
 #' perms <- obtain_permutation_matrix(declaration)
 #' dim(perms)
 #' 
-obtain_num_permutations <- function(declaration) UseMethod("obtain_num_permutations", declaration)
+obtain_num_permutations <- function(declaration) {
+  (function(declaration) UseMethod("obtain_num_permutations", declaration))(declaration)
+}
 
 obtain_num_permutations.ra_simple <- function(declaration) {
   declaration$num_arms ^ (nrow(declaration$probabilities_matrix))

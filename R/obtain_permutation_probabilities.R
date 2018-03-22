@@ -22,7 +22,9 @@
 #' # correctly correct!
 #' perms %*% perm_probs
 #'
-obtain_permutation_probabilities <- function(declaration) UseMethod("obtain_permutation_probabilities", declaration)
+obtain_permutation_probabilities <- function(declaration) {
+  (function(declaration) UseMethod("obtain_permutation_probabilities", declaration))(declaration)
+}
 
 obtain_permutation_probabilities.ra_simple <- function(declaration) {
 
@@ -54,13 +56,13 @@ obtain_permutation_probabilities.ra_simple <- function(declaration) {
 }
 
 obtain_permutation_probabilities.ra_complete <- function(declaration) {   
-        complete_ra_permutation_probabilities(
-          N = nrow(declaration$probabilities_matrix),
-          prob_each = declaration$probabilities_matrix[1, ],
-          conditions = declaration$cleaned_arguments$conditions
-        )
-      
-    }
+  complete_ra_permutation_probabilities(
+    N = nrow(declaration$probabilities_matrix),
+    prob_each = declaration$probabilities_matrix[1, ],
+    conditions = declaration$cleaned_arguments$conditions
+  )
+
+}
 
 
 obtain_permutation_probabilities.ra_blocked <- function(declaration) {    
