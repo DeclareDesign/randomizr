@@ -89,7 +89,9 @@ declare_rs <- function(N = NULL,
   
   if (check_inputs) {
     input_check <- check_samplr_arguments_new(all_args)
-    #all_args$check_inputs <- FALSE # don't need to recheck when generating samples
+    for(i in names(input_check))
+      all_args[[i]] <- input_check[[i]]
+    all_args$check_inputs <- FALSE # don't need to recheck when using declaration
   }
   
   # Determine rs_type
