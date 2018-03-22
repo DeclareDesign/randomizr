@@ -42,19 +42,18 @@ strata_rs_probabilities <- function(strata = NULL,
   }
   
   # Case 1: prob is specified
-  if (!is.null(prob)) {
-    prob_vec <- rep(prob, length(strata))
+  if (is.numeric(prob)) {
+    prob_vec <- rep_len(prob, length(strata))
     return(prob_vec)
   }
   
-  prob_vec <- rep(NA, length(strata))
-  
-  # Case 2: strata_n is specified
-  if(!is.null(n)){
-    strata_n <- rep(n, length(N_per_stratum))
+
+  # Case 2: strata_n is specified, or n is
+  if(is.numeric(n) && !is.numeric(strata_n)){
+    strata_n <- rep_len(n, length(N_per_stratum))
   }
   
-  if (!is.null(strata_n)) {
+  if (is.numeric(strata_n)) {
     prob_vec_list <-
       mapply(
         FUN = complete_rs_probabilities,
@@ -71,7 +70,7 @@ strata_rs_probabilities <- function(strata = NULL,
   }
   
   # Case 3: strata_prob is specified
-  if (!is.null(strata_prob)) {
+  if (is.numeric(strata_prob)) {
     prob_vec_list <-
       mapply(
         FUN = complete_rs_probabilities,
@@ -85,4 +84,7 @@ strata_rs_probabilities <- function(strata = NULL,
       unlist(prob_vec_list, FALSE, FALSE)[order(strata_spots)]
     return(prob_vec)
   }
+  
+  warnings("Could not calculate sampling probabilities")
+  invisible(NULL)
 }
