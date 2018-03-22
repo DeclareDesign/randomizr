@@ -2,7 +2,7 @@
 #'
 #' TODO
 #'
-#' @param permutation_matrix deprecated
+#' @param permutation_matrix A permutation matrix
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.
 #'

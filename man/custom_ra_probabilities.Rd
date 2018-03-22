@@ -7,7 +7,7 @@
 custom_ra_probabilities(permutation_matrix)
 }
 \arguments{
-\item{permutation_matrix}{deprecated}
+\item{permutation_matrix}{A permutation matrix}
 }
 \value{
 A matrix of probabilities of assignment
