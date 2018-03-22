@@ -111,7 +111,9 @@ declare_ra <- function(N = NULL,
   
   if (check_inputs && is.null(permutation_matrix)) {
     input_check <- check_randomizr_arguments_new(all_args)
-    #all_args$check_inputs <- FALSE # don't need to recheck when using declaration
+    for(n in names(input_check))
+      all_args[[n]] <- input_check[[n]]
+    all_args$check_inputs <- FALSE # don't need to recheck when using declaration
   }
   
   # Determine ra_type
