@@ -1,4 +1,18 @@
 
+.invoke_check <- function(check){
+  definition <- sys.function(sys.parent())
+  envir <- parent.frame(1)
+
+  all_args <- mget(names(formals(definition)), envir)  
+  ret <- check(all_args)
+  list2env(ret, envir)
+  invisible(NULL)
+}
+
+#f <- function(N,n) {.invoke_check(function(a) list(n = a[["n"]] + 1)); n}
+
+
+
 check_randomizr_arguments_new <- function(all_args) do.call(check_randomizr_arguments, all_args)
 
 check_randomizr_arguments <-

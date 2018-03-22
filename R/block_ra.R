@@ -85,21 +85,8 @@ block_ra <- function(blocks = NULL,
                      check_inputs = TRUE) {
   input_check <- NULL
   if (check_inputs) {
-    input_check <- check_randomizr_arguments(
-      blocks = blocks,
-      prob = prob,
-      prob_each = prob_each,
-      m = m,
-      block_m = block_m,
-      block_m_each = block_m_each,
-      block_prob = block_prob,
-      block_prob_each = block_prob_each,
-      num_arms = num_arms,
-      conditions = conditions
-    )
-    num_arms <- input_check$num_arms
-    conditions <- input_check$conditions
-    N_per_block <- input_check$N_per_block
+    .invoke_check(check_randomizr_arguments_new)
+    
     
   } else {
     N_per_block <- tapply(blocks, blocks, length)

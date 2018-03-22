@@ -75,22 +75,8 @@ block_and_cluster_ra <-
            conditions = NULL,
            check_inputs = TRUE) {
     
-    if (check_inputs) {
-      input_check <-
-        check_randomizr_arguments(
-          blocks = blocks,
-          clusters = clusters,
-          prob = prob,
-          prob_each = prob_each,
-          m = m,
-          block_m = block_m,
-          block_m_each = block_m_each,
-          block_prob = block_prob,
-          block_prob_each = block_prob_each,
-          num_arms = num_arms,
-          conditions = conditions
-        )
-    }
+    if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+    
 
     # Setup: obtain unique clusters
     n_per_clust <- tapply(clusters, clusters, length)

@@ -69,20 +69,8 @@ complete_ra <- function(N,
                         num_arms = NULL,
                         conditions = NULL,
                         check_inputs = TRUE) {
-  if (check_inputs) {
-    input_check <-
-      check_randomizr_arguments(
-        N = N,
-        m = m,
-        m_each = m_each,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions
-      )
-    num_arms <- input_check$num_arms
-    conditions <- input_check$conditions
-  }
+  if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+  
   
   # Simple 2 group design, returns zeros and ones
   if (is.null(m_each) &

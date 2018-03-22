@@ -53,16 +53,8 @@ cluster_ra_probabilities <-
   
 
     
-    if (check_inputs) {
-      input_check <-
-        check_randomizr_arguments(
-          clusters = clusters,
-          prob = prob,
-          prob_each = prob_each,
-          num_arms = num_arms,
-          conditions = conditions
-        )
-    }
+    if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+    
     n_per_clust <- tapply(clusters, clusters, length)
     unique_clust <- names(n_per_clust)
     n_clust <- length(unique_clust)

@@ -37,19 +37,8 @@ simple_ra_probabilities <-
            num_arms = NULL,
            conditions = NULL,
            check_inputs = TRUE) {
-    if (check_inputs) {
-      input_check <-
-        check_randomizr_arguments(
-          N = N,
-          prob = prob,
-          prob_each = prob_each,
-          num_arms = num_arms,
-          conditions = conditions
-        )
-      num_arms <- input_check$num_arms
-      conditions <- input_check$conditions
-      
-    }
+    if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+    
     
     # Three easy cases
     
