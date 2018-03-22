@@ -176,31 +176,7 @@ ra_prob     <- function(this) UseMethod("ra_prob", this)
 ra_function.default <- function(this){
   stop("You must provide a random assignment declaration created by declare_ra().")
 }
-
-###############################################################################
-### Custom ra's do not have corresponding _ra and _ra_probability functions, 
-### so leaving them here
-  
-
-ra_function.ra_custom <- function(this){
-  P <- this$permutation_matrix
-  P[ , sample.int(ncol(P), 1)]
-}
-
-ra_prob.ra_custom <- function(this){
-   P <- as.factor(this$permutation_matrix)
-   dim(P) <- dim(this$permutation_matrix)
-
-   lvl <- levels(P)
-   
-   P <- apply(P, 1, tabulate, nlevels(P))  
-   
-   rownames(P) <- paste0("prob_", lvl)
-   P <- prop.table(P, 2)
-   t(P)
-   
-}
-  
+ 
   
   
 
