@@ -37,7 +37,7 @@ strata_rs_probabilities <- function(strata = NULL,
   strata_spots <-
     unlist(split(1:length(strata), strata), FALSE, FALSE)
   
-  if (is.null(prob) & is.null(strata_n) & is.null(strata_prob) & is.null(n)) {
+  if (is.null(prob) && is.null(strata_n) && is.null(strata_prob) && is.null(n)) {
     prob <- 0.5
   }
   
