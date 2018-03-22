@@ -113,7 +113,10 @@ declare_rs <- function(N = NULL,
 
 
   return_object <- list2env(all_args, parent = emptyenv())
-  return_object$rs_function <- function() rs_function(return_object)
+  return_object$rs_function <- function() {
+    .Deprecated(draw_rs) 
+    rs_function(return_object)
+  }
   return_object$rs_type <- rs_type
   return_object$cleaned_arguments <- input_check
   
@@ -201,7 +204,7 @@ formals(obtain_inclusion_probabilities) <- c(formals(obtain_inclusion_probabilit
 
 #' @export
 print.rs_declaration <- function(x, ...) {
-  S <- x$rs_function()
+  S <- draw_rs(x)
   n <- length(S)
   
   constant_probabilities <-

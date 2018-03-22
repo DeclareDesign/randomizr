@@ -53,7 +53,7 @@ obtain_permutation_matrix <-
     
     if (num_permutations > maximum_permutations) {
       #warning(paste0("The number of possible permutations (", num_permutations,") exceeds maximum_permtations (", maximum_permutations, "), so obtain_permutation_matrix will return a random sample of ", maximum_permutations, " possible permutations. You can increase maximum_permtations if you wish."))
-      return(replicate(maximum_permutations, declaration$ra_function()))
+      return(replicate(maximum_permutations, conduct_ra(declaration)))
     }
     
     if (declaration$ra_type == "simple")  {
