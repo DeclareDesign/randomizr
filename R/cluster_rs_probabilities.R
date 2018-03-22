@@ -25,12 +25,7 @@ cluster_rs_probabilities <-
            prob = NULL,
            simple = FALSE,
            check_inputs = TRUE) {
-    if (check_inputs) {
-      input_check <-
-        check_samplr_arguments(n = n,
-                               clusters = clusters,
-                               prob = prob)
-    }
+    if (check_inputs) .invoke_check(check_samplr_arguments_new)
     
     n_per_clust <- tapply(clusters, clusters, length)
     unique_clust <- names(n_per_clust)

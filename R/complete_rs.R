@@ -37,12 +37,7 @@ complete_rs <- function(N,
                         prob = NULL,
                         check_inputs = TRUE) {
   # Checks
-  if (check_inputs) {
-    input_check <-
-      check_samplr_arguments(N = N,
-                             n = n,
-                             prob = prob)
-  }
+  if (check_inputs) .invoke_check(check_samplr_arguments_new)
   
   if (N == 1) {
     if (is.null(n) & is.null(prob)) {

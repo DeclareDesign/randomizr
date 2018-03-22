@@ -21,12 +21,8 @@ simple_rs <-
   function(N, prob = NULL,
            check_inputs = TRUE) {
     
-    if(check_inputs){
-      
-      input_check <-
-        check_samplr_arguments(N = N,
-                               prob = prob)
-    }
+    if (check_inputs) .invoke_check(check_samplr_arguments_new)
+    
     
     if (is.null(prob)) {
       prob <- 0.5

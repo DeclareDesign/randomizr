@@ -63,17 +63,8 @@ strata_and_cluster_rs <-
            strata_prob = NULL,
            check_inputs = TRUE) {
 
-    if (check_inputs) {
-      input_check <-
-        check_samplr_arguments(
-          strata = strata,
-          clusters = clusters,
-          prob = prob,
-          n = n,
-          strata_n = strata_n,
-          strata_prob = strata_prob
-        )
-    }
+    if (check_inputs) .invoke_check(check_samplr_arguments_new)
+    
     
     # Setup: obtain unique clusters
     n_per_clust <- tapply(clusters, clusters, length)

@@ -18,13 +18,7 @@ complete_rs_probabilities <- function(N,
                                       n = NULL,
                                       prob = NULL,
                                       check_inputs = TRUE) {
-  if (check_inputs) {
-    input_check <-
-      check_samplr_arguments(N = N,
-                             n = n,
-                             prob = prob)
-    
-  }
+  if (check_inputs) .invoke_check(check_samplr_arguments_new)
   
   if (N == 1) {
     if (is.null(n) & is.null(prob)) {
