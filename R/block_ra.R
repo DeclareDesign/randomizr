@@ -103,11 +103,9 @@ block_ra <- function(blocks = NULL,
       check_inputs = FALSE
   ))
   
-  mapply_args <- append(mapply_args, block_ra_helper(blocks, prob, prob_each, m, 
-                                                     block_m, block_m_each, block_prob,
-                                                     block_prob_each, num_arms, N_per_block))
-  
-  assign_list <- do.call("mapply", mapply_args)
+  assign_list <- block_ra_helper(blocks, prob, prob_each, m, 
+                                 block_m, block_m_each, block_prob,
+                                 block_prob_each, num_arms, N_per_block, mapply_args)
   
   
   assignment <-
@@ -201,13 +199,10 @@ block_ra_probabilities <- function(blocks = NULL,
     SIMPLIFY = FALSE
   )
 
-  mapply_args <- append(mapply_args, block_ra_helper(blocks, prob, prob_each, m, 
-                                                     block_m, block_m_each, block_prob,
-                                                     block_prob_each, num_arms, N_per_block))
+  prob_mat <-  block_ra_helper(blocks, prob, prob_each, m, 
+                               block_m, block_m_each, block_prob,
+                               block_prob_each, num_arms, N_per_block, mapply_args)
   
-
-  
-  prob_mat <- do.call(mapply, mapply_args)
   prob_mat <- do.call(rbind, prob_mat)
   prob_mat <- prob_mat[order(block_spots), , drop = FALSE]
   
@@ -225,7 +220,8 @@ block_ra_helper <- function(blocks = NULL,
                      block_prob = NULL,
                      block_prob_each = NULL,
                      num_arms = NULL,
-                     N_per_block) {
+                     N_per_block, 
+                     mapply_args) {
 
   
   # Case 0: m is specified
@@ -278,5 +274,5 @@ block_ra_helper <- function(blocks = NULL,
     ret <- list(prob_each=block_prob_each_list)
   }
   
-  ret
+  do.call(mapply, append(mapply_args, ret))
 }
