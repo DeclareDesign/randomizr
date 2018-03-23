@@ -118,7 +118,11 @@ declare_rs <- function(N = NULL,
     rs_function(return_object)
   }
   return_object$rs_type <- rs_type
-  return_object$cleaned_arguments <- input_check
+  
+  delayedAssign("cleaned_arguments", {
+    warning("cleaned_arguments is deprecated")     
+    input_check 
+  }, assign.env = return_object)
   
   delayedAssign("probabilities_vector", rs_probabilities(return_object), assign.env = return_object)
   

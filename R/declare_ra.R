@@ -150,7 +150,11 @@ declare_ra <- function(N = NULL,
     ra_function(return_object) #todo
   }
   return_object$ra_type = ra_type
-  return_object$cleaned_arguments = input_check
+  
+  delayedAssign("cleaned_arguments", {
+    warning("cleaned_arguments is deprecated")     
+    input_check 
+  }, assign.env = return_object)
 
 
   delayedAssign("probabilities_matrix", ra_probabilities(return_object), assign.env = return_object)
