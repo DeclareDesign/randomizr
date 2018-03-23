@@ -117,7 +117,11 @@ declare_rs <- function(N = NULL,
     .Deprecated(draw_rs) 
     rs_function(return_object)
   }
-  return_object$rs_type <- rs_type
+  
+  delayedAssign("rs_type", {
+    warning("rs_type is deprecated; check the object class instead.")     
+    ra_type 
+  }, assign.env = return_object)  
   
   delayedAssign("cleaned_arguments", {
     warning("cleaned_arguments is deprecated")     
@@ -214,19 +218,19 @@ print.rs_declaration <- function(x, ...) {
   constant_probabilities <-
     all(x$probabilities_vector[1] == x$probabilities_vector)
   
-  if (x$rs_type == "stratified")
-    cat("Random sampling procedure: Stratified random sampling", "\n")
-  if (x$rs_type == "clustered")
-    cat("Random sampling procedure: Cluster random sampling", "\n")
-  if (x$rs_type == "simple")
-    cat("Random sampling procedure: Simple random sampling", "\n")
-  if (x$rs_type == "stratified_and_clustered")
-    cat("Random sampling procedure: Stratified and clustered random sampling",
-        "\n")
-  if (x$rs_type == "complete")
-    cat("Random sampling procedure: Complete random sampling",
-        "\n")
-  cat("Number of units:", n, "\n")
+  cat(
+    "Random sampling procedure:",
+    switch(class(x)[2],
+           "rs_stratified"="Stratified",
+           "rs_clustered"="Cluster",
+           "rs_simple"="Simple",
+           "rs_stratified_and_clustered"="Stratified and clustered",
+           "rs_complete"="Complete"),
+    "random sampling\n",
+    "Number of units:", n, "\n"
+    
+  )
+  
   if (!is.null(x$strata)) {
     cat("Number of strata:", length(unique(x$strata)), "\n")
   }
@@ -238,7 +242,9 @@ print.rs_declaration <- function(x, ...) {
     cat("The inclusion probabilities are constant across units.")
   } else{
     cat(
-      "The inclusion probabilities are NOT constant across units. Your analysis strategy must account for differential inclusion probabilities, typically by employing inverse probability weights."
+      "The inclusion probabilities are NOT constant across units.",
+      "Your analysis strategy must account for differential inclusion probabilities,",
+      "typically by employing inverse probability weights."
     )
   }
 }

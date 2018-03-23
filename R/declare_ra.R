@@ -149,8 +149,13 @@ declare_ra <- function(N = NULL,
     .Deprecated(conduct_ra)
     ra_function(return_object) #todo
   }
-  return_object$ra_type = ra_type
+
+  delayedAssign("ra_type", {
+    warning("ra_type is deprecated; check the object class instead.")     
+    ra_type 
+  }, assign.env = return_object)
   
+    
   delayedAssign("cleaned_arguments", {
     warning("cleaned_arguments is deprecated")     
     input_check 
@@ -272,12 +277,12 @@ print.ra_declaration <- function(x, ...) {
   constant_probabilities <- nrow(unique(x$probabilities_matrix)) == 1
 
   cat("Random assignment procedure:" ,
-      switch(x$ra_type, 
-             "blocked"="Block",
-             "clustered"="Cluster",
-             "simple"="Simple",
-             "blocked_and_clustered"="Blocked and clustered",
-             "complete"="Complete"
+      switch(class(x)[2], 
+             "ra_blocked"="Block",
+             "ra_clustered"="Cluster",
+             "ra_simple"="Simple",
+             "ra_blocked_and_clustered"="Blocked and clustered",
+             "ra_complete"="Complete"
              ),
       "random assignment", "\n",
   
@@ -286,12 +291,15 @@ print.ra_declaration <- function(x, ...) {
       if (!is.null(x$clusters)) sprintf("Number of clusters: %d\n", length(unique(x$clusters))),
       "Number of treatment arms:", num_arms, "\n",
 
-      sprintf("The possible treatment categories are %s.\n", paste(conditions, collapse = " and ") ),
-
-      if (constant_probabilities) {
-        "The probabilities of assignment are constant across units."
-      } else{
-          "The probabilities of assignment are NOT constant across units. Your analysis strategy must account for differential probabilities of assignment, typically by employing inverse probability weights."
-      }
+      sprintf("The possible treatment categories are %s.\n", paste(conditions, collapse = " and ") )
   )
+  if (constant_probabilities) {
+    cat("The probabilities of assignment are constant across units.")
+  } else{
+    cat(
+      "The probabilities of assignment are NOT constant across units.",
+      "Your analysis strategy must account for differential probabilities of assignment,",
+      "typically by employing inverse probability weights."
+    )
+  }
 }
