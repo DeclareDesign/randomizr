@@ -73,7 +73,7 @@ obtain_num_permutations.ra_blocked <- function(declaration){
   
   condition_names_list <- lapply(1:length(ns_per_block_list),
                                  function(x)
-                                   declaration$cleaned_arguments$conditions)
+                                   declaration$conditions)
   
   num_permutations_by_block <- mapply(FUN = complete_ra_num_permutations,
                                       ns_per_block_list,
@@ -132,7 +132,7 @@ obtain_num_permutations.ra_blocked_and_clustered <- function(declaration){
   
   condition_names_list <- lapply(1:length(ns_per_block_list),
                                  function(x)
-                                   declaration$cleaned_arguments$conditions)
+                                   declaration$conditions)
   
   num_permutations_by_block <- mapply(FUN = complete_ra_num_permutations,
                                       ns_per_block_list,

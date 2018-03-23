@@ -141,7 +141,7 @@ obtain_permutation_matrix.ra_clustered <- function(declaration) {
     complete_ra_permutations(
       N = n_clust,
       prob_each = declaration$probabilities_matrix[1,],
-      conditions = declaration$cleaned_arguments$conditions
+      conditions = declaration$conditions
     )
   
   # expand
@@ -183,7 +183,7 @@ obtain_permutation_matrix.ra_blocked_and_clustered <- function(declaration) {
   
   condition_names_list <- lapply(1:length(ns_per_block_list),
                                  function(x)
-                                   declaration$cleaned_arguments$conditions)
+                                   declaration$conditions)
   
   perms_by_block <- mapply(FUN = complete_ra_permutations,
                            ns_per_block_list,

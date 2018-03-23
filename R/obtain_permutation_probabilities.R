@@ -60,7 +60,7 @@ obtain_permutation_probabilities.ra_complete <- function(declaration) {
   complete_ra_permutation_probabilities(
     N = nrow(declaration$probabilities_matrix),
     prob_each = declaration$probabilities_matrix[1, ],
-    conditions = declaration$cleaned_arguments$conditions
+    conditions = declaration$conditions
   )
 
 }
@@ -85,7 +85,7 @@ obtain_permutation_probabilities.ra_blocked <- function(declaration) {
   
   condition_names_list <- lapply(1:length(ns_per_block_list),
                                  function(x)
-                                   declaration$cleaned_arguments$conditions)
+                                   declaration$conditions)
   
   permutation_probabilities_by_block <-
     mapply(FUN = complete_ra_permutation_probabilities,
@@ -113,7 +113,7 @@ obtain_permutation_probabilities.ra_clustered <- function(declaration) {
     complete_ra_permutation_probabilities(
       N = n_clust,
       prob_each = declaration$probabilities_matrix[1, ],
-      conditions = declaration$cleaned_arguments$conditions
+      conditions = declaration$conditions
     )
   names(permutation_probabilities) <- NULL
   permutation_probabilities 
@@ -147,7 +147,7 @@ obtain_permutation_probabilities.ra_blocked_and_clustered <- function(declaratio
   
   condition_names_list <- lapply(1:length(ns_per_block_list),
                                  function(x)
-                                   declaration$cleaned_arguments$conditions)
+                                   declaration$conditions)
   
   permutation_probabilities_by_block <-
     mapply(FUN = complete_ra_permutation_probabilities,

@@ -145,7 +145,7 @@ complete_rs_probabilities <- function(N,
     
     if (N == 1) {
       
-      # we "know" below should be .5 becasue prob 
+      # we "know" below should be .5 becasue n beats prob 
       prob_vec <- if(n == 0) 0 else if(n == 1) .5 else 
         stop("The number of units sampled (n) must be less than or equal to the total number of units (N)")
       
@@ -157,11 +157,7 @@ complete_rs_probabilities <- function(N,
     
   } else if (is.numeric(prob)) {
   
-    prob_vec <- if(N == 1) prob else {
-        n_floor <- floor(N * prob)
-        n_ceiling <- ceiling(N * prob)
-        ifelse(n_ceiling == N,  n_floor / N, prob)
-    }
+    prob_vec <- if(N == 1) prob else ifelse(ceiling(N * prob) == N,  floor(N * prob) / N, prob)
     
   }
 
