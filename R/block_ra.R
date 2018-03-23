@@ -83,11 +83,8 @@ block_ra <- function(blocks = NULL,
                      num_arms = NULL,
                      conditions = NULL,
                      check_inputs = TRUE) {
-  input_check <- NULL
   if (check_inputs) {
     .invoke_check(check_randomizr_arguments_new)
-    
-    
   } else {
     N_per_block <- tapply(blocks, blocks, length)
     attributes(N_per_block) <- NULL
@@ -96,7 +93,7 @@ block_ra <- function(blocks = NULL,
   block_spots <-
     unlist(split(1:length(blocks), blocks), FALSE, FALSE)
   
-  if (!is.null(prob)) {
+  if (is.numeric(prob)) {
     prob_each <- c(1 - prob, prob)
   }
   
@@ -104,12 +101,12 @@ block_ra <- function(blocks = NULL,
   
   # Case 0: m is specified
   
-  if (!is.null(m)) {
-    block_m <- rep(m, length(N_per_block))
+  if (is.numeric(m)) {
+    block_m <- rep_len(m, length(N_per_block))
   }
   
   # Case 1: block_m is specified
-  if (!is.null(block_m)) {
+  if (is.numeric(block_m)) {
     assign_list <-
       mapply(
         FUN = complete_ra,
@@ -123,10 +120,6 @@ block_ra <- function(blocks = NULL,
         SIMPLIFY = FALSE
       )
     
-    assignment <-
-      unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assignment <- clean_condition_names(assignment, conditions)
-    return(assignment)
   }
   
   # Case 1.5: block_prob is specified
@@ -144,10 +137,6 @@ block_ra <- function(blocks = NULL,
         SIMPLIFY = FALSE
       )
     
-    assignment <-
-      unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assignment <- clean_condition_names(assignment, conditions)
-    return(assignment)
   }
   
   # Case 2 use or infer prob_each
@@ -168,10 +157,6 @@ block_ra <- function(blocks = NULL,
         SIMPLIFY = FALSE
       )
     
-    assignment <-
-      unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assignment <- clean_condition_names(assignment, conditions)
-    return(assignment)
   }
   
   # Case 3 use block_m_each
@@ -194,10 +179,6 @@ block_ra <- function(blocks = NULL,
         SIMPLIFY = FALSE
       )
     
-    assignment <-
-      unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assignment <- clean_condition_names(assignment, conditions)
-    return(assignment)
   }
   
   # Case 4 use block_prob_each
@@ -221,11 +202,11 @@ block_ra <- function(blocks = NULL,
         SIMPLIFY = FALSE
       )
     
-    assignment <-
-      unlist(assign_list, FALSE, FALSE)[order(block_spots)]
-    assignment <- clean_condition_names(assignment, conditions)
-    return(assignment)
   }
+  assignment <-
+    unlist(assign_list, FALSE, FALSE)[order(block_spots)]
+  assignment <- clean_condition_names(assignment, conditions)
+  return(assignment)
 }
 
 

@@ -117,13 +117,13 @@ declare_ra <- function(N = NULL,
   }
   
   # Determine ra_type
-  if (!is.null(permutation_matrix)){
+  if (is.matrix(permutation_matrix)){
     ra_type <- "custom"
-  } else  if (!is.null(blocks) && !is.null(clusters)) {
+  } else  if (is.vector(blocks) && is.vector(clusters)) {
     ra_type <- "blocked_and_clustered"
-  } else  if (!is.null(clusters)) {
+  } else  if (is.vector(clusters)) {
     ra_type <- "clustered"
-  } else  if (!is.null(blocks)) {
+  } else  if (is.vector(blocks)) {
     ra_type <- "blocked"
     if (simple) stop("You can't specify 'simple' when using blocked assignment")
   } else  if (simple == FALSE) {

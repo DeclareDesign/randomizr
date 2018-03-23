@@ -119,8 +119,8 @@ declare_rs <- function(N = NULL,
   }
   
   delayedAssign("rs_type", {
-    warning("rs_type is deprecated; check the object class instead.")     
-    ra_type 
+    warning("rs_type is deprecated; check the class attribute instead.")     
+    rs_type 
   }, assign.env = return_object)  
   
   delayedAssign("cleaned_arguments", {
