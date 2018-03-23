@@ -93,6 +93,17 @@ block_ra <- function(blocks = NULL,
   block_spots <-
     unlist(split(1:length(blocks), blocks), FALSE, FALSE)
   
+  mapply_args <- list(
+    FUN="complete_ra",
+    SIMPLIFY=FALSE,
+    N=N_per_block,
+    MoreArgs = list(
+      conditions = conditions,
+      num_arms = num_arms,
+      check_inputs = FALSE
+  ))
+  
+  
   if (is.numeric(prob)) {
     prob_each <- c(1 - prob, prob)
   }
@@ -107,78 +118,30 @@ block_ra <- function(blocks = NULL,
   
   # Case 1: block_m is specified
   if (is.numeric(block_m)) {
-    assign_list <-
-      mapply(
-        FUN = complete_ra,
-        N = N_per_block,
-        m = block_m,
-        MoreArgs = list(
-          conditions = conditions,
-          num_arms = num_arms,
-          check_inputs = FALSE
-        ),
-        SIMPLIFY = FALSE
-      )
-    
+    mapply_args$m <- block_m
   }
   
   # Case 1.5: block_prob is specified
   if (!is.null(block_prob)) {
-    assign_list <-
-      mapply(
-        FUN = complete_ra,
-        N = N_per_block,
-        prob = block_prob,
-        MoreArgs = list(
-          conditions = conditions,
-          num_arms = num_arms,
-          check_inputs = FALSE
-        ),
-        SIMPLIFY = FALSE
-      )
-    
+    mapply_args$prob <- block_prob
   }
   
   # Case 2 use or infer prob_each
-  if (is.null(block_m_each) & is.null(block_prob_each)) {
+  if (is.null(block_m_each) && is.null(block_prob_each)) {
     if (is.null(prob_each)) {
       prob_each <- rep(1 / num_arms, num_arms)
     }
-    assign_list <-
-      mapply(
-        FUN = complete_ra,
-        N = N_per_block,
-        MoreArgs = list(
-          prob_each = prob_each,
-          conditions = conditions,
-          num_arms = num_arms,
-          check_inputs = FALSE
-        ),
-        SIMPLIFY = FALSE
-      )
-    
+    mapply_args$prob_each <- list(prob_each) # need to guard against being vectorized
   }
   
   # Case 3 use block_m_each
   
-  if (!is.null(block_m_each)) {
+  if (is.matrix(block_m_each)) {
     block_m_each_list <-
       #split(block_m_each, rep(1:nrow(block_m_each), times = ncol(block_m_each)))
       split(block_m_each, 1:nrow(block_m_each))
-    
-    assign_list <-
-      mapply(
-        FUN = complete_ra,
-        N = N_per_block,
-        m_each = block_m_each_list,
-        MoreArgs = list(
-          conditions = conditions,
-          num_arms = num_arms,
-          check_inputs = FALSE
-        ),
-        SIMPLIFY = FALSE
-      )
-    
+
+    mapply_args$m_each <- block_m_each_list    
   }
   
   # Case 4 use block_prob_each
@@ -188,21 +151,12 @@ block_ra <- function(blocks = NULL,
       #split(block_prob_each, rep(1:nrow(block_prob_each), times = ncol(block_prob_each)))
       split(block_prob_each, 1:nrow(block_prob_each))
     
-    
-    assign_list <-
-      mapply(
-        FUN = complete_ra,
-        N = N_per_block,
-        prob_each = block_prob_each_list,
-        MoreArgs = list(
-          conditions = conditions,
-          num_arms = num_arms,
-          check_inputs = FALSE
-        ),
-        SIMPLIFY = FALSE
-      )
-    
+    mapply_args$prob_each <- block_prob_each_list
   }
+  
+  assign_list <- do.call("mapply", mapply_args)
+  
+  
   assignment <-
     unlist(assign_list, FALSE, FALSE)[order(block_spots)]
   assignment <- clean_condition_names(assignment, conditions)

@@ -5,8 +5,7 @@
 .pattern <- "_(ra|rs)(_probabilities|)$"
 
 .invoke <- function(f){
-  f <- match.fun(f)
-  what <- names(formals(f))
+  what <- names(formals(match.fun(f)))
   function(this){
     do.call(f, mget(what, this))    
   }  
