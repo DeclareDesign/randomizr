@@ -1,3 +1,4 @@
+
 #' Obtain the probabilities of permutations
 #'
 #' @param declaration A random assignment declaration, created by \code{\link{declare_ra}}.

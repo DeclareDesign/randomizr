@@ -31,3 +31,29 @@ simple_rs <-
     assignment <- sample(0:1, size = N, replace=TRUE, prob = c(1-prob, prob))
     return(assignment)
   }
+#' Inclusion Probabilities: Simple Random Sampling
+#'
+#' @inheritParams simple_rs
+#' @return A vector length N indicating the probability of being sampled.
+#'
+#' @examples
+#' probs <- simple_ra_probabilities(N = 100)
+#' table(probs)
+#'
+#' probs <- simple_ra_probabilities(N = 100, prob = 0.3)
+#' table(probs)
+#'
+#' @export
+simple_rs_probabilities <-
+  function(N,
+           prob = NULL,
+           check_inputs = TRUE) {
+    if (check_inputs) .invoke_check(check_samplr_arguments_new)
+    
+    if (is.null(prob)) {
+      prob <- 0.5
+    }
+    
+    prob_vec <- rep(prob, N)
+    return(prob_vec)
+  }
