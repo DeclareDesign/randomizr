@@ -41,21 +41,21 @@
 #'
 #'
 obtain_permutation_matrix <- function(declaration, maximum_permutations = 10000) {
-    
-    if(inherits(declaration,  "ra_custom")){
-      return(declaration$permutation_matrix)
-    }
-    
-    num_permutations = obtain_num_permutations(declaration)
-    
-    
-    
-    if (num_permutations > maximum_permutations) {
-      #warning(paste0("The number of possible permutations (", num_permutations,") exceeds maximum_permtations (", maximum_permutations, "), so obtain_permutation_matrix will return a random sample of ", maximum_permutations, " possible permutations. You can increase maximum_permtations if you wish."))
-      return(replicate(maximum_permutations, conduct_ra(declaration)))
-    }
+  
+  if(inherits(declaration,  "ra_custom")){
+    return(declaration$permutation_matrix)
+  }
+  
+  num_permutations = obtain_num_permutations(declaration)
+  
+  
+  
+  if (num_permutations > maximum_permutations) {
+    #warning(paste0("The number of possible permutations (", num_permutations,") exceeds maximum_permtations (", maximum_permutations, "), so obtain_permutation_matrix will return a random sample of ", maximum_permutations, " possible permutations. You can increase maximum_permtations if you wish."))
+    return(replicate(maximum_permutations, conduct_ra(declaration)))
+  }
 
-    (function(declaration) UseMethod("obtain_permutation_matrix", declaration))(declaration)
+  (function(declaration) UseMethod("obtain_permutation_matrix", declaration))(declaration)
     
 }    
  
