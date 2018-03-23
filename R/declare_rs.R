@@ -120,7 +120,7 @@ declare_rs <- function(N = NULL,
   return_object$rs_type <- rs_type
   return_object$cleaned_arguments <- input_check
   
-  delayedAssign("probabilities_vector", rs_prob(return_object), assign.env = return_object)
+  delayedAssign("probabilities_vector", rs_probabilities(return_object), assign.env = return_object)
   
   class(return_object) <- c("rs_declaration",  paste0("rs_", rs_type))
   attr(return_object, "call") <- match.call() 

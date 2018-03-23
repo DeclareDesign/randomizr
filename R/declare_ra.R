@@ -153,7 +153,7 @@ declare_ra <- function(N = NULL,
   return_object$cleaned_arguments = input_check
 
 
-  delayedAssign("probabilities_matrix", ra_prob(return_object), assign.env = return_object)
+  delayedAssign("probabilities_matrix", ra_probabilities(return_object), assign.env = return_object)
 
 
   class(return_object) <- c("ra_declaration", paste0("ra_", ra_type))
