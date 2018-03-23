@@ -103,56 +103,9 @@ block_ra <- function(blocks = NULL,
       check_inputs = FALSE
   ))
   
-  
-  if (is.numeric(prob)) {
-    prob_each <- c(1 - prob, prob)
-  }
-  
-  # Setup: obtain number of arms and conditions
-  
-  # Case 0: m is specified
-  
-  if (is.numeric(m)) {
-    block_m <- rep_len(m, length(N_per_block))
-  }
-  
-  # Case 1: block_m is specified
-  if (is.numeric(block_m)) {
-    mapply_args$m <- block_m
-  }
-  
-  # Case 1.5: block_prob is specified
-  if (!is.null(block_prob)) {
-    mapply_args$prob <- block_prob
-  }
-  
-  # Case 2 use or infer prob_each
-  if (is.null(block_m_each) && is.null(block_prob_each)) {
-    if (is.null(prob_each)) {
-      prob_each <- rep(1 / num_arms, num_arms)
-    }
-    mapply_args$prob_each <- list(prob_each) # need to guard against being vectorized
-  }
-  
-  # Case 3 use block_m_each
-  
-  if (is.matrix(block_m_each)) {
-    block_m_each_list <-
-      #split(block_m_each, rep(1:nrow(block_m_each), times = ncol(block_m_each)))
-      split(block_m_each, 1:nrow(block_m_each))
-
-    mapply_args$m_each <- block_m_each_list    
-  }
-  
-  # Case 4 use block_prob_each
-  
-  if (!is.null(block_prob_each)) {
-    block_prob_each_list <-
-      #split(block_prob_each, rep(1:nrow(block_prob_each), times = ncol(block_prob_each)))
-      split(block_prob_each, 1:nrow(block_prob_each))
-    
-    mapply_args$prob_each <- block_prob_each_list
-  }
+  mapply_args <- append(mapply_args, block_ra_helper(blocks, prob, prob_each, m, 
+                                                     block_m, block_m_each, block_prob,
+                                                     block_prob_each, num_arms, N_per_block))
   
   assign_list <- do.call("mapply", mapply_args)
   
@@ -227,8 +180,6 @@ block_ra_probabilities <- function(blocks = NULL,
                                    check_inputs = TRUE) {
   if (check_inputs) {
     .invoke_check(check_randomizr_arguments_new)
-    
-    
   } else {
     N_per_block <- tapply(blocks, blocks, length)
     attributes(N_per_block) <- NULL
@@ -238,13 +189,7 @@ block_ra_probabilities <- function(blocks = NULL,
     unlist(split(1:length(blocks), blocks), FALSE, FALSE)
   
   blocks <- sort(unique(blocks))
-  prob_mat <- matrix(
-    NA,
-    nrow = length(blocks),
-    ncol = length(conditions),
-    dimnames = list(NULL,  paste0("prob_", conditions))
-  )
-  
+
   mapply_args <- list(
     FUN = "complete_ra_probabilities",
     N = N_per_block,
@@ -256,23 +201,49 @@ block_ra_probabilities <- function(blocks = NULL,
     SIMPLIFY = FALSE
   )
 
+  mapply_args <- append(mapply_args, block_ra_helper(blocks, prob, prob_each, m, 
+                                                     block_m, block_m_each, block_prob,
+                                                     block_prob_each, num_arms, N_per_block))
+  
+
+  
+  prob_mat <- do.call(mapply, mapply_args)
+  prob_mat <- do.call(rbind, prob_mat)
+  prob_mat <- prob_mat[order(block_spots), , drop = FALSE]
+  
+  return(prob_mat)
+  
+}
+
+
+block_ra_helper <- function(blocks = NULL,
+                     prob = NULL,
+                     prob_each = NULL,
+                     m = NULL,
+                     block_m = NULL,
+                     block_m_each = NULL,
+                     block_prob = NULL,
+                     block_prob_each = NULL,
+                     num_arms = NULL,
+                     N_per_block) {
+
   
   # Case 0: m is specified
   
   if (!is.null(m)) {
-    mapply_args$m <- rep(m, length(N_per_block))
+    ret <- list(m=rep(m, length(N_per_block)))
   }
   
   # Case 1 use block_m
   
   else if (!is.null(block_m)) {
-    mapply_args$m <- block_m
+    ret <- list(m=block_m)
   }
   
   # Case 1.5 use block_prob
   
   else if (!is.null(block_prob)) {
-    mapply_args$prob <- block_prob
+    ret <- list(prob=block_prob)
   }
   
   # Case 2 use or infer prob_each
@@ -285,7 +256,7 @@ block_ra_probabilities <- function(blocks = NULL,
       prob_each <- rep(1 / num_arms, num_arms)
     }
     
-    mapply_args$prob_each <- list(prob_each)
+    ret <- list(prob_each=list(prob_each))
   }
   
   # Case 2 use block_m_each
@@ -294,7 +265,7 @@ block_ra_probabilities <- function(blocks = NULL,
     block_m_each_list <-
       split(block_m_each, rep(1:nrow(block_m_each), times = ncol(block_m_each)))
     
-    mapply_args$m_each <- block_m_each_list
+    ret <- list(m_each=block_m_each_list)
   }
   
   
@@ -304,13 +275,8 @@ block_ra_probabilities <- function(blocks = NULL,
     block_prob_each_list <-
       split(block_prob_each, rep(1:nrow(block_prob_each), times = ncol(block_prob_each)))
     
-    mapply_args$prob_each <- block_prob_each_list
+    ret <- list(prob_each=block_prob_each_list)
   }
   
-  prob_mat <- do.call(mapply, mapply_args)
-  prob_mat <- do.call(rbind, prob_mat)
-  prob_mat <- prob_mat[order(block_spots), , drop = FALSE]
-  
-  return(prob_mat)
-  
+  ret
 }
