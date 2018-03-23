@@ -245,59 +245,38 @@ block_ra_probabilities <- function(blocks = NULL,
     dimnames = list(NULL,  paste0("prob_", conditions))
   )
   
+  mapply_args <- list(
+    FUN = "complete_ra_probabilities",
+    N = N_per_block,
+    MoreArgs = list(
+      conditions = conditions,
+      num_arms = num_arms,
+      check_inputs = FALSE
+    ),
+    SIMPLIFY = FALSE
+  )
+
+  
   # Case 0: m is specified
   
   if (!is.null(m)) {
-    block_m <- rep(m, length(N_per_block))
+    mapply_args$m <- rep(m, length(N_per_block))
   }
   
   # Case 1 use block_m
   
-  if (!is.null(block_m)) {
-    prob_mat_list <-
-      mapply(
-        FUN = complete_ra_probabilities,
-        N = N_per_block,
-        m = block_m,
-        MoreArgs = list(
-          conditions = conditions,
-          num_arms = num_arms,
-          check_inputs = FALSE
-        ),
-        SIMPLIFY = FALSE
-      )
-    
-    prob_mat <- do.call(rbind, prob_mat_list)
-    prob_mat <- prob_mat[order(block_spots), , drop = FALSE]
-    
-    return(prob_mat)
+  else if (!is.null(block_m)) {
+    mapply_args$m <- block_m
   }
   
   # Case 1.5 use block_prob
   
-  if (!is.null(block_prob)) {
-    prob_mat_list <-
-      mapply(
-        FUN = complete_ra_probabilities,
-        N = N_per_block,
-        prob = block_prob,
-        MoreArgs = list(
-          conditions = conditions,
-          num_arms = num_arms,
-          check_inputs = FALSE
-        ),
-        SIMPLIFY = FALSE
-      )
-    
-    prob_mat <- do.call(rbind, prob_mat_list)
-    prob_mat <- prob_mat[order(block_spots), , drop = FALSE]
-    
-    return(prob_mat)
-    return(prob_mat)
+  else if (!is.null(block_prob)) {
+    mapply_args$prob <- block_prob
   }
   
   # Case 2 use or infer prob_each
-  if (is.null(block_m_each) & is.null(block_prob_each)) {
+  else if (is.null(block_m_each) & is.null(block_prob_each)) {
     if (!is.null(prob)) {
       prob_each <- c(1 - prob, prob)
     }
@@ -306,76 +285,32 @@ block_ra_probabilities <- function(blocks = NULL,
       prob_each <- rep(1 / num_arms, num_arms)
     }
     
-    prob_mat_list <-
-      mapply(
-        FUN = complete_ra_probabilities,
-        N = N_per_block,
-        MoreArgs = list(
-          prob_each = prob_each,
-          conditions = conditions,
-          num_arms = num_arms,
-          check_inputs = FALSE
-        ),
-        SIMPLIFY = FALSE
-      )
-    
-    prob_mat <- do.call(rbind, prob_mat_list)
-    prob_mat <- prob_mat[order(block_spots), , drop = FALSE]
-    
-    return(prob_mat)
-    
+    mapply_args$prob_each <- list(prob_each)
   }
   
   # Case 2 use block_m_each
   
-  if (!is.null(block_m_each)) {
+  else if (!is.null(block_m_each)) {
     block_m_each_list <-
       split(block_m_each, rep(1:nrow(block_m_each), times = ncol(block_m_each)))
     
-    prob_mat_list <-
-      mapply(
-        FUN = complete_ra_probabilities,
-        N = N_per_block,
-        m_each = block_m_each_list,
-        MoreArgs = list(
-          conditions = conditions,
-          num_arms = num_arms,
-          check_inputs = FALSE
-        ),
-        SIMPLIFY = FALSE
-      )
-    
-    prob_mat <- do.call(rbind, prob_mat_list)
-    prob_mat <- prob_mat[order(block_spots), , drop = FALSE]
-    
-    return(prob_mat)
+    mapply_args$m_each <- block_m_each_list
   }
   
   
   # Case 3 use block_prob_each
   
-  if (!is.null(block_prob_each)) {
+  else if (!is.null(block_prob_each)) {
     block_prob_each_list <-
       split(block_prob_each, rep(1:nrow(block_prob_each), times = ncol(block_prob_each)))
     
-    prob_mat_list <-
-      mapply(
-        FUN = complete_ra_probabilities,
-        N = N_per_block,
-        prob_each = block_prob_each_list,
-        MoreArgs = list(
-          conditions = conditions,
-          num_arms = num_arms,
-          check_inputs = FALSE
-        ),
-        SIMPLIFY = FALSE
-      )
-    
-    prob_mat <- do.call(rbind, prob_mat_list)
-    prob_mat <- prob_mat[order(block_spots), , drop = FALSE]
-    
-    return(prob_mat)
+    mapply_args$prob_each <- block_prob_each_list
   }
   
+  prob_mat <- do.call(mapply, mapply_args)
+  prob_mat <- do.call(rbind, prob_mat)
+  prob_mat <- prob_mat[order(block_spots), , drop = FALSE]
+  
+  return(prob_mat)
   
 }
