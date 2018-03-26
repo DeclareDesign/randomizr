@@ -40,174 +40,176 @@
 #' dim(perms)
 #'
 #'
-obtain_permutation_matrix <-
-  function(declaration, maximum_permutations = 10000) {
-    
-    if(declaration$ra_type == "custom"){
-      return(declaration$permutation_matrix)
-    }
-    
-    num_permutations = obtain_num_permutations(declaration)
-    
-    
-    
-    if (num_permutations > maximum_permutations) {
-      #warning(paste0("The number of possible permutations (", num_permutations,") exceeds maximum_permtations (", maximum_permutations, "), so obtain_permutation_matrix will return a random sample of ", maximum_permutations, " possible permutations. You can increase maximum_permtations if you wish."))
-      return(replicate(maximum_permutations, declaration$ra_function()))
-    }
-    
-    if (declaration$ra_type == "simple")  {
-      N = nrow(declaration$probabilities_matrix)
-      prob_each = declaration$probabilities_matrix[1, ]
-      r_parts <- restrictedparts(N, length(prob_each))
-      perms <- t( permutations(length(prob_each)) )
-      
-      r_parts_perms3 <- vapply(r_parts, `[`, perms, perms)  
-      dim(r_parts_perms3) <- local({
-        d <- dim(r_parts_perms3)
-        c(d[1], prod(d[-1])) # pivot third dimension to columns inplace
-      })
-            
-      m_eaches <- unique(r_parts_perms3, MARGIN = 2)
-      
-      perms_list <- sapply(1:ncol(m_eaches), function(j) {
-        permutations_m_each(m_each = m_eaches[, j], declaration$cleaned_arguments$conditions)
-      })
-        
-      perms <- do.call(cbind, perms_list)
-      
-    }
-    
-    if (declaration$ra_type == "complete") {
-      perms <-
-        complete_ra_permutations(
-          N = nrow(declaration$probabilities_matrix),
-          prob_each = declaration$probabilities_matrix[1,],
-          conditions = declaration$cleaned_arguments$conditions
-        )
-    }
-    
-    if (declaration$ra_type == "blocked") {
-      block_spots <-
-        unlist(split(1:length(declaration$blocks), declaration$blocks), FALSE, FALSE)
-      
-      block_prob_each_local <-
-        by(
-          declaration$probabilities_matrix,
-          INDICES = declaration$blocks,
-          FUN = function(x) {
-            x[1,]
-          }
-        )
-      block_prob_each_local <-
-        lapply(block_prob_each_local, as.vector, mode = "numeric")
-      
-      ns_per_block_list <-
-        lapply(split(declaration$blocks,
-                     declaration$blocks),
-               length)
-      
-      condition_names_list <- lapply(1:length(ns_per_block_list),
-                                     function(x)
-                                       declaration$cleaned_arguments$conditions)
-      
-      perms_by_block <- mapply(FUN = complete_ra_permutations,
-                               ns_per_block_list,
-                               block_prob_each_local,
-                               condition_names_list,
-                               SIMPLIFY = FALSE)
-
-      perms <-
-        Reduce(expand_matrix, x = perms_by_block)
-      
-      perms <- perms[order(block_spots), ]
-      
-    }
-    
-    if (declaration$ra_type == "clustered") {
-      prob_each_local <-
-        declaration$probabilities_matrix[1,]
-      
-      n_per_clust <-
-        tapply(declaration$clusters, declaration$clusters, length)
-      n_clust <- length(n_per_clust)
-      
-      perms <-
-        complete_ra_permutations(
-          N = n_clust,
-          prob_each = declaration$probabilities_matrix[1,],
-          conditions = declaration$cleaned_arguments$conditions
-        )
-      
-      # expand
-      perms <- perms[rep(1:n_clust, n_per_clust),]
-      # arrange
-      perms <-
-        perms[order(unlist(split(
-          1:length(declaration$clusters), declaration$clusters
-        ), FALSE, FALSE)), ]
-      
-    }
-    
-    if (declaration$ra_type == "blocked_and_clustered") {
-      # Setup: obtain unique clusters
-      n_per_clust <-
-        tapply(declaration$clusters, declaration$clusters, length)
-      n_clust <- length(n_per_clust)
-      
-      # get the block for each cluster
-      clust_blocks <-
-        tapply(declaration$blocks, declaration$clusters, unique)
-      
-      block_prob_each_local <-
-        by(
-          declaration$probabilities_matrix,
-          INDICES = declaration$blocks,
-          FUN = function(x) {
-            x[1,]
-          }
-        )
-      block_prob_each_local <-
-        lapply(block_prob_each_local, as.vector, mode = "numeric")
-      
-      ns_per_block_list <-
-        lapply(split(clust_blocks,
-                     clust_blocks),
-               length)
-      
-      condition_names_list <- lapply(1:length(ns_per_block_list),
-                                     function(x)
-                                       declaration$cleaned_arguments$conditions)
-      
-      perms_by_block <- mapply(FUN = complete_ra_permutations,
-                               ns_per_block_list,
-                               block_prob_each_local,
-                               condition_names_list,
-                               SIMPLIFY = FALSE)
-      
-      perms <-
-        Reduce(expand_matrix, x = perms_by_block)
-      
-      # arrange by blocks
-      block_spots <-
-        unlist(split(1:length(clust_blocks), clust_blocks), FALSE, FALSE)
-      
-      perms <- perms[order(block_spots), ]
-      
-      # expand
-      perms <- perms[rep(1:n_clust, n_per_clust),]
-      
-      # arrange
-      perms <-
-        perms[order(unlist(split(
-          1:length(declaration$clusters), declaration$clusters
-        ), FALSE, FALSE)), ]
-      
-    }
-    
-    return(perms)
-    
+obtain_permutation_matrix <- function(declaration, maximum_permutations = 10000) {
+  
+  if(inherits(declaration,  "ra_custom")){
+    return(declaration$permutation_matrix)
   }
+  
+  num_permutations = obtain_num_permutations(declaration)
+  
+  
+  
+  if (num_permutations > maximum_permutations) {
+    #warning(paste0("The number of possible permutations (", num_permutations,") exceeds maximum_permtations (", maximum_permutations, "), so obtain_permutation_matrix will return a random sample of ", maximum_permutations, " possible permutations. You can increase maximum_permtations if you wish."))
+    return(replicate(maximum_permutations, conduct_ra(declaration)))
+  }
+
+  (function(declaration) UseMethod("obtain_permutation_matrix", declaration))(declaration)
+    
+}    
+ 
+obtain_permutation_matrix.ra_simple <- function(declaration) {
+
+  N = nrow(declaration$probabilities_matrix)
+  prob_each = declaration$probabilities_matrix[1, ]
+  r_parts <- restrictedparts(N, length(prob_each))
+  perms <- t( permutations(length(prob_each)) )
+  
+  r_parts_perms3 <- vapply(r_parts, `[`, perms, perms)  
+  dim(r_parts_perms3) <- local({
+    d <- dim(r_parts_perms3)
+    c(d[1], prod(d[-1])) # pivot third dimension to columns inplace
+  })
+        
+  m_eaches <- unique(r_parts_perms3, MARGIN = 2)
+  
+  perms_list <- sapply(1:ncol(m_eaches), function(j) {
+    permutations_m_each(m_each = m_eaches[, j], declaration$conditions)
+  })
+    
+  perms <- do.call(cbind, perms_list)
+  perms
+}
+
+obtain_permutation_matrix.ra_complete <- function(declaration) {
+  complete_ra_permutations(
+    N = nrow(declaration$probabilities_matrix),
+    prob_each = declaration$probabilities_matrix[1,],
+    conditions = declaration$conditions
+  )
+}
+
+obtain_permutation_matrix.ra_blocked <- function(declaration) {
+
+  block_spots <-
+    unlist(split(1:length(declaration$blocks), declaration$blocks), FALSE, FALSE)
+  
+  block_prob_each_local <-
+    by(
+      declaration$probabilities_matrix,
+      INDICES = declaration$blocks,
+      FUN = function(x) {
+        x[1,]
+      }
+    )
+  block_prob_each_local <-
+    lapply(block_prob_each_local, as.vector, mode = "numeric")
+  
+  ns_per_block_list <-
+    lapply(split(declaration$blocks,
+                 declaration$blocks),
+           length)
+  
+  condition_names_list <- lapply(1:length(ns_per_block_list),
+                                 function(x)
+                                   declaration$conditions)
+  
+  perms_by_block <- mapply(FUN = complete_ra_permutations,
+                           ns_per_block_list,
+                           block_prob_each_local,
+                           condition_names_list,
+                           SIMPLIFY = FALSE)
+
+  perms <-
+    Reduce(expand_matrix, x = perms_by_block)
+  
+  perms <- perms[order(block_spots), ]
+  perms
+}
+
+obtain_permutation_matrix.ra_clustered <- function(declaration) {
+
+  prob_each_local <-
+    declaration$probabilities_matrix[1,]
+  
+  n_per_clust <-
+    tapply(declaration$clusters, declaration$clusters, length)
+  n_clust <- length(n_per_clust)
+  
+  perms <-
+    complete_ra_permutations(
+      N = n_clust,
+      prob_each = declaration$probabilities_matrix[1,],
+      conditions = declaration$conditions
+    )
+  
+  # expand
+  perms <- perms[rep(1:n_clust, n_per_clust),]
+  # arrange
+  perms <-
+    perms[order(unlist(split(
+      1:length(declaration$clusters), declaration$clusters
+    ), FALSE, FALSE)), ]
+  perms
+}
+
+obtain_permutation_matrix.ra_blocked_and_clustered <- function(declaration) {
+
+  # Setup: obtain unique clusters
+  n_per_clust <-
+    tapply(declaration$clusters, declaration$clusters, length)
+  n_clust <- length(n_per_clust)
+  
+  # get the block for each cluster
+  clust_blocks <-
+    tapply(declaration$blocks, declaration$clusters, unique)
+  
+  block_prob_each_local <-
+    by(
+      declaration$probabilities_matrix,
+      INDICES = declaration$blocks,
+      FUN = function(x) {
+        x[1,]
+      }
+    )
+  block_prob_each_local <-
+    lapply(block_prob_each_local, as.vector, mode = "numeric")
+  
+  ns_per_block_list <-
+    lapply(split(clust_blocks,
+                 clust_blocks),
+           length)
+  
+  condition_names_list <- lapply(1:length(ns_per_block_list),
+                                 function(x)
+                                   declaration$conditions)
+  
+  perms_by_block <- mapply(FUN = complete_ra_permutations,
+                           ns_per_block_list,
+                           block_prob_each_local,
+                           condition_names_list,
+                           SIMPLIFY = FALSE)
+  
+  perms <-
+    Reduce(expand_matrix, x = perms_by_block)
+  
+  # arrange by blocks
+  block_spots <-
+    unlist(split(1:length(clust_blocks), clust_blocks), FALSE, FALSE)
+  
+  perms <- perms[order(block_spots), ]
+  
+  # expand
+  perms <- perms[rep(1:n_clust, n_per_clust),]
+  
+  # arrange
+  perms <-
+    perms[order(unlist(split(
+      1:length(declaration$clusters), declaration$clusters
+    ), FALSE, FALSE)), ]
+  perms
+}
 
 
 # Helper functions --------------------------------------------------------

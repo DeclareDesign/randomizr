@@ -18,7 +18,7 @@ expect_declaration <- function(declaration){
   draw <- conduct_ra(declaration)
 
   expect_gt(length(draw), 0)  
-  expect_true(all(draw %in% declaration$cleaned_arguments$conditions))
+  expect_true(all(draw %in% declaration$conditions))
   
   
 }

@@ -5,11 +5,11 @@
 \title{Obtain the probabilities of units being in the conditions that they are in.}
 \usage{
 obtain_condition_probabilities(declaration = NULL, assignment, N = NULL,
-  blocks = block_var, clusters = clust_var, m = NULL, m_each = NULL,
+  blocks = NULL, clusters = NULL, m = NULL, m_each = NULL,
   prob = NULL, prob_each = NULL, block_m = NULL, block_m_each = NULL,
   block_prob = NULL, block_prob_each = NULL, num_arms = NULL,
-  conditions = condition_names, simple = FALSE, block_var = NULL,
-  clust_var = NULL, condition_names = NULL)
+  conditions = NULL, simple = FALSE, permutation_matrix = NULL,
+  check_inputs = TRUE)
 }
 \arguments{
 \item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
@@ -44,11 +44,9 @@ obtain_condition_probabilities(declaration = NULL, assignment, N = NULL,
 
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.}
 
-\item{block_var}{deprecated}
+\item{permutation_matrix}{for custom random assignment procedures.}
 
-\item{clust_var}{deprecated}
-
-\item{condition_names}{deprecated}
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \description{
 You can either give obtain_condition_probabilities() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.\cr \cr

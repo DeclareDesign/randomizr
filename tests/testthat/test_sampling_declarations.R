@@ -4,8 +4,6 @@ test_declaration <- function(declaration, esum, eprob){
   S <- draw_rs(declaration)
   prob <- obtain_inclusion_probabilities(declaration = declaration)
 
-  expect_true(is.function(declaration$rs_function))
-  
   if(!is.na(esum))expect_equal(sum(S), esum)
   if(!is.na(eprob))expect_true(all(prob == eprob))
   
@@ -58,6 +56,14 @@ test_that("strata",{
   
   declaration <- declare_rs(strata = strata)
   test_declaration(declaration, 350/2, .5)
+})
+
+test_that("strata",{
+  
+  strata <- gl(3,100)
+  
+  declaration <- declare_rs(strata = strata)
+  test_declaration(declaration, 150, .5)
 })
 
 

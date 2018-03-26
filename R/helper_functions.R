@@ -1,10 +1,19 @@
-# randomizr input cleaning and helper functions
 
-warn_deprecated_args <- function(block_var=NULL, clust_var=NULL, strata_var=NULL) {
-  if(!is.null(block_var)){warning(simpleCondition("block_var is deprecated, use blocks instead", call=sys.call(1)))}
-  if(!is.null(clust_var)){warning(simpleCondition("clust_var is deprecated, use clusters instead", call=sys.call(1)))}
-  if(!is.null(strata_var)){warning(simpleCondition("strata_var is deprecated, use strata instead", call=sys.call(1)))}
+.invoke_check <- function(check){
+  definition <- sys.function(sys.parent())
+  envir <- parent.frame(1)
+
+  all_args <- mget(names(formals(definition)), envir)  
+  ret <- check(all_args)
+  list2env(ret, envir)
+  invisible(NULL)
 }
+
+#f <- function(N,n) {.invoke_check(function(a) list(n = a[["n"]] + 1)); n}
+
+
+
+check_randomizr_arguments_new <- function(all_args) do.call(check_randomizr_arguments, all_args)
 
 check_randomizr_arguments <-
   function(N = NULL,
@@ -19,8 +28,7 @@ check_randomizr_arguments <-
            block_prob_each = NULL,
            clusters = NULL,
            num_arms = NULL,
-           conditions = condition_names,
-           condition_names = NULL) {
+           conditions = NULL, ...) {
     conflict_args <- list(
       prob = prob,
       m = m,
@@ -349,6 +357,10 @@ check_randomizr_arguments <-
     
   }
 
+check_samplr_arguments_new <- function(all_args){
+  do.call(check_samplr_arguments, all_args)
+}
+
 check_samplr_arguments <-
   function(N = NULL,
            prob = NULL,
@@ -356,7 +368,7 @@ check_samplr_arguments <-
            strata = NULL,
            strata_n = NULL,
            strata_prob = NULL,
-           clusters = NULL) {
+           clusters = NULL, ...) {
     conflict_args <- list(
       prob = prob,
       n = n,

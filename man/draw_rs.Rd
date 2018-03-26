@@ -4,10 +4,9 @@
 \alias{draw_rs}
 \title{Draw a random sample}
 \usage{
-draw_rs(declaration = NULL, N = NULL, strata = strata_var,
-  clusters = clust_var, n = NULL, prob = NULL, strata_n = NULL,
-  strata_prob = NULL, simple = FALSE, strata_var = NULL,
-  clust_var = NULL)
+draw_rs(declaration = NULL, N = NULL, strata = NULL, clusters = NULL,
+  n = NULL, prob = NULL, strata_n = NULL, strata_prob = NULL,
+  simple = FALSE, check_inputs = TRUE)
 }
 \arguments{
 \item{declaration}{A random sampling declaration, created by \code{\link{declare_rs}}.}
@@ -28,9 +27,7 @@ draw_rs(declaration = NULL, N = NULL, strata = strata_var,
 
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.}
 
-\item{strata_var}{deprecated}
-
-\item{clust_var}{deprecated}
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \description{
 You can either give draw_rs() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.

@@ -4,10 +4,9 @@
 \alias{declare_rs}
 \title{Declare a random sampling procedure.}
 \usage{
-declare_rs(N = NULL, strata = strata_var, clusters = clust_var,
-  n = NULL, prob = NULL, strata_n = NULL, strata_prob = NULL,
-  simple = FALSE, check_inputs = TRUE, strata_var = NULL,
-  clust_var = NULL)
+declare_rs(N = NULL, strata = NULL, clusters = NULL, n = NULL,
+  prob = NULL, strata_n = NULL, strata_prob = NULL, simple = FALSE,
+  check_inputs = TRUE)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
@@ -27,10 +26,6 @@ declare_rs(N = NULL, strata = strata_var, clusters = clust_var,
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
-
-\item{strata_var}{deprecated}
-
-\item{clust_var}{deprecated}
 }
 \value{
 A list of class "declaration".  The list has five entries:

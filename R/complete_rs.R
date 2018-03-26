@@ -37,12 +37,7 @@ complete_rs <- function(N,
                         prob = NULL,
                         check_inputs = TRUE) {
   # Checks
-  if (check_inputs) {
-    input_check <-
-      check_samplr_arguments(N = N,
-                             n = n,
-                             prob = prob)
-  }
+  if (check_inputs) .invoke_check(check_samplr_arguments_new)
   
   if (N == 1) {
     if (is.null(n) & is.null(prob)) {
@@ -120,4 +115,51 @@ complete_rs <- function(N,
       return(assignment)
     }
   }
+}
+
+#' Inclusion Probabilities: Complete Random Sampling
+#'
+#' @inheritParams complete_rs
+#' @return A vector length N indicating the probability of being sampled.
+#'
+#' @examples
+#' probs <- complete_rs_probabilities(N = 100)
+#' table(probs)
+#'
+#' probs <- complete_rs_probabilities(N = 100, n = 50)
+#' table(probs)
+#'
+#' probs <- complete_rs_probabilities(N=100, prob = .3)
+#' table(probs)
+#'
+#' @export
+complete_rs_probabilities <- function(N,
+                                      n = NULL,
+                                      prob = NULL,
+                                      check_inputs = TRUE) {
+  if (check_inputs) .invoke_check(check_samplr_arguments_new)
+  
+  if(is.null(n) && is.null(prob)) {
+    prob_vec <- .5
+  } else if (is.numeric(n)) {
+    
+    if (N == 1) {
+      
+      # we "know" below should be .5 becasue n beats prob 
+      prob_vec <- if(n == 0) 0 else if(n == 1) .5 else 
+        stop("The number of units sampled (n) must be less than or equal to the total number of units (N)")
+      
+    } else {
+      
+      prob_vec <- n / N
+    }
+    
+    
+  } else if (is.numeric(prob)) {
+  
+    prob_vec <- if(N == 1) prob else ifelse(ceiling(N * prob) == N,  floor(N * prob) / N, prob)
+    
+  }
+
+  rep_len(prob_vec, N)
 }
