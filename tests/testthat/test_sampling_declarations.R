@@ -58,6 +58,14 @@ test_that("strata",{
   test_declaration(declaration, 350/2, .5)
 })
 
+test_that("strata",{
+  
+  strata <- gl(3,100)
+  
+  declaration <- declare_rs(strata = strata)
+  test_declaration(declaration, 150, .5)
+})
+
 
 test_that("clusters",{
   clusters <- rep(letters, times = 1:26)

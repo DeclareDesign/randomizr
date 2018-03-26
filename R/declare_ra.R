@@ -116,14 +116,17 @@ declare_ra <- function(N = NULL,
     all_args$check_inputs <- FALSE # don't need to recheck when using declaration
   }
   
+  is_block <- is.vector(blocks) || is.factor(blocks)
+  is_clust <- is.vector(clusters) || is.factor(clusters)
+  
   # Determine ra_type
   if (is.matrix(permutation_matrix)){
     ra_type <- "custom"
-  } else  if (is.vector(blocks) && is.vector(clusters)) {
+  } else  if (is_block && is_clust) {
     ra_type <- "blocked_and_clustered"
-  } else  if (is.vector(clusters)) {
+  } else  if (is_clust) {
     ra_type <- "clustered"
-  } else  if (is.vector(blocks)) {
+  } else  if (is_block) {
     ra_type <- "blocked"
     if (simple) stop("You can't specify 'simple' when using blocked assignment")
   } else  if (simple == FALSE) {

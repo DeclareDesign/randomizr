@@ -137,6 +137,12 @@ test_that("Blocks default",{
   test_declaration(declaration, 175, .5, 1)
 })
 
+test_that("Blocks default w/ factor",{
+  blocks <- gl(3,100)
+  declaration <- declare_ra(blocks=blocks)
+  test_declaration(declaration, 150, .5, 1)
+})
+
 test_that("blocks m_each",{
   blocks <- rep(c("A", "B","C"), times=c(50, 100, 200))
   block_m_each <- rbind(c(25, 25),

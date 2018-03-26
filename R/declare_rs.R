@@ -94,12 +94,15 @@ declare_rs <- function(N = NULL,
     all_args$check_inputs <- FALSE # don't need to recheck when using declaration
   }
   
+  is_strata <- is.vector(strata) || is.factor(strata)
+  is_clust <- is.vector(clusters) || is.factor(clusters)
+  
   # Determine rs_type
-  if (!is.null(strata) && !is.null(clusters)) {
+  if (is_strata && is_clust) {
     rs_type <- "stratified_and_clustered"
-  } else if (!is.null(clusters)) {
+  } else if (is_clust) {
     rs_type <- "clustered"
-  } else if (!is.null(strata)) {
+  } else if (is_strata) {
     rs_type <- "stratified"
     if(simple) stop("You can't specify 'simple' with strata.")
   } else if (simple == FALSE) {
