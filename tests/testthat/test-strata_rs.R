@@ -56,3 +56,9 @@ table(strata, S)
 probs <- strata_rs_probabilities(strata = strata, strata_prob = c(0, .2, .3))
 table(strata,probs)
 
+
+
+test_that("Unhandled cases warn", {
+  expect_warning(strata_rs_probabilities(strata=gl(2,999), strata_prob = c("0.5", "0.5")))
+  
+})

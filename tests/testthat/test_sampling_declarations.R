@@ -28,6 +28,12 @@ test_that("Complete N = 101, prob = .34",{
   test_declaration(declaration, NA, .34)
 })
 
+test_that("simple + n fails",{
+  
+  expect_error(declare_rs(N = 101, n = 34, simple=TRUE))
+})
+
+
 
 test_that("N=100 n=50",{
   

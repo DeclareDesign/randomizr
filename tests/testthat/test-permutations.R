@@ -296,3 +296,7 @@ test_that("Overflowing N",{
 })
 
 
+test_that("multinomial coefficient helper",{
+  
+  expect_error(multinomial_coefficient(200, 3:100))
+})

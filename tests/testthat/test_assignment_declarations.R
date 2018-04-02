@@ -74,6 +74,12 @@ test_that("num_arms",{
 })
 
 
+test_that("simple + n fails",{
+  
+  expect_error(declare_ra(N = 101, m = 34, simple=TRUE))
+})
+
+
 context("Declarations: Simple Random Assignments")
 
   

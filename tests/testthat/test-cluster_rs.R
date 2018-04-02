@@ -39,3 +39,16 @@ test_that("prob = 1", {
   expect_true(all(S== 1))
   expect_true(all(probs== 1))
 })
+
+test_that("clust simple ", {
+  clusters = gl(10,2)
+  S <- cluster_rs(clusters = clusters, simple = TRUE)
+  s_prob <- cluster_rs_probabilities(clusters = clusters, simple = TRUE)
+  expect_true(all(rowSums(table(clusters, S) > 0 ) == 1))
+  expect_true(all(s_prob > 0 & s_prob < 1))
+})
+
+test_that("n and simple is error", {
+  expect_error(cluster_rs(clusters = gl(10,2), simple = TRUE, n=3))
+  expect_error(cluster_rs_probabilities(clusters = gl(10,2), simple = TRUE, n=3))
+})

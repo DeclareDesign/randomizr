@@ -50,3 +50,15 @@ test_that("Multi-arm Designs",{
     cluster_ra(clusters=clusters, prob_each = c(.1, .2, .7))
   )
 })
+
+
+test_that("Two Group Designs",{
+  expect_error(cluster_ra(clusters=gl(10,2), m=3, simple=TRUE))
+  expect_error(cluster_ra(clusters=gl(10,2), m_each=c(3,7), simple=TRUE))
+})
+
+
+test_that("simple assignment",{
+  clusters <- gl(100, 2)
+  expect_equal(sum(cluster_ra(clusters, prob = 1, simple=TRUE)), 200)
+})
