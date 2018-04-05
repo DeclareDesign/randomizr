@@ -14,6 +14,11 @@ test_that("custom RA yields inputs",{
   Z <- conduct_ra(declaration_2)
   
   expect_identical(
+    permutation_matrix,
+    obtain_permutation_matrix(declaration_2)
+  )
+  
+  expect_identical(
     obtain_condition_probabilities(declaration = declaration_2, assignment = Z),
     
     prob[cbind(seq_along(Z), match(paste0("prob_", Z), colnames(prob)))]

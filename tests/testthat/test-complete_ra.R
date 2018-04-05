@@ -161,3 +161,20 @@ test_that("zeros in m_each", {
   )
   expect_equivalent(table(Z)["T3"], 0)
 })
+
+test_that("N=1 handling",{
+  expect_error(S <- complete_ra(N = 1, m=.5))
+  S <- complete_ra(N=1, prob=.2)
+  
+  expect_equivalent( complete_ra_probabilities(N = 1, m=1), c(.5, .5))
+  expect_equivalent( complete_ra_probabilities(N = 1, m=0), c(1, 0))
+  
+  expect_equivalent( complete_ra_probabilities(N = 1), c(.5, .5))
+  expect_equivalent( complete_ra_probabilities(N = 1, prob=.2), c(.8, .2))
+  
+  expect_error(complete_ra_probabilities(N = 1, m=.5))  
+})
+
+test_that("N=2 roundup rule",{
+  expect_equivalent( complete_ra_probabilities(N = 2, prob=.95), c(.5, .5, .5, .5))
+})

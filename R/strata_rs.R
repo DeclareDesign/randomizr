@@ -50,7 +50,7 @@ strata_rs <- function(strata = NULL,
   
   # Setup: obtain number of arms and conditions
   
-  if (is.null(prob) & is.null(strata_n) & is.null(strata_prob) & is.null(n)) {
+  if (is.null(prob) && is.null(strata_n) && is.null(strata_prob) && is.null(n)) {
     prob <- 0.5
   }
   
@@ -192,6 +192,6 @@ strata_rs_probabilities <- function(strata = NULL,
     return(prob_vec)
   }
   
-  warnings("Could not calculate sampling probabilities")
+  warning("Could not calculate sampling probabilities")
   invisible(NULL)
 }

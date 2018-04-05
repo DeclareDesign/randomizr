@@ -46,6 +46,7 @@ complete_rs <- function(N,
     }
     if (!is.null(n)) {
       if (!n %in% c(0, 1)) {
+        # todo move this check into .check_rs
         stop(
           "The number of units sampled (n) must be less than or equal to the total number of units (N)"
         )
@@ -61,6 +62,7 @@ complete_rs <- function(N,
     }
     if (!is.null(prob)) {
       assignment <- simple_rs(N, prob = prob, check_inputs = check_inputs)
+      return(assignment)
     }
   }
   
