@@ -40,30 +40,9 @@ complete_rs <- function(N,
   if (check_inputs) .invoke_check(check_samplr_arguments_new)
   
   if (N == 1) {
-    if (is.null(n) & is.null(prob)) {
-      assignment <- simple_rs(N, prob = 0.5)
-      return(assignment)
-    }
-    if (!is.null(n)) {
-      if (!n %in% c(0, 1)) {
-        # todo move this check into .check_rs
-        stop(
-          "The number of units sampled (n) must be less than or equal to the total number of units (N)"
-        )
-      }
-      if (n == 0) {
-        assignment <- 0
-        return(assignment)
-      }
-      if (n == 1) {
-        assignment <- simple_rs(N, prob = 0.5, check_inputs = check_inputs)
-        return(assignment)
-      }
-    }
-    if (!is.null(prob)) {
-      assignment <- simple_rs(N, prob = prob, check_inputs = check_inputs)
-      return(assignment)
-    }
+    # n/2 : 0=>0, 1 => 1/2
+    prob <- if(is.numeric(n)) n / 2 else if(is.numeric(prob)) prob else .5
+    return( simple_rs(N, prob, FALSE) )
   }
   
   if (N > 1) {
@@ -144,18 +123,9 @@ complete_rs_probabilities <- function(N,
   if(is.null(n) && is.null(prob)) {
     prob_vec <- .5
   } else if (is.numeric(n)) {
-    
-    if (N == 1) {
-      
-      # we "know" below should be .5 becasue n beats prob 
-      prob_vec <- if(n == 0) 0 else if(n == 1) .5 else 
-        stop("The number of units sampled (n) must be less than or equal to the total number of units (N)")
-      
-    } else {
-      
-      prob_vec <- n / N
-    }
-    
+
+    # special case when n=1, N=1 => prob=.5
+    prob_vec <- n / max(N,2)
     
   } else if (is.numeric(prob)) {
   

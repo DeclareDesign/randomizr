@@ -128,22 +128,10 @@ declare_ra <- function(N = NULL,
     ra_type <- "clustered"
   } else  if (is_block) {
     ra_type <- "blocked"
-    if (simple) stop("You can't specify 'simple' when using blocked assignment")
   } else  if (simple == FALSE) {
     ra_type <- "complete"
   } else {
     ra_type <- "simple"
-    
-    if (!is.null(m)) {
-      stop("You can't specify 'm' when using simple random assignment.")
-    }
-    if (!is.null(m_each)) {
-      stop("You can't specify 'm_each' when using simple random assignment.")
-    }
-    if (!is.null(block_m_each)) {
-      stop("You can't specify 'block_m_each' when using simple random assignment.")
-    }
-    
   }
   
   return_object <- list2env(all_args, parent = emptyenv())
@@ -248,22 +236,22 @@ obtain_condition_probabilities <-
   function(declaration = NULL,
            assignment) {
     # checks
-    if (!is.null(declaration)) {
-      if (!inherits(declaration, "ra_declaration")) {
-        stop("You must provide a random assignment declaration created by declare_ra().")
-      }
-    } else{
+    if (is.null(declaration)) {
       if (is.null(N)) {
         N <- length(assignment)
       }
       all_args <- mget(names(formals(declare_ra)))
       declaration <- do.call(declare_ra, all_args) 
+    } else if (!inherits(declaration, "ra_declaration")) {
+      stop("You must provide a random assignment declaration created by declare_ra().")
     }
     
-    probabilities_matrix <- declaration$probabilities_matrix
-    cond_Z     <- paste0("prob_", assignment)
-    indices    <- match(cond_Z, colnames(probabilities_matrix))
-    cond_probs <- probabilities_matrix[ cbind(seq_len(nrow(probabilities_matrix)), indices) ]
+    
+    pmat <- declaration$probabilities_matrix # this may have been delayAssigned
+    cond_probs <- pmat[cbind(
+      seq_len(nrow(pmat)), 
+      match(paste0("prob_", assignment), colnames(pmat))
+    )]
     return(cond_probs)
   }
 

@@ -1,4 +1,7 @@
 
+
+# Call check() with all formal arguments of the invoking function
+# reinsert results into that environment
 .invoke_check <- function(check){
   definition <- sys.function(sys.parent())
   envir <- parent.frame(1)
@@ -28,6 +31,7 @@ check_randomizr_arguments <-
            block_prob_each = NULL,
            clusters = NULL,
            num_arms = NULL,
+           simple = NULL,
            conditions = NULL, ...) {
 
     # N, blocks, clusters, num_arms, conditions are used generally, check them first
@@ -94,7 +98,11 @@ check_randomizr_arguments <-
       arg_block <- grepl("^block_", arg)
       arg_each  <- grepl("_each$", arg)
       
-      if(arg_block && is.null(blocks)) stop("Specified ", arg, "but blocks is NULL.")
+      if(arg_block && is.null(blocks)) stop("Specified `", arg, "` but blocks is NULL.")
+
+      if(isTRUE(simple) && !grepl("prob", arg)) stop("You can't specify `", arg, "`` when simple = TRUE")
+
+      if(isTRUE(simple) && !is.null(blocks)) stop("You can't specify `simple`` when using blocked assignment")
 
       .check_ra_arg_num_arms_conditions(arg, arg_block, arg_each, specified_args[[1]], num_arms, conditions)  
 
@@ -135,8 +143,11 @@ check_randomizr_arguments <-
     
   }
 
+# Arg-specific checks
 .check_ra <- new.env(parent=emptyenv())
 
+
+# Generic checks that block, each num_arms, conditions are consistent.
 .check_ra_arg_num_arms_conditions <- function(arg, arg_block, arg_each, value, num_arms, conditions){
   
   if (!arg_each) {
@@ -185,6 +196,9 @@ check_randomizr_arguments <-
 .check_ra$m <- function(N, blocks, clusters, num_arms, conditions, m) {
   if (m < 0) {
     stop("If specified, the number of units assigned to treatment (m) must be nonnegative.")
+  }
+  if(m != floor(m)){
+    stop("`m` must be an integer.")
   }
   if(is.null(blocks)) {
     if (m > N) {
@@ -282,7 +296,8 @@ check_samplr_arguments <- function(N = NULL,
   strata = NULL,
   strata_n = NULL,
   strata_prob = NULL,
-  clusters = NULL, ...)
+  clusters = NULL, 
+  simple = NULL, ...)
 {
 
   if (!is.null(clusters)) {
@@ -329,7 +344,14 @@ check_samplr_arguments <- function(N = NULL,
          paste(names(specified_args), collapse = " and "),
          ".")
   } else if(length(specified_args) == 1) {
-    .check_rs[[names(specified_args)]](N, strata, clusters, specified_args[[1]])
+    arg <- names(specified_args)
+    
+    if(isTRUE(simple) && !grepl("prob", arg)) stop("You can't specify `", arg, "` when simple = TRUE.")
+    
+    if(isTRUE(simple) && !is.null(strata)) stop("You can't specify 'simple' with strata.")
+    
+    
+    .check_rs[[arg]](N, strata, clusters, specified_args[[1]])
   }
     
   list(
@@ -341,7 +363,7 @@ check_samplr_arguments <- function(N = NULL,
     
 }
 
-
+# rs specific arg checks
 .check_rs <- new.env(parent=emptyenv())
 
 
@@ -367,6 +389,9 @@ check_samplr_arguments <- function(N = NULL,
 .check_rs$n <- function(N, strata, clusters, n) {
   if (n < 0) {
     stop("If specified, the number of units sampled (n) must be nonnegative.")
+  }
+  if (n != floor(n)) {
+    stop("If specified, the number of units sampled (n) must be an integer.")
   }
   if(is.null(strata)) {
     if (n > N) {
@@ -413,3 +438,6 @@ clean_condition_names <- function(assignment, conditions) {
   
   return(factor(assignment, levels = conditions))
 }
+
+is_constant <- function(x) all(x[1] == x)
+

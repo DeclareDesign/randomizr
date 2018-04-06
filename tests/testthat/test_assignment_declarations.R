@@ -74,7 +74,7 @@ test_that("num_arms",{
 })
 
 
-test_that("simple + n fails",{
+test_that("simple + m fails",{
   
   expect_error(declare_ra(N = 101, m = 34, simple=TRUE))
 })

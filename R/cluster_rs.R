@@ -31,9 +31,6 @@ cluster_rs <- function(clusters=NULL,
   n_clust <- length(unique_clust)
   
   if (simple) {
-    if (!is.null(n)) {
-      stop("Please do not specify n when simple = TRUE")
-    }
     S_clust <- simple_rs(N = n_clust,
                          prob = prob)
     
@@ -81,9 +78,6 @@ cluster_rs_probabilities <-
     n_clust <- length(unique_clust)
     
     if (simple) {
-      if (!is.null(n)) {
-        stop("Please do not specify n when simple = TRUE")
-      }
       probs_clust <-
         simple_rs_probabilities(N = n_clust,
                                 prob = prob)
