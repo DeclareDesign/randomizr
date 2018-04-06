@@ -42,6 +42,8 @@ check_randomizr_arguments <-
 
     if (!is.null(blocks)) {
       
+      if(isTRUE(simple) && !is.null(blocks)) stop("You can't specify `simple`` when using blocked assignment")
+
       if (!is.null(clusters)) {
         N_per_block <- tapply(clusters, blocks, function(x)length(unique(x)))
         attributes(N_per_block) <- NULL
@@ -59,7 +61,7 @@ check_randomizr_arguments <-
       } else if (N != sum(N_per_block)) {
         stop("N should equal the length of blocks")
       }
-      
+            
       N_blocks <- length(N_per_block)
       
       attributes(blocks) <- list(N_per_block=N_per_block, N_blocks=N_blocks)
@@ -101,8 +103,6 @@ check_randomizr_arguments <-
       if(arg_block && is.null(blocks)) stop("Specified `", arg, "` but blocks is NULL.")
 
       if(isTRUE(simple) && !grepl("prob", arg)) stop("You can't specify `", arg, "`` when simple = TRUE")
-
-      if(isTRUE(simple) && !is.null(blocks)) stop("You can't specify `simple`` when using blocked assignment")
 
       .check_ra_arg_num_arms_conditions(arg, arg_block, arg_each, specified_args[[1]], num_arms, conditions)  
 
