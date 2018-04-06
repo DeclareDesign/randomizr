@@ -265,7 +265,6 @@ print.ra_declaration <- function(x, ...) {
   
   conditions <- sort(unique(Z))
   num_arms <- length(conditions)
-  constant_probabilities <- nrow(unique(x$probabilities_matrix)) == 1
 
   cat("Random assignment procedure:" ,
       switch(class(x)[2], 
@@ -284,7 +283,7 @@ print.ra_declaration <- function(x, ...) {
 
       sprintf("The possible treatment categories are %s.\n", paste(conditions, collapse = " and ") )
   )
-  if (constant_probabilities) {
+  if (all(apply(x$probabilities_matrix, 2, is_constant))) {
     cat("The probabilities of assignment are constant across units.")
   } else{
     cat(
