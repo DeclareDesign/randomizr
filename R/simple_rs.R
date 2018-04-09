@@ -17,20 +17,12 @@
 #' S <- simple_rs(N = 100, prob = 0.3)
 #' table(S)
 #'
-simple_rs <-
-  function(N, prob = NULL,
-           check_inputs = TRUE) {
-    
-    if (check_inputs) .invoke_check(check_samplr_arguments_new)
-    
-    
-    if (is.null(prob)) {
-      prob <- 0.5
-    }
-    
-    assignment <- sample(0:1, size = N, replace=TRUE, prob = c(1-prob, prob))
-    return(assignment)
-  }
+simple_rs <- function(N, prob = NULL, check_inputs = TRUE) {
+  if(check_inputs) .invoke_check(check_samplr_arguments_new)
+  if(is.null(prob)) prob <- .5
+  simple_ra(N, prob, conditions=0:1, check_inputs = FALSE)    
+}
+
 #' Inclusion Probabilities: Simple Random Sampling
 #'
 #' @inheritParams simple_rs
@@ -44,16 +36,8 @@ simple_rs <-
 #' table(probs)
 #'
 #' @export
-simple_rs_probabilities <-
-  function(N,
-           prob = NULL,
-           check_inputs = TRUE) {
-    if (check_inputs) .invoke_check(check_samplr_arguments_new)
-    
-    if (is.null(prob)) {
-      prob <- 0.5
-    }
-    
-    prob_vec <- rep(prob, N)
-    return(prob_vec)
-  }
+simple_rs_probabilities <- function(N, prob = NULL, check_inputs = TRUE) {
+  if(check_inputs) .invoke_check(check_samplr_arguments_new)
+  if(is.null(prob)) prob <- .5
+  simple_ra_probabilities(N, prob, conditions=0:1, check_inputs = FALSE)[,2]
+}

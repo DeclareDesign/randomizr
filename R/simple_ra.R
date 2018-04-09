@@ -41,26 +41,20 @@
 #'
 #' Z <- simple_ra(N=100, conditions=c("control", "placebo", "treatment"))
 #' table(Z)
-simple_ra <-
-  function(N,
-           prob = NULL,
-           prob_each = NULL,
-           num_arms = NULL,
-           conditions = NULL,
-           check_inputs = TRUE) {
-    if (check_inputs) .invoke_check(check_randomizr_arguments_new)
-    
-    if (is.null(prob_each)) {
-      prob_each <- if(is.numeric(prob)) c(1 - prob, prob) else 
-        rep(1 / num_arms, num_arms)
-    }
-    
+simple_ra <- function(N, prob = NULL, prob_each = NULL,
+                      num_arms = NULL, conditions = NULL, check_inputs = TRUE
+) {
+  if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+  prob_mat <- simple_ra_probabilities(N, prob, prob_each, num_arms, conditions, FALSE)
+  assignment <- vsample(prob_mat, conditions)
+  assignment <- clean_condition_names(assignment, conditions)
+  return(assignment)
+}
 
-    assignment <- sample(conditions, N, replace = TRUE, prob_each)
-    assignment <- clean_condition_names(assignment, conditions)
-    return(assignment)
-  }
-
+vsample <- function(prob_mat, conditions){
+  i <- max.col(runif(nrow(prob_mat)) <=  t(apply(prob_mat, 1, cumsum)), "first")
+  conditions[i]
+}
 
 
 #' probabilities of assignment: Simple Random Assignment
@@ -106,22 +100,18 @@ simple_ra_probabilities <-
     
     
     # Three easy cases
-    
-    if (is.null(prob) & is.null(prob_each)) {
-      condition_probabilities <- rep(1 / num_arms, num_arms)
-    }
-    if (!is.null(prob)) {
-      condition_probabilities <- c(1 - prob, prob)
-    }
-    if (!is.null(prob_each)) {
-      condition_probabilities <- prob_each
-    }
-    
+    condition_probabilities <- if(is.matrix(prob_each))        t(prob_each) 
+                               else if(is.numeric(prob_each))  prob_each
+                               else if(length(prob) > 1)       rbind(1 - prob, prob)
+                               else if(is.numeric(prob))       c(1- prob, prob)
+                               else                            1 / num_arms
+
     # Build prob_mat
     prob_mat <- matrix(
-      rep(condition_probabilities, N),
+      condition_probabilities,
       byrow = TRUE,
-      ncol = length(condition_probabilities),
+      nrow = N,
+      ncol = length(conditions),
       dimnames = list(NULL,  paste0("prob_", conditions))
     )
     return(prob_mat)

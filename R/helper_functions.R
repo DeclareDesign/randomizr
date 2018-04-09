@@ -117,10 +117,10 @@ check_randomizr_arguments <-
     
     if (is.null(num_arms)) {
       
-      num_arms <- if(!is.null(conditions)) length(conditions) 
+      num_arms <- if(!is.null(conditions)) length(conditions)
         else if (length(specified_args) == 0) 2
         else if (!arg_each) 2
-        else if (!arg_block) length(specified_args[[1]]) 
+        else if (!arg_block && !is.matrix(specified_args[[1]])) length(specified_args[[1]]) 
         else ncol(specified_args[[1]]) 
 
       if(num_arms == 2 && is.null(conditions))
@@ -132,15 +132,14 @@ check_randomizr_arguments <-
         conditions <- paste0("T", 1:num_arms)
     }
     
-    return(
-      list(
+    ret <- list(
         num_arms = num_arms,
         conditions = conditions,
         condition_names = conditions,
         N_per_block = get0("N_per_block")
       )
-    )
     
+    ret
   }
 
 # Arg-specific checks
@@ -174,8 +173,11 @@ check_randomizr_arguments <-
 }
 
 .check_ra$prob <- function(N, blocks, clusters, num_arms, conditions, prob) {
-  if (prob > 1 | prob < 0) {
+  if (any(prob > 1 | prob < 0)) {
     stop("The probability of assignment to treatment must be between 0 and 1.")
+  }
+  if(! length(prob) %in% c(1, N)) {
+    stop("`prob` must be either length 1 or length N")
   }
 }
 
@@ -186,11 +188,20 @@ check_randomizr_arguments <-
       "The probabilties of assignment to any condition may not be greater than 1 or less than zero."
     )
   }
-  if (sum(prob_each) != 1) {
+  if (is.null(dim(prob_each)) && sum(prob_each) != 1){
     stop(
-      "The sum of the probabilities of assignment to each condition (prob_each) must equal 1."
+      "The sum of the probabilities of assignment to each condition (prob_each) must equal 1 for each obs."
     )
   }
+  if (is.numeric(dim(prob_each)) && any(rowSums(prob_each) != 1)) {
+    stop(
+      "The sum of the probabilities of assignment to each condition (prob_each) must equal 1 for each obs."
+    )
+  }
+  if(! length(prob) %in% length(conditions)*c(1, N)) {
+    stop("`prob` must be either length 1 or length N")
+  }
+  
 }
 
 .check_ra$m <- function(N, blocks, clusters, num_arms, conditions, m) {
@@ -368,8 +379,11 @@ check_samplr_arguments <- function(N = NULL,
 
 
 .check_rs$prob <- function(N, strata, clusters, prob) {
-  if (prob > 1 | prob < 0) {
+  if (any(prob > 1 | prob < 0)) {
     stop("The probability of assignment to treatment must be between 0 and 1.")
+  }
+  if(! length(prob) %in% c(1, N)) {
+    stop("`prob` must be either length 1 or length N")
   }
 }
 
