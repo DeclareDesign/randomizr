@@ -42,7 +42,7 @@ check_randomizr_arguments <-
 
     if (!is.null(blocks)) {
       
-      if(isTRUE(simple) && !is.null(blocks)) stop("You can't specify `simple`` when using blocked assignment")
+      if(isTRUE(simple)) stop("You can't specify `simple`` when using blocked assignment")
 
       if (!is.null(clusters)) {
         N_per_block <- tapply(clusters, blocks, function(x)length(unique(x)))
@@ -306,6 +306,9 @@ check_samplr_arguments <- function(N = NULL,
 
   if (!is.null(strata)) {
     
+    if(isTRUE(simple)) stop("You can't specify 'simple' with strata.")
+    
+    
     if (!is.null(clusters)) {
       N_per_stratum <- tapply(clusters, strata, function(x)length(unique(x)))
       attributes(N_per_stratum) <- NULL
@@ -347,9 +350,6 @@ check_samplr_arguments <- function(N = NULL,
     arg <- names(specified_args)
     
     if(isTRUE(simple) && !grepl("prob", arg)) stop("You can't specify `", arg, "` when simple = TRUE.")
-    
-    if(isTRUE(simple) && !is.null(strata)) stop("You can't specify 'simple' with strata.")
-    
     
     .check_rs[[arg]](N, strata, clusters, specified_args[[1]])
   }
