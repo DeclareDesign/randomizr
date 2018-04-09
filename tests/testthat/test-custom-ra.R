@@ -25,7 +25,7 @@ test_that("custom RA yields inputs",{
   )
     
     
-  expect_identical(
+  expect_equal(
     obtain_num_permutations(declaration_2),
     ncol(permutation_matrix)
   )

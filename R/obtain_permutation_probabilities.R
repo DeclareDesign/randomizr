@@ -175,12 +175,7 @@ exponentiate_vector <- function(vec, power) {
   if (power == 1) {
     return(vec)
   }
-  if (power == 2) {
-    return(c(vec %*% t(vec)))
-  }
-  if (power > 2) {
-    return(c(exponentiate_vector(vec, power - 1) %*% t(vec)))
-  }
+  c(tcrossprod(Recall(vec, power - 1), vec))
 }
 
 complete_ra_permutation_probabilities <-
@@ -219,9 +214,7 @@ complete_ra_permutation_probabilities <-
             sum(x %in% i)) + m_each_floor
         })
       
-      num_possibilities <-
-        apply(m_eaches, 2, function(x)
-          multinomial_coefficient(N, m_each = x))
+      num_possibilities <- apply(m_eaches, 2, multinomial_coefficient, N=N)
       
       permutation_probabilities <-
         rep(fix_ups_probs / num_possibilities, num_possibilities)

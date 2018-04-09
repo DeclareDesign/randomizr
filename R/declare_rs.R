@@ -113,7 +113,7 @@ declare_rs <- function(N = NULL,
 
   return_object <- list2env(all_args, parent = emptyenv())
   return_object$rs_function <- function() {
-    .Deprecated(draw_rs) 
+    .Deprecated("draw_rs") 
     rs_function(return_object)
   }
   

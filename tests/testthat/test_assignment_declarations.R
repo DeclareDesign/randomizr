@@ -324,3 +324,40 @@ test_that("block clusters block_m_each",{
     c(.6, .8, .4, .6)
   )
 })
+
+test_that("big permutation matrix",{
+  
+  pm <- obtain_permutation_matrix(declare_ra(N=12))
+  expect_equal( ncol(unique(pm, MARGIN=2))   , ncol(pm))
+})
+
+test_that("check errors",{
+  
+  expect_error(declare_ra(clusters=c(1,1,1,1), blocks = c(1,2,1,2)))
+  expect_error(declare_ra(N=9, blocks = c(1,1,2,2)))
+  expect_error(declare_ra(prob=.2))
+  expect_error(declare_ra(N=4, prob=.2, prob_each=.3))
+  
+})
+
+test_that("check deprecations",{
+  # TODO remove when below are also removed, this is just for test coverage
+  d <- declare_ra(N=10, n=4)  
+  expect_warning(d$ra_function())
+  expect_warning(d$ra_type)
+  expect_warning(d$cleaned_arguments)
+})
+
+test_that("conduct_ra auto-declare",{
+  expect_equal(conduct_ra(N=1, prob=1), 1)
+  expect_error(conduct_ra(sleep))
+  
+})
+
+
+test_that("obtain_condition_probabilities auto-declare",{
+  expect_equal(obtain_condition_probabilities(assignment = 1), .5)
+  expect_error(obtain_condition_probabilities(sleep))
+  
+})
+

@@ -137,7 +137,7 @@ declare_ra <- function(N = NULL,
   return_object <- list2env(all_args, parent = emptyenv())
 
   return_object$ra_function = function() {
-    .Deprecated(conduct_ra)
+    .Deprecated("conduct_ra")
     ra_function(return_object) #todo
   }
 
@@ -184,6 +184,8 @@ conduct_ra <- function(declaration = NULL) {
   if (is.null(declaration)) {
     all_args <- mget(names(formals(declare_ra)))
     declaration <- do.call(declare_ra, all_args) 
+  } else if (!inherits(declaration, "ra_declaration")) {
+    stop("You must provide a random assignment declaration created by declare_ra().")
   }
   ra_function(declaration)
 }
