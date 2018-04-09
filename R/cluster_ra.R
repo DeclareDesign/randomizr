@@ -153,15 +153,9 @@ cluster_ra_probabilities <-
     return(prob_mat)
   }
 
-
+# consolidated logic for simple vs complete, 
 cluster_ra_helper <- function(simple_delegate, complete_delegate, delegate_args, simple, m, m_each){
   if (simple) {
-    if (!is.null(m)) {
-      stop("Please do not specify m when simple = TRUE")
-    }
-    if (!is.null(m_each)) {
-      stop("Please do not specify m_each when simple = TRUE")
-    }
     delegate <- simple_delegate
   } else{
     delegate <- complete_delegate

@@ -178,3 +178,9 @@ test_that("N=1 handling",{
 test_that("N=2 roundup rule",{
   expect_equivalent( complete_ra_probabilities(N = 2, prob=.95), c(.5, .5, .5, .5))
 })
+
+
+test_that("multi-dim fixup",{
+  ra <- declare_ra(N=4, prob_each=c(1,1,1,2)/5)
+  expect_length( table(obtain_permutation_probabilities(ra)), 7)
+})

@@ -211,6 +211,9 @@ block_ra_probabilities <- function(blocks = NULL,
 }
 
 
+
+# consolidates the default argument fillin for block ra / block ra probs
+
 block_ra_helper <- function(blocks = NULL,
                      prob = NULL,
                      prob_each = NULL,

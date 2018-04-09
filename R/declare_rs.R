@@ -104,20 +104,16 @@ declare_rs <- function(N = NULL,
     rs_type <- "clustered"
   } else if (is_strata) {
     rs_type <- "stratified"
-    if(simple) stop("You can't specify 'simple' with strata.")
   } else if (simple == FALSE) {
     rs_type <- "complete"
   } else {
     rs_type <- "simple"
-    if (!is.null(n)) {
-      stop("You can't specify 'n' when using simple random sampling.")
-    }
   }
 
 
   return_object <- list2env(all_args, parent = emptyenv())
   return_object$rs_function <- function() {
-    .Deprecated(draw_rs) 
+    .Deprecated("draw_rs") 
     rs_function(return_object)
   }
   
@@ -199,15 +195,13 @@ formals(draw_rs) <- c(formals(draw_rs), formals(declare_rs))
 #' @export
 obtain_inclusion_probabilities <- function(declaration = NULL) {
   # checks
-  if (!is.null(declaration)) {
-    if (!inherits(declaration, "rs_declaration")) {
-      stop("You must provide a random sampling declaration created by declare_rs().")
-    }
-  } else {
+  if (is.null(declaration)) {
     all_args <- mget(names(formals(declare_rs)))
     declaration <- do.call(declare_rs, all_args) 
+  } else if (!inherits(declaration, "rs_declaration")) {
+    stop("You must provide a random sampling declaration created by declare_rs().")
   }
-  
+
   declaration$probabilities_vector
 }
 
@@ -217,9 +211,6 @@ formals(obtain_inclusion_probabilities) <- c(formals(obtain_inclusion_probabilit
 print.rs_declaration <- function(x, ...) {
   S <- draw_rs(x)
   n <- length(S)
-  
-  constant_probabilities <-
-    all(x$probabilities_vector[1] == x$probabilities_vector)
   
   cat(
     "Random sampling procedure:",
@@ -241,7 +232,7 @@ print.rs_declaration <- function(x, ...) {
     cat("Number of clusters:", length(unique(x$clusters)), "\n")
   }
   
-  if (constant_probabilities) {
+  if (is_constant(x$probabilities_vector)) {
     cat("The inclusion probabilities are constant across units.")
   } else{
     cat(

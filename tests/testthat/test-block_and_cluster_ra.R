@@ -26,6 +26,7 @@ test_that("defaults",{
   
 })
 
+
 test_that("num_arms = 3",{
   Z <- block_and_cluster_ra(clusters = clusters, blocks = blocks, num_arms = 3)
   expect_only_one_per_cluster(Z)

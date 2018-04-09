@@ -92,11 +92,6 @@ complete_ra <- function(N,
       
       # Special Case 2: N = 1; m is specified
       if (!is.null(m)) {
-        if (!m %in% c(0, 1)) {
-          stop(
-            "The number of units assigned to treatment (m) must be less than or equal to the total number of units (N)"
-          )
-        }
         if (m == 0) {
           assignment <- conditions[1]
           assignment <-
@@ -314,11 +309,6 @@ complete_ra_probabilities <- function(N,
         return(prob_mat)
       }
       if (!is.null(m)) {
-        if (!m %in% c(0, 1)) {
-          stop(
-            "The number of units assigned to treatment (m) must be less than or equal to the total number of units (N)"
-          )
-        }
         if (m == 0) {
           prob_mat <- matrix(
             rep(c(1, 0), N),
