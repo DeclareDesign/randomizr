@@ -33,6 +33,17 @@ test_that("N=101 prob=.34",{
   expect_true(all.equal(probs, rep(0.34, 101)))
 })
 
+test_that("N=101 prob=.34 fixup",{
+  skip()
+  S <- replicate(1e6, sum(complete_rs(N = 101, prob = .34)))
+  
+  expect_equal(sort(unique(S)), 34:35)
+  
+  expect_equal(round(mean(S)/101, 4), .34)
+  
+})
+
+
 test_that("N=1 handling",{
   expect_error(S <- complete_rs(N = 1, n=.5))
   S <- complete_rs(N=1, prob=.2)

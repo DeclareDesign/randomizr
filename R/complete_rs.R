@@ -52,15 +52,13 @@ complete_rs <- function(N,
       prob <- .5
     } 
     
-    n_floor <- floor(N * prob)
-    n_ceiling <- ceiling(N * prob)
+    Np <- N*prob
+    n_dn <- floor(Np)
+    n_up <- ceiling(Np)
     
-    if (n_ceiling %in% c(n_floor, N)) {
-      n <- n_floor
-    } else {
-      prob_fix_up <- ((N * prob) - n_floor) / (n_ceiling - n_floor)
-      n <- sample(c(n_floor, n_ceiling), 1, prob = c(1-prob_fix_up, prob_fix_up))
-    }
+    n <- if (n_up == n_dn || n_up == N) n_dn 
+         else n_dn + sample(0:1, 1, prob = abs(1:0 - (Np - n_dn)))
+         
   }
   
   assignment <- sample(rep(c(0, 1), c(N - n, n)))
