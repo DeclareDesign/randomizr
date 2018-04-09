@@ -34,7 +34,7 @@ test_that("N=101 prob=.34",{
 })
 
 test_that("N=101 prob=.34 fixup",{
-  skip()
+  skip(message = "too slow")
   S <- replicate(1e6, sum(complete_rs(N = 101, prob = .34)))
   
   expect_equal(sort(unique(S)), 34:35)
