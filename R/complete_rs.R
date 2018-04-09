@@ -45,57 +45,28 @@ complete_rs <- function(N,
     return( simple_rs(N, prob, FALSE) )
   }
   
-  if (N > 1) {
-    if (is.null(n) & is.null(prob)) {
-      n_floor <- floor(N / 2)
-      n_ceiling <- ceiling(N / 2)
-      
-      if (n_ceiling > n_floor) {
-        prob_fix_up <- ((N * .5) - n_floor) / (n_ceiling - n_floor)
-      } else{
-        prob_fix_up <- .5
-      }
-      
-      if (simple_rs(1, prob_fix_up, check_inputs = check_inputs) == 0) {
-        n <- n_floor
-      } else{
-        n <- n_ceiling
-      }
-      assignment <-  sample(rep(c(0, 1), c(N - n, n)))
-      return(assignment)
-    }
-    if (!is.null(n)) {
-      if (n == N) {
-        assignment <- rep(1, N)
-        return(assignment)
-      }
-      assignment <- sample(rep(c(0, 1), c(N - n, n)))
-      return(assignment)
-    }
-    if (!is.null(prob)) {
-      n_floor <- floor(N * prob)
-      n_ceiling <- ceiling(N * prob)
-      if (n_ceiling == N) {
-        n <- n_floor
-        assignment <- sample(rep(c(0, 1), c(N - n, n)))
-        return(assignment)
-      }
-      
-      if (n_ceiling > n_floor) {
-        prob_fix_up <- ((N * prob) - n_floor) / (n_ceiling - n_floor)
-      } else{
-        prob_fix_up <- .5
-      }
-      
-      if (simple_rs(1, prob_fix_up, check_inputs = check_inputs) == 0) {
-        n <- n_floor
-      } else{
-        n <- n_ceiling
-      }
-      assignment <- sample(rep(c(0, 1), c(N - n, n)))
-      return(assignment)
+
+  if (is.null(n)) {
+    
+    if(is.null(prob)) {
+      prob <- .5
+    } 
+    
+    n_floor <- floor(N * prob)
+    n_ceiling <- ceiling(N * prob)
+    
+    if (n_ceiling %in% c(n_floor, N)) {
+      n <- n_floor
+    } else {
+      prob_fix_up <- ((N * prob) - n_floor) / (n_ceiling - n_floor)
+      n <- sample(c(n_floor, n_ceiling), 1, prob = c(1-prob_fix_up, prob_fix_up))
     }
   }
+  
+  assignment <- sample(rep(c(0, 1), c(N - n, n)))
+  return(assignment)
+
+    
 }
 
 #' Inclusion Probabilities: Complete Random Sampling
@@ -120,18 +91,11 @@ complete_rs_probabilities <- function(N,
                                       check_inputs = TRUE) {
   if (check_inputs) .invoke_check(check_samplr_arguments_new)
   
-  if(is.null(n) && is.null(prob)) {
-    prob_vec <- .5
-  } else if (is.numeric(n)) {
-
-    # special case when n=1, N=1 => prob=.5
-    prob_vec <- n / max(N,2)
-    
-  } else if (is.numeric(prob)) {
-  
-    prob_vec <- if(N == 1) prob else ifelse(ceiling(N * prob) == N,  floor(N * prob) / N, prob)
-    
-  }
+  prob_vec <-  if (is.numeric(n))  
+                 n / max(N,2) # 0,1=> 0, 1,1 => 1/2
+               else if (is.numeric(prob)) 
+                 ifelse(N > 1 && ceiling(N * prob) == N,  floor(N * prob) / N, prob)
+               else .5
 
   rep_len(prob_vec, N)
 }
