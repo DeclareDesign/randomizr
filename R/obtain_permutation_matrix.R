@@ -340,27 +340,20 @@ permutations_m_each <- function(m_each, conditions) {
 }
 
 
-expand_matrix <-
-  function(mat_1, mat_2) {
-    mat_list <-
-      sapply(
-        1:ncol(mat_2),
-        FUN =
-          function(j) {
-            apply(
-              mat_1,
-              2,
-              FUN = function(i)
-                c(i, mat_2[, j])
-            )
-          },
-        simplify = FALSE
-      )
-    
-    return(do.call(cbind, mat_list))
-    
-  }
 
+expand_matrix <- function(mat_1, mat_2) {
+  # by column:
+  #  out = [  M1_1 M1_2 M1_3 ... M1_k M1_1 M1_2 M1_3 ... M1_k   
+  #           M2_1 M2_1 M2_1 ... M2_1 M2_2 M2_2 M2_2 ... M2_k ]
+  
+  
+  out <- matrix(0L, nrow(mat_1) + nrow(mat_2), ncol(mat_1) * ncol(mat_2))
+  
+  out[1:nrow(mat_1),] <- mat_1
+  out[nrow(mat_1) + 1:nrow(mat_2), ] <- mat_2[, rep(1:ncol(mat_2), each=ncol(mat_1))]
+  
+  out
+}
 
 #' @useDynLib randomizr
 restrictedparts <- function(n, m) .Call("randomizr_restrictedparts", as.integer(n), as.integer(m), PACKAGE="randomizr")
