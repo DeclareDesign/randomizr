@@ -26,7 +26,7 @@ obtain_inclusion_probabilities(declaration = NULL, N = NULL,
 
 \item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
 
-\item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.}
+\item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling is used. When \code{simple = TRUE}, please do not specify n or strata_n. When \code{simple = TRUE}, \code{prob} may vary by unit.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
 }
