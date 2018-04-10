@@ -6,19 +6,16 @@
 #' @param m Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. In a blocked design, exactly m units in each block will be treated. (optional)
 #' @param m_each Use for a multi-arm design in which the values of m_each determine the number of units (or clusters) assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many units (or clusters) should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)
 #' @param prob Use for a two-arm design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be assigned to treatment and with probability prob, ceiling(N*prob) units (or clusters) will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
-#' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
+#' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
 #' @param block_m Use for a two-arm design in which block_m describes the number of units to assign to treatment within each block. Note that in previous versions of randomizr, block_m behaved like block_m_each.
 #' @param block_m_each Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of conditions, if specified.
 #' @param block_prob Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Differs from prob in that the probability of assignment can vary across blocks.
-#' @param block_prob_each Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.
+#' @param block_prob_each Use for a multi-arm design in which the values of block_prob_each determine the probabilities of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilities of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
-#' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
+#' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.
 #' @param permutation_matrix for custom random assignment procedures.
 #' @param check_inputs logical. Defaults to TRUE.
-#' @param block_var deprecated
-#' @param clust_var deprecated
-#' @param condition_names deprecated
 #'
 #' @return A list of class "declaration".  The list has five entries:
 #'   $ra_function, a function that generates random assignments according to the declaration.
@@ -93,8 +90,8 @@
 #'
 #' @export
 declare_ra <- function(N = NULL,
-                       blocks = block_var,
-                       clusters = clust_var,
+                       blocks = NULL,
+                       clusters = NULL,
                        m = NULL,
                        m_each = NULL,
                        prob = NULL,
@@ -104,243 +101,67 @@ declare_ra <- function(N = NULL,
                        block_prob = NULL,
                        block_prob_each = NULL,
                        num_arms = NULL,
-                       conditions = condition_names,
+                       conditions = NULL,
                        simple = FALSE,
                        permutation_matrix = NULL,
-                       check_inputs = TRUE, 
-                       block_var = NULL, 
-                       clust_var = NULL,
-                       condition_names = NULL) {
+                       check_inputs = TRUE) {
   input_check <- NULL
+  all_args <-  mget(names(formals(sys.function())))
+
   
-  warn_deprecated_args(block_var, clust_var)
-    
-  if (check_inputs & is.null(permutation_matrix)) {
-    input_check <- check_randomizr_arguments(
-      N = N,
-      blocks = blocks,
-      clusters = clusters,
-      m = m,
-      m_each = m_each,
-      prob = prob,
-      prob_each = prob_each,
-      block_m = block_m,
-      block_m_each = block_m_each,
-      block_prob = block_prob,
-      block_prob_each = block_prob_each,
-      num_arms = num_arms,
-      conditions = conditions
-    )
+  if (check_inputs && is.null(permutation_matrix)) {
+    input_check <- check_randomizr_arguments_new(all_args)
+    for(i in names(input_check))
+      all_args[[i]] <- input_check[[i]]
+    all_args$check_inputs <- FALSE # don't need to recheck when using declaration
   }
+  
+  is_block <- is.vector(blocks) || is.factor(blocks)
+  is_clust <- is.vector(clusters) || is.factor(clusters)
+  
   # Determine ra_type
-  if (!is.null(permutation_matrix)){
+  if (is.matrix(permutation_matrix)){
     ra_type <- "custom"
-  } else  if (!is.null(blocks) && !is.null(clusters)) {
+  } else  if (is_block && is_clust) {
     ra_type <- "blocked_and_clustered"
-  } else  if (!is.null(clusters)) {
+  } else  if (is_clust) {
     ra_type <- "clustered"
-  } else  if (!is.null(blocks)) {
+  } else  if (is_block) {
     ra_type <- "blocked"
-    if (simple) stop("You can't specify 'simple' when using blocked assignment")
   } else  if (simple == FALSE) {
     ra_type <- "complete"
   } else {
     ra_type <- "simple"
-    
-    if (!is.null(m)) {
-      stop("You can't specify 'm' when using simple random assignment.")
-    }
-    if (!is.null(m_each)) {
-      stop("You can't specify 'm_each' when using simple random assignment.")
-    }
-    if (!is.null(block_m_each)) {
-      stop("You can't specify 'block_m_each' when using simple random assignment.")
-    }
-    
+  }
+  
+  return_object <- list2env(all_args, parent = emptyenv())
+
+  return_object$ra_function = function() {
+    .Deprecated("conduct_ra")
+    ra_function(return_object) #todo
   }
 
+  delayedAssign("ra_type", {
+    warning("ra_type is deprecated; check the object class instead.")     
+    ra_type 
+  }, assign.env = return_object)
   
-  if (ra_type == "simple") {
     
-    ra_function <- function() {
-      simple_ra(
-        N = N,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        check_inputs = check_inputs
-      )
-    }
-    probabilities_matrix <-
-      simple_ra_probabilities(
-        N = N,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        check_inputs = check_inputs
-      )
-  }
-  
-  if (ra_type == "complete") {
-    ra_function <- function() {
-      complete_ra(
-        N = N,
-        m = m,
-        m_each = m_each,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        check_inputs = check_inputs
-      )
-    }
-    
-    probabilities_matrix <-
-      complete_ra_probabilities(
-        N = N,
-        m = m,
-        m_each = m_each,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        check_inputs = check_inputs
-      )
-    
-  }
-  
-  if (ra_type == "blocked") {
-    ra_function <- function() {
-      block_ra(
-        blocks = blocks,
-        num_arms = num_arms,
-        m = m,
-        block_m = block_m,
-        block_m_each = block_m_each,
-        prob = prob,
-        prob_each = prob_each,
-        block_prob = block_prob,
-        block_prob_each = block_prob_each,
-        conditions = conditions,
-        check_inputs = check_inputs
-      )
-    }
-    
-    probabilities_matrix <-
-      block_ra_probabilities(
-        blocks = blocks,
-        num_arms = num_arms,
-        m = m,
-        block_m = block_m,
-        block_m_each = block_m_each,
-        prob = prob,
-        prob_each = prob_each,
-        block_prob = block_prob,
-        block_prob_each = block_prob_each,
-        conditions = conditions,
-        check_inputs = check_inputs
-      )
-  }
-  
-  
-  if (ra_type == "clustered") {
-    ra_function <- function() {
-      cluster_ra(
-        clusters = clusters,
-        m = m,
-        m_each = m_each,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        simple = simple,
-        check_inputs = check_inputs
-      )
-    }
-    
-    probabilities_matrix <-
-      cluster_ra_probabilities(
-        clusters = clusters,
-        m = m,
-        m_each = m_each,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        simple = simple,
-        check_inputs = check_inputs
-      )
-    
-  }
-  
-  if (ra_type == "blocked_and_clustered") {
-    ra_function <- function() {
-      block_and_cluster_ra(
-        clusters = clusters,
-        blocks = blocks,
-        num_arms = num_arms,
-        prob = prob,
-        prob_each = prob_each,
-        m = m,
-        block_m = block_m,
-        block_m_each = block_m_each,
-        block_prob = block_prob,
-        block_prob_each = block_prob_each,
-        conditions = conditions,
-        check_inputs = check_inputs
-      )
-    }
-    
-    probabilities_matrix <-
-      block_and_cluster_ra_probabilities(
-        clusters = clusters,
-        blocks = blocks,
-        prob = prob,
-        prob_each = prob_each,
-        block_prob = block_prob,
-        m = m,
-        block_m = block_m,
-        block_m_each = block_m_each,
-        block_prob_each = block_prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        check_inputs = check_inputs
-      )
-    
-  }
-  
-  if (ra_type == "custom"){
-    ra_function <- function(){
-      permutation_matrix[,sample(ncol(permutation_matrix), 1)]
-    }
-    conditions <- sort(unique(c(permutation_matrix)))
-    
-    probabilities_matrix <- 
-      sapply(conditions, 
-             FUN = function(x) apply(permutation_matrix, MARGIN = 1, FUN = function(y) mean(y == x)))
-    
-    colnames(probabilities_matrix) <- paste0("prob_", conditions)
-    
-  }
-  
-  
-  return_object <- list(
-    ra_function = ra_function,
-    ra_type = ra_type,
-    probabilities_matrix = probabilities_matrix,
-    permutation_matrix = permutation_matrix,
-    blocks = blocks,
-    clusters = clusters,
-    original_call = match.call(),
-    cleaned_arguments = input_check
-  )
-  
-  class(return_object) <- "ra_declaration"
+  delayedAssign("cleaned_arguments", {
+    warning("cleaned_arguments is deprecated")     
+    input_check 
+  }, assign.env = return_object)
+
+
+  delayedAssign("probabilities_matrix", ra_probabilities(return_object), assign.env = return_object)
+
+
+  class(return_object) <- c("ra_declaration", paste0("ra_", ra_type))
+  attr(return_object, "call") <- match.call() 
   return(return_object)
   
 }
+
 
 #' Conduct a random assignment
 #'
@@ -359,57 +180,22 @@ declare_ra <- function(N = NULL,
 #' table(Z)
 #'
 #' @export
-conduct_ra <- function(declaration = NULL,
-                       N = NULL,
-                       blocks = block_var,
-                       clusters = clust_var,
-                       m = NULL,
-                       m_each = NULL,
-                       prob = NULL,
-                       prob_each = NULL,
-                       block_m = NULL,
-                       block_m_each = NULL,
-                       block_prob = NULL,
-                       block_prob_each = NULL,
-                       num_arms = NULL,
-                       conditions = condition_names,
-                       simple = FALSE,
-                       check_inputs = TRUE, 
-                       block_var = NULL, 
-                       clust_var = NULL,
-                       condition_names = NULL) {
-  if (!is.null(declaration)) {
-    if (class(declaration) != "ra_declaration") {
-      stop("You must provide a random assignment declaration created by declare_ra().")
-    }
-  } else{
-    declaration <-
-      declare_ra(
-        N = N,
-        blocks = blocks,
-        clusters = clusters,
-        m = m,
-        m_each = m_each,
-        prob = prob,
-        prob_each = prob_each,
-        block_m = block_m,
-        block_m_each = block_m_each,
-        block_prob = block_prob,
-        block_prob_each = block_prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        simple = simple,
-        check_inputs = check_inputs
-      )
-    
+conduct_ra <- function(declaration = NULL) {
+  if (is.null(declaration)) {
+    all_args <- mget(names(formals(declare_ra)))
+    declaration <- do.call(declare_ra, all_args) 
+  } else if (!inherits(declaration, "ra_declaration")) {
+    stop("You must provide a random assignment declaration created by declare_ra().")
   }
-  return(declaration$ra_function())
+  ra_function(declaration)
 }
+
+formals(conduct_ra) <- c(formals(conduct_ra), formals(declare_ra))
 
 #' Obtain the probabilities of units being in the conditions that they are in.
 #'
 #' You can either give obtain_condition_probabilities() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.\cr \cr
-#' This function is especially useful when units have different probabilties of assignment and the analyst plans to use inverse-probability weights.
+#' This function is especially useful when units have different probabilities of assignment and the analyst plans to use inverse-probability weights.
 #'
 #'
 #' @param declaration A random assignment declaration, created by \code{\link{declare_ra}}.
@@ -450,116 +236,62 @@ conduct_ra <- function(declaration = NULL,
 #' @export
 obtain_condition_probabilities <-
   function(declaration = NULL,
-           assignment,
-           N = NULL,
-           blocks = block_var,
-           clusters = clust_var,
-           m = NULL,
-           m_each = NULL,
-           prob = NULL,
-           prob_each = NULL,
-           block_m = NULL,
-           block_m_each = NULL,
-           block_prob = NULL,
-           block_prob_each = NULL,
-           num_arms = NULL,
-           conditions = condition_names,
-           simple = FALSE, 
-           block_var = NULL, 
-           clust_var = NULL,
-           condition_names = NULL) {
+           assignment) {
     # checks
-    if (!is.null(declaration)) {
-      if (class(declaration) != "ra_declaration") {
-        stop("You must provide a random assignment declaration created by declare_ra().")
-      }
-    } else{
+    if (is.null(declaration)) {
       if (is.null(N)) {
         N <- length(assignment)
       }
-      declaration <-
-        declare_ra(
-          N = N,
-          blocks = blocks,
-          clusters = clusters,
-          m = m,
-          m_each = m_each,
-          prob = prob,
-          prob_each = prob_each,
-          block_m = block_m,
-          block_m_each = block_m_each,
-          block_prob = block_prob,
-          block_prob_each = block_prob_each,
-          num_arms = num_arms,
-          conditions = conditions,
-          simple = simple
-        )
+      all_args <- mget(names(formals(declare_ra)))
+      declaration <- do.call(declare_ra, all_args) 
+    } else if (!inherits(declaration, "ra_declaration")) {
+      stop("You must provide a random assignment declaration created by declare_ra().")
     }
     
-    probabilities_matrix <- declaration$probabilities_matrix
-    cond_Z <- paste0("prob_", assignment)
-    indicies <-
-      sapply(colnames(probabilities_matrix),
-             FUN = x <-
-               function(cond_name, cond_Z) {
-                 cond_Z == cond_name
-               },
-             cond_Z = cond_Z)
-    cond_probs <-
-      as.vector(t(probabilities_matrix))[as.vector(t(indicies))]
+    
+    pmat <- declaration$probabilities_matrix # this may have been delayAssigned
+    cond_probs <- pmat[cbind(
+      seq_len(nrow(pmat)), 
+      match(paste0("prob_", assignment), colnames(pmat))
+    )]
     return(cond_probs)
   }
 
+formals(obtain_condition_probabilities) <- c(formals(obtain_condition_probabilities), formals(declare_ra))
+
+
 #' @export
 print.ra_declaration <- function(x, ...) {
-  Z <- x$ra_function()
+  Z <- conduct_ra(x)
   n <- length(Z)
   
   conditions <- sort(unique(Z))
   num_arms <- length(conditions)
-  constant_probabilities <-
-    all(apply(
-      x$probabilities_matrix,
-      2,
-      FUN = function(x) {
-        all(x[1] == x)
-      }
-    ))
+
+  cat("Random assignment procedure:" ,
+      switch(class(x)[2], 
+             "ra_blocked"="Block",
+             "ra_clustered"="Cluster",
+             "ra_simple"="Simple",
+             "ra_blocked_and_clustered"="Blocked and clustered",
+             "ra_complete"="Complete"
+             ),
+      "random assignment", "\n",
   
-  if (x$ra_type == "blocked")
-    cat("Random assignment procedure: Block random assignment", "\n")
-  if (x$ra_type == "clustered")
-    cat("Random assignment procedure: Cluster random assignment", "\n")
-  if (x$ra_type == "simple")
-    cat("Random assignment procedure: Simple random assignment", "\n")
-  if (x$ra_type == "blocked_and_clustered")
-    cat("Random assignment procedure: Blocked and clustered random assignment",
-        "\n")
-  if (x$ra_type == "complete")
-    cat("Random assignment procedure: Complete random assignment",
-        "\n")
-  cat("Number of units:", n, "\n")
-  if (!is.null(x$blocks)) {
-    cat("Number of blocks:", length(unique(x$blocks)), "\n")
-  }
-  if (!is.null(x$clusters)) {
-    cat("Number of clusters:", length(unique(x$clusters)), "\n")
-  }
-  
-  cat("Number of treatment arms:", num_arms, "\n")
-  cat(
-    "The possible treatment categories are ",
-    paste(conditions, collapse = " and "),
-    ".",
-    "\n",
-    sep = ""
+      "Number of units:", n, "\n",
+      if (!is.null(x$blocks)) sprintf("Number of blocks: %d\n", length(unique(x$blocks))),
+      if (!is.null(x$clusters)) sprintf("Number of clusters: %d\n", length(unique(x$clusters))),
+      "Number of treatment arms:", num_arms, "\n",
+
+      sprintf("The possible treatment categories are %s.\n", paste(conditions, collapse = " and ") )
   )
-  
-  if (constant_probabilities) {
+  if (all(apply(x$probabilities_matrix, 2, is_constant))) {
     cat("The probabilities of assignment are constant across units.")
   } else{
     cat(
-      "The probabilities of assignment are NOT constant across units. Your analysis strategy must account for differential probabilities of assignment, typically by employing inverse probability weights."
+      "The probabilities of assignment are NOT constant across units.",
+      "Your analysis strategy must account for differential probabilities of assignment,",
+      "typically by employing inverse probability weights."
     )
   }
 }

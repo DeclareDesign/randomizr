@@ -109,7 +109,7 @@ If you specify num_arms without changing prob_each, `simple_ra` will assume equa
       ------------+-----------------------------------
             Total |        592      100.00</code></pre>
 
-You can also just specify the probabilites of your multiple arms. The probabilities must sum to 1.
+You can also just specify the probabilities of your multiple arms. The probabilities must sum to 1.
 
 <pre><code>      . simple_ra Z, replace prob_each(.2 .2 .6)
 

@@ -1,17 +1,17 @@
-## Update randomizr to version 0.6.0
-* large speedups via mapply (particularly for blocked designs)
-* removed experimental load balancing
-* harmonized output variable types
-* removed all calls to merge and table
-* removed all loops
+## Update randomizr to version 0.12.0
+* update condition_names to conditions
+* small bug fixes
+* addressed restrictedparts error
 
 ## Test environments
-* local OS X install, R version 3.4.0 (2017-04-21) -- You Stupid Darkness
+* local OS X install, R version 3.4.3 (Kite-Eating Tree)
 * R-devel with win-builder.r-project.org.
 
 ## R CMD check results
 There were no ERRORs, WARNINGs, or NOTEs.
 
 ## Downstream dependencies
-There are currently no downstream dependencies for this package.
+* estimatr
+* ri2
+Both of these packages are written by our team and are not broken by these changes
 

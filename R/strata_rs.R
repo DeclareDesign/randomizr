@@ -8,7 +8,6 @@
 #' @param strata_n Use for a design in which the numeric vector strata_n describes the number of units to sample within each stratum.
 #' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.
 #' @param check_inputs logical. Defaults to TRUE.
-#' @param strata_var deprecated
 #'
 #' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
 #' @export
@@ -32,24 +31,15 @@
 #' table(strata, Z)
 #'
 #'
-strata_rs <- function(strata = strata_var,
+strata_rs <- function(strata = NULL,
                       prob = NULL,
                       n = NULL,
                       strata_n = NULL,
                       strata_prob = NULL,
-                      check_inputs = TRUE,
-                      strata_var = NULL) {
-  warn_deprecated_args(strata_var=strata_var)
-  if (check_inputs) {
-    input_check <- check_samplr_arguments(
-      strata = strata,
-      prob = prob,
-      n = NULL,
-      strata_n = strata_n,
-      strata_prob = strata_prob
-    )
+                      check_inputs = TRUE) {
   
-    N_per_stratum <- input_check$N_per_stratum
+  if (check_inputs) {
+    .invoke_check(check_samplr_arguments_new)
   } else{
     N_per_stratum <- tapply(strata, strata, length)
     attributes(N_per_stratum) <- NULL
@@ -60,7 +50,7 @@ strata_rs <- function(strata = strata_var,
   
   # Setup: obtain number of arms and conditions
   
-  if (is.null(prob) & is.null(strata_n) & is.null(strata_prob) & is.null(n)) {
+  if (is.null(prob) && is.null(strata_n) && is.null(strata_prob) && is.null(n)) {
     prob <- 0.5
   }
   
@@ -113,4 +103,95 @@ strata_rs <- function(strata = strata_var,
     assignment <- unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
     return(assignment)
   }
+}
+
+#' Inclusion Probabilities: Stratified Random Sampling
+#'
+#' @inheritParams strata_rs
+#' @return A vector length N indicating the probability of being sampled.
+#'
+#' @examples
+#'
+#' strata <- rep(c("A", "B","C"), times = c(50, 100, 200))
+
+#' probs <- strata_rs_probabilities(strata = strata)
+#' table(strata, probs)
+#'
+#' probs <- strata_rs_probabilities(strata = strata, prob = .2)
+#' table(strata, probs)
+#'
+#' probs <- strata_rs_probabilities(strata = strata, strata_prob = c(.1, .2, .3))
+#' table(strata, probs)
+#'
+#' probs <- strata_rs_probabilities(strata = strata, strata_n = c(10, 40, 70))
+#' table(strata, probs)
+#'
+#' @export
+strata_rs_probabilities <- function(strata = NULL,
+                                    prob = NULL,
+                                    n = NULL,
+                                    strata_n = NULL,
+                                    strata_prob = NULL,
+                                    check_inputs = TRUE) {
+  if (check_inputs) {
+    .invoke_check(check_samplr_arguments_new)
+  } else{
+    N_per_stratum <- tapply(strata, strata, length)
+    attributes(N_per_stratum) <- NULL
+  }
+  
+  
+  strata_spots <-
+    unlist(split(1:length(strata), strata), FALSE, FALSE)
+  
+  if (is.null(prob) && is.null(strata_n) && is.null(strata_prob) && is.null(n)) {
+    prob <- 0.5
+  }
+  
+  # Case 1: prob is specified
+  if (is.numeric(prob)) {
+    prob_vec <- rep_len(prob, length(strata))
+    return(prob_vec)
+  }
+  
+
+  # Case 2: strata_n is specified, or n is
+  if(is.numeric(n) && !is.numeric(strata_n)){
+    strata_n <- rep_len(n, length(N_per_stratum))
+  }
+  
+  if (is.numeric(strata_n)) {
+    prob_vec_list <-
+      mapply(
+        FUN = complete_rs_probabilities,
+        N = N_per_stratum,
+        n = strata_n,
+        MoreArgs = list(prob = prob,
+                        check_inputs = FALSE),
+        SIMPLIFY = FALSE
+      )
+    
+    prob_vec <-
+      unlist(prob_vec_list, FALSE, FALSE)[order(strata_spots)]
+    return(prob_vec)
+  }
+  
+  # Case 3: strata_prob is specified
+  if (is.numeric(strata_prob)) {
+    prob_vec_list <-
+      mapply(
+        FUN = complete_rs_probabilities,
+        N = N_per_stratum,
+        prob = strata_prob,
+        MoreArgs = list(check_inputs = FALSE),
+        SIMPLIFY = FALSE
+      )
+    
+    prob_vec <-
+      unlist(prob_vec_list, FALSE, FALSE)[order(strata_spots)]
+    return(prob_vec)
+  }
+  
+  warning("Could not calculate sampling probabilities")
+  invisible(NULL)
 }

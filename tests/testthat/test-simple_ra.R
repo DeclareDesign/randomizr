@@ -1,43 +1,66 @@
 
 context("Simple Random Assignments")
 
-# Two Group Designs
-Z <- simple_ra(N=100)
-table(Z)
+expect_u <- function(Z, lvl){
+  expect_true(all(Z %in% lvl))
+}
 
-Z <- simple_ra(N=100, prob=0.5)
-table(Z)
+test_that("Two Group Designs", {
+  expect_u(
+    simple_ra(N=100),
+    0:1
+  )
 
-Z <- simple_ra(N=100, prob_each = c(0.3, 0.7), 
-               conditions = c("control", "treatment"))
-table(Z)
+  
+  expect_u(
+    simple_ra(N=100, prob=0.5),
+    0:1
+  )
+  expect_u(
+    simple_ra(N=100, prob_each = c(0.3, 0.7), 
+                 conditions = c("control", "treatment")),
+    c("control", "treatment")
+  )
 
-# Multi-arm Designs
-Z <- simple_ra(N=100, num_arms=3)
-table(Z)
+})
+test_that("Multi-arm Designs", {
+  expect_u(
+    simple_ra(N=100, num_arms=3),
+    c("T1", "T2", "T3")
+  )
+  
+  expect_u(
+    simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4)),
+    c("T1", "T2", "T3")
+  )
+  
+  expect_u(
+    simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4), 
+                 conditions=c("control", "placebo", "treatment")),
+    c("control", "placebo", "treatment")
+  )
+  
+  expect_u(
+    simple_ra(N=100, conditions=c("control", "placebo", "treatment")),
+    c("control", "placebo", "treatment")
+  )
+  
+  
+  
+})
 
-Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4))
-table(Z)
+test_that("Special Cases", {
 
-Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4), 
-               conditions=c("control", "placebo", "treatment"))
-table(Z)
+  expect_u(simple_ra(N=1, prob = 0), 0)
+  expect_u(simple_ra(N=1, prob = 1), 1)
+  
+  expect_u(simple_ra(N=3, prob = 0), 0)
+  expect_u(simple_ra(N=3, prob = 1), 1)
 
-Z <- simple_ra(N=100, conditions=c("control", "placebo", "treatment"))
-table(Z)
+  expect_u(simple_ra(N=1, prob_each = c(0, 1)), 1)
+  expect_u(simple_ra(N=1, prob_each = c(0, 0, 1)), "T3")
+  expect_u(simple_ra(N=3, prob_each = c(0, 1)), 1)
+  expect_u(simple_ra(N=4, prob_each = c(0, 0, 1)), "T3")
 
-
-# Special Cases
-
-replicate(100, simple_ra(N=1, prob = 0))
-replicate(100, simple_ra(N=1, prob = 1))
-replicate(100, simple_ra(N=3, prob = 0))
-replicate(100, simple_ra(N=3, prob = 1))
-
-replicate(100, simple_ra(N=1, prob_each = c(0, 1)))
-replicate(100, simple_ra(N=1, prob_each = c(0, 0, 1)))
-replicate(100, simple_ra(N=3, prob_each = c(0, 1)))
-replicate(100, simple_ra(N=4, prob_each = c(0, 0, 1)))
-
-
+})
 

@@ -5,9 +5,9 @@
 \title{Obtain inclusion probabilities}
 \usage{
 obtain_inclusion_probabilities(declaration = NULL, N = NULL,
-  strata = strata_var, clusters = clust_var, n = NULL, prob = NULL,
+  strata = NULL, clusters = NULL, n = NULL, prob = NULL,
   strata_n = NULL, strata_prob = NULL, simple = FALSE,
-  strata_var = NULL, clust_var = NULL)
+  check_inputs = TRUE)
 }
 \arguments{
 \item{declaration}{A random sampling declaration, created by \code{\link{declare_rs}}.}
@@ -28,13 +28,11 @@ obtain_inclusion_probabilities(declaration = NULL, N = NULL,
 
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.}
 
-\item{strata_var}{deprecated}
-
-\item{clust_var}{deprecated}
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \description{
 You can either give obtain_inclusion_probabilities() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.\cr \cr
-This function is especially useful when units have different inclusion probabilties and the analyst plans to use inverse-probability weights.
+This function is especially useful when units have different inclusion probabilities and the analyst plans to use inverse-probability weights.
 }
 \examples{
 

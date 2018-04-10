@@ -37,87 +37,63 @@ complete_rs <- function(N,
                         prob = NULL,
                         check_inputs = TRUE) {
   # Checks
-  if (check_inputs) {
-    input_check <-
-      check_samplr_arguments(N = N,
-                             n = n,
-                             prob = prob)
-  }
+  if (check_inputs) .invoke_check(check_samplr_arguments_new)
   
   if (N == 1) {
-    if (is.null(n) & is.null(prob)) {
-      assignment <- simple_rs(N, prob = 0.5)
-      return(assignment)
-    }
-    if (!is.null(n)) {
-      if (!n %in% c(0, 1)) {
-        stop(
-          "The number of units sampled (n) must be less than or equal to the total number of units (N)"
-        )
-      }
-      if (n == 0) {
-        assignment <- 0
-        return(assignment)
-      }
-      if (n == 1) {
-        assignment <- simple_rs(N, prob = 0.5, check_inputs = check_inputs)
-        return(assignment)
-      }
-    }
-    if (!is.null(prob)) {
-      assignment <- simple_rs(N, prob = prob, check_inputs = check_inputs)
-    }
+    # n/2 : 0=>0, 1 => 1/2
+    prob <- if(is.numeric(n)) n / 2 else if(is.numeric(prob)) prob else .5
+    return( simple_rs(N, prob, FALSE) )
   }
   
-  if (N > 1) {
-    if (is.null(n) & is.null(prob)) {
-      n_floor <- floor(N / 2)
-      n_ceiling <- ceiling(N / 2)
-      
-      if (n_ceiling > n_floor) {
-        prob_fix_up <- ((N * .5) - n_floor) / (n_ceiling - n_floor)
-      } else{
-        prob_fix_up <- .5
-      }
-      
-      if (simple_rs(1, prob_fix_up, check_inputs = check_inputs) == 0) {
-        n <- n_floor
-      } else{
-        n <- n_ceiling
-      }
-      assignment <-  sample(rep(c(0, 1), c(N - n, n)))
-      return(assignment)
-    }
-    if (!is.null(n)) {
-      if (n == N) {
-        assignment <- rep(1, N)
-        return(assignment)
-      }
-      assignment <- sample(rep(c(0, 1), c(N - n, n)))
-      return(assignment)
-    }
-    if (!is.null(prob)) {
-      n_floor <- floor(N * prob)
-      n_ceiling <- ceiling(N * prob)
-      if (n_ceiling == N) {
-        n <- n_floor
-        assignment <- sample(rep(c(0, 1), c(N - n, n)))
-        return(assignment)
-      }
-      
-      if (n_ceiling > n_floor) {
-        prob_fix_up <- ((N * prob) - n_floor) / (n_ceiling - n_floor)
-      } else{
-        prob_fix_up <- .5
-      }
-      
-      if (simple_rs(1, prob_fix_up, check_inputs = check_inputs) == 0) {
-        n <- n_floor
-      } else{
-        n <- n_ceiling
-      }
-      assignment <- sample(rep(c(0, 1), c(N - n, n)))
-      return(assignment)
-    }
+
+  if (is.null(n)) {
+    
+    if(is.null(prob)) {
+      prob <- .5
+    } 
+    
+    Np <- N*prob
+    n_dn <- floor(Np)
+    n_up <- ceiling(Np)
+    
+    n <- if (n_up == n_dn || n_up == N) n_dn 
+         else n_dn + sample(0:1, 1, prob = abs(1:0 - (Np - n_dn)))
+         
   }
+  
+  assignment <- sample(rep(c(0, 1), c(N - n, n)))
+  return(assignment)
+
+    
+}
+
+#' Inclusion Probabilities: Complete Random Sampling
+#'
+#' @inheritParams complete_rs
+#' @return A vector length N indicating the probability of being sampled.
+#'
+#' @examples
+#' probs <- complete_rs_probabilities(N = 100)
+#' table(probs)
+#'
+#' probs <- complete_rs_probabilities(N = 100, n = 50)
+#' table(probs)
+#'
+#' probs <- complete_rs_probabilities(N=100, prob = .3)
+#' table(probs)
+#'
+#' @export
+complete_rs_probabilities <- function(N,
+                                      n = NULL,
+                                      prob = NULL,
+                                      check_inputs = TRUE) {
+  if (check_inputs) .invoke_check(check_samplr_arguments_new)
+  
+  prob_vec <-  if (is.numeric(n))  
+                 n / max(N,2) # 0,1=> 0, 1,1 => 1/2
+               else if (is.numeric(prob)) 
+                 ifelse(N > 1 && ceiling(N * prob) == N,  floor(N * prob) / N, prob)
+               else .5
+
+  rep_len(prob_vec, N)
 }
