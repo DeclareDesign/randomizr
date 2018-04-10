@@ -103,14 +103,14 @@ check_randomizr_arguments <-
       if(arg_block && is.null(blocks)) stop("Specified `", arg, "` but blocks is NULL.")
 
       if(isTRUE(simple) && !grepl("prob", arg)) stop("You can't specify `", arg, "`` when simple = TRUE")
-
+      
+      # checking num_arms and conditions consistency
       .check_ra_arg_num_arms_conditions(arg, arg_block, arg_each, specified_args[[1]], num_arms, conditions)  
-
       .check_ra[[arg]](N, blocks, clusters, num_arms, conditions, specified_args[[1]])
+      
     }
-
-
     
+
     # learn about design
     
     # obtain num_arms
@@ -131,6 +131,7 @@ check_randomizr_arguments <-
     if (is.null(conditions)) {
         conditions <- paste0("T", 1:num_arms)
     }
+    
     
     ret <- list(
         num_arms = num_arms,
@@ -188,19 +189,26 @@ check_randomizr_arguments <-
       "The probabilties of assignment to any condition may not be greater than 1 or less than zero."
     )
   }
-  if (is.null(dim(prob_each)) && sum(prob_each) != 1){
-    stop(
-      "The sum of the probabilities of assignment to each condition (prob_each) must equal 1 for each obs."
-    )
+  if (is.vector(prob_each)) {
+    
+    if(sum(prob_each) != 1){
+      stop(
+        "The sum of the probabilities of assignment to each condition (prob_each) must equal 1 for each obs."
+      )
+    }
   }
-  if (is.numeric(dim(prob_each)) && any(rowSums(prob_each) != 1)) {
-    stop(
-      "The sum of the probabilities of assignment to each condition (prob_each) must equal 1 for each obs."
-    )
+  else if (is.matrix(prob_each)) {
+    if(any(rowSums(prob_each) != 1)) {
+      stop(
+        "The sum of the probabilities of assignment to each condition (prob_each) must equal 1 for each obs."
+      )
+    }
+    if(! nrow(prob_each) %in% c(1, N)) {
+      stop("`prob_each` must have either 1 or N rows.")
+    }
   }
-  if(! length(prob) %in% length(conditions)*c(1, N)) {
-    stop("`prob` must be either length 1 or length N")
-  }
+  else stop("`prob_each` must be a vector or matrix")
+  
   
 }
 

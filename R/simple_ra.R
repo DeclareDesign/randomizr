@@ -46,15 +46,15 @@ simple_ra <- function(N, prob = NULL, prob_each = NULL,
 ) {
   if (check_inputs) .invoke_check(check_randomizr_arguments_new)
   prob_mat <- simple_ra_probabilities(N, prob, prob_each, num_arms, conditions, FALSE)
-  assignment <- vsample(prob_mat, conditions)
+  assignment <- conditions[vsample(prob_mat)]
   assignment <- clean_condition_names(assignment, conditions)
   return(assignment)
 }
 
-vsample <- function(prob_mat, conditions){
-  i <- max.col(runif(nrow(prob_mat)) <=  t(apply(prob_mat, 1, cumsum)), "first")
-  conditions[i]
-}
+# vsample <- function(prob_mat, conditions){
+#   i <- max.col(runif(nrow(prob_mat)) <=  t(apply(prob_mat, 1, cumsum)), "first")
+#   conditions[i]
+# }
 
 
 #' probabilities of assignment: Simple Random Assignment
