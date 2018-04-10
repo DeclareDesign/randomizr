@@ -7,7 +7,7 @@
 #' @param prob Use for a design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be sampled and with probability prob, ceiling(N*prob) units (or clusters) will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
 #' @param strata_n Use for a design in which strata_n describes the number of units to sample within each stratum.
 #' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.
-#' @param simple logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.
+#' @param simple logical, defaults to FALSE. If TRUE, simple random sampling is used. When \code{simple = TRUE}, please do not specify n or strata_n. When \code{simple = TRUE}, \code{prob} may vary by unit.
 #' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A list of class "declaration".  The list has five entries:

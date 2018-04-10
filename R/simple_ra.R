@@ -6,8 +6,8 @@
 
 #'
 #' @param N The number of units. N must be a positive integer. (required)
-#' @param prob Use for a two-arm design. prob is the probability of assignment to treatment and must be a real number between 0 and 1 inclusive. (optional)
-#' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1.  (optional)
+#' @param prob Use for a two-arm design. prob is the probability of assignment to treatment and must be a real number between 0 and 1 inclusive and must be length 1 or N. (optional)
+#' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. It may be a conditions-length vector or a N-by-conditions matrix.  (optional)
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
 #' @param check_inputs logical. Defaults to TRUE.
@@ -41,26 +41,20 @@
 #'
 #' Z <- simple_ra(N=100, conditions=c("control", "placebo", "treatment"))
 #' table(Z)
-simple_ra <-
-  function(N,
-           prob = NULL,
-           prob_each = NULL,
-           num_arms = NULL,
-           conditions = NULL,
-           check_inputs = TRUE) {
-    if (check_inputs) .invoke_check(check_randomizr_arguments_new)
-    
-    if (is.null(prob_each)) {
-      prob_each <- if(is.numeric(prob)) c(1 - prob, prob) else 
-        rep(1 / num_arms, num_arms)
-    }
-    
+simple_ra <- function(N, prob = NULL, prob_each = NULL,
+                      num_arms = NULL, conditions = NULL, check_inputs = TRUE
+) {
+  if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+  prob_mat <- simple_ra_probabilities(N, prob, prob_each, num_arms, conditions, FALSE)
+  assignment <- conditions[vsample(prob_mat)]
+  assignment <- clean_condition_names(assignment, conditions)
+  return(assignment)
+}
 
-    assignment <- sample(conditions, N, replace = TRUE, prob_each)
-    assignment <- clean_condition_names(assignment, conditions)
-    return(assignment)
-  }
-
+# vsample <- function(prob_mat, conditions){
+#   i <- max.col(runif(nrow(prob_mat)) <=  t(apply(prob_mat, 1, cumsum)), "first")
+#   conditions[i]
+# }
 
 
 #' probabilities of assignment: Simple Random Assignment
@@ -106,22 +100,18 @@ simple_ra_probabilities <-
     
     
     # Three easy cases
-    
-    if (is.null(prob) & is.null(prob_each)) {
-      condition_probabilities <- rep(1 / num_arms, num_arms)
-    }
-    if (!is.null(prob)) {
-      condition_probabilities <- c(1 - prob, prob)
-    }
-    if (!is.null(prob_each)) {
-      condition_probabilities <- prob_each
-    }
-    
+    condition_probabilities <- if(is.matrix(prob_each))        t(prob_each) 
+                               else if(is.numeric(prob_each))  prob_each
+                               else if(length(prob) > 1)       rbind(1 - prob, prob)
+                               else if(is.numeric(prob))       c(1- prob, prob)
+                               else                            1 / num_arms
+
     # Build prob_mat
     prob_mat <- matrix(
-      rep(condition_probabilities, N),
+      condition_probabilities,
       byrow = TRUE,
-      ncol = length(condition_probabilities),
+      nrow = N,
+      ncol = length(conditions),
       dimnames = list(NULL,  paste0("prob_", conditions))
     )
     return(prob_mat)

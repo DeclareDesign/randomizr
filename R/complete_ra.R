@@ -182,7 +182,7 @@ complete_ra <- function(N,
           prob_fix_up <- .5
         }
         
-        if (simple_ra(1, prob_fix_up) == 0) {
+        if (simple_ra(1, prob_fix_up, conditions = 0:1) == 0) {
           m <- m_floor
         } else{
           m <- m_ceiling

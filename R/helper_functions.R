@@ -103,24 +103,24 @@ check_randomizr_arguments <-
       if(arg_block && is.null(blocks)) stop("Specified `", arg, "` but blocks is NULL.")
 
       if(isTRUE(simple) && !grepl("prob", arg)) stop("You can't specify `", arg, "`` when simple = TRUE")
-
+      
+      # checking num_arms and conditions consistency
       .check_ra_arg_num_arms_conditions(arg, arg_block, arg_each, specified_args[[1]], num_arms, conditions)  
-
       .check_ra[[arg]](N, blocks, clusters, num_arms, conditions, specified_args[[1]])
+      
     }
-
-
     
+
     # learn about design
     
     # obtain num_arms
     
     if (is.null(num_arms)) {
       
-      num_arms <- if(!is.null(conditions)) length(conditions) 
+      num_arms <- if(!is.null(conditions)) length(conditions)
         else if (length(specified_args) == 0) 2
         else if (!arg_each) 2
-        else if (!arg_block) length(specified_args[[1]]) 
+        else if (!arg_block && !is.matrix(specified_args[[1]])) length(specified_args[[1]]) 
         else ncol(specified_args[[1]]) 
 
       if(num_arms == 2 && is.null(conditions))
@@ -132,15 +132,15 @@ check_randomizr_arguments <-
         conditions <- paste0("T", 1:num_arms)
     }
     
-    return(
-      list(
+    
+    ret <- list(
         num_arms = num_arms,
         conditions = conditions,
         condition_names = conditions,
         N_per_block = get0("N_per_block")
       )
-    )
     
+    ret
   }
 
 # Arg-specific checks
@@ -174,8 +174,11 @@ check_randomizr_arguments <-
 }
 
 .check_ra$prob <- function(N, blocks, clusters, num_arms, conditions, prob) {
-  if (prob > 1 | prob < 0) {
+  if (any(prob > 1 | prob < 0)) {
     stop("The probability of assignment to treatment must be between 0 and 1.")
+  }
+  if(! length(prob) %in% c(1, N)) {
+    stop("`prob` must be either length 1 or length N")
   }
 }
 
@@ -186,11 +189,27 @@ check_randomizr_arguments <-
       "The probabilties of assignment to any condition may not be greater than 1 or less than zero."
     )
   }
-  if (sum(prob_each) != 1) {
-    stop(
-      "The sum of the probabilities of assignment to each condition (prob_each) must equal 1."
-    )
+  if (is.vector(prob_each)) {
+    
+    if(sum(prob_each) != 1){
+      stop(
+        "The sum of the probabilities of assignment to each condition (prob_each) must equal 1 for each obs."
+      )
+    }
   }
+  else if (is.matrix(prob_each)) {
+    if(any(rowSums(prob_each) != 1)) {
+      stop(
+        "The sum of the probabilities of assignment to each condition (prob_each) must equal 1 for each obs."
+      )
+    }
+    if(! nrow(prob_each) %in% c(1, N)) {
+      stop("`prob_each` must have either 1 or N rows.")
+    }
+  }
+  else stop("`prob_each` must be a vector or matrix")
+  
+  
 }
 
 .check_ra$m <- function(N, blocks, clusters, num_arms, conditions, m) {
@@ -368,8 +387,11 @@ check_samplr_arguments <- function(N = NULL,
 
 
 .check_rs$prob <- function(N, strata, clusters, prob) {
-  if (prob > 1 | prob < 0) {
+  if (any(prob > 1 | prob < 0)) {
     stop("The probability of assignment to treatment must be between 0 and 1.")
+  }
+  if(! length(prob) %in% c(1, N)) {
+    stop("`prob` must be either length 1 or length N")
   }
 }
 

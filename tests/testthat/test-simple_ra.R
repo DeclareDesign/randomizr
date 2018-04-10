@@ -64,3 +64,30 @@ test_that("Special Cases", {
 
 })
 
+
+test_that("Weighted", {
+  
+  p1 <- simple_ra_probabilities(N=4, prob_each=c(.1, .9))
+  p2 <- simple_ra_probabilities(N=4, prob=c(.9))
+  
+  expect_equal(p1, p2)
+  
+  p3 <- simple_ra_probabilities(N=4, prob_each=cbind(.1, .1, .8))
+  p4 <- simple_ra_probabilities(N=4, prob_each=c(.1, .1, .8))
+  
+  expect_equal(p3, p4)
+
+  p5 <- simple_ra_probabilities(N=10, prob=1:10/10)
+  p6 <- simple_ra_probabilities(N=10, prob_each=cbind(9:0/10, 1:10/10))
+  
+  
+  expect_equal(p5, p6)
+  
+
+  expect_true(all(replicate(100, simple_ra(N=10, prob=1:10/10)[10] == 1)))
+  
+  
+})
+
+
+

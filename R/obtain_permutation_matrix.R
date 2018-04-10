@@ -358,3 +358,6 @@ expand_matrix <- function(mat_1, mat_2) {
 #' @useDynLib randomizr
 restrictedparts <- function(n, m) .Call("randomizr_restrictedparts", as.integer(n), as.integer(m), PACKAGE="randomizr")
 
+
+vsample <- function(pmat) .Call("randomizr_vsample", pmat, PACKAGE="randomizr")
+

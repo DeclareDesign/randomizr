@@ -6,9 +6,13 @@
 
 /* .Call calls */
 extern SEXP randomizr_restrictedparts(SEXP, SEXP);
+extern SEXP randomizr_vsample(SEXP, SEXP);
+
+
 
 static const R_CallMethodDef CallEntries[] = {
   {"randomizr_restrictedparts", (DL_FUNC) &randomizr_restrictedparts, 2},
+  {"randomizr_vsample", (DL_FUNC) &randomizr_vsample, 1},
   {NULL, NULL, 0}
 };
 

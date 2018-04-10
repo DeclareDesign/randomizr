@@ -26,3 +26,19 @@ test_that("SRS probs .1", {
   probs <- simple_rs_probabilities(N = 100, prob = 0.1)
   expect_true(all(probs == .1))
 })
+
+test_that("Weighted rs", {
+  
+  p1 <- simple_rs_probabilities(N=4, prob=1:4/4)
+
+  expect_equal(p1, 1:4/4)
+  
+  draws <- replicate(100, simple_rs(N=5, prob=0:4/4))
+  expect_true(all(draws[1,] == 0))
+  expect_true(all(draws[5,] == 1))
+  
+  
+})
+
+
+

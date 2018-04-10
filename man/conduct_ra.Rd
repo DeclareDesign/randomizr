@@ -39,7 +39,7 @@ conduct_ra(declaration = NULL, N = NULL, blocks = NULL, clusters = NULL,
 
 \item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
 
-\item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.}
+\item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When \code{simple = TRUE}, please do not specify m, m_each, block_m, or block_m_each. If \code{simple = TRUE}, \code{prob} and \code{prob_each} may vary by unit.}
 
 \item{permutation_matrix}{for custom random assignment procedures.}
 
