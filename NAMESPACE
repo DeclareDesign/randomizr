@@ -2,8 +2,8 @@
 
 S3method("$<-",ra_declaration)
 S3method("$<-",rs_declaration)
-S3method("[<-",ra_declaration)
-S3method("[<-",rs_declaration)
+S3method("[[<-",ra_declaration)
+S3method("[[<-",rs_declaration)
 S3method(print,ra_declaration)
 S3method(print,rs_declaration)
 export(block_and_cluster_ra)

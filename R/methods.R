@@ -2,7 +2,7 @@
 ### RS declaration generics
 
 #' @export
-`[<-.ra_declaration` <- function(x, i, j, value ) {
+`[[<-.ra_declaration` <- function(x, i, j, value ) {
   warning("Cannot assign into ra_declaration")
   NextMethod()
 }
@@ -27,7 +27,7 @@ ra_function.default <- function(this){
 
 
 #' @export
-`[<-.rs_declaration` <- function(x, i, j, value ) {
+`[[<-.rs_declaration` <- function(x, i, j, value ) {
   warning("Cannot assign into rs_declaration")
   NextMethod()
 }

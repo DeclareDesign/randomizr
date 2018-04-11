@@ -45,10 +45,11 @@
 simple_ra <- function(N, prob = NULL, prob_each = NULL,
                       num_arms = NULL, conditions = condition_names, check_inputs = TRUE, condition_names=NULL
 ) {
-  if (check_inputs) .invoke_check(check_randomizr_arguments_new)
   if(!is.null(condition_names)) warning("condition_names is deprecated, use conditions instead.")
+  if (check_inputs) .invoke_check(check_randomizr_arguments_new)
   prob_mat <- simple_ra_probabilities(N, prob, prob_each, num_arms, conditions, FALSE)
   assignment <- conditions[vsample(prob_mat)]
+  # assignment <- sample(conditions, N, replace = TRUE, prob=prob_mat[1,])
   assignment <- clean_condition_names(assignment, conditions)
   return(assignment)
 }
