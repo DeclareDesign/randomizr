@@ -2,10 +2,16 @@
 ### RS declaration generics
 
 #' @export
-`[<-.ra_declaration` <- function(x, i, j, value ) stop("Cannot assign into ra_declaration")
+`[<-.ra_declaration` <- function(x, i, j, value ) {
+  warning("Cannot assign into ra_declaration")
+  NextMethod()
+}
 
 #' @export
-`$<-.ra_declaration` <- function(x, name, value ) stop("Cannot assign into ra_declaration")
+`$<-.ra_declaration` <- function(x, name, value ) {
+  warning("Cannot assign into ra_declaration")
+  NextMethod()
+}
 
 ra_function <- function(this) UseMethod("ra_function", this)
 
@@ -21,10 +27,15 @@ ra_function.default <- function(this){
 
 
 #' @export
-`[<-.rs_declaration` <- function(x, i, j, value ) stop("Cannot assign into rs_declaration")
-
+`[<-.rs_declaration` <- function(x, i, j, value ) {
+  warning("Cannot assign into rs_declaration")
+  NextMethod()
+}
 #' @export
-`$<-.rs_declaration` <- function(x, name, value ) stop("Cannot assign into rs_declaration")
+`$<-.rs_declaration` <- function(x, name, value ) {
+  warning("Cannot assign into rs_declaration")
+  NextMethod()
+}
 
 rs_function <- function(this) UseMethod("rs_function", this)
 
