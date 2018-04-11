@@ -144,6 +144,7 @@ complete_ra <- function(N,
         } else{
           m <- m_ceiling
         }
+        
         assignment <-  sample(rep(conditions, c(N - m, m)))
         assignment <-
           clean_condition_names(assignment, conditions)
@@ -182,11 +183,8 @@ complete_ra <- function(N,
           prob_fix_up <- .5
         }
         
-        if (simple_ra(1, prob_fix_up, conditions = 0:1) == 0) {
-          m <- m_floor
-        } else{
-          m <- m_ceiling
-        }
+        m <- sample(c(m_ceiling, m_floor), 1, prob=c(prob_fix_up, 1-prob_fix_up))
+
         assignment <- sample(rep(conditions, c(N - m, m)))
         assignment <-
           clean_condition_names(assignment, conditions)
