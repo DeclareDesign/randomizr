@@ -306,7 +306,7 @@ permutations_m_each <- function(m_each, conditions) {
       available <- which(is.na(out[,j]))
       which_row <- available[ local_positions[[j]] ]
       out[which_row, j] <- conditions[x]
->>>>>>> origin/master
+
     }
     
   }
