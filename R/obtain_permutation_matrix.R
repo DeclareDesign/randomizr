@@ -304,18 +304,19 @@ permutations_m_each <- function(m_each, conditions) {
       ra_list <- unlist(ra_list, recursive = FALSE)
       
       new_pos <-
-        sapply(1:length(local_positions),
+        sapply(1:length(old_pos),
                function(i) {
                  lapply(
-                   X = old_pos,
+                   X = local_positions,
                    FUN = function(x, y, N) {
                      (1:N)[-x][y]
                    },
-                   y = local_positions[[i]],
+                   x = old_pos[[i]],
                    N = N
                  )
                },
                simplify = FALSE)
+      
       
       new_pos <- unlist(new_pos, recursive = FALSE)
       
@@ -325,7 +326,7 @@ permutations_m_each <- function(m_each, conditions) {
                         cond = conditions[j],
                         SIMPLIFY = FALSE)
       
-      old_pos <- new_pos
+      old_pos <- lapply(ra_list, function(x) which(!is.na(x)))
       
     }
   }

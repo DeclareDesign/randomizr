@@ -67,6 +67,9 @@ test_that("testing internal methods N=6 prob_each=.5 condtions=0:1",{
     sum(perm_probs)
   )
   
+  expect_equal(
+    3,
+    unique(colSums(perms)))
 })
 
 
@@ -95,6 +98,10 @@ test_that("testing internal methods N=10",{
     1,
     sum(perm_probs)
   )
+  
+  expect_equal(
+    5,
+    unique(colSums(perms)))
   
 })
 
@@ -300,3 +307,13 @@ test_that("multinomial coefficient helper",{
   
   expect_error(multinomial_coefficient(200, 3:100))
 })
+
+
+test_that("kyle's declation",{
+  
+  declaration <- declare_ra(N = 8, m_each = c(2, 2, 2, 2))
+  perms <- obtain_permutation_matrix(declaration)
+  expect_equal(2, unique(apply(perms, 2, FUN = function(x) sum(x == "T1"))))
+    
+  })
+

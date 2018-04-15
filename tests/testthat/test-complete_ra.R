@@ -164,9 +164,9 @@ test_that("zeros in m_each", {
 
 test_that("N=1 handling",{
   expect_error(S <- complete_ra(N = 1, m=.5))
-  S <- complete_ra(N=1, prob=.2)
+  S <- complete_ra(N = 1, prob = .2)
   
-  expect_equivalent( complete_ra_probabilities(N = 1, m=1), c(.5, .5))
+  expect_equivalent(complete_ra_probabilities(N = 1, m = 1), c(.5, .5))
   expect_equivalent( complete_ra_probabilities(N = 1, m=0), c(1, 0))
   
   expect_equivalent( complete_ra_probabilities(N = 1), c(.5, .5))
