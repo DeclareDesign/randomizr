@@ -26,10 +26,11 @@
 #' table(S)
 #'
 #' # If N = n, sample with 100% probability...
-#' complete_ra(N=2, n=2)
+#' complete_rs(N=2, n=2)
 #'
-#' # except if N = n = 1, in which case sample with 50% probability
-#' complete_ra(N=1, n=1)
+#' # Up through randomizr 0.12.0, 
+#' # This behavior has been deprecated
+#' complete_rs(N=1, n=1) # sampled with 50% probability
 #'
 #'
 complete_rs <- function(N,
@@ -41,14 +42,27 @@ complete_rs <- function(N,
   
   if (N == 1) {
     # n/2 : 0=>0, 1 => 1/2
-    prob <- if(is.numeric(n)) n / 2 else if(is.numeric(prob)) prob else .5
-    return( simple_rs(N, prob, FALSE) )
+    # prob <- if (is.numeric(n)) {
+    #   n / 2
+    # } else if (is.numeric(prob)) {
+    #   prob
+    # } else {
+    #   .5
+    # }
+    prob <- if (is.numeric(n)) {
+      n / N
+    } else if (is.numeric(prob)) {
+      prob
+    } else {
+      .5
+    }
+    return(simple_rs(N, prob, FALSE))
   }
   
 
   if (is.null(n)) {
     
-    if(is.null(prob)) {
+    if (is.null(prob)) {
       prob <- .5
     } 
     
@@ -90,7 +104,8 @@ complete_rs_probabilities <- function(N,
   if (check_inputs) .invoke_check(check_samplr_arguments_new)
   
   prob_vec <-  if (is.numeric(n))  
-                 n / max(N,2) # 0,1=> 0, 1,1 => 1/2
+                 #n / max(N,2) # 0,1=> 0, 1,1 => 1/2
+                  n / N
                else if (is.numeric(prob)) 
                  ifelse(N > 1 && ceiling(N * prob) == N,  floor(N * prob) / N, prob)
                else .5
