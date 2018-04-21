@@ -72,128 +72,73 @@ complete_ra <- function(N,
   
   
   # Simple 2 group design, returns zeros and ones
-  if (is.null(m_each) &
-      is.null(prob_each) & length(conditions) == 2) {
-    # Special Cases: N = 1
-    if (N == 1) {
-      # Special Case 1: N = 1; Neither m nor prob is specified
-      if (is.null(m) & is.null(prob)) {
-        assignment <-
-          simple_ra(
-            N,
-            prob = 0.5,
-            conditions = conditions,
-            check_inputs = check_inputs
-          )
-        assignment <-
-          clean_condition_names(assignment, conditions)
-        return(assignment)
+  if (is.null(m_each) &&
+      is.null(prob_each) && length(conditions) == 2) {
+
+    # Two-arm Design Case 1: Neither m nor prob is specified
+    if (is.null(m) & is.null(prob)) {
+      m_floor <- floor(N / 2)
+      m_ceiling <- ceiling(N / 2)
+      
+      if (m_ceiling > m_floor) {
+        prob_fix_up <- ((N * .5) - m_floor) / (m_ceiling - m_floor)
+      } else{
+        prob_fix_up <- .5
       }
       
-      # Special Case 2: N = 1; m is specified
-      if (!is.null(m)) {
-        if (m == 0) {
-          assignment <- conditions[1]
-          assignment <-
-            clean_condition_names(assignment, conditions)
-          return(assignment)
-        }
-        if (m == 1) {
-          # assignment <-
-          #   simple_ra(
-          #     N,
-          #     prob = 0.5,
-          #     conditions = conditions,
-          #     check_inputs = check_inputs
-          #   )
-          assignment <- conditions[2]
-          assignment <-
-            clean_condition_names(assignment, conditions)
-          return(assignment)
-        }
+      if (simple_ra(1, prob_fix_up) == 0) {
+        m <- m_floor
+      } else{
+        m <- m_ceiling
       }
       
-      # Special Case 3: N = 1; prob is specified
-      if (!is.null(prob)) {
-        assignment <-
-          simple_ra(
-            N,
-            prob = prob,
-            conditions = conditions,
-            check_inputs = check_inputs
-          )
-        assignment <-
-          clean_condition_names(assignment, conditions)
-        return(assignment)
-      }
+      assignment <-  sample(rep(conditions, c(N - m, m)))
+      assignment <-
+        clean_condition_names(assignment, conditions)
+      return(assignment)
     }
     
-    if (N > 1) {
-      # Two-arm Design Case 1: Neither m nor prob is specified
-      if (is.null(m) & is.null(prob)) {
-        m_floor <- floor(N / 2)
-        m_ceiling <- ceiling(N / 2)
-        
-        if (m_ceiling > m_floor) {
-          prob_fix_up <- ((N * .5) - m_floor) / (m_ceiling - m_floor)
-        } else{
-          prob_fix_up <- .5
-        }
-        
-        if (simple_ra(1, prob_fix_up) == 0) {
-          m <- m_floor
-        } else{
-          m <- m_ceiling
-        }
-        
-        assignment <-  sample(rep(conditions, c(N - m, m)))
+    # Two-arm Design Case 2: m is specified
+    if (!is.null(m)) {
+      if (m == N) {
+        assignment <- rep(1, N)
         assignment <-
           clean_condition_names(assignment, conditions)
         return(assignment)
       }
-      
-      # Two-arm Design Case 2: m is specified
-      if (!is.null(m)) {
-        if (m == N) {
-          assignment <- rep(1, N)
-          assignment <-
-            clean_condition_names(assignment, conditions)
-          return(assignment)
-        }
+      assignment <- sample(rep(conditions, c(N - m, m)))
+      assignment <-
+        clean_condition_names(assignment, conditions)
+      return(assignment)
+    }
+    
+    # Two-arm Design Case 3: prob is specified
+    if (!is.null(prob)) {
+      m_floor <- floor(N * prob)
+      m_ceiling <- ceiling(N * prob)
+      if (m_ceiling == N) {
+        m <- m_floor
         assignment <- sample(rep(conditions, c(N - m, m)))
         assignment <-
           clean_condition_names(assignment, conditions)
         return(assignment)
       }
       
-      # Two-arm Design Case 3: prob is specified
-      if (!is.null(prob)) {
-        m_floor <- floor(N * prob)
-        m_ceiling <- ceiling(N * prob)
-        if (m_ceiling == N) {
-          m <- m_floor
-          assignment <- sample(rep(conditions, c(N - m, m)))
-          assignment <-
-            clean_condition_names(assignment, conditions)
-          return(assignment)
-        }
-        
-        if (m_ceiling > m_floor) {
-          prob_fix_up <- ((N * prob) - m_floor) / (m_ceiling - m_floor)
-        } else{
-          prob_fix_up <- .5
-        }
-        
-        m <- sample(c(m_ceiling, m_floor), 1, prob = c(prob_fix_up, 1 - prob_fix_up))
+      if (m_ceiling > m_floor) {
+        prob_fix_up <- ((N * prob) - m_floor) / (m_ceiling - m_floor)
+      } else{
+        prob_fix_up <- .5
+      }
+      
+      m <- sample(c(m_ceiling, m_floor), 1, prob = c(prob_fix_up, 1 - prob_fix_up))
 
-        assignment <- sample(rep(conditions, c(N - m, m)))
-        assignment <-
-          clean_condition_names(assignment, conditions)
-        return(assignment)
-      }
+      assignment <- sample(rep(conditions, c(N - m, m)))
+      assignment <-
+        clean_condition_names(assignment, conditions)
+      return(assignment)
     }
   }
-  
+
   # Multi-arm Designs
   
   # Multi-arm Design Case 1: neither prob_each nor m_each specified
