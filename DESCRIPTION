@@ -9,7 +9,7 @@ Description: Generates random assignments for common experimental designs and
 URL: http://randomizr.declaredesign.org, https://github.com/DeclareDesign/randomizr
 BugReports: https://github.com/DeclareDesign/randomizr/issues
 Depends:
-    R (>= 3.3.0)
+    R (>= 3.4.0)
 License: MIT + file LICENSE
 LazyData: true
 Suggests:
