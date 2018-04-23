@@ -48,7 +48,9 @@ test_that("N=1 handling",{
   expect_error(S <- complete_rs(N = 1, n=.5))
   S <- complete_rs(N=1, prob=.2)
   
-  expect_equal( complete_rs_probabilities(N = 1, n=1), .5)
+  #expect_equal( complete_rs_probabilities(N = 1, n=1), .5)
+  expect_equal(complete_rs_probabilities(N = 1, n = 1), 1)
+  expect_equal(complete_rs_probabilities(N = 1, n = 0), 0)
 })
 
 

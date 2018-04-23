@@ -166,21 +166,27 @@ test_that("N=1 handling",{
   expect_error(S <- complete_ra(N = 1, m=.5))
   S <- complete_ra(N = 1, prob = .2)
   
-  expect_equivalent(complete_ra_probabilities(N = 1, m = 1), c(.5, .5))
-  expect_equivalent( complete_ra_probabilities(N = 1, m=0), c(1, 0))
+  #expect_equivalent(complete_ra_probabilities(N = 1, m = 1), c(.5, .5))
+  expect_equivalent(complete_ra_probabilities(N = 1, m = 1), c(0, 1))
+  expect_equivalent(complete_ra_probabilities(N = 1, m = 0), c(1, 0))
   
-  expect_equivalent( complete_ra_probabilities(N = 1), c(.5, .5))
-  expect_equivalent( complete_ra_probabilities(N = 1, prob=.2), c(.8, .2))
+  expect_equivalent(complete_ra_probabilities(N = 1), c(.5, .5))
+  expect_equivalent(complete_ra_probabilities(N = 1, prob = .2), c(.8, .2))
   
-  expect_error(complete_ra_probabilities(N = 1, m=.5))  
+  expect_error(complete_ra_probabilities(N = 1, m = .5))  
+  
+  expect_true(all(c(0, 1) %in% replicate(100, complete_ra(N = 1))))
+  expect_true(all(replicate(100, complete_ra(N = 1, m = 1)) == 1))
+  expect_true(all(replicate(100, complete_ra(N = 1, m = 0)) == 0))
+  
 })
 
 test_that("N=2 roundup rule",{
-  expect_equivalent( complete_ra_probabilities(N = 2, prob=.95), c(.5, .5, .5, .5))
+  expect_equivalent(complete_ra_probabilities(N = 2, prob = .95), c(.5, .5, .5, .5))
 })
 
 
 test_that("multi-dim fixup",{
-  ra <- declare_ra(N=4, prob_each=c(1,1,1,2)/5)
-  expect_length( table(obtain_permutation_probabilities(ra)), 7)
+  ra <- declare_ra(N = 4, prob_each = c(1, 1, 1, 2) / 5)
+  expect_length(table(obtain_permutation_probabilities(ra)), 7)
 })
