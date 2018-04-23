@@ -40,26 +40,6 @@ complete_rs <- function(N,
   # Checks
   if (check_inputs) .invoke_check(check_samplr_arguments_new)
   
-  if (N == 1) {
-    # n/2 : 0=>0, 1 => 1/2
-    # prob <- if (is.numeric(n)) {
-    #   n / 2
-    # } else if (is.numeric(prob)) {
-    #   prob
-    # } else {
-    #   .5
-    # }
-    prob <- if (is.numeric(n)) {
-      n / N
-    } else if (is.numeric(prob)) {
-      prob
-    } else {
-      .5
-    }
-    return(simple_rs(N, prob, FALSE))
-  }
-  
-
   if (is.null(n)) {
     
     if (is.null(prob)) {
@@ -70,7 +50,8 @@ complete_rs <- function(N,
     n_dn <- floor(Np)
     n_up <- ceiling(Np)
     
-    n <- if (n_up == n_dn || n_up == N) n_dn 
+    # If rounding doesn't matter or rounds up to 100% use n_dn, (except when N=1)
+    n <- if (n_up == n_dn || (N > 1 && n_up == N)) n_dn 
          else n_dn + sample(0:1, 1, prob = abs(1:0 - (Np - n_dn)))
          
   }
