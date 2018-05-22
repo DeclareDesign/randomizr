@@ -1,5 +1,6 @@
 ---
 output: github_document
+title: "randomizr: Easy to use tools for common forms of random assignment and sampling"
 ---
 
 ```{r, echo = FALSE}
@@ -12,8 +13,6 @@ knitr::opts_chunk$set(
 )
 options(digits = 2)
 ```
-
-# randomizr: Easy to use tools for common forms of random assignment and sampling
 
 [![CRAN Status](http://www.r-pkg.org/badges/version/randomizr)](https://cran.r-project.org/package=randomizr)
 [![Travis-CI Build Status](https://travis-ci.org/DeclareDesign/randomizr.svg?branch=master)](https://travis-ci.org/DeclareDesign/randomizr)
