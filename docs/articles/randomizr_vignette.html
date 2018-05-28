@@ -15,7 +15,7 @@
 <![endif]-->
 </head>
 <body>
-    <div class="container template-vignette">
+    <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -24,7 +24,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../">randomizr</a>
+      <a class="navbar-brand" href="../"></a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -51,13 +51,13 @@
       <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
-      <a href="http://randomizr.declaredesign.org">randomizr</a>
+      <a href="https://declaredesign.org/r/randomizr/">randomizr</a>
     </li>
     <li>
-      <a href="http://fabricatr.declaredesign.org">fabricatr</a>
+      <a href="https://declaredesign.org/r/fabricatr/">fabricatr</a>
     </li>
     <li>
-      <a href="http://estimatr.declaredesign.org">estimatr</a>
+      <a href="https://declaredesign.org/r/estimatr/">estimatr</a>
     </li>
   </ul>
 </li>
@@ -79,16 +79,19 @@
 
       
       </header><div class="row">
-  <div class="col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>Design and analysis of experiments with randomizr</h1>
                         <h4 class="author">Alexander Coppock</h4>
             
-          </div>
+      
+      <small class="dont-index">Source: <a href="https://github.com/DeclareDesign/randomizr/blob/master/vignettes/randomizr_vignette.Rmd"><code>vignettes/randomizr_vignette.Rmd</code></a></small>
+      <div class="hidden name"><code>randomizr_vignette.Rmd</code></div>
+
+    </div>
 
     
     
-<div class="contents">
 <p><strong>randomizr</strong> is a small package for r that simplifies the design and analysis of randomized experiments. In particular, it makes the random assignment <strong>procedure</strong> transparent, flexible, and most importantly reproduceable. By the time that many experiments are written up and made public, the process by which some units recieved treatments is lost or imprecisely described. The <strong>randomizr</strong> package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.</p>
 <p>A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage. First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a <strong>cluster</strong>. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of average causal effects and the uncertainty attending to them may be incorrect.</p>
 <div id="a-hypothetical-experiment" class="section level1">
@@ -140,8 +143,8 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra
 <th align="right">1</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td align="right">291</td>
 <td align="right">301</td>
+<td align="right">291</td>
 </tr></tbody>
 </table>
 <p>To change the probability of assignment, specify the <code>prob</code> argument:</p>
@@ -167,9 +170,9 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra
 <th align="right">T3</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td align="right">186</td>
 <td align="right">191</td>
 <td align="right">215</td>
+<td align="right">186</td>
 </tr></tbody>
 </table>
 <p>You can also just specify the probabilities of your multiple arms. The probabilities must sum to 1.</p>
@@ -182,9 +185,9 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra
 <th align="right">T3</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td align="right">125</td>
-<td align="right">111</td>
-<td align="right">356</td>
+<td align="right">118</td>
+<td align="right">119</td>
+<td align="right">355</td>
 </tr></tbody>
 </table>
 <p>You can also name your treatment arms.</p>
@@ -198,9 +201,9 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simple_ra
 <th align="right">treatment</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td align="right">103</td>
-<td align="right">127</td>
-<td align="right">362</td>
+<td align="right">132</td>
+<td align="right">108</td>
+<td align="right">352</td>
 </tr></tbody>
 </table>
 </div>
@@ -317,10 +320,10 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 }</code></pre></div>
 <p>The standard error of an estimate is defined as the standard deviation of the sampling distribution of the estimator. When standard errors are estimated (i.e., by using the <code>summary()</code> command on a model fit), they are estimated using some approximation. This simulation allows us to measure the standard error directly, since the vectors <code>simple_ests</code> and <code>complete_ests</code> describe the sampling distribution of each design.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sd</span>(simple_ests)</code></pre></div>
-<p>0.6</p>
+<p>0.63</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sd</span>(complete_ests)</code></pre></div>
-<p>0.59</p>
-<p>In this simulation complete random assignment led to a 2% decrease in sampling variability. This decrease was obtained with a small design tweak that costs the researcher essentially nothing.</p>
+<p>0.61</p>
+<p>In this simulation complete random assignment led to a 4.64% decrease in sampling variability. This decrease was obtained with a small design tweak that costs the researcher essentially nothing.</p>
 </div>
 <div id="block-random-assignment" class="section level2">
 <h2 class="hasAnchor">
@@ -372,7 +375,7 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 <td>T1</td>
 <td align="right">36</td>
 <td align="right">95</td>
-<td align="right">25</td>
+<td align="right">24</td>
 <td align="right">42</td>
 </tr>
 <tr class="even">
@@ -386,7 +389,7 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 <td>T3</td>
 <td align="right">36</td>
 <td align="right">95</td>
-<td align="right">23</td>
+<td align="right">24</td>
 <td align="right">42</td>
 </tr>
 </tbody>
@@ -406,14 +409,14 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 <td>Control</td>
 <td align="right">36</td>
 <td align="right">96</td>
-<td align="right">23</td>
-<td align="right">42</td>
+<td align="right">24</td>
+<td align="right">43</td>
 </tr>
 <tr class="even">
 <td>Placebo</td>
 <td align="right">36</td>
 <td align="right">95</td>
-<td align="right">24</td>
+<td align="right">23</td>
 <td align="right">42</td>
 </tr>
 <tr class="odd">
@@ -421,7 +424,7 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 <td align="right">36</td>
 <td align="right">95</td>
 <td align="right">24</td>
-<td align="right">43</td>
+<td align="right">42</td>
 </tr>
 </tbody>
 </table>
@@ -439,17 +442,17 @@ complete_ests &lt;-<span class="st"> </span><span class="kw">rep</span>(<span cl
 <tbody>
 <tr class="odd">
 <td>0</td>
-<td align="right">32</td>
+<td align="right">33</td>
 <td align="right">86</td>
 <td align="right">21</td>
-<td align="right">39</td>
+<td align="right">38</td>
 </tr>
 <tr class="even">
 <td>1</td>
-<td align="right">76</td>
+<td align="right">75</td>
 <td align="right">200</td>
 <td align="right">50</td>
-<td align="right">88</td>
+<td align="right">89</td>
 </tr>
 </tbody>
 </table>
@@ -591,38 +594,38 @@ fit_IPW &lt;-<span class="st"> </span><span class="kw">lm</span>(Y_blocked <span
 <tbody>
 <tr class="odd">
 <td>(Intercept)</td>
-<td align="right">-16.0</td>
-<td align="right">0.70</td>
-<td align="right">-22.9</td>
-<td align="right">0</td>
+<td align="right">-15.8</td>
+<td align="right">0.72</td>
+<td align="right">-22.0</td>
+<td align="right">0.00</td>
 </tr>
 <tr class="even">
 <td>Z_blocked</td>
-<td align="right">25.1</td>
-<td align="right">0.62</td>
-<td align="right">40.3</td>
-<td align="right">0</td>
+<td align="right">24.9</td>
+<td align="right">0.64</td>
+<td align="right">38.8</td>
+<td align="right">0.00</td>
 </tr>
 <tr class="odd">
 <td>HairBrown</td>
-<td align="right">2.3</td>
-<td align="right">0.80</td>
-<td align="right">2.9</td>
-<td align="right">0</td>
+<td align="right">2.0</td>
+<td align="right">0.82</td>
+<td align="right">2.4</td>
+<td align="right">0.02</td>
 </tr>
 <tr class="even">
 <td>HairRed</td>
-<td align="right">5.1</td>
-<td align="right">1.08</td>
-<td align="right">4.8</td>
-<td align="right">0</td>
+<td align="right">4.9</td>
+<td align="right">1.11</td>
+<td align="right">4.5</td>
+<td align="right">0.00</td>
 </tr>
 <tr class="odd">
 <td>HairBlond</td>
 <td align="right">8.9</td>
-<td align="right">0.92</td>
-<td align="right">9.7</td>
-<td align="right">0</td>
+<td align="right">0.95</td>
+<td align="right">9.4</td>
+<td align="right">0.00</td>
 </tr>
 </tbody>
 </table>
@@ -639,15 +642,15 @@ fit_IPW &lt;-<span class="st"> </span><span class="kw">lm</span>(Y_blocked <span
 <tr class="odd">
 <td>(Intercept)</td>
 <td align="right">-12</td>
-<td align="right">0.47</td>
-<td align="right">-26</td>
+<td align="right">0.49</td>
+<td align="right">-25</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>Z_blocked</td>
 <td align="right">25</td>
-<td align="right">0.67</td>
-<td align="right">37</td>
+<td align="right">0.69</td>
+<td align="right">36</td>
 <td align="right">0</td>
 </tr>
 </tbody>
@@ -670,8 +673,8 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_ra.
 </tr>
 <tr class="even">
 <td>Black_Blue_Male</td>
-<td align="right">5</td>
 <td align="right">6</td>
+<td align="right">5</td>
 </tr>
 <tr class="odd">
 <td>Black_Brown_Female</td>
@@ -781,8 +784,8 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 <tbody>
 <tr class="odd">
 <td>Black_Blue_Female</td>
-<td align="right">0</td>
 <td align="right">9</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td>Black_Blue_Male</td>
@@ -806,8 +809,8 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 </tr>
 <tr class="even">
 <td>Black_Green_Male</td>
-<td align="right">0</td>
 <td align="right">3</td>
+<td align="right">0</td>
 </tr>
 </tbody>
 </table>
@@ -825,39 +828,39 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 <tbody>
 <tr class="odd">
 <td>Black_Blue_Female</td>
+<td align="right">0</td>
+<td align="right">0</td>
 <td align="right">9</td>
-<td align="right">0</td>
-<td align="right">0</td>
 </tr>
 <tr class="even">
 <td>Black_Blue_Male</td>
-<td align="right">0</td>
 <td align="right">11</td>
+<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>Black_Brown_Female</td>
-<td align="right">36</td>
 <td align="right">0</td>
+<td align="right">36</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>Black_Brown_Male</td>
-<td align="right">0</td>
 <td align="right">32</td>
+<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>Black_Green_Female</td>
 <td align="right">0</td>
-<td align="right">0</td>
 <td align="right">2</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td>Black_Green_Male</td>
 <td align="right">0</td>
-<td align="right">0</td>
 <td align="right">3</td>
+<td align="right">0</td>
 </tr>
 </tbody>
 </table>
@@ -876,32 +879,32 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 <tr class="odd">
 <td>Black_Blue_Female</td>
 <td align="right">0</td>
-<td align="right">0</td>
 <td align="right">9</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td>Black_Blue_Male</td>
 <td align="right">0</td>
-<td align="right">0</td>
 <td align="right">11</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>Black_Brown_Female</td>
-<td align="right">0</td>
-<td align="right">0</td>
 <td align="right">36</td>
+<td align="right">0</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td>Black_Brown_Male</td>
 <td align="right">0</td>
-<td align="right">0</td>
 <td align="right">32</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>Black_Green_Female</td>
 <td align="right">0</td>
-<td align="right">0</td>
 <td align="right">2</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td>Black_Green_Male</td>
@@ -925,14 +928,14 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 <tr class="odd">
 <td>Black_Blue_Female</td>
 <td align="right">0</td>
-<td align="right">0</td>
 <td align="right">9</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td>Black_Blue_Male</td>
 <td align="right">0</td>
-<td align="right">11</td>
 <td align="right">0</td>
+<td align="right">11</td>
 </tr>
 <tr class="odd">
 <td>Black_Brown_Female</td>
@@ -942,15 +945,15 @@ Z_clust &lt;-<span class="st"> </span><span class="kw"><a href="../reference/clu
 </tr>
 <tr class="even">
 <td>Black_Brown_Male</td>
+<td align="right">0</td>
+<td align="right">0</td>
 <td align="right">32</td>
-<td align="right">0</td>
-<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>Black_Green_Female</td>
 <td align="right">0</td>
-<td align="right">0</td>
 <td align="right">2</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td>Black_Green_Male</td>
@@ -995,14 +998,14 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_and
 <tr class="odd">
 <td>Black_Blue_Female</td>
 <td align="right">0</td>
-<td align="right">0</td>
 <td align="right">9</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td>Black_Blue_Male</td>
 <td align="right">0</td>
-<td align="right">11</td>
 <td align="right">0</td>
+<td align="right">11</td>
 </tr>
 <tr class="odd">
 <td>Black_Brown_Female</td>
@@ -1012,15 +1015,15 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_and
 </tr>
 <tr class="even">
 <td>Black_Brown_Male</td>
+<td align="right">0</td>
+<td align="right">0</td>
 <td align="right">32</td>
-<td align="right">0</td>
-<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>Black_Green_Female</td>
 <td align="right">0</td>
-<td align="right">0</td>
 <td align="right">2</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td>Black_Green_Male</td>
@@ -1041,8 +1044,8 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_and
 <tr class="odd">
 <td>block_01</td>
 <td align="right">0</td>
-<td align="right">3</td>
-<td align="right">2</td>
+<td align="right">5</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td>block_02</td>
@@ -1053,14 +1056,14 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="../reference/block_and
 <tr class="odd">
 <td>block_03</td>
 <td align="right">0</td>
-<td align="right">10</td>
-<td align="right">0</td>
+<td align="right">5</td>
+<td align="right">5</td>
 </tr>
 <tr class="even">
 <td>block_04</td>
+<td align="right">7</td>
+<td align="right">5</td>
 <td align="right">0</td>
-<td align="right">0</td>
-<td align="right">12</td>
 </tr>
 <tr class="odd">
 <td>block_05</td>
@@ -1270,7 +1273,7 @@ Z &lt;-<span class="st"> </span><span class="kw">school_ra</span>(<span class="d
 </ol>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Z_matrix &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">1000</span>, <span class="kw">school_ra</span>(<span class="dv">200</span>))
 <span class="kw">plot</span>(<span class="kw">rowMeans</span>(Z_matrix))</code></pre></div>
-<p><img src="randomizr_vignette_files/figure-html/unnamed-chunk-67-1.png" width="672"></p>
+<p><img src="randomizr_vignette_files/figure-html/unnamed-chunk-67-1.png" width="700"></p>
 <p>This plot shows that the students who have a sibling in the lottery have a higher probability of assignment. The more simulations, the more precise the estimate of the probability of assignment.</p>
 </div>
 <div id="save-your-random-assignment" class="section level2">
@@ -1283,7 +1286,6 @@ Z &lt;-<span class="st"> </span><span class="kw">school_ra</span>(<span class="d
   id_var &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(hec)
 })
 <span class="kw">write.csv</span>(hec[,<span class="kw">c</span>(<span class="st">"id_var"</span>, <span class="st">"Z_blocked"</span>)], <span class="dt">file =</span> <span class="st">"MyRandomAssignment.csv"</span>)</code></pre></div>
-</div>
 </div>
 </div>
   </div>
@@ -1319,7 +1321,7 @@ Z &lt;-<span class="st"> </span><span class="kw">school_ra</span>(<span class="d
 
 
       <footer><div class="copyright" style="flex:2;">
-  <p>Developed by Alexander Coppock, Jasper Cooper, Neal Fultz.</p>
+  <p>Developed by Alexander Coppock.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 

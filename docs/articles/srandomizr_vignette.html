@@ -15,7 +15,7 @@
 <![endif]-->
 </head>
 <body>
-    <div class="container template-vignette">
+    <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -24,7 +24,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../">randomizr</a>
+      <a class="navbar-brand" href="../"></a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -51,13 +51,13 @@
       <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
-      <a href="http://randomizr.declaredesign.org">randomizr</a>
+      <a href="https://declaredesign.org/r/randomizr/">randomizr</a>
     </li>
     <li>
-      <a href="http://fabricatr.declaredesign.org">fabricatr</a>
+      <a href="https://declaredesign.org/r/fabricatr/">fabricatr</a>
     </li>
     <li>
-      <a href="http://estimatr.declaredesign.org">estimatr</a>
+      <a href="https://declaredesign.org/r/estimatr/">estimatr</a>
     </li>
   </ul>
 </li>
@@ -79,16 +79,19 @@
 
       
       </header><div class="row">
-  <div class="col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>Design and analysis of experiments with randomizr (Stata)</h1>
                         <h4 class="author">Alexander Coppock</h4>
             
-          </div>
+      
+      <small class="dont-index">Source: <a href="https://github.com/DeclareDesign/randomizr/blob/master/vignettes/srandomizr_vignette.Rmd"><code>vignettes/srandomizr_vignette.Rmd</code></a></small>
+      <div class="hidden name"><code>srandomizr_vignette.Rmd</code></div>
+
+    </div>
 
     
     
-<div class="contents">
 <p><strong>randomizr</strong> is a small pacakge for Stata that simplifies the design and analysis of randomized experiments. In particular, it makes the random assignment procedure transparent, flexible, and most importantly reproduceable. By the time that many experiments are written up and made public, the process by which some units recieved treatments is lost or imprecisely described. The randomizr package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.</p>
 <p>A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage. First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a cluster. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of average causal effects and the uncertainty attending to them may be incorrect.</p>
 <div id="a-hypothetical-experiment" class="section level1">
@@ -724,7 +727,6 @@
       -----------+----------------------+----------
            Total |       225        367 |       592 </code></pre>
 </div>
-</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -747,7 +749,7 @@
 
 
       <footer><div class="copyright" style="flex:2;">
-  <p>Developed by Alexander Coppock, Jasper Cooper, Neal Fultz.</p>
+  <p>Developed by Alexander Coppock.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 

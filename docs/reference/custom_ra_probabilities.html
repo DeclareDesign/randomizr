@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Complete Random Sampling — complete_rs • randomizr</title>
+<title>probabilities of assignment: Custom Random Assignment — custom_ra_probabilities • randomizr</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -45,7 +45,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../">Complete Random Sampling</a>
+      <a class="navbar-brand" href="../">probabilities of assignment: Custom Random Assignment</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -102,64 +102,31 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Complete Random Sampling</h1>
+    <h1>probabilities of assignment: Custom Random Assignment</h1>
     </div>
 
     
-    <p>complete_rs implements a random sampling procedure in which fixed numbers of units are sampled. The canonical example of complete random sampling is a procedure in which exactly n of N units are sampled.<br /> <br />
-Users can set the exact number of units to sample with n. Alternatively, users can specify the probability of being sampled with prob and complete_rs will infer the correct number of units to sample.
-complete_rs will either sample floor(N*prob) or ceiling(N*prob) units, choosing between these two values to ensure that the overall probability of being sampled is exactly prob.
-Users should specify N and not more than one of n or prob. <br /> <br />
-If only N is specified, N/2 units will be sampled. If N is odd, either floor(N/2) units or ceiling(N/2) units will be sampled.</p>
+    <p>probabilities of assignment: Custom Random Assignment</p>
     
 
-    <pre class="usage"><span class='fu'>complete_rs</span>(<span class='no'>N</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>custom_ra_probabilities</span>(<span class='no'>permutation_matrix</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>N</th>
-      <td><p>The number of units. N must be a positive integer. (required)</p></td>
-    </tr>
-    <tr>
-      <th>n</th>
-      <td><p>Use for a design in which exactly n units are sampled. (optional)</p></td>
-    </tr>
-    <tr>
-      <th>prob</th>
-      <td><p>Use for a design in which either floor(N*prob) or ceiling(N*prob) units are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units will be sampled and with probability prob, ceiling(N*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)</p></td>
-    </tr>
-    <tr>
-      <th>check_inputs</th>
-      <td><p>logical. Defaults to TRUE.</p></td>
+      <th>permutation_matrix</th>
+      <td><p>A permutation matrix</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A numeric vector of length N that indicates if a unit is sampled (1) or not (0).</p>
+    <p>A matrix of probabilities of assignment</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>S</span> <span class='kw'>&lt;-</span> <span class='fu'>complete_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>)
-<span class='fu'>table</span>(<span class='no'>S</span>)</div><div class='output co'>#&gt; S
-#&gt;  0  1 
-#&gt; 50 50 </div><div class='input'>
-<span class='no'>S</span> <span class='kw'>&lt;-</span> <span class='fu'>complete_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>50</span>)
-<span class='fu'>table</span>(<span class='no'>S</span>)</div><div class='output co'>#&gt; S
-#&gt;  0  1 
-#&gt; 50 50 </div><div class='input'>
-<span class='no'>S</span> <span class='kw'>&lt;-</span> <span class='fu'>complete_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.111</span>)
-<span class='fu'>table</span>(<span class='no'>S</span>)</div><div class='output co'>#&gt; S
-#&gt;  0  1 
-#&gt; 89 11 </div><div class='input'>
-<span class='co'># If N = n, sample with 100% probability...</span>
-<span class='fu'>complete_rs</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>2</span>, <span class='kw'>n</span><span class='kw'>=</span><span class='fl'>2</span>)</div><div class='output co'>#&gt; [1] 1 1</div><div class='input'>
-<span class='co'># Up through randomizr 0.12.0, </span>
-<span class='co'># This behavior has been deprecated</span>
-<span class='fu'>complete_rs</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>1</span>, <span class='kw'>n</span><span class='kw'>=</span><span class='fl'>1</span>) <span class='co'># sampled with 50% probability</span></div><div class='output co'>#&gt; [1] 1</div><div class='input'>
-
+    <pre class="examples"><div class='input'># TODO
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

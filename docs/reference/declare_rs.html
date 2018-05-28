@@ -23,8 +23,6 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,7 +45,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../">randomizr</a>
+      <a class="navbar-brand" href="../">Declare a random sampling procedure.</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -74,13 +72,13 @@
       <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
-      <a href="http://randomizr.declaredesign.org">randomizr</a>
+      <a href="https://declaredesign.org/r/randomizr/">randomizr</a>
     </li>
     <li>
-      <a href="http://fabricatr.declaredesign.org">fabricatr</a>
+      <a href="https://declaredesign.org/r/fabricatr/">fabricatr</a>
     </li>
     <li>
-      <a href="http://estimatr.declaredesign.org">estimatr</a>
+      <a href="https://declaredesign.org/r/estimatr/">estimatr</a>
     </li>
   </ul>
 </li>
@@ -111,10 +109,9 @@
     <p>Declare a random sampling procedure.</p>
     
 
-    <pre class="usage"><span class='fu'>declare_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata_var</span>, <span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clust_var</span>,
-  <span class='kw'>n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>strata_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>declare_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>clusters</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>strata_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -149,19 +146,11 @@
     </tr>
     <tr>
       <th>simple</th>
-      <td><p>logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.</p></td>
+      <td><p>logical, defaults to FALSE. If TRUE, simple random sampling is used. When <code>simple = TRUE</code>, please do not specify n or strata_n. When <code>simple = TRUE</code>, <code>prob</code> may vary by unit.</p></td>
     </tr>
     <tr>
       <th>check_inputs</th>
       <td><p>logical. Defaults to TRUE.</p></td>
-    </tr>
-    <tr>
-      <th>strata_var</th>
-      <td><p>deprecated</p></td>
-    </tr>
-    <tr>
-      <th>clust_var</th>
-      <td><p>deprecated</p></td>
     </tr>
     </table>
     
@@ -180,8 +169,8 @@
 
 <span class='co'># 1. To obtain some basic facts about a sampling procedure:</span>
 <span class='no'>declaration</span> <span class='kw'>&lt;-</span> <span class='fu'>declare_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>30</span>)
-<span class='no'>declaration</span></div><div class='output co'>#&gt; Random sampling procedure: Complete random sampling 
-#&gt; Number of units: 100 
+<span class='no'>declaration</span></div><div class='output co'>#&gt; Random sampling procedure: Complete random sampling
+#&gt;  Number of units: 100 
 #&gt; The inclusion probabilities are constant across units.</div><div class='input'>
 <span class='co'># 2. To draw a random sample:</span>
 
@@ -197,37 +186,37 @@
 #&gt;   0.3 70 30</div><div class='input'>
 <span class='co'># Simple Random Sampling Declarations</span>
 
-<span class='fu'>declare_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; Random sampling procedure: Simple random sampling 
-#&gt; Number of units: 100 
-#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.4</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; Random sampling procedure: Simple random sampling 
-#&gt; Number of units: 100 
+<span class='fu'>declare_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; Random sampling procedure: Simple random sampling
+#&gt;  Number of units: 100 
+#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.4</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; Random sampling procedure: Simple random sampling
+#&gt;  Number of units: 100 
 #&gt; The inclusion probabilities are constant across units.</div><div class='input'>
 <span class='co'># Complete Random Sampling Declarations</span>
 
-<span class='fu'>declare_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>)</div><div class='output co'>#&gt; Random sampling procedure: Complete random sampling 
-#&gt; Number of units: 100 
-#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>30</span>)</div><div class='output co'>#&gt; Random sampling procedure: Complete random sampling 
-#&gt; Number of units: 100 
+<span class='fu'>declare_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>)</div><div class='output co'>#&gt; Random sampling procedure: Complete random sampling
+#&gt;  Number of units: 100 
+#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>30</span>)</div><div class='output co'>#&gt; Random sampling procedure: Complete random sampling
+#&gt;  Number of units: 100 
 #&gt; The inclusion probabilities are constant across units.</div><div class='input'>
 <span class='co'># Stratified Random Sampling Declarations</span>
 
 <span class='no'>strata</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='fu'>c</span>(<span class='st'>"A"</span>, <span class='st'>"B"</span>,<span class='st'>"C"</span>), <span class='kw'>times</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>50</span>, <span class='fl'>100</span>, <span class='fl'>200</span>))
-<span class='fu'>declare_rs</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified random sampling 
-#&gt; Number of units: 350 
+<span class='fu'>declare_rs</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified random sampling
+#&gt;  Number of units: 350 
 #&gt; Number of strata: 3 
-#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.5</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified random sampling 
-#&gt; Number of units: 350 
+#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.5</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified random sampling
+#&gt;  Number of units: 350 
 #&gt; Number of strata: 3 
 #&gt; The inclusion probabilities are constant across units.</div><div class='input'>
 
 <span class='co'># Cluster Random Sampling Declarations</span>
 
 <span class='no'>clusters</span> <span class='kw'>&lt;-</span> <span class='fu'>rep</span>(<span class='no'>letters</span>, <span class='kw'>times</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>26</span>)
-<span class='fu'>declare_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>)</div><div class='output co'>#&gt; Random sampling procedure: Cluster random sampling 
-#&gt; Number of units: 351 
+<span class='fu'>declare_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>)</div><div class='output co'>#&gt; Random sampling procedure: Cluster random sampling
+#&gt;  Number of units: 351 
 #&gt; Number of clusters: 26 
-#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>10</span>)</div><div class='output co'>#&gt; Random sampling procedure: Cluster random sampling 
-#&gt; Number of units: 351 
+#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>10</span>)</div><div class='output co'>#&gt; Random sampling procedure: Cluster random sampling
+#&gt;  Number of units: 351 
 #&gt; Number of clusters: 26 
 #&gt; The inclusion probabilities are constant across units.</div><div class='input'>
 <span class='co'># Stratified and Clustered Random Sampling Declarations</span>
@@ -254,12 +243,12 @@
 #&gt;   stratum_3  0  0  0  0
 #&gt;   stratum_4  0  0  0  0
 #&gt;   stratum_5 23 24 25 26</div><div class='input'>
-<span class='fu'>declare_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified and clustered random sampling 
-#&gt; Number of units: 351 
+<span class='fu'>declare_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified and clustered random sampling
+#&gt;  Number of units: 351 
 #&gt; Number of strata: 5 
 #&gt; Number of clusters: 26 
-#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.3</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified and clustered random sampling 
-#&gt; Number of units: 351 
+#&gt; The inclusion probabilities are constant across units.</div><div class='input'><span class='fu'>declare_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>strata</span> <span class='kw'>=</span> <span class='no'>strata</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>.3</span>)</div><div class='output co'>#&gt; Random sampling procedure: Stratified and clustered random sampling
+#&gt;  Number of units: 351 
 #&gt; Number of strata: 5 
 #&gt; Number of clusters: 26 
 #&gt; The inclusion probabilities are constant across units.</div><div class='input'>
@@ -280,7 +269,7 @@
 
       <footer>
       <div class="copyright" style="flex:2;">
-  <p>Developed by Alexander Coppock, Jasper Cooper, Neal Fultz.</p>
+  <p>Developed by Alexander Coppock.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 
@@ -293,3 +282,4 @@
 
   </body>
 </html>
+

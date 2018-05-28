@@ -23,8 +23,6 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,7 +45,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../">randomizr</a>
+      <a class="navbar-brand" href="../">Cluster Random Sampling</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -74,13 +72,13 @@
       <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
-      <a href="http://randomizr.declaredesign.org">randomizr</a>
+      <a href="https://declaredesign.org/r/randomizr/">randomizr</a>
     </li>
     <li>
-      <a href="http://fabricatr.declaredesign.org">fabricatr</a>
+      <a href="https://declaredesign.org/r/fabricatr/">fabricatr</a>
     </li>
     <li>
-      <a href="http://estimatr.declaredesign.org">estimatr</a>
+      <a href="https://declaredesign.org/r/estimatr/">estimatr</a>
     </li>
   </ul>
 </li>
@@ -111,8 +109,8 @@
     <p>cluster_rs implements a random sampling procedure in which groups of units are sampled together (as a cluster). This function conducts complete random sampling at the cluster level, unless simple = TRUE, in which case <code><a href='simple_rs.html'>simple_rs</a></code> analogues are used.</p>
     
 
-    <pre class="usage"><span class='fu'>cluster_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clust_var</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>clust_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>cluster_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>simple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -137,10 +135,6 @@
       <th>check_inputs</th>
       <td><p>logical. Defaults to TRUE.</p></td>
     </tr>
-    <tr>
-      <th>clust_var</th>
-      <td><p>deprecated</p></td>
-    </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -154,17 +148,17 @@
 <span class='no'>S</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>)
 <span class='fu'>table</span>(<span class='no'>S</span>, <span class='no'>clusters</span>)</div><div class='output co'>#&gt;    clusters
 #&gt; S    a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v  w  x  y
-#&gt;   0  0  0  3  0  0  0  7  8  9 10  0 12  0  0 15  0 17 18 19  0 21  0  0  0 25
-#&gt;   1  1  2  0  4  5  6  0  0  0  0 11  0 13 14  0 16  0  0  0 20  0 22 23 24  0
+#&gt;   0  1  0  3  0  5  0  0  0  9  0 11 12  0 14  0  0  0 18 19 20 21 22  0  0 25
+#&gt;   1  0  2  0  4  0  6  7  8  0 10  0  0 13  0 15 16 17  0  0  0  0  0 23 24  0
 #&gt;    clusters
 #&gt; S    z
-#&gt;   0 26
-#&gt;   1  0</div><div class='input'>
+#&gt;   0  0
+#&gt;   1 26</div><div class='input'>
 <span class='no'>S</span> <span class='kw'>&lt;-</span> <span class='fu'>cluster_rs</span>(<span class='kw'>clusters</span> <span class='kw'>=</span> <span class='no'>clusters</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>13</span>)
 <span class='fu'>table</span>(<span class='no'>S</span>, <span class='no'>clusters</span>)</div><div class='output co'>#&gt;    clusters
 #&gt; S    a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v  w  x  y
-#&gt;   0  0  2  3  0  0  6  0  0  9  0  0  0 13 14 15 16  0  0 19 20 21  0 23  0 25
-#&gt;   1  1  0  0  4  5  0  7  8  0 10 11 12  0  0  0  0 17 18  0  0  0 22  0 24  0
+#&gt;   0  0  2  0  4  0  0  0  0  0  0 11  0 13  0 15 16  0 18 19 20 21  0 23 24 25
+#&gt;   1  1  0  3  0  5  6  7  8  9 10  0 12  0 14  0  0 17  0  0  0  0 22  0  0  0
 #&gt;    clusters
 #&gt; S    z
 #&gt;   0  0
@@ -186,7 +180,7 @@
 
       <footer>
       <div class="copyright" style="flex:2;">
-  <p>Developed by Alexander Coppock, Jasper Cooper, Neal Fultz.</p>
+  <p>Developed by Alexander Coppock.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 
@@ -199,3 +193,4 @@
 
   </body>
 </html>
+

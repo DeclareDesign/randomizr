@@ -23,8 +23,6 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,7 +45,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../">randomizr</a>
+      <a class="navbar-brand" href="../">Block Random Assignment</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -74,13 +72,13 @@
       <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
-      <a href="http://randomizr.declaredesign.org">randomizr</a>
+      <a href="https://declaredesign.org/r/randomizr/">randomizr</a>
     </li>
     <li>
-      <a href="http://fabricatr.declaredesign.org">fabricatr</a>
+      <a href="https://declaredesign.org/r/fabricatr/">fabricatr</a>
     </li>
     <li>
-      <a href="http://estimatr.declaredesign.org">estimatr</a>
+      <a href="https://declaredesign.org/r/estimatr/">estimatr</a>
     </li>
   </ul>
 </li>
@@ -108,13 +106,13 @@
     </div>
 
     
-    <p>block_ra implements a random assignment procedure in which units that are grouped into blocks defined by pre-treatment covariates are assiged using complete random assignment within block. For example, imagine that 50 of 100 men are assigned to treatment and 75 of 200 women are assigned to treatment.</p>
+    <p>block_ra implements a random assignment procedure in which units that are grouped into blocks defined by pre-treatment covariates are assigned using complete random assignment within block. For example, imagine that 50 of 100 men are assigned to treatment and 75 of 200 women are assigned to treatment.</p>
     
 
-    <pre class="usage"><span class='fu'>block_ra</span>(<span class='kw'>blocks</span> <span class='kw'>=</span> <span class='no'>block_var</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>m</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+    <pre class="usage"><span class='fu'>block_ra</span>(<span class='kw'>blocks</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>m</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>block_m</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>block_m_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>block_prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>block_prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='no'>condition_names</span>,
-  <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>block_var</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+  <span class='kw'>block_prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -162,14 +160,6 @@
     <tr>
       <th>check_inputs</th>
       <td><p>logical. Defaults to TRUE.</p></td>
-    </tr>
-    <tr>
-      <th>block_var</th>
-      <td><p>deprecated</p></td>
-    </tr>
-    <tr>
-      <th>condition_names</th>
-      <td><p>deprecated</p></td>
     </tr>
     </table>
     
@@ -238,9 +228,9 @@
 <span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>block_ra</span>(<span class='kw'>blocks</span> <span class='kw'>=</span> <span class='no'>blocks</span>, <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='fl'>3</span>)
 <span class='fu'>table</span>(<span class='no'>blocks</span>, <span class='no'>Z</span>)</div><div class='output co'>#&gt;       Z
 #&gt; blocks T1 T2 T3
-#&gt;      A 18 16 16
+#&gt;      A 17 16 17
 #&gt;      B 34 33 33
-#&gt;      C 68 66 66</div><div class='input'>
+#&gt;      C 67 66 67</div><div class='input'>
 <span class='no'>block_m_each</span> <span class='kw'>&lt;-</span> <span class='fu'>rbind</span>(<span class='fu'>c</span>(<span class='fl'>10</span>, <span class='fl'>20</span>, <span class='fl'>20</span>),
                  <span class='fu'>c</span>(<span class='fl'>30</span>, <span class='fl'>50</span>, <span class='fl'>20</span>),
                  <span class='fu'>c</span>(<span class='fl'>50</span>, <span class='fl'>75</span>, <span class='fl'>75</span>))
@@ -282,7 +272,7 @@
 
       <footer>
       <div class="copyright" style="flex:2;">
-  <p>Developed by Alexander Coppock, Jasper Cooper, Neal Fultz.</p>
+  <p>Developed by Alexander Coppock.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 
@@ -295,3 +285,4 @@
 
   </body>
 </html>
+

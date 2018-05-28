@@ -23,8 +23,6 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,7 +45,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../">randomizr</a>
+      <a class="navbar-brand" href="../">Complete Random Assignment</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -74,13 +72,13 @@
       <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
-      <a href="http://randomizr.declaredesign.org">randomizr</a>
+      <a href="https://declaredesign.org/r/randomizr/">randomizr</a>
     </li>
     <li>
-      <a href="http://fabricatr.declaredesign.org">fabricatr</a>
+      <a href="https://declaredesign.org/r/fabricatr/">fabricatr</a>
     </li>
     <li>
-      <a href="http://estimatr.declaredesign.org">estimatr</a>
+      <a href="https://declaredesign.org/r/estimatr/">estimatr</a>
     </li>
   </ul>
 </li>
@@ -108,17 +106,16 @@
     </div>
 
     
-    <p>complete_ra implements a random assignment procedure in which fixed numbers of units are assigned to treatment conditions. The canonical example of complete random assignment is a procedure in which exactly m of N units are assigned to treatment and N-m units are assigned to control. 
+    <p>complete_ra implements a random assignment procedure in which fixed numbers of units are assigned to treatment conditions. The canonical example of complete random assignment is a procedure in which exactly m of N units are assigned to treatment and N-m units are assigned to control.<br /> <br />
 Users can set the exact number of units to assign to each condition with m or m_each. Alternatively, users can specify probabilities of assignment with prob or prob_each and complete_ra will infer the correct number of units to assign to each condition.
 In a two-arm design, complete_ra will either assign floor(N*prob) or ceiling(N*prob) units to treatment, choosing between these two values to ensure that the overall probability of assignment is exactly prob.
-In a multi-arm design, complete_ra will first assign floor(N*prob_each) units to their respective conditions, then will assign the remaining units using simple random assignment, choosing these second-stage probabilities so that the overall probabilities of assignment are exactly prob_each. 
-In most cases, users should specify N and not more than one of m, m_each, prob, prob_each, or num_arms.  
+In a multi-arm design, complete_ra will first assign floor(N*prob_each) units to their respective conditions, then will assign the remaining units using simple random assignment, choosing these second-stage probabilities so that the overall probabilities of assignment are exactly prob_each.<br /> <br />
+In most cases, users should specify N and not more than one of m, m_each, prob, prob_each, or num_arms. <br /> <br />
 If only N is specified, a two-arm trial in which N/2 units are assigned to treatment is assumed. If N is odd, either floor(N/2) units or ceiling(N/2) units will be assigned to treatment.</p>
     
 
     <pre class="usage"><span class='fu'>complete_ra</span>(<span class='no'>N</span>, <span class='kw'>m</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>m_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='no'>condition_names</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>condition_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+  <span class='kw'>num_arms</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -154,10 +151,6 @@ If only N is specified, a two-arm trial in which N/2 units are assigned to treat
     <tr>
       <th>check_inputs</th>
       <td><p>logical. Defaults to TRUE.</p></td>
-    </tr>
-    <tr>
-      <th>condition_names</th>
-      <td><p>deprecated</p></td>
     </tr>
     </table>
     
@@ -208,10 +201,10 @@ If only N is specified, a two-arm trial in which N/2 units are assigned to treat
 <span class='fu'>table</span>(<span class='no'>Z</span>)</div><div class='output co'>#&gt; Z
 #&gt; T1 T2 
 #&gt; 50 50 </div><div class='input'>
-<span class='co'># If N = m, assign with 100% probability...</span>
+<span class='co'># If N = m, assign with 100% probability</span>
 <span class='fu'>complete_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>2</span>, <span class='kw'>m</span><span class='kw'>=</span><span class='fl'>2</span>)</div><div class='output co'>#&gt; [1] 1 1</div><div class='input'>
-<span class='co'># except if N = m = 1, in which case assign with 50% probability</span>
-<span class='fu'>complete_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>1</span>, <span class='kw'>m</span><span class='kw'>=</span><span class='fl'>1</span>)</div><div class='output co'>#&gt; [1] 0</div><div class='input'>
+<span class='co'># Up through randomizr 0.12.0, </span>
+<span class='fu'>complete_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>1</span>, <span class='kw'>m</span><span class='kw'>=</span><span class='fl'>1</span>) <span class='co'># assigned with 50% probability</span></div><div class='output co'>#&gt; [1] 1</div><div class='input'># This behavior has been deprecated
 
 </div></pre>
   </div>
@@ -230,7 +223,7 @@ If only N is specified, a two-arm trial in which N/2 units are assigned to treat
 
       <footer>
       <div class="copyright" style="flex:2;">
-  <p>Developed by Alexander Coppock, Jasper Cooper, Neal Fultz.</p>
+  <p>Developed by Alexander Coppock.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 
@@ -243,3 +236,4 @@ If only N is specified, a two-arm trial in which N/2 units are assigned to treat
 
   </body>
 </html>
+

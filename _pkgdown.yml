@@ -33,11 +33,11 @@ navbar:
       - text: DeclareDesign
         href: http://declaredesign.org
       - text: randomizr
-        href: http://randomizr.declaredesign.org
+        href: https://declaredesign.org/r/randomizr/
       - text: fabricatr
-        href: http://fabricatr.declaredesign.org
+        href: https://declaredesign.org/r/fabricatr/
       - text: estimatr
-        href: http://estimatr.declaredesign.org
+        href: https://declaredesign.org/r/estimatr/
 
   - text: "DeclareDesign home"
     href: http://declaredesign.org

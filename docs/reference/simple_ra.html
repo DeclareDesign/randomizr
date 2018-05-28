@@ -23,8 +23,6 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,7 +45,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../">randomizr</a>
+      <a class="navbar-brand" href="../">Simple Random Assignment</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -74,13 +72,13 @@
       <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
-      <a href="http://randomizr.declaredesign.org">randomizr</a>
+      <a href="https://declaredesign.org/r/randomizr/">randomizr</a>
     </li>
     <li>
-      <a href="http://fabricatr.declaredesign.org">fabricatr</a>
+      <a href="https://declaredesign.org/r/fabricatr/">fabricatr</a>
     </li>
     <li>
-      <a href="http://estimatr.declaredesign.org">estimatr</a>
+      <a href="https://declaredesign.org/r/estimatr/">estimatr</a>
     </li>
   </ul>
 </li>
@@ -108,8 +106,8 @@
     </div>
 
     
-    <p>simple_ra implements a random assignment procedure in which units are independently assigned to treatment conditions. Because units are assigned independently, the number of units that are assigned to each condition can vary from assignment to assignment. For most experimental applications in which the number of experimental units is known in advance, <code><a href='complete_ra.html'>complete_ra</a></code> is better because the number of units assigned to each condition is fixed across assignments.
-In most cases, users should specify N and not more than one of prob, prob_each, or num_arms.  
+    <p>simple_ra implements a random assignment procedure in which units are independently assigned to treatment conditions. Because units are assigned independently, the number of units that are assigned to each condition can vary from assignment to assignment. For most experimental applications in which the number of experimental units is known in advance, <code><a href='complete_ra.html'>complete_ra</a></code> is better because the number of units assigned to each condition is fixed across assignments.<br /><br />
+In most cases, users should specify N and not more than one of prob, prob_each, or num_arms. <br /> <br />
 If only N is specified, a two-arm trial with prob = 0.5 is assumed.</p>
     
 
@@ -126,11 +124,11 @@ If only N is specified, a two-arm trial with prob = 0.5 is assumed.</p>
     </tr>
     <tr>
       <th>prob</th>
-      <td><p>Use for a two-arm design. prob is the probability of assignment to treatment and must be a real number between 0 and 1 inclusive. (optional)</p></td>
+      <td><p>Use for a two-arm design. prob is the probability of assignment to treatment and must be a real number between 0 and 1 inclusive and must be length 1 or N. (optional)</p></td>
     </tr>
     <tr>
       <th>prob_each</th>
-      <td><p>Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1.  (optional)</p></td>
+      <td><p>Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. It may be a conditions-length vector or a N-by-conditions matrix.  (optional)</p></td>
     </tr>
     <tr>
       <th>num_arms</th>
@@ -146,7 +144,7 @@ If only N is specified, a two-arm trial with prob = 0.5 is assumed.</p>
     </tr>
     <tr>
       <th>condition_names</th>
-      <td><p>deprecated</p></td>
+      <td><p>DEPRECATED</p></td>
     </tr>
     </table>
     
@@ -161,11 +159,11 @@ If only N is specified, a two-arm trial with prob = 0.5 is assumed.</p>
 <span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>)
 <span class='fu'>table</span>(<span class='no'>Z</span>)</div><div class='output co'>#&gt; Z
 #&gt;  0  1 
-#&gt; 46 54 </div><div class='input'>
+#&gt; 51 49 </div><div class='input'>
 <span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>prob</span><span class='kw'>=</span><span class='fl'>0.5</span>)
 <span class='fu'>table</span>(<span class='no'>Z</span>)</div><div class='output co'>#&gt; Z
 #&gt;  0  1 
-#&gt; 46 54 </div><div class='input'>
+#&gt; 52 48 </div><div class='input'>
 <span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>prob_each</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0.3</span>, <span class='fl'>0.7</span>),
                <span class='kw'>conditions</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>table</span>(<span class='no'>Z</span>)</div><div class='output co'>#&gt; Z
@@ -175,20 +173,20 @@ If only N is specified, a two-arm trial with prob = 0.5 is assumed.</p>
 <span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>num_arms</span><span class='kw'>=</span><span class='fl'>3</span>)
 <span class='fu'>table</span>(<span class='no'>Z</span>)</div><div class='output co'>#&gt; Z
 #&gt; T1 T2 T3 
-#&gt; 37 31 32 </div><div class='input'>
+#&gt; 38 31 31 </div><div class='input'>
 <span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>prob_each</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>0.3</span>, <span class='fl'>0.3</span>, <span class='fl'>0.4</span>))
 <span class='fu'>table</span>(<span class='no'>Z</span>)</div><div class='output co'>#&gt; Z
 #&gt; T1 T2 T3 
-#&gt; 32 31 37 </div><div class='input'>
+#&gt; 24 34 42 </div><div class='input'>
 <span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>prob_each</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>0.3</span>, <span class='fl'>0.3</span>, <span class='fl'>0.4</span>),
                <span class='kw'>conditions</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>table</span>(<span class='no'>Z</span>)</div><div class='output co'>#&gt; Z
 #&gt;   control   placebo treatment 
-#&gt;        29        34        37 </div><div class='input'>
+#&gt;        33        32        35 </div><div class='input'>
 <span class='no'>Z</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_ra</span>(<span class='kw'>N</span><span class='kw'>=</span><span class='fl'>100</span>, <span class='kw'>conditions</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"control"</span>, <span class='st'>"placebo"</span>, <span class='st'>"treatment"</span>))
 <span class='fu'>table</span>(<span class='no'>Z</span>)</div><div class='output co'>#&gt; Z
 #&gt;   control   placebo treatment 
-#&gt;        28        36        36 </div></pre>
+#&gt;        41        32        27 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -205,7 +203,7 @@ If only N is specified, a two-arm trial with prob = 0.5 is assumed.</p>
 
       <footer>
       <div class="copyright" style="flex:2;">
-  <p>Developed by Alexander Coppock, Jasper Cooper, Neal Fultz.</p>
+  <p>Developed by Alexander Coppock.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 
@@ -218,3 +216,4 @@ If only N is specified, a two-arm trial with prob = 0.5 is assumed.</p>
 
   </body>
 </html>
+

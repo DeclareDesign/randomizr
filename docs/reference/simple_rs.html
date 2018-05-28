@@ -23,8 +23,6 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,7 +45,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../">randomizr</a>
+      <a class="navbar-brand" href="../">Simple Random Sampling</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -74,13 +72,13 @@
       <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
-      <a href="http://randomizr.declaredesign.org">randomizr</a>
+      <a href="https://declaredesign.org/r/randomizr/">randomizr</a>
     </li>
     <li>
-      <a href="http://fabricatr.declaredesign.org">fabricatr</a>
+      <a href="https://declaredesign.org/r/fabricatr/">fabricatr</a>
     </li>
     <li>
-      <a href="http://estimatr.declaredesign.org">estimatr</a>
+      <a href="https://declaredesign.org/r/estimatr/">estimatr</a>
     </li>
   </ul>
 </li>
@@ -108,7 +106,7 @@
     </div>
 
     
-    <p>simple_rs implements a random sampling procedure in which units are independently sampled. Because units are sampled independently, the number of units that are sampled can vary from sample to sample. For most applications in which the number of units in the sampling frame is known in advance, <code><a href='complete_rs.html'>complete_rs</a></code> is better because the number of units sampled is fixed across sampled.</p>
+    <p>simple_rs implements a random sampling procedure in which units are independently sampled. Because units are sampled independently, the number of units that are sampled can vary from sample to sample. For most applications in which the number of units in the sampling frame is known in advance, <code><a href='complete_rs.html'>complete_rs</a></code> is better because the number of units sampled is fixed across sampled.<br /><br /></p>
     
 
     <pre class="usage"><span class='fu'>simple_rs</span>(<span class='no'>N</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>check_inputs</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
@@ -122,7 +120,7 @@
     </tr>
     <tr>
       <th>prob</th>
-      <td><p>prob is the probability of being sampled must be a real number between 0 and 1 inclusive. (optional)</p></td>
+      <td><p>prob is the probability of being sampled must be a real number between 0 and 1 inclusive, and must be length 1 or N. (optional)</p></td>
     </tr>
     <tr>
       <th>check_inputs</th>
@@ -140,11 +138,11 @@
 <span class='no'>S</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>)
 <span class='fu'>table</span>(<span class='no'>S</span>)</div><div class='output co'>#&gt; S
 #&gt;  0  1 
-#&gt; 46 54 </div><div class='input'>
+#&gt; 51 49 </div><div class='input'>
 <span class='no'>S</span> <span class='kw'>&lt;-</span> <span class='fu'>simple_rs</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>0.3</span>)
 <span class='fu'>table</span>(<span class='no'>S</span>)</div><div class='output co'>#&gt; S
 #&gt;  0  1 
-#&gt; 69 31 </div><div class='input'>
+#&gt; 63 37 </div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -162,7 +160,7 @@
 
       <footer>
       <div class="copyright" style="flex:2;">
-  <p>Developed by Alexander Coppock, Jasper Cooper, Neal Fultz.</p>
+  <p>Developed by Alexander Coppock.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 
@@ -175,3 +173,4 @@
 
   </body>
 </html>
+

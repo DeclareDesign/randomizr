@@ -1,6 +1,5 @@
-
 randomizr: Easy to use tools for common forms of random assignment and sampling
-===============================================================================
+================
 
 [![CRAN Status](http://www.r-pkg.org/badges/version/randomizr)](https://cran.r-project.org/package=randomizr) [![Travis-CI Build Status](https://travis-ci.org/DeclareDesign/randomizr.svg?branch=master)](https://travis-ci.org/DeclareDesign/randomizr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/randomizr?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/randomizr) [![Coverage Status](https://coveralls.io/repos/github/DeclareDesign/randomizr/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/randomizr?branch=master) ![CRAN downloads](http://cranlogs.r-pkg.org/badges/grand-total/randomizr)
 
@@ -25,7 +24,7 @@ install.packages("randomizr", repos="http://r.declaredesign.org")
 
 ### Getting started with randomizr for R
 
-**randomizr** has five main random assignment functions, corresponding to the common experimental designs listed above. You can read more about using each of these functions in our [reference library](http://randomizr.declaredesign.org/reference/index.html) or by clicking on the function names: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`.
+**randomizr** has five main random assignment functions, corresponding to the common experimental designs listed above. You can read more about using each of these functions in our [reference library](https://declaredesign.org/r/randomizr/reference/) or by clicking on the function names: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`.
 
 `complete_ra()` (Complete randomization) is the function that will be most appropriate for a large number of experimental situations: when you want to assign a fixed `m` units out of a population of `N` units to treatment:
 
@@ -59,7 +58,7 @@ table(Z, clust_var)
 | placebo   |    0|    2|    0|    0|    5|    0|    0|    0|    0|    0|    0|    0|   13|   14|    0|
 | treatment |    1|    0|    0|    4|    0|    6|    0|    0|    0|   10|   11|   12|    0|    0|   15|
 
-For more information about all of **randomizr**'s functionality, please see our [online tutorial](http://randomizr.declaredesign.org/articles/randomizr_vignette.html)
+For more information about all of **randomizr**'s functionality, please see our [online tutorial](https://declaredesign.org/R/randomizr/articles/randomizr_vignette.html)
 
 randomizr for Stata
 -------------------
@@ -87,6 +86,6 @@ set obs 100
 complete_ra, m(50)
 ```
 
-A Stata version of our [online tutorial](http://randomizr.declaredesign.org/articles/srandomizr_vignette.html) is also available.
+A Stata version of our [online tutorial](https://declaredesign.org/R/randomizr/articles/srandomizr_vignette.html) is also available.
 
 Happy randomizing!

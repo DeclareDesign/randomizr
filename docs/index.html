@@ -15,7 +15,7 @@
 <![endif]-->
 </head>
 <body>
-    <div class="container template-vignette">
+    <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -24,7 +24,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="">randomizr</a>
+      <a class="navbar-brand" href=""></a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -51,13 +51,13 @@
       <a href="http://declaredesign.org">DeclareDesign</a>
     </li>
     <li>
-      <a href="http://randomizr.declaredesign.org">randomizr</a>
+      <a href="https://declaredesign.org/r/randomizr/">randomizr</a>
     </li>
     <li>
-      <a href="http://fabricatr.declaredesign.org">fabricatr</a>
+      <a href="https://declaredesign.org/r/fabricatr/">fabricatr</a>
     </li>
     <li>
-      <a href="http://estimatr.declaredesign.org">estimatr</a>
+      <a href="https://declaredesign.org/r/estimatr/">estimatr</a>
     </li>
   </ul>
 </li>
@@ -79,15 +79,11 @@
 
       
       </header><div class="row">
-  <div class="col-md-9">
+  <div class="col-md-9 contents">
     
 
     
     
-<div class="contents">
-<div id="randomizr-easy-to-use-tools-for-common-forms-of-random-assignment-and-sampling" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#randomizr-easy-to-use-tools-for-common-forms-of-random-assignment-and-sampling" class="anchor"></a>randomizr: Easy to use tools for common forms of random assignment and sampling</h1></div>
 <p><a href="https://cran.r-project.org/package=randomizr"><img src="http://www.r-pkg.org/badges/version/randomizr" alt="CRAN Status"></a> <a href="https://travis-ci.org/DeclareDesign/randomizr"><img src="https://travis-ci.org/DeclareDesign/randomizr.svg?branch=master" alt="Travis-CI Build Status"></a> <a href="https://ci.appveyor.com/project/DeclareDesign/randomizr"><img src="https://ci.appveyor.com/api/projects/status/github/DeclareDesign/randomizr?branch=master&amp;svg=true" alt="AppVeyor Build Status"></a> <a href="https://coveralls.io/github/DeclareDesign/randomizr?branch=master"><img src="https://coveralls.io/repos/github/DeclareDesign/randomizr/badge.svg?branch=master" alt="Coverage Status"></a> <img src="http://cranlogs.r-pkg.org/badges/grand-total/randomizr" alt="CRAN downloads"></p>
 <p><strong>randomizr</strong> is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. <strong>randomizr</strong> automates all of these processes and assists scientists in doing transparent, replicable science. We offer <strong>randomizr</strong> for both <code>R</code> and <code>Stata</code>.</p>
 <div id="randomizr-for-r" class="section level2">
@@ -104,7 +100,7 @@
 <div id="getting-started-with-randomizr-for-r" class="section level3">
 <h3 class="hasAnchor">
 <a href="#getting-started-with-randomizr-for-r" class="anchor"></a>Getting started with randomizr for R</h3>
-<p><strong>randomizr</strong> has five main random assignment functions, corresponding to the common experimental designs listed above. You can read more about using each of these functions in our <a href="http://randomizr.declaredesign.org/reference/index.html">reference library</a> or by clicking on the function names: <code><a href="reference/simple_ra.html">simple_ra()</a></code>, <code><a href="reference/complete_ra.html">complete_ra()</a></code>, <code><a href="reference/block_ra.html">block_ra()</a></code>, <code><a href="reference/cluster_ra.html">cluster_ra()</a></code>, and <code><a href="reference/block_and_cluster_ra.html">block_and_cluster_ra()</a></code>.</p>
+<p><strong>randomizr</strong> has five main random assignment functions, corresponding to the common experimental designs listed above. You can read more about using each of these functions in our <a href="https://declaredesign.org/r/randomizr/reference/">reference library</a> or by clicking on the function names: <code><a href="reference/simple_ra.html">simple_ra()</a></code>, <code><a href="reference/complete_ra.html">complete_ra()</a></code>, <code><a href="reference/block_ra.html">block_ra()</a></code>, <code><a href="reference/cluster_ra.html">cluster_ra()</a></code>, and <code><a href="reference/block_and_cluster_ra.html">block_and_cluster_ra()</a></code>.</p>
 <p><code><a href="reference/complete_ra.html">complete_ra()</a></code> (Complete randomization) is the function that will be most appropriate for a large number of experimental situations: when you want to assign a fixed <code>m</code> units out of a population of <code>N</code> units to treatment:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(randomizr)
 Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/complete_ra.html">complete_ra</a></span>(<span class="dt">N =</span> <span class="dv">100</span>, <span class="dt">m =</span> <span class="dv">50</span>)
@@ -205,7 +201,7 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/cluster_ra.h
 </tr>
 </tbody>
 </table>
-<p>For more information about all of <strong>randomizr</strong>’s functionality, please see our <a href="http://randomizr.declaredesign.org/articles/randomizr_vignette.html">online tutorial</a></p>
+<p>For more information about all of <strong>randomizr</strong>’s functionality, please see our <a href="https://declaredesign.org/R/randomizr/articles/randomizr_vignette.html">online tutorial</a></p>
 </div>
 </div>
 <div id="randomizr-for-stata" class="section level2">
@@ -223,40 +219,46 @@ Z &lt;-<span class="st"> </span><span class="kw"><a href="reference/cluster_ra.h
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ssc install randomizr
 set obs <span class="dv">100</span>
 complete_ra, <span class="kw">m</span>(<span class="dv">50</span>)</code></pre></div>
-<p>A Stata version of our <a href="http://randomizr.declaredesign.org/articles/srandomizr_vignette.html">online tutorial</a> is also available.</p>
+<p>A Stata version of our <a href="https://declaredesign.org/R/randomizr/articles/srandomizr_vignette.html">online tutorial</a> is also available.</p>
 <p>Happy randomizing!</p>
-</div>
-</div>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <div id="sidebar_links">
-<h2 class="hasAnchor">
-<a href="#sidebar_links" class="anchor"></a>Links</h2>
+    <div class="links">
+<h2>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://cran.r-project.org/package=randomizr">Download from CRAN</a></li>
-<li><a href="https://github.com/DeclareDesign/randomizr">Help develop randomizr</a></li>
-<li><a href="https://github.com/DeclareDesign/randomizr/issues">Report a bug</a></li>
-</ul>
-</div>
-<div id="sidebar_authors">
-<h2 class="hasAnchor">
-<a href="#sidebar_authors" class="anchor"></a>Developers</h2>
-<ul class="list-unstyled">
-<li>Alexander Coppock <br><small class="roles"> Author, maintainer </small> </li>
-<li>Jasper Cooper <br><small class="roles"> Contributor </small> </li>
-<li>Neal Fultz <br><small class="roles"> Contributor </small> <br><small>(C version of restricted partitions)</small>
+<li>Download from CRAN at <br><a href="https://cloud.r-project.org/package=randomizr">https://​cloud.r-project.org/​package=randomizr</a>
+</li>
+<li>Browse source code at <br><a href="https://github.com/DeclareDesign/randomizr">https://​github.com/​DeclareDesign/​randomizr</a>
+</li>
+<li>Report a bug at <br><a href="https://github.com/DeclareDesign/randomizr/issues">https://​github.com/​DeclareDesign/​randomizr/​issues</a>
 </li>
 </ul>
 </div>
+<div class="license">
+<h2>License</h2>
+<ul class="list-unstyled">
+<li>
+<a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a>
+</li>
+</ul>
+</div>
+<div class="developers">
+<h2>Developers</h2>
+<ul class="list-unstyled">
+<li>Alexander Coppock <br><small class="roles"> Author, maintainer </small>  </li>
+<li><a href="authors.html">All authors...</a></li>
+</ul>
+</div>
+
       </div>
 
 </div>
 
 
       <footer><div class="copyright" style="flex:2;">
-  <p>Developed by Alexander Coppock, Jasper Cooper, Neal Fultz.</p>
+  <p>Developed by Alexander Coppock.</p>
   <p>Code is licensed under <a href="https://opensource.org/licenses/mit-license.php">MIT</a> license.</p>
 </div>
 
