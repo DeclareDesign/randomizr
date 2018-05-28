@@ -49,7 +49,6 @@ simple_ra <- function(N, prob = NULL, prob_each = NULL,
   if (check_inputs) .invoke_check(check_randomizr_arguments_new)
   prob_mat <- simple_ra_probabilities(N, prob, prob_each, num_arms, conditions, FALSE)
   assignment <- conditions[vsample(prob_mat)]
-  # assignment <- sample(conditions, N, replace = TRUE, prob=prob_mat[1,])
   assignment <- clean_condition_names(assignment, conditions)
   return(assignment)
 }

@@ -170,7 +170,7 @@ complete_ra <- function(N,
             conditions,
             N_remainder,
             prob = prob_each_fix_up,
-            replace = TRUE
+            replace = FALSE
           )
         ))
     } else{
