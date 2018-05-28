@@ -6,7 +6,7 @@ Authors@R: c(person("Alexander", "Coppock", email = "acoppock@gmail.com", role =
              person("Neal", "Fultz", email = "nfultz@gmail.com", role = c("ctb"), comment = "C version of restricted partitions"))
 Description: Generates random assignments for common experimental designs and 
 	    random samples for common sampling designs.
-URL: http://randomizr.declaredesign.org, https://github.com/DeclareDesign/randomizr
+URL: https://declaredesign.org/r/randomizr/, https://github.com/DeclareDesign/randomizr
 BugReports: https://github.com/DeclareDesign/randomizr/issues
 Depends:
     R (>= 3.4.0)
