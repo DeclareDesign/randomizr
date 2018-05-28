@@ -262,7 +262,7 @@ block_ra_helper <- function(blocks = NULL,
   
   else if (!is.null(block_m_each)) {
     block_m_each_list <-
-      split(block_m_each, rep(1:nrow(block_m_each), times = ncol(block_m_each)))
+      split(block_m_each, 1:nrow(block_m_each))
     
     ret <- list(m_each=block_m_each_list)
   }
@@ -272,7 +272,7 @@ block_ra_helper <- function(blocks = NULL,
   
   else if (!is.null(block_prob_each)) {
     block_prob_each_list <-
-      split(block_prob_each, rep(1:nrow(block_prob_each), times = ncol(block_prob_each)))
+      split(block_prob_each, 1:nrow(block_prob_each))
     
     ret <- list(prob_each=block_prob_each_list)
   }
