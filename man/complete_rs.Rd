@@ -36,10 +36,11 @@ S <- complete_rs(N = 100, prob = .111)
 table(S)
 
 # If N = n, sample with 100\% probability...
-complete_ra(N=2, n=2)
+complete_rs(N=2, n=2)
 
-# except if N = n = 1, in which case sample with 50\% probability
-complete_ra(N=1, n=1)
+# Up through randomizr 0.12.0, 
+# This behavior has been deprecated
+complete_rs(N=1, n=1) # sampled with 50\% probability
 
 
 }

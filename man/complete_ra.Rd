@@ -68,11 +68,11 @@ table(Z)
 Z <- complete_ra(N = 100, num_arms = 2)
 table(Z)
 
-# If N = m, assign with 100\% probability...
+# If N = m, assign with 100\% probability
 complete_ra(N=2, m=2)
 
-# except if N = m = 1, in which case assign with 50\% probability
-complete_ra(N=1, m=1)
-
+# Up through randomizr 0.12.0, 
+complete_ra(N=1, m=1) # assigned with 50\% probability
+# This behavior has been deprecated
 
 }

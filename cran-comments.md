@@ -1,10 +1,9 @@
-## Update randomizr to version 0.12.0
-* update condition_names to conditions
+## Update randomizr to version 0.16.0
 * small bug fixes
-* addressed restrictedparts error
+* complete_ra without replacement for remainders
 
 ## Test environments
-* local OS X install, R version 3.4.3 (Kite-Eating Tree)
+* local OS X install, R version 3.5.0 (2018-04-23) (Joy in Playing)
 * R-devel with win-builder.r-project.org.
 
 ## R CMD check results
