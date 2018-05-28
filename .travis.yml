@@ -8,9 +8,9 @@ matrix:
     r: release
     
   - os: linux
-    r: oldrel
+    r: 3.4
     after_success:
-    - echo skipping source packaging on linux/oldrel
+    - echo skipping source packaging on linux/3.4
     
   - os: linux
     r: devel
@@ -26,8 +26,7 @@ matrix:
 
 
   - os: osx
-    osx_image: xcode6.4
-    r: oldrel
+    r: 3.4
     if: branch = master
     r_github_packages:
     - DeclareDesign/DDtools
