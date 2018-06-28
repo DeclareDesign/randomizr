@@ -20,7 +20,7 @@ options(digits = 2)
 [![Coverage Status](https://coveralls.io/repos/github/DeclareDesign/randomizr/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/randomizr?branch=master)
 ![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/randomizr)
 
-**randomizr** is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. **randomizr** automates all of these processes and assists scientists in doing transparent, replicable science. We offer **randomizr** for both `R` and `Stata`.
+**randomizr** is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. Social and lab scientists conducting experiments need a process to assign individuals or units of observation to treatment or control wings. Common designs include simple random assignment, complete randomization, block randomization, cluster randomization, and blocked cluster randomization. **randomizr** automates all of these processes and assists scientists in doing transparent, replicable science. We offer **randomizr** for both [`R`](https://declaredesign.org/R/randomizr) and [`Stata`](https://declaredesign.org/stata/randomizr).
 
 ## randomizr for R
 
@@ -85,18 +85,6 @@ If you would like to install the latest development release directly from GitHub
 ```{r eval=FALSE}
 net install randomizr, from(https://raw.githubusercontent.com/DeclareDesign/strandomizr/master/) replace
 ```
-
-## Getting started with randomizr for Stata
-
-`complete_ra` (complete randomization) is the workhorse function that will be most appropriate for a large number of experimental situations: it assigns m of N units to treatment:
-
-```{r eval=FALSE}
-ssc install randomizr
-set obs 100
-complete_ra, m(50)
-```
-
-A Stata version of our [online tutorial](https://declaredesign.org/R/randomizr/articles/srandomizr_vignette.html) is also available.
 
 
 Happy randomizing!
