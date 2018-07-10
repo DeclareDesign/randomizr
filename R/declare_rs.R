@@ -207,30 +207,48 @@ obtain_inclusion_probabilities <- function(declaration = NULL) {
 
 formals(obtain_inclusion_probabilities) <- c(formals(obtain_inclusion_probabilities), formals(declare_rs))
 
+
+#' @export
+summary.rs_declaration <- function(obj, ...) {
+ print(obj, ... = ...) 
+}
+
 #' @export
 print.rs_declaration <- function(x, ...) {
   S <- draw_rs(x)
   n <- length(S)
   
-  cat(
-    "Random sampling procedure:",
-    switch(class(x)[2],
-           "rs_stratified"="Stratified",
-           "rs_clustered"="Cluster",
-           "rs_simple"="Simple",
-           "rs_stratified_and_clustered"="Stratified and clustered",
-           "rs_complete"="Complete"),
-    "random sampling\n",
-    "Number of units:", n, "\n"
-    
-  )
+  cat("Random sampling procedure:",
+      switch(
+        class(x)[2],
+        "rs_stratified" = "Stratified",
+        "rs_clustered" = "Cluster",
+        "rs_simple" = "Simple",
+        "rs_stratified_and_clustered" = "Stratified and clustered",
+        "rs_complete" = "Complete"
+      ),
+      "random sampling",
+      "\n")
+  
+  cat("Number of units:", n, "\n")
   
   if (!is.null(x$strata)) {
     cat("Number of strata:", length(unique(x$strata)), "\n")
   }
+  
   if (!is.null(x$clusters)) {
     cat("Number of clusters:", length(unique(x$clusters)), "\n")
   }
+  
+  # awaiting num permutations
+  # if (obtain_num_permutations(x) == Inf) {
+  #   cat("The number of possible random assignments is approximately infinite. \n")
+  # } else {
+  #   cat(paste0("The number of possible random assignments is ",
+  #              obtain_num_permutations(x),
+  #              ". "),
+  #       "\n")
+  # }
   
   if (is_constant(x$probabilities_vector)) {
     cat("The inclusion probabilities are constant across units.")

@@ -267,7 +267,7 @@ formals(obtain_condition_probabilities) <-
 
 #' @export
 summary.ra_declaration <- function(obj, ...){
-  print(obj)
+  print(obj, ... = ...)
 }
 
 #' @export

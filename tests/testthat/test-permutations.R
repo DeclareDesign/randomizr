@@ -5,7 +5,6 @@ expect_declaration <- function(declaration){
 
   perms <- obtain_permutation_matrix(declaration)
   
-  
   n_perms <- obtain_num_permutations(declaration)
   perms_probs <- obtain_permutation_probabilities(declaration)
   
@@ -19,7 +18,6 @@ expect_declaration <- function(declaration){
 
   expect_gt(length(draw), 0)  
   expect_true(all(draw %in% declaration$conditions))
-  
   
 }
 
@@ -204,7 +202,7 @@ test_that("declare_ra(N=4)", {
   declaration <- declare_ra(N = 4)
   perms <- obtain_permutation_matrix(declaration)
   dim(perms)
-  obtain_num_permutations(declaration)
+  expect_equal(obtain_num_permutations(declaration), 6)
   obtain_permutation_probabilities(declaration)
 
 })
@@ -214,7 +212,7 @@ test_that("blocked, diff size group", {
   declaration <- declare_ra(blocks = blocks)
   perms <- obtain_permutation_matrix(declaration)
   dim(perms)
-  obtain_num_permutations(declaration)
+  expect_equal(obtain_num_permutations(declaration), 24)
   obtain_permutation_probabilities(declaration)
 })
 

@@ -201,7 +201,7 @@ obtain_permutation_matrix.ra_blocked_and_clustered <- function(declaration) {
   perms <- perms[order(block_spots), ]
   
   # expand
-  perms <- perms[rep(1:n_clust, n_per_clust),]
+  perms <- perms[rep(1:n_clust, n_per_clust), ]
   
   # arrange
   perms <-
@@ -213,8 +213,6 @@ obtain_permutation_matrix.ra_blocked_and_clustered <- function(declaration) {
 
 
 # Helper functions --------------------------------------------------------
-
-
 
 
 # https://stackoverflow.com/a/20199902/4172083
@@ -306,11 +304,8 @@ permutations_m_each <- function(m_each, conditions) {
       available <- which(is.na(out[,j]))
       which_row <- available[ local_positions[[j]] ]
       out[which_row, j] <- conditions[x]
-
     }
-    
   }
-  
   
   # Final pass is easy
   out[is.na(out)] <- conditions[k]
@@ -325,18 +320,27 @@ expand_matrix <- function(mat_1, mat_2) {
   #  out = [  M1_1 M1_2 M1_3 ... M1_k M1_1 M1_2 M1_3 ... M1_k   
   #           M2_1 M2_1 M2_1 ... M2_1 M2_2 M2_2 M2_2 ... M2_k ]
   
-  
   out <- matrix(0L, nrow(mat_1) + nrow(mat_2), ncol(mat_1) * ncol(mat_2))
   
-  out[1:nrow(mat_1),] <- mat_1
-  out[nrow(mat_1) + 1:nrow(mat_2), ] <- mat_2[, rep(1:ncol(mat_2), each=ncol(mat_1))]
+  out[1:nrow(mat_1), ] <- mat_1
+  out[nrow(mat_1) + 1:nrow(mat_2),] <-
+    mat_2[, rep(1:ncol(mat_2), each = ncol(mat_1))]
   
   out
 }
 
 #' @useDynLib randomizr
-restrictedparts <- function(n, m) .Call("randomizr_restrictedparts", as.integer(n), as.integer(m), PACKAGE="randomizr")
+restrictedparts <-
+  function(n, m) {
+    .Call("randomizr_restrictedparts",
+          as.integer(n),
+          as.integer(m),
+          PACKAGE = "randomizr")
+  }
 
 
-vsample <- function(pmat) .Call("randomizr_vsample", pmat, PACKAGE="randomizr")
+vsample <-
+  function(pmat) {
+    .Call("randomizr_vsample", pmat, PACKAGE = "randomizr")
+  }
 
