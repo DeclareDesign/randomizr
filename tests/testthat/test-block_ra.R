@@ -17,7 +17,7 @@ expect_error(block_ra(blocks = blocks, m = 60))
 Z <- block_ra(blocks = blocks, block_prob = c(.1, .2, .3))
 Z <- block_ra(blocks = blocks, block_prob = c(0, .2, .3))
 expect_error(block_ra(blocks = blocks, block_prob = c(.1, .2, .3, .4)))
-expect_error(block_ra(blocks = blocks, block_prob = c(.1, .2,-.3)))
+expect_error(block_ra(blocks = blocks, block_prob = c(.1, .2, -.3)))
 expect_error(block_ra(blocks = blocks, block_prob = c(.1, .2, 1.1)))
 
 table(blocks, Z)
@@ -181,3 +181,18 @@ batch <-
     block_m = c(18, 18),
     conditions = c("batch_1", "batch_2")
   )
+
+
+test_that("Error", {
+  blocks <- rep(c("A", "B", "C"), times = c(50, 100, 200))
+  
+  block_m_each <- rbind(c(25, 25),
+                        c(50, 50),
+                        c(100, 100))
+  
+  block_prob_each <- rbind(c(.3, .6, .1),
+                           c(.2, .7, .1),
+                           c(.1, .8, .2))
+  
+  expect_error(block_ra(blocks = blocks, block_prob_each = block_prob_each))
+})
