@@ -102,7 +102,8 @@ block_and_cluster_ra <-
     # back up to the individual level, maintaining original ordering
     assignment <- rep(z_clust, n_per_clust)
     assignment <-
-      assignment[order(unlist(split(1:length(clusters), clusters), FALSE, FALSE))]
+      assignment[order(unlist(split(seq_along(clusters), clusters), 
+                              FALSE, FALSE))]
     return(assignment)
   }
 
@@ -190,6 +191,7 @@ block_and_cluster_ra_probabilities <-
     )
     
     prob_mat <- probs_clust[rep(1:n_clust, n_per_clust), , drop = FALSE]
-    prob_mat <- prob_mat[order(unlist(split(1:length(clusters),clusters), FALSE, FALSE)), , drop = FALSE]
+    prob_mat <- prob_mat[order(unlist(split(seq_along(clusters),clusters),
+                                      FALSE, FALSE)), , drop = FALSE]
     return(prob_mat)
   }

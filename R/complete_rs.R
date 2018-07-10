@@ -50,10 +50,12 @@ complete_rs <- function(N,
     n_dn <- floor(Np)
     n_up <- ceiling(Np)
     
-    # If rounding doesn't matter or rounds up to 100% use n_dn, (except when N=1)
-    n <- if (n_up == n_dn || (N > 1 && n_up == N)) n_dn 
-         else n_dn + sample(0:1, 1, prob = abs(1:0 - (Np - n_dn)))
-         
+    # If rounding doesn't matter or rounds up to 100% use n_dn except when N=1
+    n <- if (n_up == n_dn || (N > 1 && n_up == N)) {
+      n_dn
+    } else  {
+      n_dn + sample(0:1, 1, prob = abs(1:0 - (Np - n_dn)))
+    }
   }
   
   assignment <- sample(rep(c(0, 1), c(N - n, n)))
@@ -84,12 +86,15 @@ complete_rs_probabilities <- function(N,
                                       check_inputs = TRUE) {
   if (check_inputs) .invoke_check(check_samplr_arguments_new)
   
-  prob_vec <-  if (is.numeric(n))  
-                 #n / max(N,2) # 0,1=> 0, 1,1 => 1/2
-                  n / N
-               else if (is.numeric(prob)) 
-                 ifelse(N > 1 && ceiling(N * prob) == N,  floor(N * prob) / N, prob)
-               else .5
-
+  prob_vec <-  if (is.numeric(n))  {
+    #n / max(N,2) # 0,1=> 0, 1,1 => 1/2
+    n / N
+  } else if (is.numeric(prob)) {
+    ifelse(N > 1 && ceiling(N * prob) == N,
+           floor(N * prob) / N, prob)
+  } else {
+    .5
+  }
+  
   rep_len(prob_vec, N)
 }

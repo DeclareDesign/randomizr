@@ -130,3 +130,11 @@ test_that("obtain_inclusion_probabilities auto-declare",{
   expect_error(obtain_inclusion_probabilities(sleep))
   
 })
+
+
+test_that("print and summary", {
+  d <- declare_rs(N = 10, n = 4)
+  expect_output(print(d))
+  expect_output(summary(d))
+})
+

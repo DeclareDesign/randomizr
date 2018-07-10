@@ -62,8 +62,8 @@ strata_and_cluster_rs <-
            strata_n = NULL,
            strata_prob = NULL,
            check_inputs = TRUE) {
-
-    if (check_inputs) .invoke_check(check_samplr_arguments_new)
+    if (check_inputs)
+      .invoke_check(check_samplr_arguments_new)
     
     
     # Setup: obtain unique clusters
@@ -85,7 +85,8 @@ strata_and_cluster_rs <-
     # back up to the individual level, maintaining original ordering
     assignment <- rep(S_clust, n_per_clust)
     assignment <-
-      assignment[order(unlist(split(1:length(clusters), clusters), FALSE, FALSE))]
+      assignment[order(unlist(split(seq_along(clusters), clusters), 
+                              FALSE, FALSE))]
     return(assignment)
   }
 
@@ -146,8 +147,8 @@ strata_and_cluster_rs_probabilities <-
            strata_n = NULL,
            strata_prob = NULL,
            check_inputs = TRUE) {
-    
-    if (check_inputs) .invoke_check(check_samplr_arguments_new)
+    if (check_inputs)
+      .invoke_check(check_samplr_arguments_new)
     
     
     # Setup: obtain unique clusters
@@ -167,6 +168,6 @@ strata_and_cluster_rs_probabilities <-
     
     prob_vec <- rep(probs_clust, n_per_clust)
     prob_vec <-
-      prob_vec[order(unlist(split(1:length(clusters), clusters), FALSE, FALSE))]
+      prob_vec[order(unlist(split(seq_along(clusters), clusters), FALSE, FALSE))]
     return(prob_vec)
   }

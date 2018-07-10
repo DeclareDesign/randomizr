@@ -91,21 +91,33 @@ block_ra <- function(blocks = NULL,
   }
   
   block_spots <-
-    unlist(split(1:length(blocks), blocks), FALSE, FALSE)
+    unlist(split(seq_along(blocks), blocks), FALSE, FALSE)
   
   mapply_args <- list(
-    FUN="complete_ra",
-    SIMPLIFY=FALSE,
-    N=N_per_block,
+    FUN = "complete_ra",
+    SIMPLIFY = FALSE,
+    N = N_per_block,
     MoreArgs = list(
       conditions = conditions,
       num_arms = num_arms,
       check_inputs = FALSE
-  ))
+    )
+  )
   
-  assign_list <- block_ra_helper(blocks, prob, prob_each, m, 
-                                 block_m, block_m_each, block_prob,
-                                 block_prob_each, num_arms, N_per_block, mapply_args)
+  assign_list <-
+    block_ra_helper(
+      blocks,
+      prob,
+      prob_each,
+      m,
+      block_m,
+      block_m_each,
+      block_prob,
+      block_prob_each,
+      num_arms,
+      N_per_block,
+      mapply_args
+    )
   
   
   assignment <-
@@ -184,7 +196,7 @@ block_ra_probabilities <- function(blocks = NULL,
   }
   
   block_spots <-
-    unlist(split(1:length(blocks), blocks), FALSE, FALSE)
+    unlist(split(seq_along(blocks), blocks), FALSE, FALSE)
   
   blocks <- sort(unique(blocks))
 
@@ -199,9 +211,19 @@ block_ra_probabilities <- function(blocks = NULL,
     SIMPLIFY = FALSE
   )
 
-  prob_mat <-  block_ra_helper(blocks, prob, prob_each, m, 
-                               block_m, block_m_each, block_prob,
-                               block_prob_each, num_arms, N_per_block, mapply_args)
+  prob_mat <-  block_ra_helper(
+    blocks,
+    prob,
+    prob_each,
+    m,
+    block_m,
+    block_m_each,
+    block_prob,
+    block_prob_each,
+    num_arms,
+    N_per_block,
+    mapply_args
+  )
   
   prob_mat <- do.call(rbind, prob_mat)
   prob_mat <- prob_mat[order(block_spots), , drop = FALSE]
@@ -262,7 +284,7 @@ block_ra_helper <- function(blocks = NULL,
   
   else if (!is.null(block_m_each)) {
     block_m_each_list <-
-      split(block_m_each, 1:nrow(block_m_each))
+      split(block_m_each, seq_len(nrow(block_m_each)))
     
     ret <- list(m_each=block_m_each_list)
   }
@@ -272,7 +294,7 @@ block_ra_helper <- function(blocks = NULL,
   
   else if (!is.null(block_prob_each)) {
     block_prob_each_list <-
-      split(block_prob_each, 1:nrow(block_prob_each))
+      split(block_prob_each, seq_len(nrow(block_prob_each)))
     
     ret <- list(prob_each=block_prob_each_list)
   }

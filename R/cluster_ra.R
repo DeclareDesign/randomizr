@@ -51,9 +51,9 @@ cluster_ra <- function(clusters = NULL,
                        conditions = NULL,
                        simple = FALSE,
                        check_inputs = TRUE) {
+  if (check_inputs)
+    .invoke_check(check_randomizr_arguments_new)
   
-  if (check_inputs) .invoke_check(check_randomizr_arguments_new)
-
   n_per_clust <- tapply(clusters, clusters, length)
   n_clust <- length(n_per_clust)
   
@@ -65,13 +65,13 @@ cluster_ra <- function(clusters = NULL,
     conditions = conditions,
     check_inputs = check_inputs
   )
-
-  z_clust <- cluster_ra_helper("simple_ra", "complete_ra", delegate_args, simple, m, m_each);
   
-
+  z_clust <- cluster_ra_helper("simple_ra", "complete_ra",
+                               delegate_args, simple, m, m_each)
+  
   assignment <- rep(z_clust, n_per_clust)
   assignment <-
-    assignment[order(unlist(split(1:length(clusters), clusters), FALSE, FALSE))]
+    assignment[order(unlist(split(seq_along(clusters), clusters), FALSE, FALSE))]
   return(assignment)
 }
 #' probabilities of assignment: Cluster Random Assignment
@@ -126,43 +126,57 @@ cluster_ra_probabilities <-
            conditions = NULL,
            simple = FALSE,
            check_inputs = TRUE) {
-  
-
-    
-    if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+    if (check_inputs)
+      .invoke_check(check_randomizr_arguments_new)
     
     n_per_clust <- tapply(clusters, clusters, length)
     unique_clust <- names(n_per_clust)
     n_clust <- length(unique_clust)
     
     delegate_args <- list(
-        N = n_clust,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions,
-        check_inputs = check_inputs
+      N = n_clust,
+      prob = prob,
+      prob_each = prob_each,
+      num_arms = num_arms,
+      conditions = conditions,
+      check_inputs = check_inputs
     )
-
-    probs_clust <- cluster_ra_helper("simple_ra_probabilities", "complete_ra_probabilities", delegate_args, simple, m, m_each);
+    
+    
+    probs_clust <-
+      cluster_ra_helper(
+        "simple_ra_probabilities",
+        "complete_ra_probabilities",
+        delegate_args,
+        simple,
+        m,
+        m_each
+      )
     
     prob_mat <-
       probs_clust[rep(1:n_clust, n_per_clust), , drop = FALSE]
     prob_mat <-
-      prob_mat[order(unlist(split(1:length(clusters), clusters), FALSE, FALSE)), , drop = FALSE]
+      prob_mat[order(unlist(split(seq_along(clusters), clusters),
+                            FALSE, FALSE)), , drop = FALSE]
     return(prob_mat)
   }
 
-# consolidated logic for simple vs complete, 
-cluster_ra_helper <- function(simple_delegate, complete_delegate, delegate_args, simple, m, m_each){
-  if (simple) {
-    delegate <- simple_delegate
-  } else{
-    delegate <- complete_delegate
-    delegate_args$m <- m
-    delegate_args$m_each <- m_each
+# consolidated logic for simple vs complete,
+cluster_ra_helper <-
+  function(simple_delegate,
+           complete_delegate,
+           delegate_args,
+           simple,
+           m,
+           m_each) {
+    if (simple) {
+      delegate <- simple_delegate
+    } else{
+      delegate <- complete_delegate
+      delegate_args$m <- m
+      delegate_args$m_each <- m_each
+    }
+    
+    do.call(delegate, delegate_args)
+    
   }
-  
-  do.call(delegate, delegate_args)
-  
-}

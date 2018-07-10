@@ -11,7 +11,6 @@
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
 #' @param check_inputs logical. Defaults to TRUE.
-#' @param condition_names DEPRECATED
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.
 #' @export
@@ -42,22 +41,21 @@
 #'
 #' Z <- simple_ra(N=100, conditions=c("control", "placebo", "treatment"))
 #' table(Z)
-simple_ra <- function(N, prob = NULL, prob_each = NULL,
-                      num_arms = NULL, conditions = condition_names, check_inputs = TRUE, condition_names=NULL
-) {
-  if(!is.null(condition_names)) warning("condition_names is deprecated, use conditions instead.")
-  if (check_inputs) .invoke_check(check_randomizr_arguments_new)
-  prob_mat <- simple_ra_probabilities(N, prob, prob_each, num_arms, conditions, FALSE)
+simple_ra <- function(N,
+                      prob = NULL,
+                      prob_each = NULL,
+                      num_arms = NULL,
+                      conditions = NULL,
+                      check_inputs = TRUE) {
+  if (check_inputs) {
+    .invoke_check(check_randomizr_arguments_new)
+  }
+  prob_mat <-
+    simple_ra_probabilities(N, prob, prob_each, num_arms, conditions, FALSE)
   assignment <- conditions[vsample(prob_mat)]
   assignment <- clean_condition_names(assignment, conditions)
   return(assignment)
 }
-
-# vsample <- function(prob_mat, conditions){
-#   i <- max.col(runif(nrow(prob_mat)) <=  t(apply(prob_mat, 1, cumsum)), "first")
-#   conditions[i]
-# }
-
 
 #' probabilities of assignment: Simple Random Assignment
 #'
@@ -100,13 +98,19 @@ simple_ra_probabilities <-
            check_inputs = TRUE) {
     if (check_inputs) .invoke_check(check_randomizr_arguments_new)
     
-    
     # Three easy cases
-    condition_probabilities <- if(is.matrix(prob_each))        t(prob_each) 
-                               else if(is.numeric(prob_each))  prob_each
-                               else if(length(prob) > 1)       rbind(1 - prob, prob)
-                               else if(is.numeric(prob))       c(1- prob, prob)
-                               else                            1 / num_arms
+    condition_probabilities <-
+      if (is.matrix(prob_each)) {
+        t(prob_each)
+      } else if (is.numeric(prob_each)) {
+        prob_each
+      } else if (length(prob) > 1) {
+        rbind(1 - prob, prob)
+      } else if (is.numeric(prob)) {
+        c(1 - prob, prob)
+      } else{
+        1 / num_arms
+      }
 
     # Build prob_mat
     prob_mat <- matrix(

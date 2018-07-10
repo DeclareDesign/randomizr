@@ -1,5 +1,7 @@
 
 
+
+
 context("Complete Random Assignments")
 
 test_that("Invalid complete RAs", {
@@ -15,52 +17,48 @@ test_that("Invalid complete RAs", {
 })
 
 test_that("N=100, m=3", {
-  expect_identical(
-  
-    table(complete_ra(
-      100,
-      m = 30,
-      conditions = c("Control", "Treatment")
-    )),
-    structure(c(70L, 30L), .Dim = 2L, .Dimnames = structure(list(
-      c("Control", "Treatment")), .Names = ""), class = "table")
-  )
+  expect_identical(table(complete_ra(
+    100,
+    m = 30,
+    conditions = c("Control", "Treatment")
+  )),
+  structure(
+    c(70L, 30L),
+    .Dim = 2L,
+    .Dimnames = structure(list(c(
+      "Control", "Treatment"
+    )), .Names = ""),
+    class = "table"
+  ))
 })
 
 
 # should this be allowed?
 test_that("num_arms=1", {
-  expect_equal(
-    complete_ra(100, num_arms = 1),
-    factor(rep("T1", 100))
-  )
+  expect_equal(complete_ra(100, num_arms = 1),
+               factor(rep("T1", 100)))
 })
 
 test_that("m_each = N", {
-  expect_equal(
-    complete_ra(100, m_each = c(100)),
-    factor(rep("T1", 100))
-  )
+  expect_equal(complete_ra(100, m_each = c(100)),
+               factor(rep("T1", 100)))
 })
 
 test_that("length(conditions) = 1", {
-  expect_equal(
-    complete_ra(100, conditions = c("Treatment")),
-    factor(rep("Treatment", 100))
-  )
+  expect_equal(complete_ra(100, conditions = c("Treatment")),
+               factor(rep("Treatment", 100)))
 })
 
 test_that("N=1 num_arms=2", {
+  expect_equivalent(as.numeric(sort(table(
+    complete_ra(1, num_arms = 2)
+  ))),
+  0:1)
   
-  expect_equivalent(
-    as.numeric(sort(table(complete_ra(1, num_arms = 2)))),
-    0:1
-  )
-  
-  expect_equivalent(
-    as.numeric(table(complete_ra(1, num_arms = 2, conditions = 0:1))),
-    1
-  )
+  expect_equivalent(as.numeric(table(
+    complete_ra(1, num_arms = 2, conditions = 0:1)
+  )),
+  1)
 })
 
 test_that("N=100", {
@@ -113,33 +111,30 @@ test_that("30/30/40 with named conditions", {
 })
 
 test_that("3 named conditions", {
-  
   Z <- complete_ra(N = 100,
-                conditions = c("control", "placebo", "treatment"))
+                   conditions = c("control", "placebo", "treatment"))
   
   expect_true(all(table(Z) %in% c(33, 34)))
 })
 
 test_that("zero in m_each", {
   Z <- complete_ra(2,
-          m_each = c(1, 0, 1),
-          conditions = c("T1", "T2", "T3")
-        )
+                   m_each = c(1, 0, 1),
+                   conditions = c("T1", "T2", "T3"))
   expect_true(all(Z != "T2"))
 })
 
 test_that("Not biased", {
-  
   expect_lt(sum(replicate(1000, complete_ra(1))), 600)
   expect_gt(sum(replicate(1000, complete_ra(1))), 400)
   # correct!
   replicate(100, complete_ra(N = 1, m = 1))
   
-  for(N in 1:5) {
-    expect_equal(
-      sum(replicate(100, complete_ra(N = N, m = 0))),
-      0
-    )
+  for (N in 1:5) {
+    expect_equal(sum(replicate(100, complete_ra(
+      N = N, m = 0
+    ))),
+    0)
   }
   
   expect_equal(complete_ra(N = 2, m = 2), c(1, 1))
@@ -162,8 +157,8 @@ test_that("zeros in m_each", {
   expect_equivalent(table(Z)["T3"], 0)
 })
 
-test_that("N=1 handling",{
-  expect_error(S <- complete_ra(N = 1, m=.5))
+test_that("N=1 handling", {
+  expect_error(S <- complete_ra(N = 1, m = .5))
   S <- complete_ra(N = 1, prob = .2)
   
   #expect_equivalent(complete_ra_probabilities(N = 1, m = 1), c(.5, .5))
@@ -173,20 +168,25 @@ test_that("N=1 handling",{
   expect_equivalent(complete_ra_probabilities(N = 1), c(.5, .5))
   expect_equivalent(complete_ra_probabilities(N = 1, prob = .2), c(.8, .2))
   
-  expect_error(complete_ra_probabilities(N = 1, m = .5))  
+  expect_error(complete_ra_probabilities(N = 1, m = .5))
   
   expect_true(all(c(0, 1) %in% replicate(100, complete_ra(N = 1))))
-  expect_true(all(replicate(100, complete_ra(N = 1, m = 1)) == 1))
-  expect_true(all(replicate(100, complete_ra(N = 1, m = 0)) == 0))
+  expect_true(all(replicate(100, complete_ra(
+    N = 1, m = 1
+  )) == 1))
+  expect_true(all(replicate(100, complete_ra(
+    N = 1, m = 0
+  )) == 0))
   
 })
 
-test_that("N=2 roundup rule",{
-  expect_equivalent(complete_ra_probabilities(N = 2, prob = .95), c(.5, .5, .5, .5))
+test_that("N=2 roundup rule", {
+  expect_equivalent(complete_ra_probabilities(N = 2, prob = .95),
+                    c(.5, .5, .5, .5))
 })
 
 
-test_that("multi-dim fixup",{
+test_that("multi-dim fixup", {
   ra <- declare_ra(N = 4, prob_each = c(1, 1, 1, 2) / 5)
   expect_length(table(obtain_permutation_probabilities(ra)), 7)
 })

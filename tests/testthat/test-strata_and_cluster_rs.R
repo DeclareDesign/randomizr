@@ -15,35 +15,40 @@ expect_only_one_per_cluster <- function(Z, w = 1) {
 }
 
 
-test_that("defaults",{
+test_that("defaults", {
   S <- strata_and_cluster_rs(clusters = clusters, strata = strata)
-  probs <- strata_and_cluster_rs_probabilities(clusters = clusters, strata = strata)
+  probs <-
+    strata_and_cluster_rs_probabilities(clusters = clusters, strata = strata)
   
   expect_only_one_per_cluster(S)
-
+  
 })
 
-test_that("n=1",{
-    
-  S <- strata_and_cluster_rs(clusters = clusters, strata = strata, n = 2)
-  probs <- strata_and_cluster_rs_probabilities(clusters = clusters, strata = strata, n = 2)
+test_that("n=1", {
+  S <-
+    strata_and_cluster_rs(clusters = clusters,
+                          strata = strata,
+                          n = 2)
+  probs <-
+    strata_and_cluster_rs_probabilities(clusters = clusters,
+                                        strata = strata,
+                                        n = 2)
   
   expect_only_one_per_cluster(S)
-
+  
 })
 
-test_that("prob=.5",{
-    
+test_that("prob=.5", {
   S <- strata_and_cluster_rs(clusters = clusters,
                              strata = strata,
                              prob = .5)
-  probs <- strata_and_cluster_rs_probabilities(clusters = clusters, strata = strata)
+  probs <-
+    strata_and_cluster_rs_probabilities(clusters = clusters, strata = strata)
   
   expect_only_one_per_cluster(S)
 })
 
-test_that("prob = 0",{
-  
+test_that("prob = 0", {
   S <- strata_and_cluster_rs(clusters = clusters,
                              strata = strata,
                              prob = 0)
@@ -55,8 +60,8 @@ test_that("prob = 0",{
   expect_true(all(probs == 0))
 })
 
-test_that("prob = 1",{
-  S <- strata_and_cluster_rs(clusters = clusters, 
+test_that("prob = 1", {
+  S <- strata_and_cluster_rs(clusters = clusters,
                              strata = strata,
                              prob = 1)
   probs <- strata_and_cluster_rs_probabilities(clusters = clusters,
@@ -67,28 +72,34 @@ test_that("prob = 1",{
   expect_true(all(probs == 1))
 })
 
-test_that("strata_n",{
-  S <- strata_and_cluster_rs(clusters = clusters,
-                             strata = strata,
-                             strata_n = c(2, 3, 2, 3, 2)
-                             )
+test_that("strata_n", {
+  S <- strata_and_cluster_rs(
+    clusters = clusters,
+    strata = strata,
+    strata_n = c(2, 3, 2, 3, 2)
+  )
   
-  probs <- strata_and_cluster_rs_probabilities(clusters = clusters,
-                                               strata = strata,
-                                               strata_n = c(2, 3, 2, 3, 2))
+  probs <- strata_and_cluster_rs_probabilities(
+    clusters = clusters,
+    strata = strata,
+    strata_n = c(2, 3, 2, 3, 2)
+  )
   
   expect_only_one_per_cluster(S)
 })
 
-test_that("strata_prob",{
-  S <- strata_and_cluster_rs(clusters = clusters,
-                             strata = strata,
-                             strata_prob = c(.1, .2, .3, .4, .5)
-                             )
+test_that("strata_prob", {
+  S <- strata_and_cluster_rs(
+    clusters = clusters,
+    strata = strata,
+    strata_prob = c(.1, .2, .3, .4, .5)
+  )
   
-  probs <- strata_and_cluster_rs_probabilities(clusters = clusters,
-                                               strata = strata,
-                                               strata_prob = c(.1, .2, .3, .4, .5))
+  probs <- strata_and_cluster_rs_probabilities(
+    clusters = clusters,
+    strata = strata,
+    strata_prob = c(.1, .2, .3, .4, .5)
+  )
   
   expect_only_one_per_cluster(S)
 })

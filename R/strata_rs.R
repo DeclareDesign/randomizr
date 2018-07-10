@@ -20,7 +20,7 @@
 #'
 #' Z <- strata_rs(strata = strata, prob = .3)
 #' table(strata, Z)
-#' 
+#'
 #' Z <- strata_rs(strata = strata, n = 20)
 #' table(strata, Z)
 #'
@@ -37,7 +37,6 @@ strata_rs <- function(strata = NULL,
                       strata_n = NULL,
                       strata_prob = NULL,
                       check_inputs = TRUE) {
-  
   if (check_inputs) {
     .invoke_check(check_samplr_arguments_new)
   } else{
@@ -46,11 +45,12 @@ strata_rs <- function(strata = NULL,
   }
   
   strata_spots <-
-    unlist(split(1:length(strata), strata), FALSE, FALSE)
+    unlist(split(seq_along(strata), strata), FALSE, FALSE)
   
   # Setup: obtain number of arms and conditions
   
-  if (is.null(prob) && is.null(strata_n) && is.null(strata_prob) && is.null(n)) {
+  if (is.null(prob) &&
+      is.null(strata_n) && is.null(strata_prob) && is.null(n)) {
     prob <- 0.5
   }
   
@@ -65,13 +65,14 @@ strata_rs <- function(strata = NULL,
         SIMPLIFY = FALSE
       )
     
-    assignment <- unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
+    assignment <-
+      unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
     return(assignment)
   }
   
   # Case 2: strata_n is specified
   
-  if(!is.null(n)){
+  if (!is.null(n)) {
     strata_n <- rep(n, length(N_per_stratum))
   }
   
@@ -85,7 +86,8 @@ strata_rs <- function(strata = NULL,
         SIMPLIFY = FALSE
       )
     
-    assignment <- unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
+    assignment <-
+      unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
     return(assignment)
   }
   
@@ -100,7 +102,8 @@ strata_rs <- function(strata = NULL,
         SIMPLIFY = FALSE
       )
     
-    assignment <- unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
+    assignment <-
+      unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
     return(assignment)
   }
 }
@@ -142,9 +145,10 @@ strata_rs_probabilities <- function(strata = NULL,
   
   
   strata_spots <-
-    unlist(split(1:length(strata), strata), FALSE, FALSE)
+    unlist(split(seq_along(strata), strata), FALSE, FALSE)
   
-  if (is.null(prob) && is.null(strata_n) && is.null(strata_prob) && is.null(n)) {
+  if (is.null(prob) &&
+      is.null(strata_n) && is.null(strata_prob) && is.null(n)) {
     prob <- 0.5
   }
   
@@ -154,9 +158,9 @@ strata_rs_probabilities <- function(strata = NULL,
     return(prob_vec)
   }
   
-
+  
   # Case 2: strata_n is specified, or n is
-  if(is.numeric(n) && !is.numeric(strata_n)){
+  if (is.numeric(n) && !is.numeric(strata_n)) {
     strata_n <- rep_len(n, length(N_per_stratum))
   }
   

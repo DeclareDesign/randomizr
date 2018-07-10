@@ -137,7 +137,7 @@ declare_ra <- function(N = NULL,
   
   return_object <- list2env(all_args, parent = emptyenv())
   
-  return_object$ra_function = function() {
+  return_object$ra_function <- function() {
     .Deprecated("conduct_ra")
     ra_function(return_object) #todo
   }
@@ -255,8 +255,9 @@ obtain_condition_probabilities <-
     
     pmat <-
       declaration$probabilities_matrix # this may have been delayAssigned
-    cond_probs <- pmat[cbind(seq_len(nrow(pmat)),
-                             match(paste0("prob_", assignment), colnames(pmat)))]
+    cond_probs <-
+      pmat[cbind(seq_len(nrow(pmat)),
+                 match(paste0("prob_", assignment), colnames(pmat)))]
     return(cond_probs)
   }
 
@@ -266,11 +267,12 @@ formals(obtain_condition_probabilities) <-
 
 
 #' @export
-summary.ra_declaration <- function(obj, ...){
-  print(obj, ... = ...)
+summary.ra_declaration <- function(object, ...) {
+  print(object, ... = ...)
 }
 
 #' @export
+#' @importFrom utils head
 print.ra_declaration <- function(x, ...) {
   Z <- conduct_ra(x)
   n <- length(Z)
@@ -309,10 +311,14 @@ print.ra_declaration <- function(x, ...) {
   if (obtain_num_permutations(x) == Inf) {
     cat("The number of possible random assignments is approximately infinite. \n")
   } else {
-    cat(paste0("The number of possible random assignments is ",
+    cat(
+      paste0(
+        "The number of possible random assignments is ",
         obtain_num_permutations(x),
-        ". "),
-"\n")
+        ". "
+      ),
+      "\n"
+    )
   }
   if (all(apply(x$probabilities_matrix, 2, is_constant))) {
     cat("The probabilities of assignment are constant across units: \n")
@@ -325,4 +331,5 @@ print.ra_declaration <- function(x, ...) {
       "typically by employing inverse probability weights."
     )
   }
+  invisible(x)
 }

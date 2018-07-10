@@ -24,7 +24,7 @@ perms <- obtain_permutation_matrix(declaration)
 dim(perms)
 obtain_num_permutations(declaration)
 
-# blocked 
+# blocked
 
 blocks <- c("A", "A", "B", "B", "C", "C", "C")
 declaration <- declare_ra(blocks = blocks)

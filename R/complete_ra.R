@@ -130,8 +130,9 @@ complete_ra <- function(N,
         prob_fix_up <- .5
       }
       
-      m <- sample(c(m_ceiling, m_floor), 1, prob = c(prob_fix_up, 1 - prob_fix_up))
-
+      m <- sample(c(m_ceiling, m_floor), 1,
+                  prob = c(prob_fix_up, 1 - prob_fix_up))
+      
       assignment <- sample(rep(conditions, c(N - m, m)))
       assignment <-
         clean_condition_names(assignment, conditions)

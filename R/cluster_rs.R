@@ -41,7 +41,7 @@ cluster_rs <- function(clusters=NULL,
   }
   assignment <- rep(S_clust, n_per_clust)
   assignment <-
-    assignment[order(unlist(split(1:length(clusters), clusters), FALSE, FALSE))]
+    assignment[order(unlist(split(seq_along(clusters), clusters), FALSE, FALSE))]
   return(assignment)
 }
 #' Inclusion Probabilities: Cluster Sampling
@@ -91,6 +91,7 @@ cluster_rs_probabilities <-
     
     prob_vec <- rep(probs_clust, n_per_clust)
     prob_vec <-
-      prob_vec[order(unlist(split(1:length(clusters), clusters), FALSE, FALSE))]
+      prob_vec[order(unlist(split(seq_along(clusters), clusters), 
+                            FALSE, FALSE))]
     return(prob_vec)
   }
