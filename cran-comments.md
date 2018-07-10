@@ -1,6 +1,6 @@
-## Update randomizr to version 0.16.0
+## Update randomizr to version 0.16.1
 * small bug fixes
-* complete_ra without replacement for remainders
+* add summary method
 
 ## Test environments
 * local OS X install, R version 3.5.0 (2018-04-23) (Joy in Playing)
