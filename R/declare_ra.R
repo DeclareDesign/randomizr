@@ -107,20 +107,21 @@ declare_ra <- function(N = NULL,
                        check_inputs = TRUE) {
   input_check <- NULL
   all_args <-  mget(names(formals(sys.function())))
-
+  
   
   if (check_inputs && is.null(permutation_matrix)) {
     input_check <- check_randomizr_arguments_new(all_args)
-    for(i in names(input_check))
+    for (i in names(input_check))
       all_args[[i]] <- input_check[[i]]
-    all_args$check_inputs <- FALSE # don't need to recheck when using declaration
+    all_args$check_inputs <-
+      FALSE # don't need to recheck when using declaration
   }
   
   is_block <- is.vector(blocks) || is.factor(blocks)
   is_clust <- is.vector(clusters) || is.factor(clusters)
   
   # Determine ra_type
-  if (is.matrix(permutation_matrix)){
+  if (is.matrix(permutation_matrix)) {
     ra_type <- "custom"
   } else  if (is_block && is_clust) {
     ra_type <- "blocked_and_clustered"
@@ -135,29 +136,32 @@ declare_ra <- function(N = NULL,
   }
   
   return_object <- list2env(all_args, parent = emptyenv())
-
+  
   return_object$ra_function = function() {
     .Deprecated("conduct_ra")
     ra_function(return_object) #todo
   }
-
+  
   delayedAssign("ra_type", {
-    warning("ra_type is deprecated; check the object class instead.")     
-    ra_type 
+    warning("ra_type is deprecated; check the object class instead.")
+    ra_type
   }, assign.env = return_object)
   
-    
+  
   delayedAssign("cleaned_arguments", {
-    warning("cleaned_arguments is deprecated")     
-    input_check 
+    warning("cleaned_arguments is deprecated")
+    input_check
   }, assign.env = return_object)
-
-
-  delayedAssign("probabilities_matrix", ra_probabilities(return_object), assign.env = return_object)
-
-
-  class(return_object) <- c("ra_declaration", paste0("ra_", ra_type))
-  attr(return_object, "call") <- match.call() 
+  
+  
+  delayedAssign("probabilities_matrix",
+                ra_probabilities(return_object),
+                assign.env = return_object)
+  
+  
+  class(return_object) <-
+    c("ra_declaration", paste0("ra_", ra_type))
+  attr(return_object, "call") <- match.call()
   return(return_object)
   
 }
@@ -183,7 +187,7 @@ declare_ra <- function(N = NULL,
 conduct_ra <- function(declaration = NULL) {
   if (is.null(declaration)) {
     all_args <- mget(names(formals(declare_ra)))
-    declaration <- do.call(declare_ra, all_args) 
+    declaration <- do.call(declare_ra, all_args)
   } else if (!inherits(declaration, "ra_declaration")) {
     stop("You must provide a random assignment declaration created by declare_ra().")
   }
@@ -243,22 +247,28 @@ obtain_condition_probabilities <-
         N <- length(assignment)
       }
       all_args <- mget(names(formals(declare_ra)))
-      declaration <- do.call(declare_ra, all_args) 
+      declaration <- do.call(declare_ra, all_args)
     } else if (!inherits(declaration, "ra_declaration")) {
       stop("You must provide a random assignment declaration created by declare_ra().")
     }
     
     
-    pmat <- declaration$probabilities_matrix # this may have been delayAssigned
-    cond_probs <- pmat[cbind(
-      seq_len(nrow(pmat)), 
-      match(paste0("prob_", assignment), colnames(pmat))
-    )]
+    pmat <-
+      declaration$probabilities_matrix # this may have been delayAssigned
+    cond_probs <- pmat[cbind(seq_len(nrow(pmat)),
+                             match(paste0("prob_", assignment), colnames(pmat)))]
     return(cond_probs)
   }
 
-formals(obtain_condition_probabilities) <- c(formals(obtain_condition_probabilities), formals(declare_ra))
+formals(obtain_condition_probabilities) <-
+  c(formals(obtain_condition_probabilities),
+    formals(declare_ra))
 
+
+#' @export
+summary.ra_declaration <- function(obj, ...){
+  print(obj)
+}
 
 #' @export
 print.ra_declaration <- function(x, ...) {
@@ -267,26 +277,47 @@ print.ra_declaration <- function(x, ...) {
   
   conditions <- sort(unique(Z))
   num_arms <- length(conditions)
-
-  cat("Random assignment procedure:" ,
-      switch(class(x)[2], 
-             "ra_blocked"="Block",
-             "ra_clustered"="Cluster",
-             "ra_simple"="Simple",
-             "ra_blocked_and_clustered"="Blocked and clustered",
-             "ra_complete"="Complete"
-             ),
-      "random assignment", "\n",
   
-      "Number of units:", n, "\n",
-      if (!is.null(x$blocks)) sprintf("Number of blocks: %d\n", length(unique(x$blocks))),
-      if (!is.null(x$clusters)) sprintf("Number of clusters: %d\n", length(unique(x$clusters))),
-      "Number of treatment arms:", num_arms, "\n",
-
-      sprintf("The possible treatment categories are %s.\n", paste(conditions, collapse = " and ") )
-  )
+  cat("Random assignment procedure:" ,
+      switch(
+        class(x)[2],
+        "ra_blocked" = "Block",
+        "ra_clustered" = "Cluster",
+        "ra_simple" = "Simple",
+        "ra_blocked_and_clustered" = "Blocked and clustered",
+        "ra_complete" = "Complete"
+      ),
+      "random assignment",
+      "\n")
+  
+  cat("Number of units:", n, "\n")
+  
+  if (!is.null(x$blocks)) {
+    cat(sprintf("Number of blocks: %d\n", length(unique(x$blocks))))
+  }
+  if (!is.null(x$clusters)) {
+    cat(sprintf("Number of clusters: %d\n", length(unique(x$clusters))))
+  }
+  
+  cat("Number of treatment arms:", num_arms, "\n")
+  
+  cat(sprintf(
+    "The possible treatment categories are %s.\n",
+    paste(conditions, collapse = " and ")
+  ))
+  
+  if (obtain_num_permutations(x) == Inf) {
+    cat("The number of possible random assignments is approximately infinite. \n")
+  } else {
+    cat(paste0("The number of possible random assignments is ",
+        obtain_num_permutations(x),
+        ". "),
+"\n")
+  }
   if (all(apply(x$probabilities_matrix, 2, is_constant))) {
-    cat("The probabilities of assignment are constant across units.")
+    cat("The probabilities of assignment are constant across units: \n")
+    print(apply(x$probabilities_matrix, 2, head, n = 1))
+    
   } else{
     cat(
       "The probabilities of assignment are NOT constant across units.",
