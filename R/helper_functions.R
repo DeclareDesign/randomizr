@@ -242,14 +242,14 @@ check_randomizr_arguments <-
       )
     }
     if (is.vector(prob_each)) {
-      if (sum(prob_each) != 1) {
+      if (!all.equal(sum(prob_each), 1)) {
         stop(
           "The sum of the probabilities of assignment to each condition (prob_each) must equal 1 for each obs."
         )
       }
     }
     else if (is.matrix(prob_each)) {
-      if (any(rowSums(prob_each) != 1)) {
+      if (any(sapply(rowSums(prob_each), FUN = function(x) !all.equal(x, 1)))) {
         stop(
           "The sum of the probabilities of assignment to each condition (prob_each) must equal 1 for each obs."
         )
@@ -343,7 +343,7 @@ check_randomizr_arguments <-
         "If specified, block_prob_each should have the same number of rows as there are unique blocks in blocks"
       )
     }
-    if (is.null(clusters) && any(rowSums(block_prob_each) != 1)) {
+    if (is.null(clusters) && any(sapply(rowSums(block_prob_each), function(x) !all.equal(x, 1)))) {
       stop("If specified, each row of block_prob_each must sum to 1.")
     }
     

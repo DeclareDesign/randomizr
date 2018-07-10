@@ -1,6 +1,7 @@
 ## Update randomizr to version 0.16.1
 * small bug fixes
 * add summary method
+* Addresses noLD <https://www.stats.ox.ac.uk/pub/bdr/noLD/randomizr.out>
 
 ## Test environments
 * local OS X install, R version 3.5.0 (2018-04-23) (Joy in Playing)
