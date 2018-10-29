@@ -5,7 +5,9 @@
 #' @param strata A vector of length N that indicates which stratum each unit belongs to.
 #' @param clusters A vector of length N that indicates which cluster each unit belongs to.
 #' @param prob Use for a design in which either floor(N_clusters_stratum*prob) or ceiling(N_clusters_stratum*prob) clusters are sampled within each stratum. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters_stratum*prob) clusters will be sampled and with probability prob, ceiling(N_clusters_stratum*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
+#' @param prob_unit Must of be of length N. tapply(prob_unit, blocks, unique) will be passed to `strata_prob`.
 #' @param n Use for a design in which the scalar n describes the fixed number of units to sample in each stratum. This number does not vary across strata.
+#' @param n_unit Must be of length N. tapply(m_unit, blocks, unique) will be passed to `strata_n`.
 #' @param strata_n Use for a design in which strata_n describes the number of units to sample within each stratum.
 #' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.
 #' @param check_inputs logical. Defaults to TRUE.
@@ -58,7 +60,9 @@ strata_and_cluster_rs <-
   function(strata = NULL,
            clusters = NULL,
            prob = NULL,
+           prob_unit = NULL,
            n = NULL,
+           n_unit = NULL,
            strata_n = NULL,
            strata_prob = NULL,
            check_inputs = TRUE) {
@@ -71,6 +75,14 @@ strata_and_cluster_rs <-
     
     # get the stratum for each cluster
     clust_strata <- tapply(strata, clusters, unique)
+    
+    if(!is.null(prob_unit)){
+      strata_prob <- tapply(prob_unit, strata, unique)
+    }
+    
+    if(!is.null(n_unit)){
+      strata_n <- tapply(n_unit, strata, unique)
+    }
     
     # Conduct random assignment at cluster level
     S_clust <- strata_rs(
@@ -143,7 +155,9 @@ strata_and_cluster_rs_probabilities <-
   function(strata = NULL,
            clusters = NULL,
            prob = NULL,
+           prob_unit = NULL,
            n = NULL,
+           n_unit = NULL,
            strata_n = NULL,
            strata_prob = NULL,
            check_inputs = TRUE) {
@@ -156,6 +170,14 @@ strata_and_cluster_rs_probabilities <-
     
     # get the stratum for each cluster
     clust_strata <- tapply(strata, clusters, unique)
+    
+    if(!is.null(prob_unit)){
+      strata_prob <- tapply(prob_unit, strata, unique)
+    }
+    
+    if(!is.null(n_unit)){
+      strata_n <- tapply(n_unit, strata, unique)
+    }
     
     probs_clust <- strata_rs_probabilities(
       strata = clust_strata,

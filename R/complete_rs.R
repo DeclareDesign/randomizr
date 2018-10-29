@@ -9,7 +9,9 @@
 #'
 #' @param N The number of units. N must be a positive integer. (required)
 #' @param n Use for a design in which exactly n units are sampled. (optional)
+#' @param n_unit unique(n_unit) will be passed to `n`. Must be the same for all units (optional)
 #' @param prob Use for a design in which either floor(N*prob) or ceiling(N*prob) units are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units will be sampled and with probability prob, ceiling(N*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
+#' @param prob_unit unique(prob_unit) will be passed to the prob argument and must be the same for all units.
 #' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
@@ -35,10 +37,28 @@
 #'
 complete_rs <- function(N,
                         n = NULL,
+                        n_unit = NULL,
                         prob = NULL,
+                        prob_unit = NULL,
                         check_inputs = TRUE) {
   # Checks
   if (check_inputs) .invoke_check(check_samplr_arguments_new)
+  
+  if (!is.null(prob_unit)) {
+    unique_prob_unit <- unique(prob_unit)
+    if (length(unique_prob_unit) > 1) {
+      stop("In a complete random sampling design, `prob_unit` must be the same for all units")
+    }
+    prob <- unique(prob_unit)
+  }
+  
+  if(!is.null(n_unit)) {
+    unique_n_unit <- unique(n_unit)
+    if (length(unique_n_unit) > 1) {
+      stop("In a complete random sampling design, `n_unit` must be the same for all units")
+    }
+    n <- unique(n_unit)
+  }
   
   if (is.null(n)) {
     
@@ -82,9 +102,27 @@ complete_rs <- function(N,
 #' @export
 complete_rs_probabilities <- function(N,
                                       n = NULL,
+                                      n_unit = NULL,
                                       prob = NULL,
+                                      prob_unit = NULL,
                                       check_inputs = TRUE) {
   if (check_inputs) .invoke_check(check_samplr_arguments_new)
+  
+  if (!is.null(prob_unit)) {
+    unique_prob_unit <- unique(prob_unit)
+    if (length(unique_prob_unit) > 1) {
+      stop("In a complete random sampling design, `prob_unit` must be the same for all units")
+    }
+    prob <- unique(prob_unit)
+  }
+  
+  if(!is.null(n_unit)) {
+    unique_n_unit <- unique(n_unit)
+    if (length(unique_n_unit) > 1) {
+      stop("In a complete random sampling design, `n_unit` must be the same for all units")
+    }
+    n <- unique(n_unit)
+  }
   
   prob_vec <-  if (is.numeric(n))  {
     #n / max(N,2) # 0,1=> 0, 1,1 => 1/2

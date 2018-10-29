@@ -4,13 +4,15 @@
 \alias{simple_ra}
 \title{Simple Random Assignment}
 \usage{
-simple_ra(N, prob = NULL, prob_each = NULL, num_arms = NULL,
-  conditions = NULL, check_inputs = TRUE)
+simple_ra(N, prob = NULL, prob_unit = NULL, prob_each = NULL,
+  num_arms = NULL, conditions = NULL, check_inputs = TRUE)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
 
-\item{prob}{Use for a two-arm design. prob is the probability of assignment to treatment and must be a real number between 0 and 1 inclusive and must be length 1 or N. (optional)}
+\item{prob}{Use for a two-arm design. prob is the probability of assignment to treatment and must be a real number between 0 and 1 inclusive and must be length 1. (optional)}
+
+\item{prob_unit}{Use for a two-arm design. prob is the probability of assignment to treatment and must be a real number between 0 and 1 inclusive and must be length N. (optional)}
 
 \item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. It may be a conditions-length vector or a N-by-conditions matrix.  (optional)}
 

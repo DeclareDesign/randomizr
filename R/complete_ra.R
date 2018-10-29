@@ -10,8 +10,10 @@
 #'
 #' @param N The number of units. N must be a positive integer. (required)
 #' @param m Use for a two-arm design in which m units are assigned to treatment and N-m units are assigned to control. (optional)
+#' @param m_unit Use for a two-arm design in which exactly unique(m_unit) units are assigned to treatment and the remainder are assigned to control. m_unit must be of length N and must be the same for all units (optional)
 #' @param m_each Use for a multi-arm design in which the values of m_each determine the number of units assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many units should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)
 #' @param prob Use for a two-arm design in which either floor(N*prob) or ceiling(N*prob) units are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N*prob) units will be assigned to treatment and with probability prob, ceiling(N*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
+#' @param prob_unit Use for a two-arm design. unique(prob_unit) will be passed to the prob argument and must be the same for all units.
 #' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
@@ -62,14 +64,34 @@
 #'
 complete_ra <- function(N,
                         m = NULL,
+                        m_unit = NULL,
                         m_each = NULL,
                         prob = NULL,
+                        prob_unit = NULL,
                         prob_each = NULL,
                         num_arms = NULL,
                         conditions = NULL,
                         check_inputs = TRUE) {
   if (check_inputs) .invoke_check(check_randomizr_arguments_new)
   
+    
+    
+  # Annoying that these checks aren't in the general error checker, but I don't know how to distinguish between simple and complete in there! - AC
+  if (!is.null(prob_unit)) {
+    unique_prob_unit <- unique(prob_unit)
+    if (length(unique_prob_unit) > 1) {
+      stop("In a complete random assignment design, `prob_unit` must be the same for all units")
+    }
+    prob <- unique(prob_unit)
+  }
+  
+  if(!is.null(m_unit)) {
+    unique_m_unit <- unique(m_unit)
+    if (length(unique_m_unit) > 1) {
+      stop("In a complete random assignment design, `m_unit` must be the same for all units")
+    }
+    m <- unique(m_unit)
+    }
   
   # Simple 2 group design, returns zeros and ones
   if (is.null(m_each) &&
@@ -231,8 +253,10 @@ complete_ra <- function(N,
 #' @export
 complete_ra_probabilities <- function(N,
                                       m = NULL,
+                                      m_unit = NULL,
                                       m_each = NULL,
                                       prob = NULL,
+                                      prob_unit = NULL,
                                       prob_each = NULL,
                                       num_arms = NULL,
                                       conditions = NULL,
@@ -240,6 +264,21 @@ complete_ra_probabilities <- function(N,
   # Setup: obtain number of arms and conditions
   if (check_inputs) .invoke_check(check_randomizr_arguments_new)
   
+  if (!is.null(prob_unit)) {
+    unique_prob_unit <- unique(prob_unit)
+    if (length(unique_prob_unit) > 1) {
+      stop("In a complete random assignment design, `prob_unit` must be the same for all units")
+    }
+    prob <- unique(prob_unit)
+  }
+  
+  if(!is.null(m_unit)) {
+    unique_m_unit <- unique(m_unit)
+    if (length(unique_m_unit) > 1) {
+      stop("In a complete random assignment design, `m_unit` must be the same for all units")
+    }
+    m <- unique(m_unit)
+  }
   
   if (is.null(m_each) &
       is.null(prob_each) & length(conditions) == 2) {

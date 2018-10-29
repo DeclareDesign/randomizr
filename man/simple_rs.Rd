@@ -4,12 +4,14 @@
 \alias{simple_rs}
 \title{Simple Random Sampling}
 \usage{
-simple_rs(N, prob = NULL, check_inputs = TRUE)
+simple_rs(N, prob = NULL, prob_unit = NULL, check_inputs = TRUE)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
 
-\item{prob}{prob is the probability of being sampled must be a real number between 0 and 1 inclusive, and must be length 1 or N. (optional)}
+\item{prob}{prob is the probability of being sampled must be a real number between 0 and 1 inclusive, and must be of length 1. (optional)}
+
+\item{prob_unit}{prob is the probability of being sampled must be a real number between 0 and 1 inclusive, and must be of length N. (optional)}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
 }

@@ -196,3 +196,19 @@ test_that("Error", {
   
   expect_error(block_ra(blocks = blocks, block_prob_each = block_prob_each))
 })
+
+
+test_that("prob_unit and m_unit", {
+  blocks <- rep(c("A", "B", "C"), times = c(50, 100, 200))
+  
+  Z <- block_ra(blocks = blocks, prob_unit = rep(c(.1, .2, .3), c(50, 100, 200)))
+  expect_equal(table(blocks, Z), structure(c(45L, 80L, 140L, 5L, 20L, 60L), .Dim = 3:2, .Dimnames = list(
+    blocks = c("A", "B", "C"), Z = c("0", "1")), class = "table"))
+  
+  Z <- block_ra(blocks = blocks, m_unit = rep(c(20, 20, 25), c(50, 100, 200)))
+  expect_equal(table(blocks, Z), structure(c(30L, 80L, 175L, 20L, 20L, 25L), .Dim = 3:2, .Dimnames = list(
+    blocks = c("A", "B", "C"), Z = c("0", "1")), class = "table"))
+})
+
+
+

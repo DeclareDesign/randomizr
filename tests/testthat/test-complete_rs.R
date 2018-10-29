@@ -72,3 +72,15 @@ test_that("Special Cases",{
   expect_equal(complete_rs(N = 2, n = 2), c(1, 1))
 
 })
+
+
+test_that("_unit",{
+  table(complete_rs(100, prob_unit = rep(0.4, 100)))
+  expect_error(table(complete_rs(100, prob = rep(0.4, 100))))
+  expect_error(complete_rs(100, prob_unit = rep(c(0.4, 0.5), c(50, 50))))
+  
+  table(complete_rs(100, n_unit = rep(40, 100)))
+  expect_warning(expect_error(table(complete_rs(100, n = rep(40, 100)))))
+  expect_error(complete_rs(100, n_unit = rep(c(40, 50), c(50, 50))))
+  
+})

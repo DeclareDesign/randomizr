@@ -12,6 +12,7 @@ Depends:
     R (>= 3.4.0)
 License: MIT + file LICENSE
 LazyData: true
+Encoding: UTF-8
 Suggests:
     knitr,
     dplyr,
@@ -20,4 +21,4 @@ Suggests:
     rmarkdown, 
     ri
 VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0

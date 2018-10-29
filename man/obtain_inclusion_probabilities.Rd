@@ -5,9 +5,9 @@
 \title{Obtain inclusion probabilities}
 \usage{
 obtain_inclusion_probabilities(declaration = NULL, N = NULL,
-  strata = NULL, clusters = NULL, n = NULL, prob = NULL,
-  strata_n = NULL, strata_prob = NULL, simple = FALSE,
-  check_inputs = TRUE)
+  strata = NULL, clusters = NULL, n = NULL, n_unit = NULL,
+  prob = NULL, prob_unit = NULL, strata_n = NULL,
+  strata_prob = NULL, simple = FALSE, check_inputs = TRUE)
 }
 \arguments{
 \item{declaration}{A random sampling declaration, created by \code{\link{declare_rs}}.}
@@ -20,7 +20,11 @@ obtain_inclusion_probabilities(declaration = NULL, N = NULL,
 
 \item{n}{Use for a design in which n units (or clusters) are sampled. In a stratified design, exactly n units in each stratum will be sampled. (optional)}
 
+\item{n_unit}{Under complete random sampling, must be constant across units. Under stratified random sampling, must be constant within strata.}
+
 \item{prob}{Use for a design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be sampled and with probability prob, ceiling(N*prob) units (or clusters) will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
+
+\item{prob_unit}{Must of be of length N. Under simple random sampling, can be different for each unit or cluster.  Under complete random sampling, must be constant across units. Under stratified random sampling, must be constant within strata.}
 
 \item{strata_n}{Use for a design in which strata_n describes the number of units to sample within each stratum.}
 
