@@ -4,8 +4,10 @@
 #' @param blocks A vector of length N that indicates which block each unit belongs to.
 #' @param clusters A vector of length N that indicates which cluster each unit belongs to.
 #' @param m Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. In a blocked design, exactly m units in each block will be treated. (optional)
+#' @param m_unit Use for a two-arm trial. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks.
 #' @param m_each Use for a multi-arm design in which the values of m_each determine the number of units (or clusters) assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many units (or clusters) should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)
 #' @param prob Use for a two-arm design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be assigned to treatment and with probability prob, ceiling(N*prob) units (or clusters) will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
+#' @param prob_unit Use for a two arm design. Must of be of length N. Under simple random assignment, can be different for each unit or cluster.  Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks.
 #' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
 #' @param block_m Use for a two-arm design in which block_m describes the number of units to assign to treatment within each block. Note that in previous versions of randomizr, block_m behaved like block_m_each.
 #' @param block_m_each Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of conditions, if specified.
@@ -93,8 +95,10 @@ declare_ra <- function(N = NULL,
                        blocks = NULL,
                        clusters = NULL,
                        m = NULL,
+                       m_unit = NULL,
                        m_each = NULL,
                        prob = NULL,
+                       prob_unit = NULL,
                        prob_each = NULL,
                        block_m = NULL,
                        block_m_each = NULL,
@@ -107,7 +111,6 @@ declare_ra <- function(N = NULL,
                        check_inputs = TRUE) {
   input_check <- NULL
   all_args <-  mget(names(formals(sys.function())))
-  
   
   if (check_inputs && is.null(permutation_matrix)) {
     input_check <- check_randomizr_arguments_new(all_args)

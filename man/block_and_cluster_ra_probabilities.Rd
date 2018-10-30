@@ -5,9 +5,10 @@
 \title{probabilities of assignment: Blocked and Clustered Random Assignment}
 \usage{
 block_and_cluster_ra_probabilities(blocks = NULL, clusters = NULL,
-  prob = NULL, prob_each = NULL, m = NULL, block_m = NULL,
-  block_m_each = NULL, block_prob = NULL, block_prob_each = NULL,
-  num_arms = NULL, conditions = NULL, check_inputs = TRUE)
+  prob = NULL, prob_unit = NULL, prob_each = NULL, m = NULL,
+  m_unit = NULL, block_m = NULL, block_m_each = NULL,
+  block_prob = NULL, block_prob_each = NULL, num_arms = NULL,
+  conditions = NULL, check_inputs = TRUE)
 }
 \arguments{
 \item{blocks}{A vector of length N that indicates which block each unit belongs to.}
@@ -16,9 +17,13 @@ block_and_cluster_ra_probabilities(blocks = NULL, clusters = NULL,
 
 \item{prob}{Use for a two-arm design in which either floor(N_clusters_block*prob) or ceiling(N_clusters_block*prob) clusters are assigned to treatment within each block. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_clusters_block*prob) clusters will be assigned to treatment and with probability prob, ceiling(N_clusters_block*prob) clusters will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)}
 
+\item{prob_unit}{Use for a two arm design. Must of be of length N. tapply(prob_unit, blocks, unique) will be passed to `block_prob`.}
+
 \item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of clusters assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
 
 \item{m}{Use for a two-arm design in which the scalar m describes the fixed number of clusters assigned in each block. This number does not vary across blocks.}
+
+\item{m_unit}{Use for a two-arm design. Must be of length N. tapply(m_unit, blocks, unique) will be passed to `block_m`.}
 
 \item{block_m}{Use for a two-arm design in which block_m describes the number of clusters to assign to treatment within each block. block_m must be a numeric vector that is as long as the number of blocks and is in the same order as sort(unique(blocks)).}
 

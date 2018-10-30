@@ -77,14 +77,16 @@ test_that("Weighted", {
   
   expect_equal(p3, p4)
 
-  p5 <- simple_ra_probabilities(N=10, prob=1:10/10)
+  p5 <- simple_ra_probabilities(N=10, prob_unit = 1:10 / 10)
   p6 <- simple_ra_probabilities(N=10, prob_each=cbind(9:0/10, 1:10/10))
   
-  
   expect_equal(p5, p6)
-  
+  expect_true(all(replicate(100, simple_ra(N=10, prob_unit=1:10/10)[10] == 1)))
+})
 
-  expect_true(all(replicate(100, simple_ra(N=10, prob=1:10/10)[10] == 1)))
+test_that("prob_unit",{
   
+  simple_ra(100, prob_unit = seq(0.1, 0.99, length.out = 100))
+  expect_error(simple_ra(100, prob = seq(0.1, 0.99, length.out = 100)))
   
 })

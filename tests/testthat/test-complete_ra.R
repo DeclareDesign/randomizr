@@ -190,3 +190,14 @@ test_that("multi-dim fixup", {
   ra <- declare_ra(N = 4, prob_each = c(1, 1, 1, 2) / 5)
   expect_length(table(obtain_permutation_probabilities(ra)), 7)
 })
+
+test_that("_unit",{
+  table(complete_ra(100, prob_unit = rep(0.4, 100)))
+  expect_error(table(complete_ra(100, prob = rep(0.4, 100))))
+  expect_error(complete_ra(100, prob_unit = rep(c(0.4, 0.5), c(50, 50))))
+  
+  table(complete_ra(100, m_unit = rep(40, 100)))
+  expect_warning(expect_error(table(complete_ra(100, m = rep(40, 100)))))
+  expect_error(complete_ra(100, m_unit = rep(c(40, 50), c(50, 50))))
+})
+

@@ -4,15 +4,20 @@
 \alias{cluster_rs_probabilities}
 \title{Inclusion Probabilities: Cluster Sampling}
 \usage{
-cluster_rs_probabilities(clusters = NULL, n = NULL, prob = NULL,
-  simple = FALSE, check_inputs = TRUE)
+cluster_rs_probabilities(clusters = NULL, n = NULL, n_unit = NULL,
+  prob = NULL, prob_unit = NULL, simple = FALSE,
+  check_inputs = TRUE)
 }
 \arguments{
 \item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{n}{Use for a design in which n clusters are sampled. (optional)}
 
+\item{n_unit}{unique(n_unit) will be passed to `n`. Must be the same for all units (optional)}
+
 \item{prob}{Use for a design in which either floor(N_clusters*prob) or ceiling(N_clusters*prob) clusters are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters*prob) clusters will be sampled and with probability prob, ceiling(N_clusters*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
+
+\item{prob_unit}{unique(prob_unit) will be passed to the prob argument and must be the same for all units.}
 
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling of clusters. When simple = TRUE, please do not specify n.}
 

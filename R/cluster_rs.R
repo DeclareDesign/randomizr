@@ -4,7 +4,9 @@
 #'
 #' @param clusters A vector of length N that indicates which cluster each unit belongs to.
 #' @param n Use for a design in which n clusters are sampled. (optional)
+#' @param n_unit unique(n_unit) will be passed to `n`. Must be the same for all units (optional)
 #' @param prob Use for a design in which either floor(N_clusters*prob) or ceiling(N_clusters*prob) clusters are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters*prob) clusters will be sampled and with probability prob, ceiling(N_clusters*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
+#' @param prob_unit unique(prob_unit) will be passed to the prob argument and must be the same for all units.
 #' @param simple logical, defaults to FALSE. If TRUE, simple random sampling of clusters. When simple = TRUE, please do not specify n.
 #' @param check_inputs logical. Defaults to TRUE.
 #'
@@ -19,9 +21,11 @@
 #' S <- cluster_rs(clusters = clusters, n = 13)
 #' table(S, clusters)
 #'
-cluster_rs <- function(clusters=NULL,
+cluster_rs <- function(clusters = NULL,
                        n = NULL,
+                       n_unit = NULL,
                        prob = NULL,
+                       prob_unit = NULL,
                        simple = FALSE,
                        check_inputs = TRUE) {
   if (check_inputs) .invoke_check(check_samplr_arguments_new)
@@ -30,14 +34,23 @@ cluster_rs <- function(clusters=NULL,
   unique_clust <- names(n_per_clust)
   n_clust <- length(unique_clust)
   
+  if (!is.null(prob_unit)) {
+    prob_unit <- tapply(prob_unit, INDEX = clusters, FUN = unique)
+  }
+  if (!is.null(n_unit)) {
+    n <- unique(n_unit)
+  }
+  
   if (simple) {
-    S_clust <- simple_rs(N = n_clust,
-                         prob = prob)
+    S_clust <- simple_rs(N = n_clust, prob = prob, prob_unit = prob_unit)
     
   } else{
+    
     S_clust <- complete_rs(N = n_clust,
                            n = n,
-                           prob = prob)
+                           n_unit = n_unit,
+                           prob = prob,
+                           prob_unit = prob_unit)
   }
   assignment <- rep(S_clust, n_per_clust)
   assignment <-
@@ -68,7 +81,9 @@ cluster_rs <- function(clusters=NULL,
 cluster_rs_probabilities <-
   function(clusters = NULL,
            n = NULL,
+           n_unit = NULL,
            prob = NULL,
+           prob_unit = NULL,
            simple = FALSE,
            check_inputs = TRUE) {
     if (check_inputs) .invoke_check(check_samplr_arguments_new)
@@ -77,15 +92,26 @@ cluster_rs_probabilities <-
     unique_clust <- names(n_per_clust)
     n_clust <- length(unique_clust)
     
+    
+    if (!is.null(prob_unit)) {
+      prob_unit <- tapply(prob_unit, INDEX = clusters, FUN = unique)
+    }
+    if (!is.null(n_unit)) {
+      n <- unique(n_unit)
+    }
+    
     if (simple) {
       probs_clust <-
         simple_rs_probabilities(N = n_clust,
-                                prob = prob)
+                                prob = prob,
+                                prob_unit = prob_unit)
     } else{
       probs_clust <-
         complete_rs_probabilities(N = n_clust,
                                   n = n,
-                                  prob = prob)
+                                  n_unit = n_unit,
+                                  prob = prob,
+                                  prob_unit = prob_unit)
     }
     
     

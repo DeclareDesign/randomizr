@@ -4,18 +4,23 @@
 \alias{cluster_ra_probabilities}
 \title{probabilities of assignment: Cluster Random Assignment}
 \usage{
-cluster_ra_probabilities(clusters = NULL, m = NULL, m_each = NULL,
-  prob = NULL, prob_each = NULL, num_arms = NULL, conditions = NULL,
-  simple = FALSE, check_inputs = TRUE)
+cluster_ra_probabilities(clusters = NULL, m = NULL, m_unit = NULL,
+  m_each = NULL, prob = NULL, prob_unit = NULL, prob_each = NULL,
+  num_arms = NULL, conditions = NULL, simple = FALSE,
+  check_inputs = TRUE)
 }
 \arguments{
 \item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{m}{Use for a two-arm design in which m clusters are assigned to treatment and N-m clusters are assigned to control. (optional)}
 
+\item{m_unit}{Use for a two-arm design in which exactly unique(m_unit) clusters are assigned to treatment and the remainder are assigned to control. m_unit must be of length N and must be the same for all units (optional)}
+
 \item{m_each}{Use for a multi-arm design in which the values of m_each determine the number of clusters assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many clusters should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)}
 
 \item{prob}{Use for a two-arm design in which either floor(N_clusters*prob) or ceiling(N_clusters*prob) clusters are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_clusters*prob) clusters will be assigned to treatment and with probability prob, ceiling(N_clusters*prob) clusters will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)}
+
+\item{prob_unit}{Use for a two-arm design. unique(prob_unit) will be passed to the prob argument and must be the same for all units.}
 
 \item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of clusters assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
 

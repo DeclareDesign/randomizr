@@ -4,7 +4,9 @@
 #'
 #' @param strata A vector of length N that indicates which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)
 #' @param prob Use for a design in which either floor(N_stratum*prob) or ceiling(N_stratum*prob) units are sampled within each stratum. The probability of  being sampled is exactly prob because with probability 1-prob, floor(N_stratum*prob) units will be sampled and with probability prob, ceiling(N_stratum*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
+#' @param prob_unit Must of be of length N. tapply(prob_unit, strata, unique) will be passed to `strata_prob`.
 #' @param n Use for a design in which the scalar n describes the fixed number of units to sample in each stratum. This number does not vary across strata.
+#' @param n_unit Must be of length N. tapply(m_unit, strata, unique) will be passed to `strata_n`.
 #' @param strata_n Use for a design in which the numeric vector strata_n describes the number of units to sample within each stratum.
 #' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.
 #' @param check_inputs logical. Defaults to TRUE.
@@ -33,7 +35,9 @@
 #'
 strata_rs <- function(strata = NULL,
                       prob = NULL,
+                      prob_unit = NULL,
                       n = NULL,
+                      n_unit = NULL,
                       strata_n = NULL,
                       strata_prob = NULL,
                       check_inputs = TRUE) {
@@ -46,6 +50,15 @@ strata_rs <- function(strata = NULL,
   
   strata_spots <-
     unlist(split(seq_along(strata), strata), FALSE, FALSE)
+  
+  
+  if(!is.null(prob_unit)){
+    strata_prob <- tapply(prob_unit, strata, unique)
+  }
+  
+  if(!is.null(n_unit)){
+    strata_n <- tapply(n_unit, strata, unique)
+  }
   
   # Setup: obtain number of arms and conditions
   
@@ -132,7 +145,9 @@ strata_rs <- function(strata = NULL,
 #' @export
 strata_rs_probabilities <- function(strata = NULL,
                                     prob = NULL,
+                                    prob_unit = NULL,
                                     n = NULL,
+                                    n_unit = NULL,
                                     strata_n = NULL,
                                     strata_prob = NULL,
                                     check_inputs = TRUE) {
@@ -143,9 +158,16 @@ strata_rs_probabilities <- function(strata = NULL,
     attributes(N_per_stratum) <- NULL
   }
   
-  
   strata_spots <-
     unlist(split(seq_along(strata), strata), FALSE, FALSE)
+  
+  if(!is.null(prob_unit)){
+    strata_prob <- tapply(prob_unit, strata, unique)
+  }
+  
+  if(!is.null(n_unit)){
+    strata_n <- tapply(n_unit, strata, unique)
+  }
   
   if (is.null(prob) &&
       is.null(strata_n) && is.null(strata_prob) && is.null(n)) {

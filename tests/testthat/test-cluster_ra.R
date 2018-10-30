@@ -62,3 +62,14 @@ test_that("simple assignment",{
   clusters <- gl(100, 2)
   expect_equal(sum(cluster_ra(clusters, prob = 1, simple=TRUE)), 200)
 })
+
+
+test_that("_unit",{
+  clusters <- rep(c("A", "B", "C"), c(2, 2, 2))
+  cluster_ra(clusters = clusters, m_unit = rep(1, 6))
+  expect_error(cluster_ra(clusters = clusters, m_unit = 1:6))
+  cluster_ra(clusters = clusters, prob_unit = rep(0.5, 6))
+  expect_error(cluster_ra(clusters = clusters, prob_unit = seq(0.1, 0.6, by = 0.1)))
+})
+
+
