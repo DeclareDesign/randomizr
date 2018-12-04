@@ -15,7 +15,11 @@ strata_and_cluster_rs(strata = NULL, clusters = NULL, prob = NULL,
 
 \item{prob}{Use for a design in which either floor(N_clusters_stratum*prob) or ceiling(N_clusters_stratum*prob) clusters are sampled within each stratum. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters_stratum*prob) clusters will be sampled and with probability prob, ceiling(N_clusters_stratum*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
 
+\item{prob_unit}{Must of be of length N. tapply(prob_unit, blocks, unique) will be passed to \code{strata_prob}.}
+
 \item{n}{Use for a design in which the scalar n describes the fixed number of units to sample in each stratum. This number does not vary across strata.}
+
+\item{n_unit}{Must be of length N. tapply(m_unit, blocks, unique) will be passed to \code{strata_n}.}
 
 \item{strata_n}{Use for a design in which strata_n describes the number of units to sample within each stratum.}
 

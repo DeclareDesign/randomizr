@@ -13,7 +13,7 @@ cluster_rs_probabilities(clusters = NULL, n = NULL, n_unit = NULL,
 
 \item{n}{Use for a design in which n clusters are sampled. (optional)}
 
-\item{n_unit}{unique(n_unit) will be passed to `n`. Must be the same for all units (optional)}
+\item{n_unit}{unique(n_unit) will be passed to \code{n}. Must be the same for all units (optional)}
 
 \item{prob}{Use for a design in which either floor(N_clusters*prob) or ceiling(N_clusters*prob) clusters are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters*prob) clusters will be sampled and with probability prob, ceiling(N_clusters*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
 
