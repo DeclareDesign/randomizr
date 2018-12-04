@@ -12,7 +12,7 @@ complete_rs_probabilities(N, n = NULL, n_unit = NULL, prob = NULL,
 
 \item{n}{Use for a design in which exactly n units are sampled. (optional)}
 
-\item{n_unit}{unique(n_unit) will be passed to `n`. Must be the same for all units (optional)}
+\item{n_unit}{unique(n_unit) will be passed to \code{n}. Must be the same for all units (optional)}
 
 \item{prob}{Use for a design in which either floor(N*prob) or ceiling(N*prob) units are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units will be sampled and with probability prob, ceiling(N*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
 
