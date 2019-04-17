@@ -2,13 +2,16 @@
 
 
 
+
 # Call check() with all formal arguments of the invoking function
 # reinsert results into that environment
 .invoke_check <- function(check) {
+  browser()
   definition <- sys.function(sys.parent())
   envir <- parent.frame(1)
   
   all_args <- mget(names(formals(definition)), envir)
+  if(blah) all_args$simple <- TRUE
   ret <- check(all_args)
   list2env(ret, envir)
   invisible(NULL)
@@ -41,14 +44,13 @@ check_randomizr_arguments <-
            conditions = NULL,
            ...) {
     # N, blocks, clusters, num_arms, conditions are used generally, check them first
-    
     if (!is.null(clusters)) {
       N <- length(unique(clusters))
     }
     
     if (!is.null(blocks)) {
       if (isTRUE(simple))
-        stop("You can't specify `simple` when using blocked assignment",
+        stop("You can't specify `simple` when using blocked assignment.",
              call. = FALSE)
       
       if (!is.null(clusters)) {
@@ -69,7 +71,7 @@ check_randomizr_arguments <-
       if (is.null(N)) {
         N <- sum(N_per_block)
       } else if (N != sum(N_per_block)) {
-        stop("N should equal the length of blocks", call. = FALSE)
+        stop("N should equal the length of blocks.", call. = FALSE)
       }
       
       N_blocks <- length(N_per_block)
@@ -131,7 +133,7 @@ check_randomizr_arguments <-
       
       if (isTRUE(simple) &&
           !grepl("prob", arg))
-        stop("You can't specify `", arg, "`` when simple = TRUE", call. = FALSE)
+        stop("You can't specify `", arg, "`` when simple = TRUE.", call. = FALSE)
       
       # checking num_arms and conditions consistency
       .check_ra_arg_num_arms_conditions(arg,
@@ -235,7 +237,7 @@ check_randomizr_arguments <-
            call. = FALSE)
     }
     if (!length(prob) %in% c(1)) {
-      stop("`prob` must be of length 1", call. = FALSE)
+      stop("`prob` must be of length 1.", call. = FALSE)
     }
   }
 
@@ -245,22 +247,47 @@ check_randomizr_arguments <-
            clusters,
            num_arms,
            conditions,
-           prob_unit) {
+           prob_unit,
+           simple) {
+    browser()
     if (any(prob_unit > 1 | prob_unit < 0)) {
       stop("The probability of assignment to treatment must be between 0 and 1.",
            call. = FALSE)
     }
     
+    # if it's complete
+    if (!simple) {
+      if (is.null(blocks)) {
+        if (!is_constant(prob_unit)) {
+          stop(
+            "In a complete random assignment design, `prob_unit` must be the same for all units.",
+            call. = FALSE
+          )
+        }
+      } else{
+        # if it's blocked
+        if (!all(tapply(
+          X = prob_unit,
+          INDEX = blocks,
+          FUN = is_constant
+        ))) {
+          stop(
+            "In a block random assignment design, `prob_unit` must be the same for all units within the same block.",
+            call. = FALSE
+          )
+        }
+      }
+    }
     
     # if it's clustered:
     if (!is.null(clusters)) {
       if (!length(prob_unit) %in% length(clusters)) {
-        stop("`prob_unit` must be of length N", call. = FALSE)
+        stop("`prob_unit` must be of length N.", call. = FALSE)
       }
       
     } else{
       if (!length(prob_unit) %in% c(N)) {
-        stop("`prob_unit` must be of length N", call. = FALSE)
+        stop("`prob_unit` must be of length N.", call. = FALSE)
       }
     }
   }
@@ -299,7 +326,7 @@ check_randomizr_arguments <-
       }
     }
     else
-      stop("`prob_each` must be a vector or matrix", call. = FALSE)
+      stop("`prob_each` must be a vector or matrix.", call. = FALSE)
     
     
   }
@@ -351,7 +378,7 @@ check_randomizr_arguments <-
     if (is.null(blocks)) {
       if (!is_constant(m_unit)) {
         stop(
-          "In a complete random assignment design, `m_unit` must be the same for all units",
+          "In a complete random assignment design, `m_unit` must be the same for all units.",
           call. = FALSE
         )
       }
@@ -359,7 +386,7 @@ check_randomizr_arguments <-
       # if it's blocked
       if (!all(tapply(X = m_unit, INDEX = blocks, FUN = is_constant))) {
         stop(
-          "In a block random assignment design, `m_unit` must be the same for all units within the same block",
+          "In a block random assignment design, `m_unit` must be the same for all units within the same block.",
           call. = FALSE
         )
       }
@@ -368,7 +395,7 @@ check_randomizr_arguments <-
     # if it's clustered:
     if (!is.null(clusters)) {
       if (!length(m_unit) %in% length(clusters)) {
-        stop("`m_unit` must be of length N", call. = FALSE)
+        stop("`m_unit` must be of length N.", call. = FALSE)
       }
       
     } else{
@@ -392,7 +419,7 @@ check_randomizr_arguments <-
     }
     if (sum(m_each) != N) {
       stop(
-        "The sum of the number assigned to each condition (m_each) must equal the total number of units (N)",
+        "The sum of the number assigned to each condition (m_each) must equal the total number of units (N).",
         call. = FALSE
       )
     }
@@ -436,7 +463,7 @@ check_randomizr_arguments <-
     }
     if (nrow(block_prob_each) != attr(blocks, "N_blocks")) {
       stop(
-        "If specified, block_prob_each should have the same number of rows as there are unique blocks in blocks",
+        "If specified, block_prob_each should have the same number of rows as there are unique blocks in blocks.",
         call. = FALSE
       )
     }
@@ -538,7 +565,7 @@ check_samplr_arguments <- function(N = NULL,
     if (is.null(N)) {
       N <- sum(N_per_stratum)
     } else if (N != sum(N_per_stratum)) {
-      stop("N should equal the length of strata", call. = FALSE)
+      stop("N should equal the length of strata.", call. = FALSE)
     }
     attributes(strata) <-
       list(N_strata = N_strata, N_per_stratum = N_per_stratum)
@@ -546,7 +573,7 @@ check_samplr_arguments <- function(N = NULL,
   
   
   if (length(N) != 1 || N != floor(N) || N <= 0) {
-    stop("N must be an integer greater than 0", call. = FALSE)
+    stop("N must be an integer greater than 0.", call. = FALSE)
   }
   
   conflict_args <- c("prob", "n", "strata_prob", "strata_n")
@@ -585,26 +612,42 @@ check_samplr_arguments <- function(N = NULL,
          call. = FALSE)
   }
   if (!length(prob) %in% c(1)) {
-    stop("`prob` must be of length 1", call. = FALSE)
+    stop("`prob` must be of length 1.", call. = FALSE)
   }
 }
 
 .check_rs$prob_unit <- function(N, strata, clusters, prob_unit) {
   if (any(prob_unit > 1 | prob_unit < 0)) {
-    stop("The probability of assignment to treatment must be between 0 and 1.",
+    stop("The probability of being sampled must be between 0 and 1.",
          call. = FALSE)
   }
-  
+  # if it's complete
+  if (is.null(strata)) {
+    if (!is_constant(prob_unit)) {
+      stop(
+        "In a complete random sampling design, `prob_unit` must be the same for all units.",
+        call. = FALSE
+      )
+    }
+  } else{
+    # if it's blocked
+    if (!all(tapply(X = prob_unit, INDEX = strata, FUN = is_constant))) {
+      stop(
+        "In a stratified random assignment design, `prob_unit` must be the same for all units within the same stratum",
+        call. = FALSE
+      )
+    }
+  }
   
   # if it's clustered:
   if (!is.null(clusters)) {
     if (!length(prob_unit) %in% length(clusters)) {
-      stop("`prob_unit` must be of length N", call. = FALSE)
+      stop("`prob_unit` must be of length N.", call. = FALSE)
     }
     
   } else{
     if (!length(prob_unit) %in% c(N)) {
-      stop("`prob_unit` must be of length N", call. = FALSE)
+      stop("`prob_unit` must be of length N.", call. = FALSE)
     }
   }
   
@@ -661,7 +704,7 @@ check_samplr_arguments <- function(N = NULL,
     if (is.null(strata)) {
       if (!is_constant(n_unit)) {
         stop(
-          "In a complete random sampling design, `n_unit` must be the same for all units",
+          "In a complete random sampling design, `n_unit` must be the same for all units.",
           call. = FALSE
         )
       }
@@ -669,7 +712,7 @@ check_samplr_arguments <- function(N = NULL,
       # if it's stratified
       if (!all(tapply(X = n_unit, INDEX = strata, FUN = is_constant))) {
         stop(
-          "In a stratified random sampling design, `n_unit` must be the same for all units within the same stratum",
+          "In a stratified random sampling design, `n_unit` must be the same for all units within the same stratum.",
           call. = FALSE
         )
       }
@@ -678,12 +721,12 @@ check_samplr_arguments <- function(N = NULL,
     # if it's clustered:
     if (!is.null(clusters)) {
       if (!length(n_unit) %in% length(clusters)) {
-        stop("`n_unit` must be of length N", call. = FALSE)
+        stop("`n_unit` must be of length N.", call. = FALSE)
       }
       
     } else{
       if (!length(n_unit) %in% c(N)) {
-        stop("`n_unit` must be of length N", call. = FALSE)
+        stop("`n_unit` must be of length N.", call. = FALSE)
       }
     }
     
