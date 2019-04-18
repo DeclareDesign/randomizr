@@ -12,6 +12,7 @@
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
 #' @param check_inputs logical. Defaults to TRUE.
+#' @param simple logical. internal use only.
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.
 #' @export
@@ -48,7 +49,8 @@ simple_ra <- function(N,
                       prob_each = NULL,
                       num_arms = NULL,
                       conditions = NULL,
-                      check_inputs = TRUE) {
+                      check_inputs = TRUE,
+                      simple = TRUE) {
   if (check_inputs) {
     .invoke_check(check_randomizr_arguments_new)
   }

@@ -3,23 +3,19 @@
 
 
 
+
 # Call check() with all formal arguments of the invoking function
 # reinsert results into that environment
 .invoke_check <- function(check) {
-  browser()
   definition <- sys.function(sys.parent())
   envir <- parent.frame(1)
-  
   all_args <- mget(names(formals(definition)), envir)
-  if(blah) all_args$simple <- TRUE
   ret <- check(all_args)
   list2env(ret, envir)
   invisible(NULL)
 }
 
 #f <- function(N,n) {.invoke_check(function(a) list(n = a[["n"]] + 1)); n}
-
-
 
 check_randomizr_arguments_new <-
   function(all_args)
@@ -142,7 +138,14 @@ check_randomizr_arguments <-
                                         specified_args[[1]],
                                         num_arms,
                                         conditions)
-      .check_ra[[arg]](N, blocks, clusters, num_arms, conditions, specified_args[[1]])
+      
+      .check_ra[[arg]](N,
+                       blocks,
+                       clusters,
+                       num_arms,
+                       conditions,
+                       simple,
+                       specified_args[[1]])
       
     }
     
@@ -231,6 +234,7 @@ check_randomizr_arguments <-
            clusters,
            num_arms,
            conditions,
+           simple,
            prob) {
     if (any(prob > 1 | prob < 0)) {
       stop("The probability of assignment to treatment must be between 0 and 1.",
@@ -247,35 +251,34 @@ check_randomizr_arguments <-
            clusters,
            num_arms,
            conditions,
-           prob_unit,
-           simple) {
-    browser()
+           simple,
+           prob_unit) {
     if (any(prob_unit > 1 | prob_unit < 0)) {
       stop("The probability of assignment to treatment must be between 0 and 1.",
            call. = FALSE)
     }
     
     # if it's complete
-    if (!simple) {
-      if (is.null(blocks)) {
+    if (is.null(blocks)) {
+      if (!is.null(simple) && !simple) {
         if (!is_constant(prob_unit)) {
           stop(
             "In a complete random assignment design, `prob_unit` must be the same for all units.",
             call. = FALSE
           )
         }
-      } else{
-        # if it's blocked
-        if (!all(tapply(
-          X = prob_unit,
-          INDEX = blocks,
-          FUN = is_constant
-        ))) {
-          stop(
-            "In a block random assignment design, `prob_unit` must be the same for all units within the same block.",
-            call. = FALSE
-          )
-        }
+      }
+    } else{
+      # if it's blocked
+      if (!all(tapply(
+        X = prob_unit,
+        INDEX = blocks,
+        FUN = is_constant
+      ))) {
+        stop(
+          "In a block random assignment design, `prob_unit` must be the same for all units within the same block.",
+          call. = FALSE
+        )
       }
     }
     
@@ -298,6 +301,7 @@ check_randomizr_arguments <-
            clusters,
            num_arms,
            conditions,
+           simple,
            prob_each) {
     if (any(prob_each > 1 | prob_each < 0)) {
       stop(
@@ -337,6 +341,7 @@ check_randomizr_arguments <-
            clusters,
            num_arms,
            conditions,
+           simple,
            m) {
     if (length(m) != 1) {
       stop("If specified, the number of units assigned to treatment (m) must be a scalar.",
@@ -373,6 +378,7 @@ check_randomizr_arguments <-
            clusters,
            num_arms,
            conditions,
+           simple,
            m_unit) {
     # if it's complete
     if (is.null(blocks)) {
@@ -412,6 +418,7 @@ check_randomizr_arguments <-
            clusters,
            num_arms,
            conditions,
+           simple,
            m_each) {
     if (any(m_each < 0)) {
       stop("The number of units assigned to all conditions must be nonnegative.",
@@ -431,6 +438,7 @@ check_randomizr_arguments <-
            clusters,
            num_arms,
            conditions,
+           simple,
            block_prob) {
     if (any(block_prob > 1 | block_prob < 0)) {
       stop(
@@ -454,6 +462,7 @@ check_randomizr_arguments <-
            clusters,
            num_arms,
            conditions,
+           simple,
            block_prob_each) {
     if (any(block_prob_each < 0 | block_prob_each > 1)) {
       stop(
@@ -482,6 +491,7 @@ check_randomizr_arguments <-
            clusters,
            num_arms,
            conditions,
+           simple,
            block_m) {
     if (length(block_m) != attr(blocks, "N_blocks")) {
       stop(
@@ -503,6 +513,7 @@ check_randomizr_arguments <-
            clusters,
            num_arms,
            conditions,
+           simple,
            block_m_each) {
     if (nrow(block_m_each) != attr(blocks, "N_blocks")) {
       stop(
@@ -525,136 +536,153 @@ check_samplr_arguments_new <- function(all_args) {
   do.call("check_samplr_arguments", all_args)
 }
 
-check_samplr_arguments <- function(N = NULL,
-                                   prob = NULL,
-                                   n = NULL,
-                                   strata = NULL,
-                                   strata_n = NULL,
-                                   strata_prob = NULL,
-                                   clusters = NULL,
-                                   simple = NULL,
-                                   ...)
-{
-  if (!is.null(clusters)) {
-    N <- length(unique(clusters))
-  }
-  
-  if (!is.null(strata)) {
-    if (isTRUE(simple))
-      stop("You can't specify 'simple' with strata.", call. = FALSE)
-    
+check_samplr_arguments <- 
+  function(N = NULL,
+           prob = NULL,
+           prob_unit = NULL,
+           n = NULL,
+           n_unit = NULL,
+           strata = NULL,
+           strata_n = NULL,
+           strata_prob = NULL,
+           clusters = NULL,
+           simple = NULL,
+           ...) {
     
     if (!is.null(clusters)) {
-      N_per_stratum <-
-        tapply(clusters, strata, function(x)
-          length(unique(x)))
-      attributes(N_per_stratum) <- NULL
+      N <- length(unique(clusters))
+    }
+    
+    if (!is.null(strata)) {
+      if (isTRUE(simple))
+        stop("You can't specify 'simple' with strata.", call. = FALSE)
       
-      # N would be set by clusters check abovew
-      if (any(colSums(table(strata, clusters) > 0) > 1)) {
-        stop("All units within a cluster must be in the same stratum.",
-             call. = FALSE)
+      if (!is.null(clusters)) {
+        N_per_stratum <-
+          tapply(clusters, strata, function(x)
+            length(unique(x)))
+        attributes(N_per_stratum) <- NULL
+        
+        # N would be set by clusters check abovew
+        if (any(colSums(table(strata, clusters) > 0) > 1)) {
+          stop("All units within a cluster must be in the same stratum.",
+               call. = FALSE)
+        }
+      } else {
+        N_per_stratum <- tapply(strata, strata, length)
+        attributes(N_per_stratum) <- NULL
       }
-    } else {
-      N_per_stratum <- tapply(strata, strata, length)
-      attributes(N_per_stratum) <- NULL
+      
+      N_strata <- length(N_per_stratum)
+      
+      if (is.null(N)) {
+        N <- sum(N_per_stratum)
+      } else if (N != sum(N_per_stratum)) {
+        stop("N should equal the length of strata.", call. = FALSE)
+      }
+      attributes(strata) <-
+        list(N_strata = N_strata, N_per_stratum = N_per_stratum)
     }
     
-    N_strata <- length(N_per_stratum)
-    
-    if (is.null(N)) {
-      N <- sum(N_per_stratum)
-    } else if (N != sum(N_per_stratum)) {
-      stop("N should equal the length of strata.", call. = FALSE)
+    if (length(N) != 1 || N != floor(N) || N <= 0) {
+      stop("N must be an integer greater than 0.", call. = FALSE)
     }
-    attributes(strata) <-
-      list(N_strata = N_strata, N_per_stratum = N_per_stratum)
-  }
-  
-  
-  if (length(N) != 1 || N != floor(N) || N <= 0) {
-    stop("N must be an integer greater than 0.", call. = FALSE)
-  }
-  
-  conflict_args <- c("prob", "n", "strata_prob", "strata_n")
-  specified_args <- Filter(Negate(is.null), mget(conflict_args))
-  
-  if (length(specified_args) > 1) {
-    stop("Please specify only one of ",
-         paste(names(specified_args), collapse = " and "),
-         ".",
-         call. = FALSE)
-  } else if (length(specified_args) == 1) {
-    arg <- names(specified_args)
     
-    if (isTRUE(simple) &&
-        !grepl("prob", arg))
-      stop("You can't specify `", arg, "` when simple = TRUE.", call. = FALSE)
+    conflict_args <- c("prob", "prob_unit", "n", "n_unit", "strata_prob", "strata_n")
+    specified_args <- Filter(Negate(is.null), mget(conflict_args))
     
-    .check_rs[[arg]](N, strata, clusters, specified_args[[1]])
+    if (length(specified_args) > 1) {
+      stop("Please specify only one of ",
+           paste(names(specified_args), collapse = " and "),
+           ".",
+           call. = FALSE)
+    } else if (length(specified_args) == 1) {
+      arg <- names(specified_args)
+      
+      if (isTRUE(simple) &&
+          !grepl("prob", arg))
+        stop("You can't specify `", arg, "` when simple = TRUE.", call. = FALSE)
+      
+      
+      .check_rs[[arg]](N, strata, clusters, simple, specified_args[[1]])
+    }
+    
+    list(
+      num_arms = 2,
+      conditions =  0:1,
+      condition_names = 0:1,
+      N_per_stratum = get0("N_per_stratum")
+    )
+    
   }
-  
-  list(
-    num_arms = 2,
-    conditions =  0:1,
-    condition_names = 0:1,
-    N_per_stratum = get0("N_per_stratum")
-  )
-  
-}
 
 # rs specific arg checks
 .check_rs <- new.env(parent = emptyenv())
 
-.check_rs$prob <- function(N, strata, clusters, prob) {
-  if (any(prob > 1 | prob < 0)) {
-    stop("The probability of assignment to treatment must be between 0 and 1.",
-         call. = FALSE)
+.check_rs$prob <-
+  function(N,
+           strata,
+           clusters,
+           simple,
+           prob) {
+    if (any(prob > 1 | prob < 0)) {
+      stop("The probability of assignment to treatment must be between 0 and 1.",
+           call. = FALSE)
+    }
+    if (!length(prob) %in% c(1)) {
+      stop("`prob` must be of length 1.", call. = FALSE)
+    }
   }
-  if (!length(prob) %in% c(1)) {
-    stop("`prob` must be of length 1.", call. = FALSE)
-  }
-}
 
-.check_rs$prob_unit <- function(N, strata, clusters, prob_unit) {
-  if (any(prob_unit > 1 | prob_unit < 0)) {
-    stop("The probability of being sampled must be between 0 and 1.",
-         call. = FALSE)
-  }
-  # if it's complete
-  if (is.null(strata)) {
-    if (!is_constant(prob_unit)) {
-      stop(
-        "In a complete random sampling design, `prob_unit` must be the same for all units.",
-        call. = FALSE
-      )
-    }
-  } else{
-    # if it's blocked
-    if (!all(tapply(X = prob_unit, INDEX = strata, FUN = is_constant))) {
-      stop(
-        "In a stratified random assignment design, `prob_unit` must be the same for all units within the same stratum",
-        call. = FALSE
-      )
-    }
-  }
-  
-  # if it's clustered:
-  if (!is.null(clusters)) {
-    if (!length(prob_unit) %in% length(clusters)) {
-      stop("`prob_unit` must be of length N.", call. = FALSE)
+.check_rs$prob_unit <-
+  function(N,
+           strata,
+           clusters,
+           simple,
+           prob_unit) {
+    if (any(prob_unit > 1 | prob_unit < 0)) {
+      stop("The probability of being sampled must be between 0 and 1.",
+           call. = FALSE)
     }
     
-  } else{
-    if (!length(prob_unit) %in% c(N)) {
-      stop("`prob_unit` must be of length N.", call. = FALSE)
+    # if it's complete
+    if (is.null(strata)) {
+      if (!is.null(simple) && !simple) {
+        if (!is_constant(prob_unit)) {
+          stop(
+            "In a complete random sampling design, `prob_unit` must be the same for all units.",
+            call. = FALSE
+          )
+        }
+      }
+    } else{
+      # if it's strata
+      if (!all(tapply(X = prob_unit, INDEX = strata, FUN = is_constant))) {
+        stop(
+          "In a stratified random assignment design, `prob_unit` must be the same for all units within the same stratum.",
+          call. = FALSE
+        )
+      }
+    }
+    # if it's clustered:
+    if (!is.null(clusters)) {
+      if (!length(prob_unit) %in% length(clusters)) {
+        stop("`prob_unit` must be of length N.", call. = FALSE)
+      }
+      
+    } else{
+      if (!length(prob_unit) %in% c(N)) {
+        stop("`prob_unit` must be of length N.", call. = FALSE)
+      }
     }
   }
-  
-}
 
 .check_rs$strata_prob <-
-  function(N, strata, clusters, strata_prob) {
+  function(N, 
+           strata, 
+           clusters, 
+           simple,
+           strata_prob) {
     if (any(strata_prob > 1 | strata_prob < 0)) {
       stop("The probabilities of being sampled must be between 0 and 1 for all strata.",
            call. = FALSE)
@@ -665,40 +693,45 @@ check_samplr_arguments <- function(N = NULL,
         call. = FALSE
       )
     }
-    
   }
 
 
-.check_rs$n <- function(N, strata, clusters, n) {
-  if (n < 0) {
-    stop("If specified, the number of units sampled (n) must be nonnegative.",
-         call. = FALSE)
-  }
-  if (n != floor(n)) {
-    stop("If specified, the number of units sampled (n) must be an integer.",
-         call. = FALSE)
-  }
-  if (is.null(strata)) {
-    if (n > N) {
-      stop(
-        "If specified, the number of units sampled (n) must not be greater than the total number of units (N).",
-        call. = FALSE
-      )
+.check_rs$n <- 
+  function(N, 
+           strata, 
+           clusters, 
+           simple,
+           n) {
+    if (n < 0) {
+      stop("If specified, the number of units sampled (n) must be nonnegative.",
+           call. = FALSE)
     }
-  } else {
-    if (n > min(attr(strata, "N_per_stratum"))) {
-      stop(
-        "If specified, the number of units sampled (n) must not be greater than the number of units in a strata (N).",
-        call. = FALSE
-      )
+    if (n != floor(n)) {
+      stop("If specified, the number of units sampled (n) must be an integer.",
+           call. = FALSE)
+    }
+    if (is.null(strata)) {
+      if (n > N) {
+        stop(
+          "If specified, the number of units sampled (n) must not be greater than the total number of units (N).",
+          call. = FALSE
+        )
+      }
+    } else {
+      if (n > min(attr(strata, "N_per_stratum"))) {
+        stop(
+          "If specified, the number of units sampled (n) must not be greater than the number of units in a strata (N).",
+          call. = FALSE
+        )
+      }
     }
   }
-}
 
 .check_rs$n_unit <-
   function(N,
            strata,
            clusters,
+           simple,
            n_unit) {
     # if it's complete
     if (is.null(strata)) {
@@ -729,42 +762,46 @@ check_samplr_arguments <- function(N = NULL,
         stop("`n_unit` must be of length N.", call. = FALSE)
       }
     }
+  }
+
+
+.check_rs$strata_n <- 
+  function(N, 
+           strata, 
+           clusters, 
+           simple,
+           strata_n) {
+    if (length(strata_n) != attr(strata, "N_strata")) {
+      stop(
+        "If specified, strata_n should have the same length as there are unique strata in strata.",
+        call. = FALSE
+      )
+    }
+    if (any(strata_n > attr(strata, "N_per_stratum") |
+            strata_n < 0)) {
+      stop(
+        "The number of units sampled within a stratum must be nonnegative and not exceed the total number units within the strata.",
+        call. = FALSE
+      )
+    }
+  }
+
+
+clean_condition_names <- 
+  function(assignment, conditions) {
+    if (is.factor(conditions)) {
+      return(factor(assignment, levels = levels(conditions)))
+    }
     
+    if (is.numeric(assignment)) {
+      return(assignment)
+    }
+    
+    if (is.logical(assignment)) {
+      return(as.numeric(assignment))
+    }
+    return(factor(assignment, levels = conditions))
   }
-
-
-.check_rs$strata_n <- function(N, strata, clusters, strata_n) {
-  if (length(strata_n) != attr(strata, "N_strata")) {
-    stop(
-      "If specified, strata_n should have the same length as there are unique strata in strata.",
-      call. = FALSE
-    )
-  }
-  if (any(strata_n > attr(strata, "N_per_stratum") |
-          strata_n < 0)) {
-    stop(
-      "The number of units sampled within a stratum must be nonnegative and not exceed the total number units within the strata.",
-      call. = FALSE
-    )
-  }
-}
-
-
-clean_condition_names <- function(assignment, conditions) {
-  if (is.factor(conditions)) {
-    return(factor(assignment, levels = levels(conditions)))
-  }
-  
-  if (is.numeric(assignment)) {
-    return(assignment)
-  }
-  
-  if (is.logical(assignment)) {
-    return(as.numeric(assignment))
-  }
-  
-  return(factor(assignment, levels = conditions))
-}
 
 is_constant <- function(x)
   all(x[1] == x)

@@ -28,7 +28,8 @@ cluster_rs <- function(clusters = NULL,
                        prob_unit = NULL,
                        simple = FALSE,
                        check_inputs = TRUE) {
-  if (check_inputs) .invoke_check(check_samplr_arguments_new)
+  if (check_inputs)
+    .invoke_check(check_samplr_arguments_new)
   
   n_per_clust <- tapply(clusters, clusters, length)
   unique_clust <- names(n_per_clust)
@@ -37,20 +38,25 @@ cluster_rs <- function(clusters = NULL,
   if (!is.null(prob_unit)) {
     prob_unit <- tapply(prob_unit, INDEX = clusters, FUN = unique)
   }
+  
   if (!is.null(n_unit)) {
-    n <- unique(n_unit)
+    n_unit <- tapply(n_unit, INDEX = clusters, FUN = unique)
   }
   
   if (simple) {
-    S_clust <- simple_rs(N = n_clust, prob = prob, prob_unit = prob_unit)
+    S_clust <-
+      simple_rs(N = n_clust,
+                prob = prob,
+                prob_unit = prob_unit)
     
   } else{
-    
-    S_clust <- complete_rs(N = n_clust,
-                           n = n,
-                           n_unit = n_unit,
-                           prob = prob,
-                           prob_unit = prob_unit)
+    S_clust <- complete_rs(
+      N = n_clust,
+      n = n,
+      n_unit = n_unit,
+      prob = prob,
+      prob_unit = prob_unit
+    )
   }
   assignment <- rep(S_clust, n_per_clust)
   assignment <-
@@ -86,7 +92,8 @@ cluster_rs_probabilities <-
            prob_unit = NULL,
            simple = FALSE,
            check_inputs = TRUE) {
-    if (check_inputs) .invoke_check(check_samplr_arguments_new)
+    if (check_inputs)
+      .invoke_check(check_samplr_arguments_new)
     
     n_per_clust <- tapply(clusters, clusters, length)
     unique_clust <- names(n_per_clust)
@@ -97,7 +104,7 @@ cluster_rs_probabilities <-
       prob_unit <- tapply(prob_unit, INDEX = clusters, FUN = unique)
     }
     if (!is.null(n_unit)) {
-      n <- unique(n_unit)
+      n_unit <- tapply(n_unit, INDEX = clusters, FUN = unique)
     }
     
     if (simple) {
@@ -107,17 +114,18 @@ cluster_rs_probabilities <-
                                 prob_unit = prob_unit)
     } else{
       probs_clust <-
-        complete_rs_probabilities(N = n_clust,
-                                  n = n,
-                                  n_unit = n_unit,
-                                  prob = prob,
-                                  prob_unit = prob_unit)
+        complete_rs_probabilities(
+          N = n_clust,
+          n = n,
+          n_unit = n_unit,
+          prob = prob,
+          prob_unit = prob_unit
+        )
     }
-    
     
     prob_vec <- rep(probs_clust, n_per_clust)
     prob_vec <-
-      prob_vec[order(unlist(split(seq_along(clusters), clusters), 
+      prob_vec[order(unlist(split(seq_along(clusters), clusters),
                             FALSE, FALSE))]
     return(prob_vec)
   }

@@ -4,7 +4,8 @@
 \alias{simple_rs}
 \title{Simple Random Sampling}
 \usage{
-simple_rs(N, prob = NULL, prob_unit = NULL, check_inputs = TRUE)
+simple_rs(N, prob = NULL, prob_unit = NULL, check_inputs = TRUE,
+  simple = TRUE)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
@@ -14,6 +15,8 @@ simple_rs(N, prob = NULL, prob_unit = NULL, check_inputs = TRUE)
 \item{prob_unit}{prob is the probability of being sampled must be a real number between 0 and 1 inclusive, and must be of length N. (optional)}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
+
+\item{simple}{logical. internal use only.}
 }
 \value{
 A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
