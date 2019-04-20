@@ -37,7 +37,13 @@ table(S)
 S <- complete_rs(N = 100, n = 50)
 table(S)
 
+S <- complete_rs(N = 100, n_unit = rep(50, 100))
+table(S)
+
 S <- complete_rs(N = 100, prob = .111)
+table(S)
+
+S <- complete_rs(N = 100, prob_unit = rep(.1, 100))
 table(S)
 
 # If N = n, sample with 100\% probability...
