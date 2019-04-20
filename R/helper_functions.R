@@ -260,7 +260,7 @@ check_randomizr_arguments <-
     
     # if it's complete
     if (is.null(blocks)) {
-      if (!is.null(simple) && !simple) {
+      if (!isTRUE(simple)) {
         if (!is_constant(prob_unit)) {
           stop(
             "In a complete random assignment design, `prob_unit` must be the same for all units.",
@@ -644,10 +644,9 @@ check_samplr_arguments <-
       stop("The probability of being sampled must be between 0 and 1.",
            call. = FALSE)
     }
-    
     # if it's complete
     if (is.null(strata)) {
-      if (!is.null(simple) && !simple) {
+      if (!isTRUE(simple)) {
         if (!is_constant(prob_unit)) {
           stop(
             "In a complete random sampling design, `prob_unit` must be the same for all units.",

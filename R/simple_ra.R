@@ -99,7 +99,8 @@ simple_ra_probabilities <-
            prob_each = NULL,
            num_arms = NULL,
            conditions = NULL,
-           check_inputs = TRUE) {
+           check_inputs = TRUE, 
+           simple = TRUE) {
     if (check_inputs) .invoke_check(check_randomizr_arguments_new)
     
     # Three easy cases

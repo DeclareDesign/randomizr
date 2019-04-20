@@ -61,7 +61,9 @@ cluster_ra <- function(clusters = NULL,
   n_per_clust <- tapply(clusters, clusters, length)
   n_clust <- length(n_per_clust)
   
-  if(!is.null(m_unit)){m_unit <- rep(unique(m_unit), n_clust)}
+  if(!is.null(m_unit)) {
+    m_unit <- rep(unique(m_unit), n_clust)
+  }
   
   delegate_args <- list(
     N = n_clust,

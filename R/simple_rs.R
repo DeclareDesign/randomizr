@@ -43,8 +43,8 @@ simple_rs <-
 #' table(probs)
 #'
 #' @export
-simple_rs_probabilities <- function(N, prob = NULL, prob_unit = NULL, check_inputs = TRUE) {
+simple_rs_probabilities <- function(N, prob = NULL, prob_unit = NULL, check_inputs = TRUE, simple = TRUE) {
   if(check_inputs) .invoke_check(check_samplr_arguments_new)
   if(is.null(prob)) prob <- .5
-  simple_ra_probabilities(N, prob, prob_unit, conditions = 0:1, check_inputs = FALSE)[,2]
+  simple_ra_probabilities(N, prob, prob_unit, conditions = 0:1, check_inputs = FALSE, simple = TRUE)[,2]
 }

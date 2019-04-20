@@ -28,8 +28,9 @@ cluster_rs <- function(clusters = NULL,
                        prob_unit = NULL,
                        simple = FALSE,
                        check_inputs = TRUE) {
-  if (check_inputs)
+  if (check_inputs){
     .invoke_check(check_samplr_arguments_new)
+  }
   
   n_per_clust <- tapply(clusters, clusters, length)
   unique_clust <- names(n_per_clust)
@@ -101,10 +102,10 @@ cluster_rs_probabilities <-
     
     
     if (!is.null(prob_unit)) {
-      prob_unit <- tapply(prob_unit, INDEX = clusters, FUN = unique)
+      prob_unit <- tapply(prob_unit, INDEX = clusters, FUN = unique, simplify = FALSE)
     }
     if (!is.null(n_unit)) {
-      n_unit <- tapply(n_unit, INDEX = clusters, FUN = unique)
+      n_unit <- tapply(n_unit, INDEX = clusters, FUN = unique, simplify = FALSE)
     }
     
     if (simple) {
