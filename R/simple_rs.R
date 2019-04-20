@@ -6,6 +6,7 @@
 #' @param prob prob is the probability of being sampled must be a real number between 0 and 1 inclusive, and must be of length 1. (optional)
 #' @param prob_unit prob is the probability of being sampled must be a real number between 0 and 1 inclusive, and must be of length N. (optional)
 #' @param check_inputs logical. Defaults to TRUE.
+#' @param simple logical. internal use only.
 #'
 #' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
 #' @export
@@ -18,7 +19,12 @@
 #' S <- simple_rs(N = 100, prob = 0.3)
 #' table(S)
 #'
-simple_rs <- function(N, prob = NULL, prob_unit = NULL, check_inputs = TRUE) {
+simple_rs <- 
+  function(N, 
+           prob = NULL, 
+           prob_unit = NULL, 
+           check_inputs = TRUE,
+           simple = TRUE) {
   if(check_inputs) .invoke_check(check_samplr_arguments_new)
   if(is.null(prob)) prob <- .5
   simple_ra(N, prob, prob_unit, conditions=0:1, check_inputs = FALSE)    
@@ -37,8 +43,8 @@ simple_rs <- function(N, prob = NULL, prob_unit = NULL, check_inputs = TRUE) {
 #' table(probs)
 #'
 #' @export
-simple_rs_probabilities <- function(N, prob = NULL, prob_unit = NULL, check_inputs = TRUE) {
+simple_rs_probabilities <- function(N, prob = NULL, prob_unit = NULL, check_inputs = TRUE, simple = TRUE) {
   if(check_inputs) .invoke_check(check_samplr_arguments_new)
   if(is.null(prob)) prob <- .5
-  simple_ra_probabilities(N, prob, prob_unit, conditions = 0:1, check_inputs = FALSE)[,2]
+  simple_ra_probabilities(N, prob, prob_unit, conditions = 0:1, check_inputs = FALSE, simple = TRUE)[,2]
 }

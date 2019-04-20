@@ -1,7 +1,3 @@
-
-
-
-
 context("Complete Random Assignments")
 
 test_that("Invalid complete RAs", {
@@ -197,7 +193,7 @@ test_that("_unit",{
   expect_error(complete_ra(100, prob_unit = rep(c(0.4, 0.5), c(50, 50))))
   
   table(complete_ra(100, m_unit = rep(40, 100)))
-  expect_warning(expect_error(table(complete_ra(100, m = rep(40, 100)))))
-  expect_error(complete_ra(100, m_unit = rep(c(40, 50), c(50, 50))))
+  expect_error(complete_ra(100, m = rep(40, 100)), "scalar.")
+  expect_error(complete_ra(100, m_unit = rep(c(40, 50), c(50, 50))), "In a complete random assignment design, `m_unit` must be the same for all units.")
 })
 

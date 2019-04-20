@@ -33,11 +33,21 @@
 #'
 #' Z <- block_ra(blocks = blocks, block_prob = c(.1, .2, .3))
 #' table(blocks, Z)
+#' 
+#' Z <- block_ra(blocks = blocks, 
+#'               prob_unit = rep(c(.1, .2, .3), 
+#'                               times = c(50, 100, 200)))
+#' table(blocks, Z)
 #'
 #' Z <- block_ra(blocks = blocks, m = 20)
 #' table(blocks, Z)
 #'
 #' Z <- block_ra(blocks = blocks, block_m = c(20, 30, 40))
+#' table(blocks, Z)
+#' 
+#' Z <- block_ra(blocks = blocks, 
+#'               m_unit = rep(c(20, 30, 40),
+#'                            times = c(50, 100, 200)))
 #' table(blocks, Z)
 #'
 #' block_m_each <- rbind(c(25, 25),
@@ -203,7 +213,7 @@ block_ra_probabilities <- function(blocks = NULL,
   block_spots <-
     unlist(split(seq_along(blocks), blocks), FALSE, FALSE)
   
-  blocks <- sort(unique(blocks))
+  # blocks <- sort(unique(blocks))
 
   mapply_args <- list(
     FUN = "complete_ra_probabilities",
@@ -254,7 +264,6 @@ block_ra_helper <- function(blocks = NULL,
                      num_arms = NULL,
                      N_per_block, 
                      mapply_args) {
-
   
   if(!is.null(prob_unit)){
     block_prob <- tapply(prob_unit, blocks, unique)
