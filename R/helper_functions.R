@@ -701,6 +701,10 @@ check_samplr_arguments <-
            clusters, 
            simple,
            n) {
+    if (!length(n) %in% c(1)) {
+      stop("If specified, the number of units sampled (n) must be of length 1.", call. = FALSE)
+    }
+    
     if (n < 0) {
       stop("If specified, the number of units sampled (n) must be nonnegative.",
            call. = FALSE)
