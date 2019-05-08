@@ -29,7 +29,8 @@ test_that("SRS probs .1", {
 
 test_that("Weighted rs", {
   
-  p1 <- simple_rs_probabilities(N=4, prob_unit =1:4/4)
+  
+  p1 <- simple_rs_probabilities(N = 4, prob_unit = 1:4 / 4)
 
   expect_equal(p1, 1:4/4)
   

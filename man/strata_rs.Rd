@@ -46,7 +46,15 @@ table(strata, Z)
 Z <- strata_rs(strata = strata, strata_prob = c(.1, .2, .3))
 table(strata, Z)
 
+Z <- strata_rs(strata = strata, 
+               prob_unit = rep(c(.1, .2, .3), times = c(50, 100, 200)))
+table(strata, Z)
+
 Z <- strata_rs(strata = strata, strata_n = c(20, 30, 40))
+table(strata, Z)
+
+Z <- strata_rs(strata = strata, 
+               n_unit = rep(c(20, 30, 40), times = c(50, 100, 200)))
 table(strata, Z)
 
 

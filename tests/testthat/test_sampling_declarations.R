@@ -138,3 +138,18 @@ test_that("print and summary", {
   expect_output(summary(d))
 })
 
+
+test_that("_each",{
+  
+  strata <- rep(c("A", "B", "C"), times = c(50, 100, 200))
+  d <- declare_rs(strata = strata, n_unit = rep(c(20, 20, 25), c(50, 100, 200)))
+  
+  expect_equal(table(strata, draw_rs(d)), 
+               structure(c(30L, 80L, 175L, 20L, 20L, 25L), .Dim = 3:2, .Dimnames = list(
+                 strata = c("A", "B", "C"), c("0", "1")), class = "table"))
+  
+  expect_error(
+    declare_rs(strata = strata, n_unit = rep(c(20, 20, 25), c(200, 100, 50))),
+    "In a stratified random sampling design, `n_unit` must be the same for all units within the same stratum."
+  )
+})

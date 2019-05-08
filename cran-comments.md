@@ -1,11 +1,11 @@
-## Update randomizr to version 0.16.1
-* small bug fixes
-* add summary method
-* Addresses noLD <https://www.stats.ox.ac.uk/pub/bdr/noLD/randomizr.out>
+## Update randomizr to version 0.18.0
+* Add small feature
+* Bug fixes for R-devel
 
 ## Test environments
-* local OS X install, R version 3.5.0 (2018-04-23) (Joy in Playing)
-* R-devel with win-builder.r-project.org.
+* local OS X install, R version 3.5.3 (2019-03-11)
+* R-devel with win-builder.r-project.org
+* Linux, Mac OS via Travis
 
 ## R CMD check results
 There were no ERRORs, WARNINGs, or NOTEs.
@@ -13,5 +13,7 @@ There were no ERRORs, WARNINGs, or NOTEs.
 ## Downstream dependencies
 * estimatr
 * ri2
-Both of these packages are written by our team and are not broken by these changes
+* DeclareDesign
+* DesignLibrary
+All four packages are written by our team and are not broken by these changes
 
