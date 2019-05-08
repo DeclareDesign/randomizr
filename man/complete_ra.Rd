@@ -48,7 +48,13 @@ table(Z)
 Z <- complete_ra(N = 100, m = 50)
 table(Z)
 
+Z <- complete_ra(N = 100, m_unit = rep(50, 100))
+table(Z)
+
 Z <- complete_ra(N = 100, prob = .111)
+table(Z)
+
+Z <- complete_ra(N = 100, prob_unit = rep(0.1, 100))
 table(Z)
 
 Z <- complete_ra(N = 100, conditions = c("control", "treatment"))

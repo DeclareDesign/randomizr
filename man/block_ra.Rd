@@ -56,10 +56,20 @@ table(blocks, Z)
 Z <- block_ra(blocks = blocks, block_prob = c(.1, .2, .3))
 table(blocks, Z)
 
+Z <- block_ra(blocks = blocks, 
+              prob_unit = rep(c(.1, .2, .3), 
+                              times = c(50, 100, 200)))
+table(blocks, Z)
+
 Z <- block_ra(blocks = blocks, m = 20)
 table(blocks, Z)
 
 Z <- block_ra(blocks = blocks, block_m = c(20, 30, 40))
+table(blocks, Z)
+
+Z <- block_ra(blocks = blocks, 
+              m_unit = rep(c(20, 30, 40),
+                           times = c(50, 100, 200)))
 table(blocks, Z)
 
 block_m_each <- rbind(c(25, 25),

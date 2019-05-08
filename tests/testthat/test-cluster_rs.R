@@ -1,9 +1,7 @@
 
-
 context("Cluster Random Sampling")
 clusters <- rep(letters[1:15], times = 1:15)
 
-#debugonce(cluster_rs_probabilities)
 test_that("Two Group Designs", {
   S <- cluster_rs(clusters = clusters)
   probs <- cluster_rs_probabilities(clusters = clusters)

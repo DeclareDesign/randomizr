@@ -17,7 +17,7 @@ vignette: >
   options(digits=2)
 ```
 
-**randomizr** is a small package for r that simplifies the design and analysis of randomized experiments. In particular, it makes the random assignment **procedure** transparent, flexible, and most importantly reproduceable. By the time that many experiments are written up and made public, the process by which some units recieved treatments is lost or imprecisely described. The **randomizr** package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.
+**randomizr** is a small package for r that simplifies the design and analysis of randomized experiments. In particular, it makes the random assignment **procedure** transparent, flexible, and most importantly reproduceable. By the time that many experiments are written up and made public, the process by which some units received treatments is lost or imprecisely described. The **randomizr** package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.
 
 A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage. First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a **cluster**. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of average causal effects and the uncertainty attending to them may be incorrect.
 
@@ -183,7 +183,7 @@ knitr::kable(t(as.matrix(table(Z))))
 ## Simple and Complete random assignment compared
 When should you use `simple_ra()` versus `complete_ra()`? Basically, if the number of units is known beforehand, `complete_ra()` is always preferred, for two reasons: 1. Researchers can plan exactly how many treatments will be deployed. 2. The standard errors associated with complete random assignment are generally smaller, increasing experimental power. See this guide on [EGAP](http://egap.org/) for more on [experimental power](http://egap.org/resources/guides/power/).
 
-Since you need to know `N` beforehand in order to use `simple_ra()`, it may seem like a useless function. Sometimes, however, the random assignment isn't directly in the researcher's control. For example, when deploying a survey exeriment on a platform like Qualtrics, simple random assignment is the only possibility due to the inflexibility of the built-in random assignment tools. When reconstructing the random assignment for analysis after the experiment has been conducted, `simple_ra()` provides a convenient way to do so.  
+Since you need to know `N` beforehand in order to use `simple_ra()`, it may seem like a useless function. Sometimes, however, the random assignment isn't directly in the researcher's control. For example, when deploying a survey experiment on a platform like Qualtrics, simple random assignment is the only possibility due to the inflexibility of the built-in random assignment tools. When reconstructing the random assignment for analysis after the experiment has been conducted, `simple_ra()` provides a convenient way to do so.  
 To demonstrate how `complete_ra()` is superior to `simple_ra()`, let's conduct a small simulation with our `HairEyeColor` dataset.
 
 ```{r}
@@ -233,9 +233,9 @@ In this simulation complete random assignment led to a `r round((var(simple_ests
 
 Block random assignment (sometimes known as stratified random assignment) is a powerful tool when used well. In this design, subjects are sorted into blocks (strata) according to their pre-treatment covariates, and then complete random assignment is conducted within each block. For example, a researcher might block on gender, assigning exactly half of the men and exactly half of the women to treatment. 
 
-Why block?  The first reason is to signal to future readers that treatment effect heterogeneity may be of interest: is the treatment effect different for men versus women? Of course, such heterogeneity could be explored if complete random assignment had been used, but blocking on a covariate defends a researcher (somewhat) against claims of data dredging. The second reason is to increase precision. If the blocking variables are predicitive of the outcome (i.e., they are correlated with the outcome), then blocking may help to decrease sampling variability. It's important, however, not to overstate these advantages. The gains from a blocked design can often be realized through covariate adjustment alone.
+Why block?  The first reason is to signal to future readers that treatment effect heterogeneity may be of interest: is the treatment effect different for men versus women? Of course, such heterogeneity could be explored if complete random assignment had been used, but blocking on a covariate defends a researcher (somewhat) against claims of data dredging. The second reason is to increase precision. If the blocking variables are predictive of the outcome (i.e., they are correlated with the outcome), then blocking may help to decrease sampling variability. It's important, however, not to overstate these advantages. The gains from a blocked design can often be realized through covariate adjustment alone.
 
-Blocking can also produce complications for estimation. Blocking can produce different probabilities of assignment for different subjects. This complication is typically addressed in one of two ways: "controlling for blocks" in a regression context, or inverse probabilitity weights (IPW), in which units are weighted by the inverse of the probability that the unit is in the condition that it is in.  
+Blocking can also produce complications for estimation. Blocking can produce different probabilities of assignment for different subjects. This complication is typically addressed in one of two ways: "controlling for blocks" in a regression context, or inverse probability weights (IPW), in which units are weighted by the inverse of the probability that the unit is in the condition that it is in.  
 
 The only required argument to `block_ra()` is `blocks`, which is a vector of length `N` that describes which block a unit belongs to. `blocks` can be a factor, character, or numeric variable. If no other arguments are specified, `block_ra()` assigns an approximately equal proportion of each block to treatment. 
 
@@ -292,7 +292,7 @@ table(Z, hec$Hair)
 knitr::kable(table(Z, hec$Hair))
 ```
 
-In the example above, the different blocks have different probabilities of assignment to treatment. In this case, people with Black hair have a 30/108 = 27.8% chance of being treated, those with Brown hair have 100/286 = 35.0% change, etc. Left unadressed, this discrepancy could bias treatment effects. We can see this directly with the `declare_ra()` function.
+In the example above, the different blocks have different probabilities of assignment to treatment. In this case, people with Black hair have a 30/108 = 27.8% chance of being treated, those with Brown hair have 100/286 = 35.0% change, etc. Left unaddressed, this discrepancy could bias treatment effects. We can see this directly with the `declare_ra()` function.
 
 ```{r echo=TRUE, results="hide"}
 declaration <- declare_ra(blocks = hec$Hair, block_m_each = block_m_each)
@@ -560,7 +560,7 @@ table(Z)
 knitr::kable(t(as.matrix(table(Z))))
 ```
 
-This assignment procedure is complicated by the sibling rule, which has two effects: first, students are cluster-assigned by family, and second, the probability of assignment varies student to student. Obviously, families who have two children in the lottery have a higher probability of winning the lottery because they effectively have two "tickets." There may be better ways of running this assignment procedure (for example, with `cluster_ra()`), but the purpose of this example is to show how complicated *real-world* procedures can be written up in a simple function. With this function, the random assignment procedure can be reproduced exactly, the complicated probabilities of assignment can be caluculated, and the analysis is greatly simplified.
+This assignment procedure is complicated by the sibling rule, which has two effects: first, students are cluster-assigned by family, and second, the probability of assignment varies student to student. Obviously, families who have two children in the lottery have a higher probability of winning the lottery because they effectively have two "tickets." There may be better ways of running this assignment procedure (for example, with `cluster_ra()`), but the purpose of this example is to show how complicated *real-world* procedures can be written up in a simple function. With this function, the random assignment procedure can be reproduced exactly, the complicated probabilities of assignment can be calculated, and the analysis is greatly simplified.
 
 ## Check probabilities of assignment directly
 
