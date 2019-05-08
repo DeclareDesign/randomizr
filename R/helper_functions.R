@@ -662,7 +662,7 @@ clean_condition_names <- function(assignment, conditions) {
     return(assignment)
   }
   
-  if (is.logical(assignment)) {
+  if (is.logical(conditions)) {
     return(as.numeric(assignment))
   }
   
