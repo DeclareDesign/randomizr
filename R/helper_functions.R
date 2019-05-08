@@ -663,7 +663,7 @@ clean_condition_names <- function(assignment, conditions) {
   }
   
   if (is.logical(conditions)) {
-    return(as.numeric(assignment))
+    return(as.logical(assignment))
   }
   
   return(factor(assignment, levels = conditions))
