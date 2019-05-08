@@ -790,21 +790,20 @@ check_samplr_arguments <-
   }
 
 
-clean_condition_names <- 
-  function(assignment, conditions) {
-    if (is.factor(conditions)) {
-      return(factor(assignment, levels = levels(conditions)))
-    }
-    
-    if (is.numeric(assignment)) {
-      return(assignment)
-    }
-    
-    if (is.logical(assignment)) {
-      return(as.numeric(assignment))
-    }
-    return(factor(assignment, levels = conditions))
+clean_condition_names <- function(assignment, conditions) {
+  if (is.factor(conditions)) {
+    return(factor(assignment, levels = levels(conditions)))
   }
+  
+  if (is.numeric(conditions)) {
+    return(assignment)
+  }
+  
+  if (is.logical(conditions)) {
+    return(as.logical(assignment))
+  }
+  return(factor(assignment, levels = conditions))
+}
 
 is_constant <- function(x)
   all(x[1] == x)

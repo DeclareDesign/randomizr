@@ -219,3 +219,18 @@ test_that("prob_unit and m_unit", {
 
 
 
+test_that("single unit in block (http://discuss.declaredesign.org/t/conditions-code/101)", {
+
+  count = c(30, 27, 1, 2)
+  block_count <- ceiling(count / 2)
+  pre_rand_data <- data.frame(district = rep(c("cps","roe47","roe48","roe49"), times = count ), stringsAsFactors = FALSE)
+  post_blk_rand <- within(pre_rand_data,{
+    mfa_tx <- block_ra(blocks = district, block_m = block_count, conditions = c("k-2 mfa","3-5 mfa"))
+    id_var <- 1:nrow(pre_rand_data)
+  })
+  
+  expect_equal(class(post_blk_rand$mfa_tx), "factor")
+  expect_equal(levels(post_blk_rand$mfa_tx), c("k-2 mfa", "3-5 mfa"))
+  
+})
+
