@@ -658,7 +658,7 @@ clean_condition_names <- function(assignment, conditions) {
     return(factor(assignment, levels = levels(conditions)))
   }
   
-  if (is.numeric(assignment)) {
+  if (is.numeric(conditions)) {
     return(assignment)
   }
   
