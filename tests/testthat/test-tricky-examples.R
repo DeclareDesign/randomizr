@@ -189,3 +189,15 @@ test_that("balancing with block_prob_each", {
   
   expect_true(all (table(blocks, draw) - golden %in% -1:1))
 })
+
+
+
+test_that("vsample advances rng", {
+  s1 <- .Random.seed
+  
+  complete_ra(5)
+  s2 <- .Random.seed
+  
+  expect_true(!identical(s1, s2))
+})
+  

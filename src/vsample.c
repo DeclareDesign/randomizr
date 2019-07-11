@@ -16,6 +16,8 @@ SEXP randomizr_vsample(SEXP pmat) {
   
   int* out = INTEGER(ret);
   
+  GetRNGstate();
+  
   for(i = 0; i < m; i++) {
     double r = unif_rand();
     for(j = 0; r > 0 && j < n; j++) {
@@ -24,6 +26,8 @@ SEXP randomizr_vsample(SEXP pmat) {
     
     out[i] = j;
   }
+  
+  PutRNGstate();
 
   UNPROTECT(1);  
   
