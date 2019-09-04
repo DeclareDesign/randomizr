@@ -6,7 +6,7 @@
 
 /* .Call calls */
 extern SEXP randomizr_restrictedparts(SEXP, SEXP);
-extern SEXP randomizr_vsample(SEXP, SEXP);
+extern SEXP randomizr_vsample(SEXP);
 
 
 
