@@ -1,10 +1,11 @@
-## Update randomizr to version 0.18.0
-* Add small feature
-* Bug fixes for R-devel
+## Update randomizr to version 0.20.0
+* Small bug fixes to random number generation
 
 ## Test environments
-* local OS X install, R version 3.5.3 (2019-03-11)
+R version 3.6.1 (2019-07-05) -- "Action of the Toes"
 * R-devel with win-builder.r-project.org
+* R-release with win-builder.r-project.org.
+* R-oldrelease with win-builder.r-project.org.
 * Linux, Mac OS via Travis
 
 ## R CMD check results
