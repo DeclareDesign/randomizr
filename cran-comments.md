@@ -1,5 +1,6 @@
 ## Update randomizr to version 0.20.0
 * Small bug fixes to random number generation
+* Fixed issue in last submission to CRAN
 
 ## Test environments
 R version 3.6.1 (2019-07-05) -- "Action of the Toes"
