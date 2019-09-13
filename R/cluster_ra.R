@@ -3,7 +3,7 @@
 #' cluster_ra implements a random assignment procedure in which groups of units are assigned together (as a cluster) to treatment conditions. This function conducts complete random assignment at the cluster level, unless simple = TRUE, in which case \code{\link{simple_ra}} analogues are used.
 #'
 #' @param clusters A vector of length N that indicates which cluster each unit belongs to.
-#' @param m Use for a two-arm design in which m clusters are assigned to treatment and N-m clusters are assigned to control. (optional)
+#' @param m Use for a two-arm design in which m clusters are assigned to treatment and N_clusters-m clusters are assigned to control. (optional)
 #' @param m_unit Use for a two-arm design in which exactly unique(m_unit) clusters are assigned to treatment and the remainder are assigned to control. m_unit must be of length N and must be the same for all units (optional)
 #' @param m_each Use for a multi-arm design in which the values of m_each determine the number of clusters assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many clusters should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)
 #' @param prob Use for a two-arm design in which either floor(N_clusters*prob) or ceiling(N_clusters*prob) clusters are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_clusters*prob) clusters will be assigned to treatment and with probability prob, ceiling(N_clusters*prob) clusters will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
