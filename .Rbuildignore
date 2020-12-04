@@ -20,3 +20,4 @@ CONDUCT.md
 ^randomizr_.*\.tar\.gz$
 ^vignettes/srandomizr_vignette\.Rmd$
 ^CRAN-RELEASE$
+^pkgdown$
