@@ -1,6 +1,51 @@
 template:
   package: ddpkgdowntemplate
 
+home:
+  sections:
+    - links
+    - citation
+    - authors
+  link_order:
+    - repo
+    - github
+    - bug_report  
+
+roles_include:
+  - aut
+  - cre
+  - fnd
+  - ctb
+
+navbar:
+  left:
+  - text: randomizr home
+    href: https://declaredesign.org/r/randomizr/
+  - text: Reference
+    href: reference/index.html
+  - text: Articles
+    menu: 
+     - text: Getting started with randomizr
+       href: articles/randomizr_vignette.html
+     - text: Getting started with randomizr for Stata
+       href: articles/srandomizr_vignette.html
+  right:
+  - text: "Ask for Help"
+    href: http://discuss.declaredesign.org
+  - text: "Packages"
+    menu:
+      - text: DeclareDesign
+        href: http://declaredesign.org/r/declaredesign/
+      - text: randomizr
+        href: https://declaredesign.org/r/randomizr/
+      - text: fabricatr
+        href: https://declaredesign.org/r/fabricatr/
+      - text: estimatr
+        href: https://declaredesign.org/r/estimatr/
+      - text: DesignLibrary
+        href: https://declaredesign.org/r/designlibrary/
+
+
 reference:
 - title: Random assignment
   contents:
