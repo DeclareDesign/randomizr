@@ -19,17 +19,6 @@ roles_include:
 
 navbar:
   left:
-  - text: randomizr home
-    href: https://declaredesign.org/r/randomizr/
-  - text: Reference
-    href: reference/index.html
-  - text: Articles
-    menu: 
-     - text: Getting started with randomizr
-       href: articles/randomizr_vignette.html
-     - text: Getting started with randomizr for Stata
-       href: articles/srandomizr_vignette.html
-  right:
   - text: "Ask for Help"
     href: http://discuss.declaredesign.org
   - text: "Packages"
@@ -44,6 +33,17 @@ navbar:
         href: https://declaredesign.org/r/estimatr/
       - text: DesignLibrary
         href: https://declaredesign.org/r/designlibrary/
+  right:
+  - text: randomizr home
+    href: https://declaredesign.org/r/randomizr/
+  - text: Reference
+    href: reference/index.html
+  - text: Articles
+    menu: 
+     - text: Getting started with randomizr
+       href: articles/randomizr_vignette.html
+     - text: Getting started with randomizr for Stata
+       href: articles/srandomizr_vignette.html 
 
 
 reference:
