@@ -2,12 +2,10 @@ randomizr: Easy to use tools for common forms of random assignment and
 sampling
 ================
 
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
 [![CRAN
 Status](https://www.r-pkg.org/badges/version/randomizr)](https://cran.r-project.org/package=randomizr)
-[![Travis-CI Build
-Status](https://travis-ci.org/DeclareDesign/randomizr.svg?branch=master)](https://travis-ci.org/DeclareDesign/randomizr)
-[![AppVeyor Build
-Status](https://ci.appveyor.com/api/projects/status/github/DeclareDesign/randomizr?branch=master&svg=true)](https://ci.appveyor.com/project/DeclareDesign/randomizr)
 [![Coverage
 Status](https://coveralls.io/repos/github/DeclareDesign/randomizr/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/randomizr?branch=master)
 ![CRAN
@@ -25,7 +23,7 @@ offer **randomizr** for both
 [`R`](https://declaredesign.org/r/randomizr) and
 [`Stata`](https://declaredesign.org/stata/randomizr).
 
-### Installing randomizr for R
+## Installing randomizr for R
 
 Installing the latest stable version of **randomizr** in `R`:.
 
@@ -41,7 +39,7 @@ bugs or syntax changes), run the following:
 install.packages("randomizr", repos="http://r.declaredesign.org")
 ```
 
-### Getting started with randomizr for R
+## Getting started with randomizr for R
 
 **randomizr** has five main random assignment functions, corresponding
 to the common experimental designs listed above. You can read more about
@@ -91,7 +89,7 @@ For more information about all of **randomizr**’s functionality, please
 see our [online
 tutorial](https://declaredesign.org/r/randomizr/articles/randomizr_vignette.html)
 
-### randomizr for Stata
+## randomizr for Stata
 
 Installing the latest stable version of **randomizr** from ssc is easy:
 
