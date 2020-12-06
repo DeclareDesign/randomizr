@@ -32,8 +32,8 @@ navbar:
   - text: "Help"
     href: http://discuss.declaredesign.org
   right:
-  - text: randomizr home
-    href: https://declaredesign.org/r/randomizr/
+  - text: Get started
+    href: articles/randomizr_vignette.html
   - text: Reference
     href: reference/index.html
   - text: Articles
@@ -42,6 +42,8 @@ navbar:
        href: articles/randomizr_vignette.html
      - text: Getting started with randomizr for Stata
        href: articles/srandomizr_vignette.html 
+  - text: randomizr home
+    href: https://declaredesign.org/r/randomizr/
 
 
 reference:
