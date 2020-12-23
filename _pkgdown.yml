@@ -1,6 +1,6 @@
 template:
-  path: "docs/templates"
-  
+  package: ddpkgdowntemplate
+
 home:
   sections:
     - links
@@ -18,28 +18,74 @@ roles_include:
   - ctb
 
 navbar:
-  type: default
   left:
-  - text: "Getting Started in R"
-    href: articles/randomizr_vignette.html
-  - text: "Getting Started in Stata"
-    href: articles/srandomizr_vignette.html
-  - text: Reference
-    href: reference/index.html
-  - text: "Ask for Help"
-    href: http://discuss.declaredesign.org
-  - text: "Packages"
+  - text: "Software"
     menu:
       - text: DeclareDesign
-        href: http://declaredesign.org
-      - text: randomizr
-        href: https://declaredesign.org/r/randomizr/
+        href: http://declaredesign.org/r/declaredesign/
       - text: fabricatr
         href: https://declaredesign.org/r/fabricatr/
       - text: estimatr
         href: https://declaredesign.org/r/estimatr/
-
-  - text: "DeclareDesign home"
-    href: http://declaredesign.org
+      - text: DesignLibrary
+        href: https://declaredesign.org/r/designlibrary/
+  - text: "Help"
+    href: http://discuss.declaredesign.org
   right:
-  - text: 
+  - text: Get started
+    href: articles/randomizr_vignette.html
+  - text: Reference
+    href: reference/index.html
+  - text: Articles
+    menu: 
+     - text: Getting started with randomizr
+       href: articles/randomizr_vignette.html
+     - text: Getting started with randomizr for Stata
+       href: articles/srandomizr_vignette.html 
+  - text: randomizr home
+    href: https://declaredesign.org/r/randomizr/
+
+
+reference:
+- title: Random assignment
+  contents:
+  - block_and_cluster_ra
+  - block_ra
+  - cluster_ra
+  - complete_ra
+  - simple_ra
+  - conduct_ra
+  - custom_ra
+  - declare_ra
+
+- title: Functions for calculating probabilities of assignment
+  contents:
+  - obtain_condition_probabilities
+  - obtain_num_permutations
+  - obtain_permutation_matrix
+  - obtain_permutation_probabilities
+  - block_and_cluster_ra_probabilities
+  - block_ra_probabilities
+  - cluster_ra_probabilities
+  - custom_ra_probabilities
+  - simple_ra_probabilities
+  - complete_ra_probabilities
+
+- title: Random sampling
+  contents:
+  - draw_rs
+  - simple_rs
+  - complete_rs
+  - strata_rs
+  - strata_and_cluster_rs
+  - declare_rs
+  - cluster_rs
+
+- title: Functions for calculating sampling inclusion probabilities
+  contents:
+  - obtain_inclusion_probabilities
+  - cluster_rs_probabilities
+  - complete_rs_probabilities
+  - simple_rs_probabilities
+  - strata_and_cluster_rs_probabilities
+  - strata_rs_probabilities

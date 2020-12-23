@@ -1,5 +1,5 @@
 ---
-title: "Design and analysis of experiments with randomizr"
+title: "Design and Analysis of Experiments with randomizr"
 author: "Alexander Coppock"
 output: rmarkdown::html_vignette
 vignette: >
