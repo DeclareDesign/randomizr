@@ -21,3 +21,4 @@ CONDUCT.md
 ^vignettes/srandomizr_vignette\.Rmd$
 ^CRAN-RELEASE$
 ^pkgdown$
+^\.github$
