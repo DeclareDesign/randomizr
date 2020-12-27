@@ -5,11 +5,13 @@ sampling
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 [![CRAN
-Status](https://www.r-pkg.org/badges/version/randomizr)](https://cran.r-project.org/package=randomizr)
-[![Coverage
-Status](https://coveralls.io/repos/github/DeclareDesign/randomizr/badge.svg?branch=master)](https://coveralls.io/github/DeclareDesign/randomizr?branch=master)
-![CRAN
-downloads](https://cranlogs.r-pkg.org/badges/grand-total/randomizr)
+status](https://www.r-pkg.org/badges/version/randomizr)](https://cran.r-project.org/package=randomizr)
+[![CRAN RStudio mirror
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/randomizr?color=green)](https://r-pkg.org/pkg/randomizr)
+[![Build
+status](https://github.com/DeclareDesign/randomizr/workflows/R-CMD-check/badge.svg)](https://github.com/DeclareDesign/randomizr/actions)
+[![Code
+coverage](https://codecov.io/gh/DeclareDesign/randomizr/branch/master/graph/badge.svg?token=wwi1lF13Se)](https://codecov.io/gh/DeclareDesign/randomizr)
 
 **randomizr** is designed to make conducting field, lab, survey, or
 online experiments easier by automating the random assignment process.
@@ -81,9 +83,9 @@ table(Z, clust_var)
 
 |           |   a |   b |   c |   d |   e |   f |   g |   h |   i |   j |   k |   l |   m |   n |   o |
 |:----------|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|
-| control   |   0 |   0 |   0 |   0 |   0 |   0 |   7 |   0 |   0 |  10 |  11 |   0 |   0 |   0 |  15 |
-| placebo   |   0 |   2 |   0 |   4 |   0 |   6 |   0 |   0 |   0 |   0 |   0 |   0 |  13 |   0 |   0 |
-| treatment |   1 |   0 |   3 |   0 |   5 |   0 |   0 |   8 |   9 |   0 |   0 |  12 |   0 |  14 |   0 |
+| control   |   1 |   0 |   0 |   0 |   0 |   0 |   0 |   0 |   9 |   0 |   0 |   0 |   0 |  14 |  15 |
+| placebo   |   0 |   0 |   3 |   0 |   5 |   0 |   7 |   0 |   0 |   0 |   0 |  12 |   0 |   0 |   0 |
+| treatment |   0 |   2 |   0 |   4 |   0 |   6 |   0 |   8 |   0 |  10 |  11 |   0 |  13 |   0 |   0 |
 
 For more information about all of **randomizr**’s functionality, please
 see our [online
