@@ -205,7 +205,7 @@ complete_ra <- function(N,
     } else{
       conditions_vec <- rep(conditions, m_each_floor)
     }
-    assignment <- sample(conditions_vec)
+    assignment <- sample(conditions_vec, length(conditions_vec)))
     assignment <- clean_condition_names(assignment, conditions)
     return(assignment)
   }
