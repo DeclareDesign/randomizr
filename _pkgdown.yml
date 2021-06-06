@@ -1,5 +1,7 @@
 template:
   package: ddpkgdowntemplate
+  
+url: https://declaredesign.org/r/randomizr
 
 home:
   sections:
