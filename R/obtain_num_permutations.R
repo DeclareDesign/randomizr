@@ -1,6 +1,6 @@
 #' Obtain the Number of Possible Permutations from a Random Assignment Declaration
 #'
-#' @param declaration A random assignment or sampling declaration, created by \code{\link{declare_ra} or \code{\link{declare_rs}}.
+#' @param declaration A random assignment or sampling declaration, created by \code{\link{declare_ra}} or \code{\link{declare_rs}}.
 #'
 #' @return a scalar
 #' @export
@@ -67,7 +67,6 @@
 #' declaration <- declare_rs(N = 20)
 #' perms <- obtain_permutation_matrix(declaration)
 #' dim(perms)
-#'
 #'
 #'
 obtain_num_permutations <- function(declaration) {

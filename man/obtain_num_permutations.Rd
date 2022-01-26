@@ -7,7 +7,7 @@
 obtain_num_permutations(declaration)
 }
 \arguments{
-\item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
+\item{declaration}{A random assignment or sampling declaration, created by \code{\link{declare_ra}} or \code{\link{declare_rs}}.}
 }
 \value{
 a scalar
@@ -17,14 +17,15 @@ Obtain the Number of Possible Permutations from a Random Assignment Declaration
 }
 \examples{
 
-# complete
+# Random assignment
+## complete
 
 declaration <- declare_ra(N = 4)
 perms <- obtain_permutation_matrix(declaration)
 dim(perms)
 obtain_num_permutations(declaration)
 
-# blocked
+## blocked
 
 blocks <- c("A", "A", "B", "B", "C", "C", "C")
 declaration <- declare_ra(blocks = blocks)
@@ -32,7 +33,7 @@ perms <- obtain_permutation_matrix(declaration)
 dim(perms)
 obtain_num_permutations(declaration)
 
-# clustered
+## clustered
 
 clusters <- c("A", "B", "A", "B", "C", "C", "C")
 declaration <- declare_ra(clusters = clusters)
@@ -40,11 +41,42 @@ perms <- obtain_permutation_matrix(declaration)
 dim(perms)
 obtain_num_permutations(declaration)
 
-# large
+## large
 
 declaration <- declare_ra(20)
 choose(20, 10)
 perms <- obtain_permutation_matrix(declaration)
 dim(perms)
+
+# Random sampling
+## complete
+
+declaration <- declare_rs(N = 4)
+perms <- obtain_permutation_matrix(declaration)
+dim(perms)
+obtain_num_permutations(declaration)
+
+## stratified
+
+strata <- c("A", "A", "B", "B", "C", "C", "C")
+declaration <- declare_rs(strata = strata)
+perms <- obtain_permutation_matrix(declaration)
+dim(perms)
+obtain_num_permutations(declaration)
+
+## clustered
+
+clusters <- c("A", "B", "A", "B", "C", "C", "C")
+declaration <- declare_rs(clusters = clusters)
+perms <- obtain_permutation_matrix(declaration)
+dim(perms)
+obtain_num_permutations(declaration)
+
+## large
+
+declaration <- declare_rs(N = 20)
+perms <- obtain_permutation_matrix(declaration)
+dim(perms)
+
 
 }
