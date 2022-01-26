@@ -18,7 +18,7 @@ expect_only_one_per_cluster <- function(Z, w = 1, clust = clusters) {
 
 test_that("defaults", {
   df <- data.frame(blocks, clusters)
-  df <- df[sample(seq_len(nrow(df))), ]
+  df <- df[sample(seq_len(nrow(df)),nrow(df)), ]
   
   Z <-
     block_and_cluster_ra(clusters = df$clusters, blocks = df$blocks)
