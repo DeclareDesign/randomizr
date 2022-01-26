@@ -212,7 +212,8 @@ complete_ra <- function(N,
   
   # Multi-arm Design Case 3: m_each specified
   if (!is.null(m_each)) {
-    assignment <- sample(rep(conditions, m_each))
+    conditions_vec <- rep(conditions, m_each)
+    assignment <- sample(conditions_vec, length(conditions_vec))
     assignment <- clean_condition_names(assignment, conditions)
     return(assignment)
   }

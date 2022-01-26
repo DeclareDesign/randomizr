@@ -197,3 +197,16 @@ test_that("_unit",{
   expect_error(complete_ra(100, m_unit = rep(c(40, 50), c(50, 50))), "In a complete random assignment design, `m_unit` must be the same for all units.")
 })
 
+
+
+
+test_that("issue 90 is OK", {
+  set.seed(1)
+  Z <- complete_ra(1, prob_each = c(0.5, 0.5), conditions = 1:2)
+  expect_equal(length(Z), 1)
+  set.seed(4)
+  Z <- complete_ra(1, prob_each = c(0.5, 0.5), conditions = 1:2)
+  expect_equal(length(Z), 1)
+})
+
+
