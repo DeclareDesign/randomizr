@@ -4,12 +4,27 @@
 \alias{conduct_ra}
 \title{Conduct a random assignment}
 \usage{
-conduct_ra(declaration = NULL, N = NULL, blocks = NULL,
-  clusters = NULL, m = NULL, m_unit = NULL, m_each = NULL,
-  prob = NULL, prob_unit = NULL, prob_each = NULL, block_m = NULL,
-  block_m_each = NULL, block_prob = NULL, block_prob_each = NULL,
-  num_arms = NULL, conditions = NULL, simple = FALSE,
-  permutation_matrix = NULL, check_inputs = TRUE)
+conduct_ra(
+  declaration = NULL,
+  N = NULL,
+  blocks = NULL,
+  clusters = NULL,
+  m = NULL,
+  m_unit = NULL,
+  m_each = NULL,
+  prob = NULL,
+  prob_unit = NULL,
+  prob_each = NULL,
+  block_m = NULL,
+  block_m_each = NULL,
+  block_prob = NULL,
+  block_prob_each = NULL,
+  num_arms = NULL,
+  conditions = NULL,
+  simple = FALSE,
+  permutation_matrix = NULL,
+  check_inputs = TRUE
+)
 }
 \arguments{
 \item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}

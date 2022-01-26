@@ -16,9 +16,8 @@ Encoding: UTF-8
 Suggests:
     knitr,
     dplyr,
-    blockTools,
     testthat,
     rmarkdown, 
     ri
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.2

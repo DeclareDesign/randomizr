@@ -4,8 +4,13 @@
 \alias{simple_rs_probabilities}
 \title{Inclusion Probabilities: Simple Random Sampling}
 \usage{
-simple_rs_probabilities(N, prob = NULL, prob_unit = NULL,
-  check_inputs = TRUE, simple = TRUE)
+simple_rs_probabilities(
+  N,
+  prob = NULL,
+  prob_unit = NULL,
+  check_inputs = TRUE,
+  simple = TRUE
+)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}

@@ -4,9 +4,17 @@
 \alias{strata_and_cluster_rs_probabilities}
 \title{Inclusion Probabilities: Stratified and Clustered Random Sampling}
 \usage{
-strata_and_cluster_rs_probabilities(strata = NULL, clusters = NULL,
-  prob = NULL, prob_unit = NULL, n = NULL, n_unit = NULL,
-  strata_n = NULL, strata_prob = NULL, check_inputs = TRUE)
+strata_and_cluster_rs_probabilities(
+  strata = NULL,
+  clusters = NULL,
+  prob = NULL,
+  prob_unit = NULL,
+  n = NULL,
+  n_unit = NULL,
+  strata_n = NULL,
+  strata_prob = NULL,
+  check_inputs = TRUE
+)
 }
 \arguments{
 \item{strata}{A vector of length N that indicates which stratum each unit belongs to.}

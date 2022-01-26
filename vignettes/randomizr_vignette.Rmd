@@ -354,7 +354,7 @@ knitr::kable(head(table(blocks, Z)))
 
 An alternative is to use the `blockTools` package, which constructs matched pairs, trios, quartets, etc. from pretreatment covariates. 
 
-```{r echo=TRUE, results="hide"}
+```{r eval=FALSE, results="hide"}
 library(blockTools)
 
 # BlockTools requires that all variables be numeric
@@ -373,9 +373,6 @@ hec$block_id <- createBlockIDs(out, df_forBT, id.var = "id_var")
 # Conduct actual random assignment with randomizr
 Z_blocked <- block_ra(blocks = hec$block_id, num_arms = 3)
 head(table(hec$block_id, Z_blocked))
-```
-```{r echo=FALSE}
-knitr::kable(head(table(hec$block_id, Z_blocked)))
 ```
 
 A note for `blockTools` users: that package also has an assignment function. My preference is to extract the blocking variable, then conduct the assignment with `block_ra()`, so that fewer steps are required to reconstruct the random assignment or generate new random assignments for a randomization inference procedure.

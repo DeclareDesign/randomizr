@@ -1,11 +1,10 @@
 context("Block Random Assignments")
 
+test_that("Block random assignment works",{
+  
+
+
 blocks <- rep(c("A", "B", "C"), times = c(50, 100, 200))
-#blocks <- factor(blocks, levels = c("B", "A", "C"))
-#blocks <- rep(1:3, times=c(50, 100, 200))
-
-
-#debugonce(randomizr:::check_randomizr_arguments)
 Z <- block_ra(blocks = blocks)
 table(blocks, Z)
 
@@ -183,6 +182,8 @@ batch <-
   )
 
 
+})
+
 test_that("Error", {
   blocks <- rep(c("A", "B", "C"), times = c(50, 100, 200))
   
@@ -233,4 +234,25 @@ test_that("single unit in block (http://discuss.declaredesign.org/t/conditions-c
   expect_equal(levels(post_blk_rand$mfa_tx), c("k-2 mfa", "3-5 mfa"))
   
 })
+
+test_that("types OK",{
+  
+  blocks <- structure(c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+                        1, 1, 1, 1, 1, 1, 1), label = "0 = texas; 1 = arkansas", format.stata = "%8.0g")
+  
+  
+  
+  declaration <- declare_ra(
+    N = 66,
+    blocks = blocks,
+    block_m = c(15, 18)
+  )
+  
+  expect_true(class(declaration)[2] == "ra_blocked")
+  
+  
+})
+
 

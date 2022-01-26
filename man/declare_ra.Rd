@@ -4,12 +4,26 @@
 \alias{declare_ra}
 \title{Declare a random assignment procedure.}
 \usage{
-declare_ra(N = NULL, blocks = NULL, clusters = NULL, m = NULL,
-  m_unit = NULL, m_each = NULL, prob = NULL, prob_unit = NULL,
-  prob_each = NULL, block_m = NULL, block_m_each = NULL,
-  block_prob = NULL, block_prob_each = NULL, num_arms = NULL,
-  conditions = NULL, simple = FALSE, permutation_matrix = NULL,
-  check_inputs = TRUE)
+declare_ra(
+  N = NULL,
+  blocks = NULL,
+  clusters = NULL,
+  m = NULL,
+  m_unit = NULL,
+  m_each = NULL,
+  prob = NULL,
+  prob_unit = NULL,
+  prob_each = NULL,
+  block_m = NULL,
+  block_m_each = NULL,
+  block_prob = NULL,
+  block_prob_each = NULL,
+  num_arms = NULL,
+  conditions = NULL,
+  simple = FALSE,
+  permutation_matrix = NULL,
+  check_inputs = TRUE
+)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}

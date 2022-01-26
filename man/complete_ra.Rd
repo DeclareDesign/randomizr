@@ -4,9 +4,18 @@
 \alias{complete_ra}
 \title{Complete Random Assignment}
 \usage{
-complete_ra(N, m = NULL, m_unit = NULL, m_each = NULL, prob = NULL,
-  prob_unit = NULL, prob_each = NULL, num_arms = NULL,
-  conditions = NULL, check_inputs = TRUE)
+complete_ra(
+  N,
+  m = NULL,
+  m_unit = NULL,
+  m_each = NULL,
+  prob = NULL,
+  prob_unit = NULL,
+  prob_each = NULL,
+  num_arms = NULL,
+  conditions = NULL,
+  check_inputs = TRUE
+)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}

@@ -202,15 +202,15 @@ check_randomizr_arguments <-
     if (!arg_each) {
       w <- 2
       num_arms_fmt <-
-        "If %s and num_arms are both specified, num_arms must be 2."
+        "If %s and num_arms are both specified, %s must be length 2 and num_arms must be 2."
       conditions_fmt <-
-        "If %s and conditions are both specified, conditions must be length 2."
+        "If %s and conditions are both specified, %s and conditions must both be length 2."
     } else if (!arg_block) {
       w <- length(value)
       num_arms_fmt <-
         "If %s and num_arms are both specified, the length of %s must be equal to num_arms."
       conditions_fmt <-
-        "If %s and conditions are both specified, they must be the same length."
+        "If %s and conditions are both specified, the length of %s must be equal to the length of conditions."
     } else {
       w <- ncol(value)
       num_arms_fmt <-

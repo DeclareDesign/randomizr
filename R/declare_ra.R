@@ -120,8 +120,8 @@ declare_ra <- function(N = NULL,
       FALSE # don't need to recheck when using declaration
   }
   
-  is_block <- is.vector(blocks) || is.factor(blocks)
-  is_clust <- is.vector(clusters) || is.factor(clusters)
+  is_block <- !is.null(blocks) || is.factor(blocks)
+  is_clust <- !is.null(clusters) || is.factor(clusters)
   
   # Determine ra_type
   if (is.matrix(permutation_matrix)) {

@@ -4,10 +4,21 @@
 \alias{block_ra_probabilities}
 \title{probabilities of assignment: Block Random Assignment}
 \usage{
-block_ra_probabilities(blocks = NULL, prob = NULL, prob_unit = NULL,
-  prob_each = NULL, m = NULL, m_unit = NULL, block_m = NULL,
-  block_m_each = NULL, block_prob = NULL, block_prob_each = NULL,
-  num_arms = NULL, conditions = NULL, check_inputs = TRUE)
+block_ra_probabilities(
+  blocks = NULL,
+  prob = NULL,
+  prob_unit = NULL,
+  prob_each = NULL,
+  m = NULL,
+  m_unit = NULL,
+  block_m = NULL,
+  block_m_each = NULL,
+  block_prob = NULL,
+  block_prob_each = NULL,
+  num_arms = NULL,
+  conditions = NULL,
+  check_inputs = TRUE
+)
 }
 \arguments{
 \item{blocks}{A vector of length N that indicates which block each unit belongs to. Can be a character, factor, or numeric vector. (required)}

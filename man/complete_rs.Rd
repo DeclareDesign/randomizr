@@ -4,8 +4,14 @@
 \alias{complete_rs}
 \title{Complete Random Sampling}
 \usage{
-complete_rs(N, n = NULL, n_unit = NULL, prob = NULL,
-  prob_unit = NULL, check_inputs = TRUE)
+complete_rs(
+  N,
+  n = NULL,
+  n_unit = NULL,
+  prob = NULL,
+  prob_unit = NULL,
+  check_inputs = TRUE
+)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}

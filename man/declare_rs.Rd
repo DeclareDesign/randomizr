@@ -4,9 +4,19 @@
 \alias{declare_rs}
 \title{Declare a random sampling procedure.}
 \usage{
-declare_rs(N = NULL, strata = NULL, clusters = NULL, n = NULL,
-  n_unit = NULL, prob = NULL, prob_unit = NULL, strata_n = NULL,
-  strata_prob = NULL, simple = FALSE, check_inputs = TRUE)
+declare_rs(
+  N = NULL,
+  strata = NULL,
+  clusters = NULL,
+  n = NULL,
+  n_unit = NULL,
+  prob = NULL,
+  prob_unit = NULL,
+  strata_n = NULL,
+  strata_prob = NULL,
+  simple = FALSE,
+  check_inputs = TRUE
+)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}

@@ -4,8 +4,7 @@
 \alias{simple_rs}
 \title{Simple Random Sampling}
 \usage{
-simple_rs(N, prob = NULL, prob_unit = NULL, check_inputs = TRUE,
-  simple = TRUE)
+simple_rs(N, prob = NULL, prob_unit = NULL, check_inputs = TRUE, simple = TRUE)
 }
 \arguments{
 \item{N}{The number of units. N must be a positive integer. (required)}
