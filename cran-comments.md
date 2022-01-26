@@ -1,5 +1,8 @@
 ## Update randomizr to version 0.22.0
 * Remove suggests dependency of blockTools per Prof. Ripley email (the package was removed from CRAN)
+* Add Graeme Blair as a contributor
+* Small bug fixes
+* Added permutation support for random sampling functions
 
 ## Test environments
 R version 4.1.2

@@ -42,14 +42,18 @@
 #'
 obtain_permutation_matrix <-
   function(declaration, maximum_permutations = 10000) {
-    if (inherits(declaration,  "ra_custom")) {
+    if (inherits(declaration,  "ra_custom") || inherits(declaration,  "rs_custom")) {
       return(declaration$permutation_matrix)
     }
     
     num_permutations <- obtain_num_permutations(declaration)
     
-    if (num_permutations > maximum_permutations) {
+    if (num_permutations > maximum_permutations && inherits(declaration, "ra_declaration")) {
       return(replicate(maximum_permutations, conduct_ra(declaration)))
+    }
+    
+    if (num_permutations > maximum_permutations && inherits(declaration, "rs_declaration")) {
+      return(replicate(maximum_permutations, draw_rs(declaration)))
     }
     
     (function(declaration)
@@ -210,6 +214,165 @@ obtain_permutation_matrix.ra_blocked_and_clustered <-
       ), FALSE, FALSE)),]
     perms
   }
+
+
+obtain_permutation_matrix.rs_simple <- function(declaration) {
+  
+  N <- nrow(declaration$probabilities_matrix)
+  prob_each <- declaration$probabilities_matrix[1,]
+  r_parts <- restrictedparts(N, length(prob_each))
+  perms <- t(permutations(length(prob_each)))
+  
+  r_parts_perms3 <- vapply(r_parts, `[`, perms, perms)
+  dim(r_parts_perms3) <- local({
+    d <- dim(r_parts_perms3)
+    c(d[1], prod(d[-1])) # pivot third dimension to columns inplace
+  })
+  
+  m_eaches <- unique(r_parts_perms3, MARGIN = 2)
+  
+  perms_list <- sapply(seq_len(ncol(m_eaches)), function(j) {
+    permutations_m_each(m_each = m_eaches[, j], declaration$conditions)
+  })
+  
+  perms <- do.call(cbind, perms_list)
+  perms
+}
+
+obtain_permutation_matrix.rs_complete <- function(declaration) {
+  complete_ra_permutations(
+    N = nrow(declaration$probabilities_matrix),
+    prob_each = declaration$probabilities_matrix[1, ],
+    conditions = declaration$conditions
+  )
+}
+
+obtain_permutation_matrix.rs_stratified <- function(declaration) {
+  
+  stratum_spots <-
+    unlist(split(seq_along(declaration$strata), declaration$strata), 
+           FALSE, FALSE)
+  
+  stratum_prob_each_local <-
+    by(
+      declaration$probabilities_matrix,
+      INDICES = declaration$strata,
+      FUN = function(x) {
+        x[1, ]
+      }
+    )
+  stratum_prob_each_local <-
+    lapply(stratum_prob_each_local, as.vector, mode = "numeric")
+  
+  ns_per_stratum_list <-
+    lapply(split(declaration$strata,
+                 declaration$strata),
+           length)
+  
+  condition_names_list <- lapply(seq_along(ns_per_stratum_list),
+                                 function(x)
+                                   declaration$conditions)
+  
+  perms_by_stratum <- mapply(
+    FUN = complete_ra_permutations,
+    ns_per_stratum_list,
+    stratum_prob_each_local,
+    condition_names_list,
+    SIMPLIFY = FALSE
+  )
+  
+  perms <-
+    Reduce(expand_matrix, x = perms_by_stratum)
+  
+  perms <- perms[order(stratum_spots),]
+  perms
+}
+
+obtain_permutation_matrix.rs_clustered <- function(declaration) {
+  
+  prob_each_local <-
+    declaration$probabilities_matrix[1, ]
+  
+  n_per_clust <-
+    tapply(declaration$clusters, declaration$clusters, length)
+  n_clust <- length(n_per_clust)
+  
+  perms <-
+    complete_ra_permutations(
+      N = n_clust,
+      prob_each = declaration$probabilities_matrix[1, ],
+      conditions = declaration$conditions
+    )
+  
+  # expand
+  perms <- perms[rep(1:n_clust, n_per_clust), ]
+  # arrange
+  perms <-
+    perms[order(unlist(split(
+      seq_along(declaration$clusters), declaration$clusters
+    ), FALSE, FALSE)),]
+  perms
+}
+
+obtain_permutation_matrix.rs_stratified_and_clustered <-
+  function(declaration) {
+    # Setup: obtain unique clusters
+    n_per_clust <-
+      tapply(declaration$clusters, declaration$clusters, length)
+    n_clust <- length(n_per_clust)
+    
+    # get the stratum for each cluster
+    clust_strata <-
+      tapply(declaration$strata, declaration$clusters, unique)
+    
+    stratum_prob_each_local <-
+      by(
+        declaration$probabilities_matrix,
+        INDICES = declaration$strata,
+        FUN = function(x) {
+          x[1, ]
+        }
+      )
+    stratum_prob_each_local <-
+      lapply(stratum_prob_each_local, as.vector, mode = "numeric")
+    
+    ns_per_stratum_list <-
+      lapply(split(clust_strata,
+                   clust_strata),
+             length)
+    
+    condition_names_list <- lapply(seq_along(ns_per_stratum_list),
+                                   function(x)
+                                     declaration$conditions)
+    
+    perms_by_stratum <- mapply(
+      FUN = complete_ra_permutations,
+      ns_per_stratum_list,
+      stratum_prob_each_local,
+      condition_names_list,
+      SIMPLIFY = FALSE
+    )
+    
+    perms <-
+      Reduce(expand_matrix, x = perms_by_stratum)
+    
+    # arrange by strata
+    stratum_spots <-
+      unlist(split(seq_along(clust_strata), clust_strata), FALSE, FALSE)
+    
+    perms <- perms[order(stratum_spots),]
+    
+    # expand
+    perms <- perms[rep(1:n_clust, n_per_clust),]
+    
+    # arrange
+    perms <-
+      perms[order(unlist(split(
+        seq_along(declaration$clusters), declaration$clusters
+      ), FALSE, FALSE)),]
+    perms
+  }
+
 
 
 # Helper functions --------------------------------------------------------
