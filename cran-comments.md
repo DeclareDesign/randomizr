@@ -15,9 +15,6 @@ R version 4.1.2
 There were no ERRORs, WARNINGs, or NOTEs.
 
 ## Downstream dependencies
-* estimatr
-* ri2
-* DeclareDesign
-* DesignLibrary
-All four packages are written by our team and are not broken by these changes
+
+There is a change to worse in the reverse dependency DeclareDesign, but we have a patch prepared once this is accepted that will address that test failure. Thank you for your understanding. There are no other changes to worse. 
 
