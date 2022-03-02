@@ -181,7 +181,7 @@ knitr::kable(t(as.matrix(table(Z))))
 ```
 
 ## Simple and Complete random assignment compared
-When should you use `simple_ra()` versus `complete_ra()`? Basically, if the number of units is known beforehand, `complete_ra()` is always preferred, for two reasons: 1. Researchers can plan exactly how many treatments will be deployed. 2. The standard errors associated with complete random assignment are generally smaller, increasing experimental power. See this guide on [EGAP](http://egap.org/) for more on [experimental power](http://egap.org/resources/guides/power/).
+When should you use `simple_ra()` versus `complete_ra()`? Basically, if the number of units is known beforehand, `complete_ra()` is always preferred, for two reasons: 1. Researchers can plan exactly how many treatments will be deployed. 2. The standard errors associated with complete random assignment are generally smaller, increasing experimental power.
 
 Since you need to know `N` beforehand in order to use `simple_ra()`, it may seem like a useless function. Sometimes, however, the random assignment isn't directly in the researcher's control. For example, when deploying a survey experiment on a platform like Qualtrics, simple random assignment is the only possibility due to the inflexibility of the built-in random assignment tools. When reconstructing the random assignment for analysis after the experiment has been conducted, `simple_ra()` provides a convenient way to do so.  
 To demonstrate how `complete_ra()` is superior to `simple_ra()`, let's conduct a small simulation with our `HairEyeColor` dataset.
@@ -354,7 +354,7 @@ knitr::kable(head(table(blocks, Z)))
 
 An alternative is to use the `blockTools` package, which constructs matched pairs, trios, quartets, etc. from pretreatment covariates. 
 
-```{r echo=TRUE, results="hide"}
+```{r eval=FALSE, results="hide"}
 library(blockTools)
 
 # BlockTools requires that all variables be numeric
@@ -373,9 +373,6 @@ hec$block_id <- createBlockIDs(out, df_forBT, id.var = "id_var")
 # Conduct actual random assignment with randomizr
 Z_blocked <- block_ra(blocks = hec$block_id, num_arms = 3)
 head(table(hec$block_id, Z_blocked))
-```
-```{r echo=FALSE}
-knitr::kable(head(table(hec$block_id, Z_blocked)))
 ```
 
 A note for `blockTools` users: that package also has an assignment function. My preference is to extract the blocking variable, then conduct the assignment with `block_ra()`, so that fewer steps are required to reconstruct the random assignment or generate new random assignments for a randomization inference procedure.

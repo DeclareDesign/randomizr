@@ -1,20 +1,21 @@
 #' Obtain the Number of Possible Permutations from a Random Assignment Declaration
 #'
-#' @param declaration A random assignment declaration, created by \code{\link{declare_ra}}.
+#' @param declaration A random assignment or sampling declaration, created by \code{\link{declare_ra}} or \code{\link{declare_rs}}.
 #'
 #' @return a scalar
 #' @export
 #'
 #' @examples
 #'
-#' # complete
+#' # Random assignment
+#' ## complete
 #'
 #' declaration <- declare_ra(N = 4)
 #' perms <- obtain_permutation_matrix(declaration)
 #' dim(perms)
 #' obtain_num_permutations(declaration)
 #'
-#' # blocked
+#' ## blocked
 #'
 #' blocks <- c("A", "A", "B", "B", "C", "C", "C")
 #' declaration <- declare_ra(blocks = blocks)
@@ -22,7 +23,7 @@
 #' dim(perms)
 #' obtain_num_permutations(declaration)
 #'
-#' # clustered
+#' ## clustered
 #'
 #' clusters <- c("A", "B", "A", "B", "C", "C", "C")
 #' declaration <- declare_ra(clusters = clusters)
@@ -30,12 +31,43 @@
 #' dim(perms)
 #' obtain_num_permutations(declaration)
 #'
-#' # large
+#' ## large
 #'
 #' declaration <- declare_ra(20)
 #' choose(20, 10)
 #' perms <- obtain_permutation_matrix(declaration)
 #' dim(perms)
+#'
+#' # Random sampling
+#' ## complete
+#' 
+#' declaration <- declare_rs(N = 4)
+#' perms <- obtain_permutation_matrix(declaration)
+#' dim(perms)
+#' obtain_num_permutations(declaration)
+#' 
+#' ## stratified
+#' 
+#' strata <- c("A", "A", "B", "B", "C", "C", "C")
+#' declaration <- declare_rs(strata = strata)
+#' perms <- obtain_permutation_matrix(declaration)
+#' dim(perms)
+#' obtain_num_permutations(declaration)
+#' 
+#' ## clustered
+#' 
+#' clusters <- c("A", "B", "A", "B", "C", "C", "C")
+#' declaration <- declare_rs(clusters = clusters)
+#' perms <- obtain_permutation_matrix(declaration)
+#' dim(perms)
+#' obtain_num_permutations(declaration)
+#' 
+#' ## large
+#' 
+#' declaration <- declare_rs(N = 20)
+#' perms <- obtain_permutation_matrix(declaration)
+#' dim(perms)
+#'
 #'
 obtain_num_permutations <- function(declaration) {
   (function(declaration)
@@ -147,6 +179,116 @@ obtain_num_permutations.ra_blocked_and_clustered <-
   }
 
 obtain_num_permutations.ra_custom <- function(declaration) {
+  ncol(declaration$permutation_matrix)
+}
+
+
+
+obtain_num_permutations.rs_simple <- function(declaration) {
+  declaration$num_arms ^ (nrow(declaration$probabilities_matrix))
+}
+
+obtain_num_permutations.rs_complete <- function(declaration) {
+  complete_ra_num_permutations(
+    N = nrow(declaration$probabilities_matrix),
+    prob_each = declaration$probabilities_matrix[1,],
+    conditions = declaration$conditions
+  )
+}
+
+obtain_num_permutations.rs_stratified <- function(declaration) {
+  stratum_prob_each_local <-
+    by(
+      declaration$probabilities_matrix,
+      INDICES = declaration$strata,
+      FUN = function(x) {
+        x[1,]
+      }
+    )
+  stratum_prob_each_local <-
+    lapply(stratum_prob_each_local, as.vector, mode = "numeric")
+  
+  ns_per_stratum_list <-
+    lapply(split(declaration$strata,
+                 declaration$strata),
+           length)
+  
+  condition_names_list <- lapply(seq_along(ns_per_stratum_list),
+                                 function(x)
+                                   declaration$conditions)
+  
+  num_permutations_by_stratum <-
+    mapply(FUN = complete_ra_num_permutations,
+           ns_per_stratum_list,
+           stratum_prob_each_local,
+           condition_names_list)
+  
+  num_permutations <-
+    prod(unlist(num_permutations_by_stratum))
+  
+  return(num_permutations)
+}
+
+obtain_num_permutations.rs_clustered <- function(declaration) {
+  prob_each_local <- declaration$probabilities_matrix[1,]
+  
+  n_per_clust <-
+    tapply(declaration$clusters, declaration$clusters, length)
+  n_clust <- length(n_per_clust)
+  
+  complete_ra_num_permutations(
+    N = n_clust,
+    prob_each = declaration$probabilities_matrix[1,],
+    conditions = declaration$conditions
+  )
+  
+}
+
+
+obtain_num_permutations.rs_stratified_and_clustered <-
+  function(declaration) {
+    # Setup: obtain unique clusters
+    n_per_clust <-
+      tapply(declaration$clusters, declaration$clusters, length)
+    n_clust <- length(n_per_clust)
+    
+    # get the stratum for each cluster
+    clust_strata <-
+      tapply(declaration$strata, declaration$clusters, unique)
+    
+    stratum_prob_each_local <-
+      by(
+        declaration$probabilities_matrix,
+        INDICES = declaration$strata,
+        FUN = function(x) {
+          x[1, ]
+        }
+      )
+    stratum_prob_each_local <-
+      lapply(stratum_prob_each_local, as.vector, mode = "numeric")
+    
+    ns_per_stratum_list <-
+      lapply(split(clust_strata,
+                   clust_strata),
+             length)
+    
+    condition_names_list <- lapply(seq_along(ns_per_stratum_list),
+                                   function(x)
+                                     declaration$conditions)
+    
+    num_permutations_by_stratum <-
+      mapply(FUN = complete_ra_num_permutations,
+             ns_per_stratum_list,
+             stratum_prob_each_local,
+             condition_names_list)
+    
+    num_permutations <-
+      prod(unlist(num_permutations_by_stratum))
+    
+    return(num_permutations)
+  }
+
+obtain_num_permutations.rs_custom <- function(declaration) {
   ncol(declaration$permutation_matrix)
 }
 

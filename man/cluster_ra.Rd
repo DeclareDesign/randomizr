@@ -4,9 +4,19 @@
 \alias{cluster_ra}
 \title{Cluster Random Assignment}
 \usage{
-cluster_ra(clusters = NULL, m = NULL, m_unit = NULL, m_each = NULL,
-  prob = NULL, prob_unit = NULL, prob_each = NULL, num_arms = NULL,
-  conditions = NULL, simple = FALSE, check_inputs = TRUE)
+cluster_ra(
+  clusters = NULL,
+  m = NULL,
+  m_unit = NULL,
+  m_each = NULL,
+  prob = NULL,
+  prob_unit = NULL,
+  prob_each = NULL,
+  num_arms = NULL,
+  conditions = NULL,
+  simple = FALSE,
+  check_inputs = TRUE
+)
 }
 \arguments{
 \item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}

@@ -4,10 +4,20 @@
 \alias{draw_rs}
 \title{Draw a random sample}
 \usage{
-draw_rs(declaration = NULL, N = NULL, strata = NULL,
-  clusters = NULL, n = NULL, n_unit = NULL, prob = NULL,
-  prob_unit = NULL, strata_n = NULL, strata_prob = NULL,
-  simple = FALSE, check_inputs = TRUE)
+draw_rs(
+  declaration = NULL,
+  N = NULL,
+  strata = NULL,
+  clusters = NULL,
+  n = NULL,
+  n_unit = NULL,
+  prob = NULL,
+  prob_unit = NULL,
+  strata_n = NULL,
+  strata_prob = NULL,
+  simple = FALSE,
+  check_inputs = TRUE
+)
 }
 \arguments{
 \item{declaration}{A random sampling declaration, created by \code{\link{declare_rs}}.}

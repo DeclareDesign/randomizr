@@ -4,13 +4,28 @@
 \alias{obtain_condition_probabilities}
 \title{Obtain the probabilities of units being in the conditions that they are in.}
 \usage{
-obtain_condition_probabilities(declaration = NULL, assignment,
-  N = NULL, blocks = NULL, clusters = NULL, m = NULL,
-  m_unit = NULL, m_each = NULL, prob = NULL, prob_unit = NULL,
-  prob_each = NULL, block_m = NULL, block_m_each = NULL,
-  block_prob = NULL, block_prob_each = NULL, num_arms = NULL,
-  conditions = NULL, simple = FALSE, permutation_matrix = NULL,
-  check_inputs = TRUE)
+obtain_condition_probabilities(
+  declaration = NULL,
+  assignment,
+  N = NULL,
+  blocks = NULL,
+  clusters = NULL,
+  m = NULL,
+  m_unit = NULL,
+  m_each = NULL,
+  prob = NULL,
+  prob_unit = NULL,
+  prob_each = NULL,
+  block_m = NULL,
+  block_m_each = NULL,
+  block_prob = NULL,
+  block_prob_each = NULL,
+  num_arms = NULL,
+  conditions = NULL,
+  simple = FALSE,
+  permutation_matrix = NULL,
+  check_inputs = TRUE
+)
 }
 \arguments{
 \item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
