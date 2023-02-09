@@ -2,6 +2,8 @@
 
 Small update for new version of knitr. Change to email address for one contributor.
 
+This is a resubmission to remove the suggests dependency of ri, which was removed from CRAN.
+
 ## Test environments
 R version 4.1.2
 * R-devel with win-builder.r-project.org
