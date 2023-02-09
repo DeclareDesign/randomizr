@@ -440,7 +440,7 @@ The power of clustered experiments can sometimes be improved through blocking. I
 
 As an example, let's group our clusters into blocks by size using `dplyr`
 
-```{r echo=TRUE, results="hide", message="hide"}
+```{r echo=TRUE, results="hide", message=FALSE}
 suppressMessages(library(dplyr))
 cluster_level_df <- 
   hec %>%
