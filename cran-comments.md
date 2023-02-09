@@ -1,8 +1,6 @@
-## Update randomizr to version 0.22.0
-* Remove suggests dependency of blockTools per Prof. Ripley email (the package was removed from CRAN)
-* Add Graeme Blair as a contributor
-* Small bug fixes
-* Added permutation support for random sampling functions
+## Update randomizr to version 0.24.0
+
+Small update for new version of knitr. Change to email address for one contributor.
 
 ## Test environments
 R version 4.1.2
@@ -12,9 +10,10 @@ R version 4.1.2
 * Linux, Mac OS via Github Actions
 
 ## R CMD check results
+
 There were no ERRORs, WARNINGs, or NOTEs.
 
 ## Downstream dependencies
 
-There is a change to worse in the reverse dependency DeclareDesign, but we have a patch prepared once this is accepted that will address that test failure. Thank you for your understanding. There are no other changes to worse. 
+No changes to worse.
 
