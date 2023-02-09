@@ -1,10 +1,10 @@
 Package: randomizr
 Title: Easy-to-Use Tools for Common Forms of Random Assignment and Sampling
-Version: 0.23.0
-Authors@R: c(person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-5733-2386")),
+Version: 0.24.0
+Authors@R: c(person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut"), comment = c(ORCID = "0000-0002-5733-2386")),
              person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("ctb"), comment = c(ORCID = "0000-0002-8639-3188")),
              person("Neal", "Fultz", email = "nfultz@gmail.com", role = c("ctb"), comment = "C version of restricted partitions"),
-             person("Graeme", "Blair", email = "graeme.blair@ucla.edu", role = c("ctb"), comment = c(ORCID = "0000-0001-9164-2102")))
+             person("Graeme", "Blair", email = "graeme.blair@gmail.com", role = c("ctb", "cre"), comment = c(ORCID = "0000-0001-9164-2102")))
 Description: Generates random assignments for common experimental designs and 
 	    random samples for common sampling designs.
 URL: https://declaredesign.org/r/randomizr/, https://github.com/DeclareDesign/randomizr
@@ -21,4 +21,4 @@ Suggests:
     rmarkdown, 
     ri
 VignetteBuilder: knitr
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
