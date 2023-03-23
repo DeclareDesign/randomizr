@@ -1,6 +1,9 @@
 ---
 output:
-  github_document
+  github_document:
+    pandoc_args: [
+      "markdown-headings", "atx"
+    ]
 title: "randomizr: Easy to use tools for common forms of random assignment and sampling"
 ---
 
