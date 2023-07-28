@@ -1,40 +1,33 @@
-template:
-  package: ddpkgdowntemplate
-  
 url: https://declaredesign.org/r/randomizr
 
-home:
-  sections:
-    - links
-    - citation
-    - authors
-  link_order:
-    - repo
-    - github
-    - bug_report  
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#0054AD"
+    border-radius: 0.5rem
+    btn-border-radius: 0.25rem
 
-roles_include:
-  - aut
-  - cre
-  - fnd
-  - ctb
+development:
+  mode: auto
 
 navbar:
-  left:
+  right:
   - text: "Software"
     menu:
       - text: DeclareDesign
-        href: http://declaredesign.org/r/declaredesign/
+        href: https://declaredesign.org/r/DeclareDesign/
+      - text: randomizr
+        href: https://declaredesign.org/r/randomizr/
       - text: fabricatr
         href: https://declaredesign.org/r/fabricatr/
       - text: estimatr
         href: https://declaredesign.org/r/estimatr/
       - text: DesignLibrary
         href: https://declaredesign.org/r/designlibrary/
-  - text: "Help"
-    href: http://discuss.declaredesign.org
-  right:
-  - text: Get started
+  - text: declaredesign.org
+    href: https://declaredesign.org
+  left:
+  - text: Getting started
     href: articles/randomizr_vignette.html
   - text: Reference
     href: reference/index.html
@@ -44,50 +37,51 @@ navbar:
        href: articles/randomizr_vignette.html
      - text: Getting started with randomizr for Stata
        href: articles/srandomizr_vignette.html 
-  - text: randomizr home
-    href: https://declaredesign.org/r/randomizr/
-
 
 reference:
-- title: Random assignment
-  contents:
-  - block_and_cluster_ra
-  - block_ra
-  - cluster_ra
-  - complete_ra
-  - simple_ra
-  - conduct_ra
-  - custom_ra
-  - declare_ra
+  - title: Random assignment
+    contents:
+    - block_and_cluster_ra
+    - block_ra
+    - cluster_ra
+    - complete_ra
+    - simple_ra
+    - conduct_ra
+    - custom_ra
+    - declare_ra
+  
+  - title: Functions for calculating probabilities of assignment
+    contents:
+    - obtain_condition_probabilities
+    - obtain_num_permutations
+    - obtain_permutation_matrix
+    - obtain_permutation_probabilities
+    - block_and_cluster_ra_probabilities
+    - block_ra_probabilities
+    - cluster_ra_probabilities
+    - custom_ra_probabilities
+    - simple_ra_probabilities
+    - complete_ra_probabilities
 
-- title: Functions for calculating probabilities of assignment
-  contents:
-  - obtain_condition_probabilities
-  - obtain_num_permutations
-  - obtain_permutation_matrix
-  - obtain_permutation_probabilities
-  - block_and_cluster_ra_probabilities
-  - block_ra_probabilities
-  - cluster_ra_probabilities
-  - custom_ra_probabilities
-  - simple_ra_probabilities
-  - complete_ra_probabilities
+  - title: Random sampling
+    contents:
+    - draw_rs
+    - simple_rs
+    - complete_rs
+    - strata_rs
+    - strata_and_cluster_rs
+    - declare_rs
+    - cluster_rs
 
-- title: Random sampling
-  contents:
-  - draw_rs
-  - simple_rs
-  - complete_rs
-  - strata_rs
-  - strata_and_cluster_rs
-  - declare_rs
-  - cluster_rs
+  - title: Functions for calculating sampling inclusion probabilities
+    contents:
+    - obtain_inclusion_probabilities
+    - cluster_rs_probabilities
+    - complete_rs_probabilities
+    - simple_rs_probabilities
+    - strata_and_cluster_rs_probabilities
+    - strata_rs_probabilities
 
-- title: Functions for calculating sampling inclusion probabilities
-  contents:
-  - obtain_inclusion_probabilities
-  - cluster_rs_probabilities
-  - complete_rs_probabilities
-  - simple_rs_probabilities
-  - strata_and_cluster_rs_probabilities
-  - strata_rs_probabilities
+  - title: Package
+    contents:
+    - randomizr 

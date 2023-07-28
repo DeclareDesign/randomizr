@@ -1,5 +1,4 @@
-randomizr: Easy to use tools for common forms of random assignment and
-sampling
+randomizr: Tools for random assignment and random sampling
 ================
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -25,7 +24,7 @@ offer **randomizr** for both
 [`R`](https://declaredesign.org/r/randomizr) and
 [`Stata`](https://declaredesign.org/stata/randomizr).
 
-## Installing randomizr for R
+### Installing randomizr for R
 
 Installing the latest stable version of **randomizr** in `R`:.
 
@@ -33,15 +32,7 @@ Installing the latest stable version of **randomizr** in `R`:.
 install.packages("randomizr")
 ```
 
-If you would like to use the current development release of
-**randomizr** (please be aware that development releases may include
-bugs or syntax changes), run the following:
-
-``` r
-install.packages("randomizr", repos="http://r.declaredesign.org")
-```
-
-## Getting started with randomizr for R
+### Getting started with randomizr for R
 
 **randomizr** has five main random assignment functions, corresponding
 to the common experimental designs listed above. You can read more about
@@ -91,7 +82,7 @@ For more information about all of **randomizr**’s functionality, please
 see our [online
 tutorial](https://declaredesign.org/r/randomizr/articles/randomizr_vignette.html)
 
-## randomizr for Stata
+### randomizr for Stata
 
 Installing the latest stable version of **randomizr** from ssc is easy:
 
