@@ -1,21 +1,18 @@
-## Update randomizr to version 0.24.0
+## Submission
 
-Small update for new version of knitr. Change to email address for one contributor.
-
-This is a resubmission to remove the suggests dependency of ri, which was removed from CRAN.
+Small patch
 
 ## Test environments
-R version 4.1.2
-* R-devel with win-builder.r-project.org
-* R-release with win-builder.r-project.org.
-* R-oldrelease with win-builder.r-project.org.
-* Linux, Mac OS via Github Actions
+* local OS X install (release)
+* win-builder (devel, release, oldrel)
 
 ## R CMD check results
 
-There were no ERRORs, WARNINGs, or NOTEs.
+0 errors | 0 warnings | 0 notes
 
-## Downstream dependencies
+## Reverse dependencies
 
-No changes to worse.
+No changes to worse. 
 
+---
+  

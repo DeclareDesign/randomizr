@@ -1,3 +1,7 @@
+# randomizr 1.0.0
+
+* Documentation fix
+
 # randomizr 0.24.0
 
 * Documentation fix
@@ -9,4 +13,3 @@
 * Added Graeme Blair as a contributor
 * Small bug fixes
 * Added permutation support for random sampling functions
-
