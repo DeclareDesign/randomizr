@@ -11,6 +11,7 @@ downloads](https://cranlogs.r-pkg.org/badges/grand-total/randomizr?color=green)]
 status](https://github.com/DeclareDesign/randomizr/workflows/R-CMD-check/badge.svg)](https://github.com/DeclareDesign/randomizr/actions)
 [![Code
 coverage](https://codecov.io/gh/DeclareDesign/randomizr/branch/master/graph/badge.svg?token=wwi1lF13Se)](https://codecov.io/gh/DeclareDesign/randomizr)
+[![Replications](https://softwarecite.com/badge/randomizr)](https://softwarecite.com/package/randomizr)
 
 **randomizr** is designed to make conducting field, lab, survey, or
 online experiments easier by automating the random assignment process.
