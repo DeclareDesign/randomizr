@@ -15,7 +15,7 @@ navbar:
   - text: "Software"
     menu:
       - text: DeclareDesign
-        href: https://declaredesign.org/r/DeclareDesign/
+        href: https://declaredesign.org/r/declaredesign/
       - text: randomizr
         href: https://declaredesign.org/r/randomizr/
       - text: fabricatr
