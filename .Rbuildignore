@@ -23,3 +23,4 @@ CONDUCT.md
 ^pkgdown$
 ^\.github$
 ^CRAN-SUBMISSION$
+^codecov\.yml$
