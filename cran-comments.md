@@ -1,6 +1,6 @@
-## Submission
+## Submission Version: 1.0.1
 
-Small patch
+Small patch: SETLENGTH -> lengthgets to come into CRAN compliance
 
 ## Test environments
 * local OS X install (release)

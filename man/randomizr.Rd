@@ -2,8 +2,29 @@
 % Please edit documentation in R/randomizr-package.r
 \docType{package}
 \name{randomizr}
+\alias{randomizr-package}
 \alias{randomizr}
 \title{randomizr}
 \description{
 Easy-to-Use Tools for Common Forms of Random Assignment and Sampling
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://declaredesign.org/r/randomizr/}
+  \item \url{https://github.com/DeclareDesign/randomizr}
+  \item Report bugs at \url{https://github.com/DeclareDesign/randomizr/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Alexander Coppock \email{acoppock@gmail.com} (\href{https://orcid.org/0000-0002-5733-2386}{ORCID})
+
+Other contributors:
+\itemize{
+  \item Jasper Cooper \email{jaspercooper@gmail.com} (\href{https://orcid.org/0000-0002-8639-3188}{ORCID}) [contributor]
+  \item Neal Fultz \email{nfultz@gmail.com} (C version of restricted partitions) [contributor]
+  \item Graeme Blair \email{graeme.blair@gmail.com} (\href{https://orcid.org/0000-0001-9164-2102}{ORCID}) [contributor]
+}
+
 }

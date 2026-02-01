@@ -1,3 +1,7 @@
+# randomizr 1.0.1
+
+* CRAN compliance
+
 # randomizr 1.0.0
 
 * Documentation fix

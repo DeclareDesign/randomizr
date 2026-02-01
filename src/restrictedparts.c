@@ -69,9 +69,7 @@ SEXP randomizr_restrictedparts(SEXP n, SEXP m) {
     REPROTECT(succ = successor(succ), ipx_succ);
   } 
 
-  //no reason to reallocate here
-  //out = lengthgets(out, jj);
-  SETLENGTH(out, jj); 
+  out = lengthgets(out, jj);
   
   UNPROTECT(2);  
   
