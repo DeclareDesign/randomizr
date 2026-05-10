@@ -1,22 +1,26 @@
 #' Block Random Assignment
 #'
-#' block_ra implements a random assignment procedure in which units that are grouped into blocks defined by pre-treatment covariates are assigned using complete random assignment within block. For example, imagine that 50 of 100 men are assigned to treatment and 75 of 200 women are assigned to treatment.
+#' \code{block_ra} assigns units to treatment conditions within pre-defined groups called blocks (or strata). Within each block, complete random assignment determines which units are treated. Blocking typically reduces the sampling variability of an experiment relative to simple or complete random assignment: by guaranteeing that treated and control units are drawn from every covariate-defined subgroup, it rules out the unlucky assignments that would otherwise pull estimates far from the true average treatment effect. The precision gain is largest when the blocking variable is strongly correlated with potential outcomes; if the blocking variable is uncorrelated with outcomes, blocking neither helps nor hurts.
 #'
-#' @param blocks A vector of length N that indicates which block each unit belongs to. Can be a character, factor, or numeric vector. (required)
-#' @param prob Use for a two-arm design in which either floor(N_block*prob) or ceiling(N_block*prob) units are assigned to treatment within each block. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_block*prob) units will be assigned to treatment and with probability prob, ceiling(N_block*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
-#' @param prob_unit Use for a two arm design. Must of be of length N. tapply(prob_unit, blocks, unique) will be passed to \code{block_prob}.
-#' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
-#' @param m Use for a two-arm design in which the scalar m describes the fixed number of units to assign in each block. This number does not vary across blocks.
-#' @param m_unit Use for a two-arm design. Must be of length N. tapply(m_unit, blocks, unique) will be passed to \code{block_m}.
-#' @param block_m Use for a two-arm design in which the vector block_m describes the number of units to assign to treatment within each block. block_m must be a numeric vector that is as long as the number of blocks and is in the same order as sort(unique(blocks)).
-#' @param block_m_each Use for a multi-arm design in which the values of block_m_each determine the number of units assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of conditions, if specified.
-#' @param block_prob Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Must be in the same order as sort(unique(blocks)). Differs from prob in that the probability of assignment can vary across blocks. 
-#' @param block_prob_each Use for a multi-arm design in which the values of block_prob_each determine the probabilities of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilities of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.
-#' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
-#' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
-#' @param check_inputs logical. Defaults to TRUE.
+#' In the simplest two-arm case with no arguments beyond \code{blocks}, the function assigns approximately half the units in each block to treatment. Researchers can specify exact counts (via \code{block_m}) or target probabilities that are held constant (via \code{prob}) or allowed to vary (via \code{block_prob}) across blocks.
 #'
-#' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.
+#' @param blocks A vector of length N indicating which block each unit belongs to. Can be character, factor, or numeric. (required)
+#' @param prob Use for a two-arm design in which either \code{floor(N_block*prob)} or \code{ceiling(N_block*prob)} units are assigned to treatment within each block. The probability of assignment to treatment is exactly \code{prob} because with probability \code{1-prob}, \code{floor(N_block*prob)} units will be assigned to treatment and with probability \code{prob}, \code{ceiling(N_block*prob)} units will be assigned to treatment. Must be a real number between 0 and 1. (optional)
+#' @param prob_unit Use for a two-arm design. Must be of length N. \code{tapply(prob_unit, blocks, unique)} will be passed to \code{block_prob}. (optional)
+#' @param prob_each Use for a multi-arm design in which the values of \code{prob_each} determine the probabilities of assignment to each treatment condition. Must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 and the total must sum to 1. Because of integer rounding, the exact number of units assigned to each condition may differ slightly from assignment to assignment, but the overall probability of assignment is exactly \code{prob_each}. (optional)
+#' @param m Use for a two-arm design in which the scalar \code{m} gives the fixed number of units to assign to treatment within every block. This count does not vary across blocks. (optional)
+#' @param m_unit Use for a two-arm design. Must be of length N. \code{tapply(m_unit, blocks, unique)} will be passed to \code{block_m}. (optional)
+#' @param block_m Use for a two-arm design in which \code{block_m} gives the number of units to assign to treatment within each block. Must be a numeric vector as long as the number of blocks, in the same order as \code{sort(unique(blocks))}. (optional)
+#' @param block_m_each Use for a multi-arm design in which \code{block_m_each} gives the number of units assigned to each condition within each block. Must be a matrix with one row per block and one column per treatment arm. Rows should respect the ordering of blocks by \code{sort(unique(blocks))}; columns should be in the order of \code{conditions}, if specified. (optional)
+#' @param block_prob Use for a two-arm design in which the probability of assignment to treatment varies across blocks. Must be in the same order as \code{sort(unique(blocks))}. (optional)
+#' @param block_prob_each Use for a multi-arm design in which assignment probabilities vary across blocks. Must be a matrix with one row per block and one column per treatment arm. Each row must sum to 1. Rows respect the ordering of \code{sort(unique(blocks))}. (optional)
+#' @param num_arms The number of treatment arms. If unspecified, determined from the other arguments. (optional)
+#' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)
+#' @param check_inputs Logical. Defaults to \code{TRUE}.
+#' @param .block_int Internal use only. Pre-computed integer encoding of \code{blocks}, passed by \code{conduct_ra} when a declaration was created with \code{declare_ra}. Users should never set this argument.
+#' @param .N_per_block Internal use only. Pre-computed block sizes corresponding to \code{.block_int}, passed by \code{conduct_ra}. Users should never set this argument.
+#'
+#' @return A vector of length N indicating the treatment condition of each unit. Numeric in a two-arm trial; a factor (ordered by \code{conditions}) in a multi-arm trial.
 #' @export
 #'
 #'
@@ -96,17 +100,45 @@ block_ra <- function(blocks = NULL,
                      block_prob_each = NULL,
                      num_arms = NULL,
                      conditions = NULL,
-                     check_inputs = TRUE) {
-  if (check_inputs) {
-    .invoke_check(check_randomizr_arguments_new)
+                     check_inputs = TRUE,
+                     .block_int = NULL,    # pre-computed from declaration cache
+                     .N_per_block = NULL) {
+  if (!is.null(.block_int)) {
+    # Cached path: declaration pre-computed the factor encoding at declare_ra()
+    # time. No as.factor or tabulate needed — saves ~21 us per simulation draw.
+    block_int   <- .block_int
+    N_per_block <- .N_per_block
   } else {
-    N_per_block <- tapply(blocks, blocks, length)
-    attributes(N_per_block) <- NULL
+    # Encode blocks as a factor once; reused by validation (via .N_per_block
+    # hint) and fast path, avoiding a duplicate as.factor call.
+    block_fac <- as.factor(blocks)
+    block_int <- as.integer(block_fac)
+    N_per_block <- tabulate(block_int)
   }
-  
+
+  if (check_inputs) {
+    # Pass N_per_block as a hint so check_randomizr_arguments skips its own
+    # tabulate call (the .N_per_block argument is accepted via ...).
+    .invoke_check(check_randomizr_arguments_new)
+  }
+
+  # Two-arm fast path: block_assign_cpp() sorts N units by (block, runif) in
+  # one C++ call and thresholds within each block — no per-block R overhead.
+  if (!is.null(num_arms) && num_arms == 2L &&
+      is.null(prob_each) && is.null(block_m_each) && is.null(block_prob_each)) {
+    if (!is.null(prob_unit)) block_prob <- tapply(prob_unit, blocks, unique)
+    if (!is.null(m_unit))    block_m    <- tapply(m_unit,    blocks, unique)
+
+    m_per_b    <- .block_m_from_args(N_per_block, m, block_m, prob, block_prob)
+    raw        <- block_assign_cpp(block_int, m_per_b)
+    cond       <- if (!is.null(conditions)) conditions else c(0L, 1L)
+    assignment <- cond[raw + 1L]
+    return(clean_condition_names(assignment, conditions))
+  }
+
   block_spots <-
     unlist(split(seq_along(blocks), blocks), FALSE, FALSE)
-  
+
   mapply_args <- list(
     FUN = "complete_ra",
     SIMPLIFY = FALSE,
@@ -117,7 +149,7 @@ block_ra <- function(blocks = NULL,
       check_inputs = FALSE
     )
   )
-  
+
   assign_list <-
     block_ra_helper(
       blocks,
@@ -134,8 +166,7 @@ block_ra <- function(blocks = NULL,
       N_per_block,
       mapply_args
     )
-  
-  
+
   assignment <-
     unlist(assign_list, FALSE, FALSE)[order(block_spots)]
   assignment <- clean_condition_names(assignment, conditions)

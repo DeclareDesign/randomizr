@@ -1,20 +1,19 @@
 #' Simple Random Assignment
 #'
-#' simple_ra implements a random assignment procedure in which units are independently assigned to treatment conditions. Because units are assigned independently, the number of units that are assigned to each condition can vary from assignment to assignment. For most experimental applications in which the number of experimental units is known in advance, \code{\link{complete_ra}} is better because the number of units assigned to each condition is fixed across assignments.\cr\cr
-#' In most cases, users should specify N and not more than one of prob, prob_each, or num_arms. \cr \cr
-#' If only N is specified, a two-arm trial with prob = 0.5 is assumed.
-
+#' \code{simple_ra} assigns units to treatment conditions independently, with each unit's assignment drawn as a separate Bernoulli trial. Because units are assigned independently, the number of units assigned to each condition varies from draw to draw. For most experimental applications in which the number of units is known in advance, \code{\link{complete_ra}} is preferable because it fixes the counts in each condition and thereby reduces sampling variability.
 #'
-#' @param N The number of units. N must be a positive integer. (required)
-#' @param prob Use for a two-arm design. prob is the probability of assignment to treatment and must be a real number between 0 and 1 inclusive and must be length 1. (optional)
-#' @param prob_unit Use for a two-arm design. prob is the probability of assignment to treatment and must be a real number between 0 and 1 inclusive and must be length N. (optional)
-#' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. It may be a conditions-length vector or a N-by-conditions matrix.  (optional)
-#' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
-#' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
-#' @param check_inputs logical. Defaults to TRUE.
-#' @param simple logical. internal use only.
+#' Simple random assignment is appropriate when units arrive sequentially and the total sample size is not known in advance, or when the assignment must proceed without coordinating across units. If only \code{N} is specified, a two-arm trial with \code{prob = 0.5} is assumed.
 #'
-#' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.
+#' @param N The number of units. Must be a positive integer. (required)
+#' @param prob Use for a two-arm design. The probability of assignment to treatment; must be a real number between 0 and 1 and of length 1. (optional)
+#' @param prob_unit Use for a two-arm design. The probability of assignment to treatment for each unit; must be a real number between 0 and 1 and of length N. (optional)
+#' @param prob_each Use for a multi-arm design. A numeric vector or N-by-conditions matrix giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. (optional)
+#' @param num_arms The number of treatment arms. If unspecified, determined from the other arguments. (optional)
+#' @param conditions A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)
+#' @param check_inputs Logical. Defaults to \code{TRUE}.
+#' @param simple Logical. Internal use only.
+#'
+#' @return A vector of length N indicating the treatment condition of each unit. Numeric in a two-arm trial; a factor (ordered by \code{conditions}) in a multi-arm trial.
 #' @export
 #'
 #' @examples

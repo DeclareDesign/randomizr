@@ -18,25 +18,25 @@ complete_ra_probabilities(
 )
 }
 \arguments{
-\item{N}{The number of units. N must be a positive integer. (required)}
+\item{N}{The number of units. Must be a positive integer. (required)}
 
-\item{m}{Use for a two-arm design in which m units are assigned to treatment and N-m units are assigned to control. (optional)}
+\item{m}{Use for a two-arm design: exactly \code{m} units are assigned to treatment and \code{N-m} to control. (optional)}
 
-\item{m_unit}{Use for a two-arm design in which exactly unique(m_unit) units are assigned to treatment and the remainder are assigned to control. m_unit must be of length N and must be the same for all units (optional)}
+\item{m_unit}{Use for a two-arm design. \code{unique(m_unit)} units are assigned to treatment; must be the same for all units and of length N. (optional)}
 
-\item{m_each}{Use for a multi-arm design in which the values of m_each determine the number of units assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many units should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)}
+\item{m_each}{Use for a multi-arm design. A numeric vector giving the exact number of units assigned to each condition; must sum to N. (optional)}
 
-\item{prob}{Use for a two-arm design in which either floor(N*prob) or ceiling(N*prob) units are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N*prob) units will be assigned to treatment and with probability prob, ceiling(N*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)}
+\item{prob}{Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. Must be between 0 and 1. (optional)}
 
-\item{prob_unit}{Use for a two-arm design. unique(prob_unit) will be passed to the prob argument and must be the same for all units.}
+\item{prob_unit}{Use for a two-arm design. \code{unique(prob_unit)} will be passed to the \code{prob} argument; must be the same for all units. (optional)}
 
-\item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
+\item{prob_each}{Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count assigned to each condition may differ slightly from draw to draw, but the overall probability of assignment is exactly \code{prob_each}. (optional)}
 
-\item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
+\item{num_arms}{The number of treatment arms. If unspecified, determined from the other arguments. (optional)}
 
-\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
+\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Defaults to \code{TRUE}.}
 }
 \value{
 A matrix of probabilities of assignment

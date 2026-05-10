@@ -29,41 +29,41 @@ conduct_ra(
 \arguments{
 \item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
 
-\item{N}{The number of units. N must be a positive integer. (required)}
+\item{N}{The number of units. Must be a positive integer. (required)}
 
-\item{blocks}{A vector of length N that indicates which block each unit belongs to.}
+\item{blocks}{A vector of length N indicating which block each unit belongs to. Supply to use blocked random assignment. (optional)}
 
-\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N indicating which cluster each unit belongs to. Supply to use cluster random assignment. (optional)}
 
-\item{m}{Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. In a blocked design, exactly m units in each block will be treated. (optional)}
+\item{m}{Use for a two-arm design: exactly \code{m} units (or clusters) are assigned to treatment. In a blocked design, exactly \code{m} units in each block are treated. (optional)}
 
-\item{m_unit}{Use for a two-arm trial. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks.}
+\item{m_unit}{Use for a two-arm trial. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. (optional)}
 
-\item{m_each}{Use for a multi-arm design in which the values of m_each determine the number of units (or clusters) assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many units (or clusters) should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)}
+\item{m_each}{Use for a multi-arm design. A numeric vector giving the number of units (or clusters) assigned to each condition; must sum to N. (optional)}
 
-\item{prob}{Use for a two-arm design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be assigned to treatment and with probability prob, ceiling(N*prob) units (or clusters) will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)}
+\item{prob}{Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units (or clusters) are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. Must be between 0 and 1. Under simple random assignment, may vary by unit. (optional)}
 
-\item{prob_unit}{Use for a two arm design. Must of be of length N. Under simple random assignment, can be different for each unit or cluster.  Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks.}
+\item{prob_unit}{Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. (optional)}
 
-\item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
+\item{prob_each}{Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count in each condition may differ slightly from draw to draw, but the overall probability is exactly \code{prob_each}. (optional)}
 
-\item{block_m}{Use for a two-arm design in which block_m describes the number of units to assign to treatment within each block. Note that in previous versions of randomizr, block_m behaved like block_m_each.}
+\item{block_m}{Use for a two-arm blocked design: a vector giving the number of units to assign to treatment within each block, in the order of \code{sort(unique(blocks))}. (optional)}
 
-\item{block_m_each}{Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of conditions, if specified.}
+\item{block_m_each}{Use for a multi-arm blocked design. A matrix with one row per block and one column per treatment arm giving the number of units assigned to each condition within each block. Rows respect the ordering of \code{sort(unique(blocks))}. (optional)}
 
-\item{block_prob}{Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Differs from prob in that the probability of assignment can vary across blocks.}
+\item{block_prob}{Use for a two-arm blocked design in which the treatment probability varies across blocks. In the order of \code{sort(unique(blocks))}. (optional)}
 
-\item{block_prob_each}{Use for a multi-arm design in which the values of block_prob_each determine the probabilities of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilities of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.}
+\item{block_prob_each}{Use for a multi-arm blocked design in which treatment probabilities vary across blocks. A matrix with one row per block and one column per arm; each row must sum to 1. (optional)}
 
-\item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
+\item{num_arms}{The number of treatment arms. If unspecified, determined from the other arguments. (optional)}
 
-\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
+\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)}
 
-\item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When \code{simple = TRUE}, please do not specify m, m_each, block_m, or block_m_each. If \code{simple = TRUE}, \code{prob} and \code{prob_each} may vary by unit.}
+\item{simple}{Logical, defaults to \code{FALSE}. If \code{TRUE}, simple random assignment is used. Do not specify \code{m}, \code{m_each}, \code{block_m}, or \code{block_m_each} when \code{simple = TRUE}. (optional)}
 
-\item{permutation_matrix}{for custom random assignment procedures.}
+\item{permutation_matrix}{For custom random assignment procedures. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Defaults to \code{TRUE}.}
 }
 \description{
 You can either give conduct_ra() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.

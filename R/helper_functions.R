@@ -38,6 +38,7 @@ check_randomizr_arguments <-
            num_arms = NULL,
            simple = NULL,
            conditions = NULL,
+           .N_per_block = NULL,  # optional pre-computed hint from caller
            ...) {
     # N, blocks, clusters, num_arms, conditions are used generally, check them first
     if (!is.null(clusters)) {
@@ -61,8 +62,8 @@ check_randomizr_arguments <-
                call. = FALSE)
         }
       } else {
-        N_per_block <- tapply(blocks, blocks, length)
-        attributes(N_per_block) <- NULL
+        N_per_block <- if (!is.null(.N_per_block)) .N_per_block
+                       else tabulate(as.integer(as.factor(blocks)))
       }
       if (is.null(N)) {
         N <- sum(N_per_block)
@@ -305,7 +306,7 @@ check_randomizr_arguments <-
            prob_each) {
     if (any(prob_each > 1 | prob_each < 0)) {
       stop(
-        "The probabilties of assignment to any condition may not be greater than 1 or less than zero.",
+        "The probabilities of assignment to any condition may not be greater than 1 or less than zero.",
         call. = FALSE
       )
     }
@@ -789,6 +790,20 @@ check_samplr_arguments <-
     }
   }
 
+
+# Compute integer m-per-block for the two-arm vectorized fast path.
+# Called only after validation has confirmed inputs are sane.
+.block_m_from_args <- function(n_per_b, m, block_m, prob, block_prob) {
+  if (!is.null(m))       return(rep(as.integer(m), length(n_per_b)))
+  if (!is.null(block_m)) return(as.integer(block_m))
+  p  <- if (!is.null(block_prob)) block_prob else rep(if (!is.null(prob)) prob else 0.5, length(n_per_b))
+  Np <- n_per_b * p
+  mf <- floor(Np)
+  # Stochastic rounding: round up with probability equal to the fractional part,
+  # but never when ceiling(Np) == n_per_b (would force m = N_b).
+  needs_up <- mf < ceiling(Np) & Np < n_per_b
+  as.integer(mf + (needs_up & runif(length(n_per_b)) < (Np - mf)))
+}
 
 clean_condition_names <- function(assignment, conditions) {
   if (is.factor(conditions)) {
