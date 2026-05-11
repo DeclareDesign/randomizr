@@ -16,3 +16,8 @@ inst/doc
 src/*.so
 src/*.o
 docs
+
+# Personal notes
+LOGFILE.md
+LOGFILE*.md
+notes/
