@@ -2,7 +2,7 @@
 % Please edit documentation in R/simple_rs.R
 \name{simple_rs_probabilities}
 \alias{simple_rs_probabilities}
-\title{Inclusion Probabilities: Simple Random Sampling}
+\title{Inclusion probabilities: Simple Random Sampling}
 \usage{
 simple_rs_probabilities(
   N,
@@ -27,7 +27,14 @@ simple_rs_probabilities(
 A vector length N indicating the probability of being sampled.
 }
 \description{
-Inclusion Probabilities: Simple Random Sampling
+Returns each unit's probability of being sampled under simple random
+sampling. Every unit is sampled independently, so the probabilities do not
+depend on which other units were drawn.
+}
+\details{
+These are the quantities inverse-probability weights are built from: weight
+each sampled unit by the reciprocal of its inclusion probability, which
+\code{\link{obtain_inclusion_probabilities}} extracts for you.
 }
 \examples{
 probs <- simple_ra_probabilities(N = 100)
@@ -36,4 +43,7 @@ table(probs)
 probs <- simple_ra_probabilities(N = 100, prob = 0.3)
 table(probs)
 
+}
+\seealso{
+\code{\link{simple_rs}}
 }

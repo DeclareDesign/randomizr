@@ -44,8 +44,15 @@ draw_rs(
 
 \item{check_inputs}{logical. Defaults to TRUE.}
 }
+\value{
+A numeric vector of length N, 1 for sampled units and 0 otherwise.
+}
 \description{
-You can either give draw_rs() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.
+\code{draw_rs} draws one random sample from a design. Give it a declaration
+made by \code{\link{declare_rs}}, or describe the design inline with the
+same arguments \code{declare_rs} takes. Declaring first pays off when the
+same design is drawn repeatedly, or when the inclusion probabilities are
+needed later by \code{\link{obtain_inclusion_probabilities}}.
 }
 \examples{
 declaration <- declare_rs(N = 100, n = 30)
@@ -56,4 +63,7 @@ table(S)
 S <- draw_rs(N = 100, n = 30)
 table(S)
 
+}
+\seealso{
+\code{\link{declare_rs}}, \code{\link{obtain_inclusion_probabilities}}
 }

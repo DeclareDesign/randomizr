@@ -2,7 +2,7 @@
 % Please edit documentation in R/complete_rs.R
 \name{complete_rs_probabilities}
 \alias{complete_rs_probabilities}
-\title{Inclusion Probabilities: Complete Random Sampling}
+\title{Inclusion probabilities: Complete Random Sampling}
 \usage{
 complete_rs_probabilities(
   N,
@@ -30,7 +30,13 @@ complete_rs_probabilities(
 A vector length N indicating the probability of being sampled.
 }
 \description{
-Inclusion Probabilities: Complete Random Sampling
+Returns each unit's probability of being sampled under complete random
+sampling, where the sample size is fixed on every draw.
+}
+\details{
+These are the quantities inverse-probability weights are built from: weight
+each sampled unit by the reciprocal of its inclusion probability, which
+\code{\link{obtain_inclusion_probabilities}} extracts for you.
 }
 \examples{
 probs <- complete_rs_probabilities(N = 100)
@@ -42,4 +48,7 @@ table(probs)
 probs <- complete_rs_probabilities(N=100, prob = .3)
 table(probs)
 
+}
+\seealso{
+\code{\link{complete_rs}}
 }

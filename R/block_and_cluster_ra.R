@@ -1,6 +1,17 @@
 #' Blocked and Clustered Random Assignment
 #'
-#' A random assignment procedure in which units are assigned as clusters and clusters are nested within blocks.
+#' \code{block_and_cluster_ra} assigns whole clusters to conditions, conducting
+#' the assignment separately within each block. Use it when treatment can only
+#' be delivered to a group and the groups differ in ways worth balancing on.
+#' Clustering costs precision, since the effective sample size is the number of
+#' clusters rather than the number of units; blocking buys some of it back by
+#' guaranteeing treated and control clusters within every block.
+#'
+#' Clusters must nest within blocks: every unit in a cluster has to belong to
+#' the same block.
+#'
+#' @seealso \code{\link{cluster_ra}}, \code{\link{block_ra}},
+#'   \code{\link{strata_and_cluster_rs}}
 #'
 #' @param blocks A vector of length N that indicates which block each unit belongs to.
 #' @param clusters A vector of length N that indicates which cluster each unit belongs to.
@@ -119,7 +130,17 @@ block_and_cluster_ra <-
     return(assignment)
   }
 
-#' probabilities of assignment: Blocked and Clustered Random Assignment
+#' Probabilities of assignment: Blocked and Clustered Random Assignment
+#'
+#' Returns the probability that each unit is assigned to each condition when
+#' clusters are assigned within blocks. Probabilities vary across blocks and are
+#' constant within a cluster.
+#'
+#' These are the quantities inverse-probability weights are built from: weight
+#' each unit by the reciprocal of the probability of the condition it landed in,
+#' which \code{\link{obtain_condition_probabilities}} extracts for you.
+#'
+#' @seealso \code{\link{block_and_cluster_ra}}
 #'
 #' @inheritParams block_and_cluster_ra
 #'

@@ -2,7 +2,7 @@
 % Please edit documentation in R/cluster_rs.R
 \name{cluster_rs_probabilities}
 \alias{cluster_rs_probabilities}
-\title{Inclusion Probabilities: Cluster Sampling}
+\title{Inclusion probabilities: Cluster Sampling}
 \usage{
 cluster_rs_probabilities(
   clusters = NULL,
@@ -33,7 +33,13 @@ cluster_rs_probabilities(
 A vector length N indicating the probability of being sampled.
 }
 \description{
-Inclusion Probabilities: Cluster Sampling
+Returns each unit's probability of being sampled when whole clusters are
+drawn. Every unit in a cluster shares its cluster's probability.
+}
+\details{
+These are the quantities inverse-probability weights are built from: weight
+each sampled unit by the reciprocal of its inclusion probability, which
+\code{\link{obtain_inclusion_probabilities}} extracts for you.
 }
 \examples{
 
@@ -49,4 +55,7 @@ prob_mat <- cluster_rs_probabilities(clusters = clusters, prob = .3)
 table(probs, clusters)
 
 
+}
+\seealso{
+\code{\link{cluster_rs}}
 }

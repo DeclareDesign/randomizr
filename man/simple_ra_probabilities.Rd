@@ -2,7 +2,7 @@
 % Please edit documentation in R/simple_ra.R
 \name{simple_ra_probabilities}
 \alias{simple_ra_probabilities}
-\title{probabilities of assignment: Simple Random Assignment}
+\title{Probabilities of assignment: Simple Random Assignment}
 \usage{
 simple_ra_probabilities(
   N,
@@ -36,7 +36,14 @@ simple_ra_probabilities(
 A matrix of probabilities of assignment
 }
 \description{
-probabilities of assignment: Simple Random Assignment
+Returns the probability that each unit is assigned to each condition under
+simple random assignment. Every unit is assigned independently, so the
+probabilities do not depend on how the other units came out.
+}
+\details{
+These are the quantities inverse-probability weights are built from: weight
+each unit by the reciprocal of the probability of the condition it landed in,
+which \code{\link{obtain_condition_probabilities}} extracts for you.
 }
 \examples{
 # Two Group Designs
@@ -64,4 +71,7 @@ head(prob_mat)
 prob_mat <- simple_ra_probabilities(N=100, conditions=c("control", "placebo", "treatment"))
 head(prob_mat)
 
+}
+\seealso{
+\code{\link{simple_ra}}
 }

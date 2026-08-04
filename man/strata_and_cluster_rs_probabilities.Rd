@@ -2,7 +2,7 @@
 % Please edit documentation in R/strata_and_cluster_rs.R
 \name{strata_and_cluster_rs_probabilities}
 \alias{strata_and_cluster_rs_probabilities}
-\title{Inclusion Probabilities: Stratified and Clustered Random Sampling}
+\title{Inclusion probabilities: Stratified and Clustered Random Sampling}
 \usage{
 strata_and_cluster_rs_probabilities(
   strata = NULL,
@@ -39,7 +39,14 @@ strata_and_cluster_rs_probabilities(
 A vector length N indicating the probability of being sampled.
 }
 \description{
-Inclusion Probabilities: Stratified and Clustered Random Sampling
+Returns each unit's probability of being sampled when clusters are drawn
+within strata. Probabilities vary across strata and are constant within a
+cluster.
+}
+\details{
+These are the quantities inverse-probability weights are built from: weight
+each sampled unit by the reciprocal of its inclusion probability, which
+\code{\link{obtain_inclusion_probabilities}} extracts for you.
 }
 \examples{
 
@@ -83,4 +90,7 @@ table(probs, clusters)
 table(probs, strata)
 
 
+}
+\seealso{
+\code{\link{strata_and_cluster_rs}}
 }

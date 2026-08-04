@@ -4,6 +4,8 @@
 #'
 #' Simple random assignment is appropriate when units arrive sequentially and the total sample size is not known in advance, or when the assignment must proceed without coordinating across units. If only \code{N} is specified, a two-arm trial with \code{prob = 0.5} is assumed.
 #'
+#' @seealso \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{simple_rs}}, \code{\link{simple_ra_probabilities}}
+#'
 #' @param N The number of units. Must be a positive integer. (required)
 #' @param prob Use for a two-arm design. The probability of assignment to treatment; must be a real number between 0 and 1 and of length 1. (optional)
 #' @param prob_unit Use for a two-arm design. The probability of assignment to treatment for each unit; must be a real number between 0 and 1 and of length N. (optional)
@@ -59,7 +61,17 @@ simple_ra <- function(N,
   return(assignment)
 }
 
-#' probabilities of assignment: Simple Random Assignment
+#' Probabilities of assignment: Simple Random Assignment
+#'
+#' Returns the probability that each unit is assigned to each condition under
+#' simple random assignment. Every unit is assigned independently, so the
+#' probabilities do not depend on how the other units came out.
+#'
+#' These are the quantities inverse-probability weights are built from: weight
+#' each unit by the reciprocal of the probability of the condition it landed in,
+#' which \code{\link{obtain_condition_probabilities}} extracts for you.
+#'
+#' @seealso \code{\link{simple_ra}}
 #'
 #' @inheritParams simple_ra
 #' @return A matrix of probabilities of assignment

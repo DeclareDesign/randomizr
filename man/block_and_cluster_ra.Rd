@@ -54,7 +54,16 @@ block_and_cluster_ra(
 A vector of length N that indicates the treatment condition of each unit.
 }
 \description{
-A random assignment procedure in which units are assigned as clusters and clusters are nested within blocks.
+\code{block_and_cluster_ra} assigns whole clusters to conditions, conducting
+the assignment separately within each block. Use it when treatment can only
+be delivered to a group and the groups differ in ways worth balancing on.
+Clustering costs precision, since the effective sample size is the number of
+clusters rather than the number of units; blocking buys some of it back by
+guaranteeing treated and control clusters within every block.
+}
+\details{
+Clusters must nest within blocks: every unit in a cluster has to belong to
+the same block.
 }
 \examples{
 clusters <- rep(letters, times=1:26)
@@ -99,4 +108,8 @@ Z <- block_and_cluster_ra(blocks = blocks,
 table(Z, blocks)
 table(Z, clusters)
 
+}
+\seealso{
+\code{\link{cluster_ra}}, \code{\link{block_ra}},
+  \code{\link{strata_and_cluster_rs}}
 }

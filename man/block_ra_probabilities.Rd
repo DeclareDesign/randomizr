@@ -2,7 +2,7 @@
 % Please edit documentation in R/block_ra.R
 \name{block_ra_probabilities}
 \alias{block_ra_probabilities}
-\title{probabilities of assignment: Block Random Assignment}
+\title{Probabilities of assignment: Block Random Assignment}
 \usage{
 block_ra_probabilities(
   blocks = NULL,
@@ -51,7 +51,14 @@ block_ra_probabilities(
 A matrix of probabilities of assignment
 }
 \description{
-probabilities of assignment: Block Random Assignment
+Returns the probability that each unit is assigned to each condition under
+block random assignment. Units in different blocks routinely have different
+probabilities, which is exactly when these numbers are needed.
+}
+\details{
+These are the quantities inverse-probability weights are built from: weight
+each unit by the reciprocal of the probability of the condition it landed in,
+which \code{\link{obtain_condition_probabilities}} extracts for you.
 }
 \examples{
 
@@ -94,4 +101,7 @@ head(prob_mat)
 prob_mat <- block_ra_probabilities(blocks=blocks, prob_each=c(.1, .1, .8))
 head(prob_mat)
 
+}
+\seealso{
+\code{\link{block_ra}}
 }

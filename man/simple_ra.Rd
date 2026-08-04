@@ -68,3 +68,6 @@ table(Z)
 Z <- simple_ra(N=100, conditions=c("control", "placebo", "treatment"))
 table(Z)
 }
+\seealso{
+\code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{simple_rs}}, \code{\link{simple_ra_probabilities}}
+}

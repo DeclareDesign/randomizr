@@ -61,3 +61,6 @@ complete_rs(N=1, n=1) # sampled with 50\% probability
 
 
 }
+\seealso{
+\code{\link{simple_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, \code{\link{complete_ra}}, \code{\link{complete_rs_probabilities}}
+}

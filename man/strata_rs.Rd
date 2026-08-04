@@ -66,3 +66,6 @@ table(strata, Z)
 
 
 }
+\seealso{
+\code{\link{complete_rs}}, \code{\link{strata_and_cluster_rs}}, \code{\link{block_ra}}, \code{\link{strata_rs_probabilities}}
+}

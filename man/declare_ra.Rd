@@ -142,3 +142,6 @@ declare_ra(clusters = clusters, blocks = blocks)
 declare_ra(clusters = clusters, blocks = blocks, prob_each = c(.2, .5, .3))
 
 }
+\seealso{
+\code{\link{conduct_ra}}, \code{\link{obtain_condition_probabilities}}, \code{\link{declare_rs}}
+}

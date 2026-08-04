@@ -4,6 +4,8 @@
 #'
 #' By default, \code{cluster_ra} conducts complete random assignment at the cluster level: a fixed number of clusters are assigned to each condition on every draw. Setting \code{simple = TRUE} switches to independent Bernoulli assignment of clusters.
 #'
+#' @seealso \code{\link{complete_ra}}, \code{\link{block_and_cluster_ra}}, \code{\link{cluster_rs}}, \code{\link{cluster_ra_probabilities}}
+#'
 #' @param clusters A vector of length N indicating which cluster each unit belongs to. (required)
 #' @param m Use for a two-arm design in which exactly \code{m} clusters are assigned to treatment. (optional)
 #' @param m_unit Use for a two-arm design. \code{unique(m_unit)} clusters are assigned to treatment; must be the same for all units and of length N. (optional)
@@ -85,7 +87,17 @@ cluster_ra <- function(clusters = NULL,
     assignment[order(unlist(split(seq_along(clusters), clusters), FALSE, FALSE))]
   return(assignment)
 }
-#' probabilities of assignment: Cluster Random Assignment
+#' Probabilities of assignment: Cluster Random Assignment
+#'
+#' Returns the probability that each unit is assigned to each condition under
+#' cluster random assignment. Every unit in a cluster shares its cluster's
+#' probability, since clusters move together.
+#'
+#' These are the quantities inverse-probability weights are built from: weight
+#' each unit by the reciprocal of the probability of the condition it landed in,
+#' which \code{\link{obtain_condition_probabilities}} extracts for you.
+#'
+#' @seealso \code{\link{cluster_ra}}
 #'
 #' @inheritParams cluster_ra
 #'

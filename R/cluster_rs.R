@@ -2,6 +2,8 @@
 #'
 #' cluster_rs implements a random sampling procedure in which groups of units are sampled together (as a cluster). This function conducts complete random sampling at the cluster level, unless simple = TRUE, in which case \code{\link{simple_rs}} analogues are used.
 #'
+#' @seealso \code{\link{complete_rs}}, \code{\link{strata_and_cluster_rs}}, \code{\link{cluster_ra}}, \code{\link{cluster_rs_probabilities}}
+#'
 #' @param clusters A vector of length N that indicates which cluster each unit belongs to.
 #' @param n Use for a design in which n clusters are sampled. (optional)
 #' @param n_unit unique(n_unit) will be passed to \code{n}. Must be the same for all units (optional)
@@ -64,7 +66,16 @@ cluster_rs <- function(clusters = NULL,
     assignment[order(unlist(split(seq_along(clusters), clusters), FALSE, FALSE))]
   return(assignment)
 }
-#' Inclusion Probabilities: Cluster Sampling
+#' Inclusion probabilities: Cluster Sampling
+#'
+#' Returns each unit's probability of being sampled when whole clusters are
+#' drawn. Every unit in a cluster shares its cluster's probability.
+#'
+#' These are the quantities inverse-probability weights are built from: weight
+#' each sampled unit by the reciprocal of its inclusion probability, which
+#' \code{\link{obtain_inclusion_probabilities}} extracts for you.
+#'
+#' @seealso \code{\link{cluster_rs}}
 #'
 #' @inheritParams cluster_rs
 #'

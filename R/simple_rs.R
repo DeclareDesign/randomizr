@@ -30,7 +30,17 @@ simple_rs <-
   simple_ra(N, prob, prob_unit, conditions=0:1, check_inputs = FALSE)    
 }
 
-#' Inclusion Probabilities: Simple Random Sampling
+#' Inclusion probabilities: Simple Random Sampling
+#'
+#' Returns each unit's probability of being sampled under simple random
+#' sampling. Every unit is sampled independently, so the probabilities do not
+#' depend on which other units were drawn.
+#'
+#' These are the quantities inverse-probability weights are built from: weight
+#' each sampled unit by the reciprocal of its inclusion probability, which
+#' \code{\link{obtain_inclusion_probabilities}} extracts for you.
+#'
+#' @seealso \code{\link{simple_rs}}
 #'
 #' @inheritParams simple_rs
 #' @return A vector length N indicating the probability of being sampled.

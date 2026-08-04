@@ -65,8 +65,17 @@ conduct_ra(
 
 \item{check_inputs}{Logical. Defaults to \code{TRUE}.}
 }
+\value{
+A vector of length N giving the treatment condition of each unit,
+  numeric in a two-arm design and a factor (ordered by \code{conditions}) in
+  a multi-arm design.
+}
 \description{
-You can either give conduct_ra() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.
+\code{conduct_ra} draws one random assignment from a design. Give it a
+declaration made by \code{\link{declare_ra}}, or describe the design inline
+with the same arguments \code{declare_ra} takes. Declaring first pays off
+when the same design is drawn repeatedly, or when the assignment
+probabilities are needed later by \code{\link{obtain_condition_probabilities}}.
 }
 \examples{
 declaration <- declare_ra(N = 100, m_each = c(30, 30, 40))
@@ -78,4 +87,7 @@ table(Z)
 Z <- conduct_ra(N = 100, m_each = c(30, 30, 40))
 table(Z)
 
+}
+\seealso{
+\code{\link{declare_ra}}, \code{\link{obtain_condition_probabilities}}
 }

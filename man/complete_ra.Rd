@@ -96,3 +96,6 @@ complete_ra(N=1, m=1) # assigned with 50\% probability
 # This behavior has been deprecated
 
 }
+\seealso{
+\code{\link{simple_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, \code{\link{complete_rs}}, \code{\link{complete_ra_probabilities}}
+}

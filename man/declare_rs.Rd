@@ -50,7 +50,18 @@ A list of class "declaration".  The list has five entries:
   $clusters, the clustering variable.
 }
 \description{
-Declare a random sampling procedure.
+\code{declare_rs} describes a sampling design once so that the rest of the
+package can work from it. Pass the result to \code{\link{draw_rs}} to draw a
+sample, or to \code{\link{obtain_inclusion_probabilities}} to recover each
+unit's probability of selection. Declaring is worth the extra line whenever a
+design is drawn more than once, since the probabilities are then computed
+from the same object that produced the sample rather than reconstructed by
+hand.
+}
+\details{
+\code{declare_rs} covers the same four designs as the sampling functions
+themselves: simple, complete, stratified, and clustered, in any combination.
+Which one it declares is inferred from the arguments given.
 }
 \examples{
 # The declare_rs function is used in three ways:
@@ -107,4 +118,8 @@ table(strata, clusters)
 declare_rs(clusters = clusters, strata = strata)
 declare_rs(clusters = clusters, strata = strata, prob = .3)
 
+}
+\seealso{
+\code{\link{draw_rs}}, \code{\link{obtain_inclusion_probabilities}},
+  \code{\link{declare_ra}}
 }

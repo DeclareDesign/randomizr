@@ -1,5 +1,20 @@
 #' Declare a random sampling procedure.
 #'
+#' \code{declare_rs} describes a sampling design once so that the rest of the
+#' package can work from it. Pass the result to \code{\link{draw_rs}} to draw a
+#' sample, or to \code{\link{obtain_inclusion_probabilities}} to recover each
+#' unit's probability of selection. Declaring is worth the extra line whenever a
+#' design is drawn more than once, since the probabilities are then computed
+#' from the same object that produced the sample rather than reconstructed by
+#' hand.
+#'
+#' \code{declare_rs} covers the same four designs as the sampling functions
+#' themselves: simple, complete, stratified, and clustered, in any combination.
+#' Which one it declares is inferred from the arguments given.
+#'
+#' @seealso \code{\link{draw_rs}}, \code{\link{obtain_inclusion_probabilities}},
+#'   \code{\link{declare_ra}}
+#'
 #' @param N The number of units. N must be a positive integer. (required)
 #' @param strata A vector of length N that indicates which stratum each unit belongs to.
 #' @param clusters A vector of length N that indicates which cluster each unit belongs to.
@@ -150,7 +165,11 @@ declare_rs <- function(N = NULL,
 
 #' Draw a random sample
 #'
-#' You can either give draw_rs() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.
+#' \code{draw_rs} draws one random sample from a design. Give it a declaration
+#' made by \code{\link{declare_rs}}, or describe the design inline with the
+#' same arguments \code{declare_rs} takes. Declaring first pays off when the
+#' same design is drawn repeatedly, or when the inclusion probabilities are
+#' needed later by \code{\link{obtain_inclusion_probabilities}}.
 #'
 #' @param declaration A random sampling declaration, created by \code{\link{declare_rs}}.
 #' @inheritParams declare_rs
@@ -163,6 +182,8 @@ declare_rs <- function(N = NULL,
 #' S <- draw_rs(N = 100, n = 30)
 #' table(S)
 #'
+#' @return A numeric vector of length N, 1 for sampled units and 0 otherwise.
+#' @seealso \code{\link{declare_rs}}, \code{\link{obtain_inclusion_probabilities}}
 #' @export
 draw_rs <- function(declaration = NULL) {
   if (is.null(declaration)) {
@@ -177,7 +198,7 @@ formals(draw_rs) <- c(formals(draw_rs), formals(declare_rs))
 
 #' Obtain inclusion probabilities
 #'
-#' You can either give obtain_inclusion_probabilities() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.\cr \cr
+#' Give obtain_inclusion_probabilities() a declaration made by \code{\link{declare_rs}}, or describe the design inline with the same arguments \code{declare_rs} takes.\cr \cr
 #' This function is especially useful when units have different inclusion probabilities and the analyst plans to use inverse-probability weights.
 #'
 #'
@@ -203,6 +224,10 @@ formals(draw_rs) <- c(formals(draw_rs), formals(declare_rs))
 #'
 #' table(strata, observed_probabilities)
 #'
+#' @return A vector of length N giving each unit's probability of being included
+#'   in the sample. These are the quantities inverse-probability weights are
+#'   built from: weight each sampled unit by the reciprocal of its value here.
+#' @seealso \code{\link{declare_rs}}, \code{\link{draw_rs}}
 #' @export
 obtain_inclusion_probabilities <- function(declaration = NULL) {
   # checks

@@ -68,8 +68,14 @@ obtain_condition_probabilities(
 
 \item{check_inputs}{Logical. Defaults to \code{TRUE}.}
 }
+\value{
+A vector of length N giving, for each unit, the probability that it
+  was assigned to the condition it is actually in. These are the quantities
+  inverse-probability weights are built from: weight each unit by the
+  reciprocal of its value here.
+}
 \description{
-You can either give obtain_condition_probabilities() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.\cr \cr
+Give obtain_condition_probabilities() a declaration made by \code{\link{declare_ra}}, or describe the design inline with the same arguments \code{declare_ra} takes.\cr \cr
 This function is especially useful when units have different probabilities of assignment and the analyst plans to use inverse-probability weights.
 }
 \examples{
@@ -103,4 +109,7 @@ observed_probabilities <-
 table(observed_probabilities[Z == 0], blocks[Z == 0])
 table(observed_probabilities[Z == 1], blocks[Z == 1])
 
+}
+\seealso{
+\code{\link{declare_ra}}, \code{\link{conduct_ra}}
 }

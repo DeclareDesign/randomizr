@@ -2,6 +2,8 @@
 #'
 #' strata_rs implements a random sampling procedure in which units that are grouped into strata defined by covariates are sample using complete random sampling within stratum For example, imagine that 50 of 100 men are sampled and 75 of 200 women are sampled.
 #'
+#' @seealso \code{\link{complete_rs}}, \code{\link{strata_and_cluster_rs}}, \code{\link{block_ra}}, \code{\link{strata_rs_probabilities}}
+#'
 #' @param strata A vector of length N that indicates which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)
 #' @param prob Use for a design in which either floor(N_stratum*prob) or ceiling(N_stratum*prob) units are sampled within each stratum. The probability of  being sampled is exactly prob because with probability 1-prob, floor(N_stratum*prob) units will be sampled and with probability prob, ceiling(N_stratum*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
 #' @param prob_unit Must of be of length N. tapply(prob_unit, strata, unique) will be passed to \code{strata_prob}.
@@ -64,7 +66,17 @@ strata_rs <- function(strata = NULL,
   )
 }
 
-#' Inclusion Probabilities: Stratified Random Sampling
+#' Inclusion probabilities: Stratified Random Sampling
+#'
+#' Returns each unit's probability of being sampled under stratified random
+#' sampling. Units in different strata routinely have different probabilities, and a
+#' sample drawn that way is not self-weighting.
+#'
+#' These are the quantities inverse-probability weights are built from: weight
+#' each sampled unit by the reciprocal of its inclusion probability, which
+#' \code{\link{obtain_inclusion_probabilities}} extracts for you.
+#'
+#' @seealso \code{\link{strata_rs}}
 #'
 #' @inheritParams strata_rs
 #' @return A vector length N indicating the probability of being sampled.

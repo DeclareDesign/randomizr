@@ -44,8 +44,13 @@ obtain_inclusion_probabilities(
 
 \item{check_inputs}{logical. Defaults to TRUE.}
 }
+\value{
+A vector of length N giving each unit's probability of being included
+  in the sample. These are the quantities inverse-probability weights are
+  built from: weight each sampled unit by the reciprocal of its value here.
+}
 \description{
-You can either give obtain_inclusion_probabilities() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.\cr \cr
+Give obtain_inclusion_probabilities() a declaration made by \code{\link{declare_rs}}, or describe the design inline with the same arguments \code{declare_rs} takes.\cr \cr
 This function is especially useful when units have different inclusion probabilities and the analyst plans to use inverse-probability weights.
 }
 \examples{
@@ -67,4 +72,7 @@ observed_probabilities <-
 
 table(strata, observed_probabilities)
 
+}
+\seealso{
+\code{\link{declare_rs}}, \code{\link{draw_rs}}
 }

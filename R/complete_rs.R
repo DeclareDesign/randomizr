@@ -7,6 +7,8 @@
 #' If only N is specified, N/2 units will be sampled. If N is odd, either floor(N/2) units or ceiling(N/2) units will be sampled.
 #'
 #'
+#' @seealso \code{\link{simple_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, \code{\link{complete_ra}}, \code{\link{complete_rs_probabilities}}
+#'
 #' @param N The number of units. N must be a positive integer. (required)
 #' @param n Use for a design in which exactly n units are sampled. (optional)
 #' @param n_unit unique(n_unit) will be passed to \code{n}. Must be the same for all units (optional)
@@ -90,7 +92,16 @@ complete_rs <- function(N,
     
 }
 
-#' Inclusion Probabilities: Complete Random Sampling
+#' Inclusion probabilities: Complete Random Sampling
+#'
+#' Returns each unit's probability of being sampled under complete random
+#' sampling, where the sample size is fixed on every draw.
+#'
+#' These are the quantities inverse-probability weights are built from: weight
+#' each sampled unit by the reciprocal of its inclusion probability, which
+#' \code{\link{obtain_inclusion_probabilities}} extracts for you.
+#'
+#' @seealso \code{\link{complete_rs}}
 #'
 #' @inheritParams complete_rs
 #' @return A vector length N indicating the probability of being sampled.

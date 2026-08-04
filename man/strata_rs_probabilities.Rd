@@ -2,7 +2,7 @@
 % Please edit documentation in R/strata_rs.R
 \name{strata_rs_probabilities}
 \alias{strata_rs_probabilities}
-\title{Inclusion Probabilities: Stratified Random Sampling}
+\title{Inclusion probabilities: Stratified Random Sampling}
 \usage{
 strata_rs_probabilities(
   strata = NULL,
@@ -36,7 +36,14 @@ strata_rs_probabilities(
 A vector length N indicating the probability of being sampled.
 }
 \description{
-Inclusion Probabilities: Stratified Random Sampling
+Returns each unit's probability of being sampled under stratified random
+sampling. Units in different strata routinely have different probabilities, and a
+sample drawn that way is not self-weighting.
+}
+\details{
+These are the quantities inverse-probability weights are built from: weight
+each sampled unit by the reciprocal of its inclusion probability, which
+\code{\link{obtain_inclusion_probabilities}} extracts for you.
 }
 \examples{
 
@@ -53,4 +60,7 @@ table(strata, probs)
 probs <- strata_rs_probabilities(strata = strata, strata_n = c(10, 40, 70))
 table(strata, probs)
 
+}
+\seealso{
+\code{\link{strata_rs}}
 }

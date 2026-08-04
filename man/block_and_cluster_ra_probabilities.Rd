@@ -2,7 +2,7 @@
 % Please edit documentation in R/block_and_cluster_ra.R
 \name{block_and_cluster_ra_probabilities}
 \alias{block_and_cluster_ra_probabilities}
-\title{probabilities of assignment: Blocked and Clustered Random Assignment}
+\title{Probabilities of assignment: Blocked and Clustered Random Assignment}
 \usage{
 block_and_cluster_ra_probabilities(
   blocks = NULL,
@@ -54,7 +54,14 @@ block_and_cluster_ra_probabilities(
 A matrix of probabilities of assignment
 }
 \description{
-probabilities of assignment: Blocked and Clustered Random Assignment
+Returns the probability that each unit is assigned to each condition when
+clusters are assigned within blocks. Probabilities vary across blocks and are
+constant within a cluster.
+}
+\details{
+These are the quantities inverse-probability weights are built from: weight
+each unit by the reciprocal of the probability of the condition it landed in,
+which \code{\link{obtain_condition_probabilities}} extracts for you.
 }
 \examples{
 
@@ -93,4 +100,7 @@ prob_mat <- block_and_cluster_ra_probabilities(clusters = clusters,
 head(prob_mat)                                    
 
 
+}
+\seealso{
+\code{\link{block_and_cluster_ra}}
 }

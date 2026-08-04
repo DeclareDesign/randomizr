@@ -127,3 +127,6 @@ table(blocks, Z)
 
 
 }
+\seealso{
+\code{\link{complete_ra}}, \code{\link{block_and_cluster_ra}}, \code{\link{strata_rs}}, \code{\link{block_ra_probabilities}}
+}

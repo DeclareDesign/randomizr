@@ -1,5 +1,15 @@
 #' Obtain Permutation Matrix from a Random Assignment Declaration
 #'
+#' Enumerates the assignments a design could have produced, one column per
+#' assignment. The matrix is the input to randomization inference, where a test
+#' statistic is recomputed under each column to build the distribution it would
+#' follow if the treatment had no effect. When a design admits more assignments
+#' than \code{maximum_permutations}, a random sample of them is returned
+#' instead, which approximates the same distribution.
+#'
+#' @seealso \code{\link{obtain_num_permutations}},
+#'   \code{\link{obtain_permutation_probabilities}}, \code{\link{declare_ra}}
+#'
 #' @param declaration A random assignment declaration, created by \code{\link{declare_ra}}.
 #' @param maximum_permutations If the number of possible random assignments exceeds maximum_permutations, obtain_permutation_matrix will return a random sample of maximum_permutations permutations. Defaults to 10,000.
 #'

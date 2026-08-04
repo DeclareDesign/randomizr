@@ -79,3 +79,6 @@ Z <- cluster_ra(clusters = clusters,
                 conditions = c("control", "placebo", "treatment"))
 table(Z, clusters)
 }
+\seealso{
+\code{\link{complete_ra}}, \code{\link{block_and_cluster_ra}}, \code{\link{cluster_rs}}, \code{\link{cluster_ra_probabilities}}
+}

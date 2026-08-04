@@ -4,6 +4,8 @@
 #'
 #' In the simplest two-arm case with no arguments beyond \code{blocks}, the function assigns approximately half the units in each block to treatment. Researchers can specify exact counts (via \code{block_m}) or target probabilities that are held constant (via \code{prob}) or allowed to vary (via \code{block_prob}) across blocks.
 #'
+#' @seealso \code{\link{complete_ra}}, \code{\link{block_and_cluster_ra}}, \code{\link{strata_rs}}, \code{\link{block_ra_probabilities}}
+#'
 #' @param blocks A vector of length N indicating which block each unit belongs to. Can be character, factor, or numeric. (required)
 #' @param prob Use for a two-arm design in which either \code{floor(N_block*prob)} or \code{ceiling(N_block*prob)} units are assigned to treatment within each block. The probability of assignment to treatment is exactly \code{prob} because with probability \code{1-prob}, \code{floor(N_block*prob)} units will be assigned to treatment and with probability \code{prob}, \code{ceiling(N_block*prob)} units will be assigned to treatment. Must be a real number between 0 and 1. (optional)
 #' @param prob_unit Use for a two-arm design. Must be of length N. \code{tapply(prob_unit, blocks, unique)} will be passed to \code{block_prob}. (optional)
@@ -193,7 +195,17 @@ block_ra <- function(blocks = NULL,
 }
 
 
-#' probabilities of assignment: Block Random Assignment
+#' Probabilities of assignment: Block Random Assignment
+#'
+#' Returns the probability that each unit is assigned to each condition under
+#' block random assignment. Units in different blocks routinely have different
+#' probabilities, which is exactly when these numbers are needed.
+#'
+#' These are the quantities inverse-probability weights are built from: weight
+#' each unit by the reciprocal of the probability of the condition it landed in,
+#' which \code{\link{obtain_condition_probabilities}} extracts for you.
+#'
+#' @seealso \code{\link{block_ra}}
 #'
 #' @inheritParams block_ra
 #' @return A matrix of probabilities of assignment

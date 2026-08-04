@@ -1,5 +1,15 @@
 #' Obtain the Number of Possible Permutations from a Random Assignment Declaration
 #'
+#' Counts the assignments a design could have produced. The count is the size of
+#' the randomization distribution, so it says how much resolution a
+#' randomization inference p-value can have: a design with 70 possible
+#' assignments cannot produce a p-value below 1/70. Counting is exact and cheap
+#' even when the number is far too large to enumerate, which is why it is worth
+#' calling before \code{\link{obtain_permutation_matrix}}.
+#'
+#' @seealso \code{\link{obtain_permutation_matrix}},
+#'   \code{\link{obtain_permutation_probabilities}}, \code{\link{declare_ra}}
+#'
 #' @param declaration A random assignment or sampling declaration, created by \code{\link{declare_ra}} or \code{\link{declare_rs}}.
 #'
 #' @return a scalar

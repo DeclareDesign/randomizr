@@ -6,6 +6,8 @@
 #'
 #' If only \code{N} is specified, a balanced two-arm trial (\code{prob = 0.5}) is assumed. When \code{N} is odd, either \code{floor(N/2)} or \code{ceiling(N/2)} units are assigned to treatment.
 #'
+#' @seealso \code{\link{simple_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, \code{\link{complete_rs}}, \code{\link{complete_ra_probabilities}}
+#'
 #' @param N The number of units. Must be a positive integer. (required)
 #' @param m Use for a two-arm design: exactly \code{m} units are assigned to treatment and \code{N-m} to control. (optional)
 #' @param m_unit Use for a two-arm design. \code{unique(m_unit)} units are assigned to treatment; must be the same for all units and of length N. (optional)
@@ -219,7 +221,18 @@ complete_ra <- function(N,
 }
 
 
-#' probabilities of assignment: Complete Random Assignment
+#' Probabilities of assignment: Complete Random Assignment
+#'
+#' Returns the probability that each unit is assigned to each condition under
+#' complete random assignment. When the implied counts are not integers the
+#' probabilities account for the stochastic rounding \code{complete_ra} uses, so
+#' they equal the target exactly rather than approximately.
+#'
+#' These are the quantities inverse-probability weights are built from: weight
+#' each unit by the reciprocal of the probability of the condition it landed in,
+#' which \code{\link{obtain_condition_probabilities}} extracts for you.
+#'
+#' @seealso \code{\link{complete_ra}}
 #'
 #' @inheritParams complete_ra
 #' @return A matrix of probabilities of assignment

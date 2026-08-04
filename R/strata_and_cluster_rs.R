@@ -1,6 +1,17 @@
 #' Stratified and Clustered Random Sampling
 #'
-#' A random sampling procedure in which units are sampled as clusters and clusters are nested within strata.
+#' \code{strata_and_cluster_rs} draws whole clusters, sampling separately within
+#' each stratum. Use it when the sampling unit is a group rather than an
+#' individual and the groups fall into categories you want represented in fixed
+#' proportion. Sampling by cluster costs precision, since the effective sample
+#' size is the number of clusters rather than the number of units; stratifying
+#' buys some of it back by fixing how many clusters come from each stratum.
+#'
+#' Clusters must nest within strata: every unit in a cluster has to belong to
+#' the same stratum.
+#'
+#' @seealso \code{\link{cluster_rs}}, \code{\link{strata_rs}},
+#'   \code{\link{block_and_cluster_ra}}
 #'
 #' @param strata A vector of length N that indicates which stratum each unit belongs to.
 #' @param clusters A vector of length N that indicates which cluster each unit belongs to.
@@ -102,7 +113,17 @@ strata_and_cluster_rs <-
     return(assignment)
   }
 
-#' Inclusion Probabilities: Stratified and Clustered Random Sampling
+#' Inclusion probabilities: Stratified and Clustered Random Sampling
+#'
+#' Returns each unit's probability of being sampled when clusters are drawn
+#' within strata. Probabilities vary across strata and are constant within a
+#' cluster.
+#'
+#' These are the quantities inverse-probability weights are built from: weight
+#' each sampled unit by the reciprocal of its inclusion probability, which
+#' \code{\link{obtain_inclusion_probabilities}} extracts for you.
+#'
+#' @seealso \code{\link{strata_and_cluster_rs}}
 #'
 #' @inheritParams strata_and_cluster_rs
 #'

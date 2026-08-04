@@ -2,7 +2,7 @@
 % Please edit documentation in R/complete_ra.R
 \name{complete_ra_probabilities}
 \alias{complete_ra_probabilities}
-\title{probabilities of assignment: Complete Random Assignment}
+\title{Probabilities of assignment: Complete Random Assignment}
 \usage{
 complete_ra_probabilities(
   N,
@@ -42,7 +42,15 @@ complete_ra_probabilities(
 A matrix of probabilities of assignment
 }
 \description{
-probabilities of assignment: Complete Random Assignment
+Returns the probability that each unit is assigned to each condition under
+complete random assignment. When the implied counts are not integers the
+probabilities account for the stochastic rounding \code{complete_ra} uses, so
+they equal the target exactly rather than approximately.
+}
+\details{
+These are the quantities inverse-probability weights are built from: weight
+each unit by the reciprocal of the probability of the condition it landed in,
+which \code{\link{obtain_condition_probabilities}} extracts for you.
 }
 \examples{
 # 2-arm designs
@@ -76,4 +84,7 @@ head(prob_mat)
 prob_mat <- complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))
 head(prob_mat)
 
+}
+\seealso{
+\code{\link{complete_ra}}
 }

@@ -13,7 +13,11 @@ obtain_permutation_probabilities(declaration)
 a vector of probabilities
 }
 \description{
-Obtain the probabilities of permutations
+Returns how likely each assignment in the permutation matrix was. Most
+designs make every possible assignment equally likely, in which case these
+are all the same and can be ignored. Blocked and clustered designs of unequal
+size do not, and there the probabilities are needed to weight the
+randomization distribution correctly.
 }
 \examples{
 
@@ -32,4 +36,8 @@ rowMeans(perms)
 # correctly correct!
 perms \%*\% perm_probs
 
+}
+\seealso{
+\code{\link{obtain_permutation_matrix}},
+  \code{\link{obtain_num_permutations}}
 }

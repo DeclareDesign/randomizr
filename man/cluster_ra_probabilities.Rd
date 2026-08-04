@@ -2,7 +2,7 @@
 % Please edit documentation in R/cluster_ra.R
 \name{cluster_ra_probabilities}
 \alias{cluster_ra_probabilities}
-\title{probabilities of assignment: Cluster Random Assignment}
+\title{Probabilities of assignment: Cluster Random Assignment}
 \usage{
 cluster_ra_probabilities(
   clusters = NULL,
@@ -45,7 +45,14 @@ cluster_ra_probabilities(
 A matrix of probabilities of assignment
 }
 \description{
-probabilities of assignment: Cluster Random Assignment
+Returns the probability that each unit is assigned to each condition under
+cluster random assignment. Every unit in a cluster shares its cluster's
+probability, since clusters move together.
+}
+\details{
+These are the quantities inverse-probability weights are built from: weight
+each unit by the reciprocal of the probability of the condition it landed in,
+which \code{\link{obtain_condition_probabilities}} extracts for you.
 }
 \examples{
 
@@ -82,4 +89,7 @@ head(prob_mat)
 
 
 
+}
+\seealso{
+\code{\link{cluster_ra}}
 }

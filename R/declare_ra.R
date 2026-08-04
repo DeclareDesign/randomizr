@@ -4,6 +4,8 @@
 #'
 #' \code{declare_ra} supports simple, complete, blocked, clustered, and blocked-and-clustered designs. It dispatches to the appropriate low-level function (\code{\link{simple_ra}}, \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}}) based on which arguments are supplied.
 #'
+#' @seealso \code{\link{conduct_ra}}, \code{\link{obtain_condition_probabilities}}, \code{\link{declare_rs}}
+#'
 #' @param N The number of units. Must be a positive integer. (required)
 #' @param blocks A vector of length N indicating which block each unit belongs to. Supply to use blocked random assignment. (optional)
 #' @param clusters A vector of length N indicating which cluster each unit belongs to. Supply to use cluster random assignment. (optional)
@@ -184,7 +186,11 @@ declare_ra <- function(N = NULL,
 
 #' Conduct a random assignment
 #'
-#' You can either give conduct_ra() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.
+#' \code{conduct_ra} draws one random assignment from a design. Give it a
+#' declaration made by \code{\link{declare_ra}}, or describe the design inline
+#' with the same arguments \code{declare_ra} takes. Declaring first pays off
+#' when the same design is drawn repeatedly, or when the assignment
+#' probabilities are needed later by \code{\link{obtain_condition_probabilities}}.
 #'
 #' @param declaration A random assignment declaration, created by \code{\link{declare_ra}}.
 #' @inheritParams declare_ra
@@ -198,6 +204,10 @@ declare_ra <- function(N = NULL,
 #' Z <- conduct_ra(N = 100, m_each = c(30, 30, 40))
 #' table(Z)
 #'
+#' @return A vector of length N giving the treatment condition of each unit,
+#'   numeric in a two-arm design and a factor (ordered by \code{conditions}) in
+#'   a multi-arm design.
+#' @seealso \code{\link{declare_ra}}, \code{\link{obtain_condition_probabilities}}
 #' @export
 conduct_ra <- function(declaration = NULL) {
   if (is.null(declaration)) {
@@ -213,7 +223,7 @@ formals(conduct_ra) <- c(formals(conduct_ra), formals(declare_ra))
 
 #' Obtain the probabilities of units being in the conditions that they are in.
 #'
-#' You can either give obtain_condition_probabilities() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.\cr \cr
+#' Give obtain_condition_probabilities() a declaration made by \code{\link{declare_ra}}, or describe the design inline with the same arguments \code{declare_ra} takes.\cr \cr
 #' This function is especially useful when units have different probabilities of assignment and the analyst plans to use inverse-probability weights.
 #'
 #'
@@ -252,6 +262,11 @@ formals(conduct_ra) <- c(formals(conduct_ra), formals(declare_ra))
 #' table(observed_probabilities[Z == 0], blocks[Z == 0])
 #' table(observed_probabilities[Z == 1], blocks[Z == 1])
 #'
+#' @return A vector of length N giving, for each unit, the probability that it
+#'   was assigned to the condition it is actually in. These are the quantities
+#'   inverse-probability weights are built from: weight each unit by the
+#'   reciprocal of its value here.
+#' @seealso \code{\link{declare_ra}}, \code{\link{conduct_ra}}
 #' @export
 obtain_condition_probabilities <-
   function(declaration = NULL,

@@ -45,3 +45,6 @@ S <- cluster_rs(clusters = clusters, n = 13)
 table(S, clusters)
 
 }
+\seealso{
+\code{\link{complete_rs}}, \code{\link{strata_and_cluster_rs}}, \code{\link{cluster_ra}}, \code{\link{cluster_rs_probabilities}}
+}
