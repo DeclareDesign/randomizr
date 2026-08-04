@@ -112,7 +112,12 @@ complete_ra <- function(N,
         prob_fix_up <- .5
       }
       
-      m <- if (runif(1L) < prob_fix_up) m_ceiling else m_floor
+      # randomizr 1.x drew this through simple_ra(1, prob_fix_up), whose
+      # vsample() walk takes the second condition when the uniform exceeds
+      # 1 - prob_fix_up. `runif(1) < prob_fix_up` has the same distribution but
+      # the opposite decision on the same draw, which silently changed every
+      # odd-N assignment. Keep 1.x's comparison.
+      m <- if (runif(1L) > 1 - prob_fix_up) m_ceiling else m_floor
       
       assignment <-  sample(rep(conditions, c(N - m, m)))
       assignment <-

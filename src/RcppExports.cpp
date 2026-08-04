@@ -11,14 +11,16 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // block_assign_cpp
-IntegerVector block_assign_cpp(IntegerVector block_int, IntegerVector m_per_block);
-RcppExport SEXP _randomizr_block_assign_cpp(SEXP block_intSEXP, SEXP m_per_blockSEXP) {
+IntegerVector block_assign_cpp(IntegerVector block_int, IntegerVector m_given, NumericVector prob_b, int mode);
+RcppExport SEXP _randomizr_block_assign_cpp(SEXP block_intSEXP, SEXP m_givenSEXP, SEXP prob_bSEXP, SEXP modeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< IntegerVector >::type block_int(block_intSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type m_per_block(m_per_blockSEXP);
-    rcpp_result_gen = Rcpp::wrap(block_assign_cpp(block_int, m_per_block));
+    Rcpp::traits::input_parameter< IntegerVector >::type m_given(m_givenSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type prob_b(prob_bSEXP);
+    Rcpp::traits::input_parameter< int >::type mode(modeSEXP);
+    rcpp_result_gen = Rcpp::wrap(block_assign_cpp(block_int, m_given, prob_b, mode));
     return rcpp_result_gen;
 END_RCPP
 }

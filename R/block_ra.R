@@ -129,8 +129,27 @@ block_ra <- function(blocks = NULL,
     if (!is.null(prob_unit)) block_prob <- tapply(prob_unit, blocks, unique)
     if (!is.null(m_unit))    block_m    <- tapply(m_unit,    blocks, unique)
 
-    m_per_b    <- .block_m_from_args(N_per_block, m, block_m, prob, block_prob)
-    raw        <- block_assign_cpp(block_int, m_per_b)
+    # Which of randomizr 1.x's three complete_ra() branches this call maps to.
+    # The kernel has to consume the RNG the same way that branch did, and in the
+    # same per-block order, or seeds set under 1.x stop reproducing.
+    G <- length(N_per_block)
+    if (!is.null(m) || !is.null(block_m)) {
+      mode    <- 0L
+      m_per_b <- if (!is.null(block_m)) as.integer(block_m) else rep(as.integer(m), G)
+      prob_v  <- numeric(G)
+    } else if (!is.null(block_prob)) {
+      mode    <- 2L
+      prob_v  <- as.numeric(block_prob)
+      m_per_b <- integer(G)
+    } else {
+      # block_ra_helper() converts a scalar prob, and the default, into
+      # prob_each before calling complete_ra, which is a different branch and a
+      # different stream from block_prob.
+      mode    <- 1L
+      prob_v  <- rep(if (!is.null(prob)) prob else 0.5, G)
+      m_per_b <- integer(G)
+    }
+    raw        <- block_assign_cpp(block_int, m_per_b, prob_v, mode)
     cond       <- if (!is.null(conditions)) conditions else c(0L, 1L)
     assignment <- cond[raw + 1L]
     return(clean_condition_names(assignment, conditions))
