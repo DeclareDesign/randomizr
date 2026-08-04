@@ -21,3 +21,11 @@ docs
 LOGFILE.md
 LOGFILE*.md
 notes/
+
+# revdepcheck working directories. The .md reports are kept as the evidence for
+# a CRAN submission; the caches and installed libraries are not.
+revdep/checks.noindex/
+revdep/library.noindex/
+revdep/data.sqlite
+revdep/.cache.rds
+revdep/*.noindex

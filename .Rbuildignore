@@ -25,3 +25,4 @@ CONDUCT.md
 ^CRAN-SUBMISSION$
 ^codecov\.yml$
 ^notes$
+^revdep$
