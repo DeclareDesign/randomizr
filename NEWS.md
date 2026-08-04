@@ -2,6 +2,16 @@
 
 This release is a significant internal restructuring. Every public interface is unchanged: function names, parameter names, return types, S3 classes, and object field names. Existing code that works with randomizr 1.x continues to work without modification, and with one documented exception it returns the same assignments.
 
+## New: assignment with heterogeneous probabilities (experimental)
+
+`prob_ra()` and `prob_ra_probabilities()` assign units when the probability of assignment varies from unit to unit, holding the number assigned to each condition as close to its target as arithmetic allows. They fill the gap between `simple_ra()`, which honours unit-varying probabilities but lets the number treated wander, and `complete_ra()`, which fixes the number treated but requires every unit to share the same probability.
+
+Three things hold at once, and all three are guaranteed rather than approached: every unit receives exactly one condition; each unit's probability of each condition is exactly the probability supplied; and each condition's count is the floor or the ceiling of its expected count. With `blocks`, the tight counts are the within-block ones. This closes issue #35, load balancing across blocks, which earlier releases listed as out of scope.
+
+The assignment is drawn by the cube method of Deville and Tillé (2004), specialised to this problem. The function originates in Macartan Humphreys's `probra` package, which introduced the design and the two motivating examples in the documentation; the algorithm here is different, and holds the counts tight for any number of arms rather than for one.
+
+`prob_ra()` is marked experimental: its interface may change, and it does not yet participate in `declare_ra()`, so `conduct_ra()` and `obtain_condition_probabilities()` do not accept a `prob_ra` design.
+
 ## Reproducibility of randomizr 1.x seeds
 
 Assignments are reproducible across the 1.x boundary. `set.seed(s)` followed by any of the assignment or sampling functions returns what randomizr 1.0.1 returned for that seed, so pre-registrations, replication scripts, and archived analyses that pinned a seed are unaffected by upgrading.
