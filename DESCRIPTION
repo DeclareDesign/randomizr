@@ -10,7 +10,8 @@ Description: Generates random assignments for common experimental designs and
 URL: https://declaredesign.org/r/randomizr/, https://github.com/DeclareDesign/randomizr
 BugReports: https://github.com/DeclareDesign/randomizr/issues
 Imports:
-    Rcpp
+    Rcpp,
+    stats
 LinkingTo:
     Rcpp
 Depends:
@@ -24,4 +25,4 @@ Suggests:
     testthat,
     rmarkdown
 VignetteBuilder: knitr
-RoxygenNote: 7.3.3
+Config/roxygen2/version: 8.0.0

@@ -1,3 +1,13 @@
+> **You are on the `rewrite` branch.** This is the 2.0 rewrite of randomizr, not the CRAN package and not `main`. The released randomizr is unaffected by anything here.
+>
+> Its exported API is byte-identical to the released package's, 29 exports either way, nothing added and nothing removed, so existing code runs unchanged. Internally it adds an Rcpp Knuth-shuffle fast path for two-arm block assignment, declaration caching, and `mget`-based S3 dispatch.
+>
+> ```r
+> remotes::install_github("DeclareDesign/randomizr@rewrite")
+> ```
+>
+> Sibling branches: `DeclareDesign/fabricatr@rewrite`, `DeclareDesign/estimatr@rewrite`, `DeclareDesign/DeclareDesign@rewrite`.
+
 randomizr: Tools for random assignment and random sampling
 ================
 
