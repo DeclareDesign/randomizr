@@ -26,3 +26,4 @@ CONDUCT.md
 ^codecov\.yml$
 ^notes$
 ^revdep$
+^\.git$
