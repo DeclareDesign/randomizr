@@ -1,11 +1,16 @@
 #' Random assignment with heterogeneous probabilities
 #'
-#' \strong{Experimental.} `prob_ra` assigns units to conditions when the
+#' \strong{Experimental.} `balanced_ra` assigns units to conditions when the
 #' probability of assignment varies from unit to unit, holding the number
 #' assigned to each condition as close to its target as arithmetic allows. It
 #' fills the gap between [simple_ra()], which honours unit-varying probabilities
 #' but lets the number treated wander, and [complete_ra()], which fixes the
 #' number treated but requires every unit to share the same probability.
+#'
+#' The "balanced" in the name is balanced sampling in the sense of Deville and
+#' Tillé (2004), meaning that the realised counts are held against their
+#' targets. It does not refer to covariate balance, which is a different idea
+#' and not what this function does.
 #'
 #' Two situations motivate it, both due to Macartan Humphreys, whose `probra`
 #' package is the origin of this function.
@@ -42,7 +47,7 @@
 #' With `blocks`, the tight counts are the within-block ones, which is the
 #' blocked design generalised to unequal probabilities. Without `blocks`, the
 #' tight counts are the overall ones. Both cannot be guaranteed at once in
-#' general, so `prob_ra` guarantees whichever the call asks for.
+#' general, so `balanced_ra` guarantees whichever the call asks for.
 #'
 #' With `clusters`, the assignment happens at the cluster level and the counts
 #' held tight are counts of clusters. Clusters of unequal size therefore give a
@@ -63,8 +68,8 @@
 #' @section Experimental:
 #' This function is new in randomizr 2.0.0 and its interface may change. It does
 #' not yet participate in [declare_ra()], so [conduct_ra()] and
-#' [obtain_condition_probabilities()] do not accept a `prob_ra` design. Use
-#' `prob_ra_probabilities()` to recover assignment probabilities.
+#' [obtain_condition_probabilities()] do not accept a `balanced_ra` design. Use
+#' `balanced_ra_probabilities()` to recover assignment probabilities.
 #'
 #' @param prob_unit A numeric vector of length N giving each unit's probability
 #'   of assignment to treatment, for a two-arm design. Unlike elsewhere in
@@ -92,54 +97,54 @@
 #' Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube
 #' method. \emph{Biometrika} 91(4), 893-912.
 #'
-#' @seealso \code{\link{prob_ra_probabilities}}, \code{\link{complete_ra}},
+#' @seealso \code{\link{balanced_ra_probabilities}}, \code{\link{complete_ra}},
 #'   \code{\link{block_ra}}, \code{\link{simple_ra}}
 #'
 #' @examples
 #' # A race between contestants with unequal chances, in which exactly one wins
 #' # because the chances sum to 1.
 #' chances <- c(0.5, 0.3, 0.15, 0.05)
-#' winners <- replicate(1000, which(prob_ra(prob_unit = chances) == 1))
+#' winners <- replicate(1000, which(balanced_ra(prob_unit = chances) == 1))
 #' table(winners) / 1000     # close to chances
 #'
 #' # Unequal probabilities, two arms, with the number treated held tight.
 #' p <- c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5)
-#' Z <- prob_ra(prob_unit = p)
+#' Z <- balanced_ra(prob_unit = p)
 #' table(Z)
 #'
 #' # Repeating the draw: probabilities are honoured, and exactly 3 are treated
 #' # every time because the probabilities sum to 3.
-#' reps <- replicate(1000, prob_ra(prob_unit = p))
+#' reps <- replicate(1000, balanced_ra(prob_unit = p))
 #' rowMeans(reps)          # close to p
 #' table(colSums(reps))    # always 3
 #'
 #' # Two districts of three villages, three to be treated, blocked by district.
 #' # The per-district target is 1.5, so each district gets one or two.
 #' districts <- rep(c("north", "south"), each = 3)
-#' reps <- replicate(1000, prob_ra(prob_unit = rep(0.5, 6), blocks = districts))
+#' reps <- replicate(1000, balanced_ra(prob_unit = rep(0.5, 6), blocks = districts))
 #' table(colSums(reps[districts == "north", ]))
 #'
 #' # Three arms with unit-varying probabilities.
 #' P <- cbind(c(.15, .47), c(.65, .48), c(.20, .05))
-#' table(replicate(1000, prob_ra(prob_unit_each = P))[1, ])
+#' table(replicate(1000, balanced_ra(prob_unit_each = P))[1, ])
 #'
 #' # Whole clusters assigned together, with unequal cluster probabilities. The
 #' # number of treated clusters is fixed; the number of treated units is not,
 #' # because the clusters differ in size.
 #' clusters <- rep(1:6, times = c(3, 1, 4, 2, 5, 3))
 #' p_cluster <- c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5)
-#' Z <- prob_ra(prob_unit = p_cluster[clusters], clusters = clusters)
+#' Z <- balanced_ra(prob_unit = p_cluster[clusters], clusters = clusters)
 #' table(clusters, Z)
 #'
 #' # Blocks and clusters together: a tight number of treated clusters in each
 #' # block.
 #' blocks <- ifelse(clusters <= 3, "east", "west")
-#' Z <- prob_ra(prob_unit = rep(0.5, length(clusters)),
+#' Z <- balanced_ra(prob_unit = rep(0.5, length(clusters)),
 #'              clusters = clusters, blocks = blocks)
 #' table(blocks, Z)
 #'
 #' @export
-prob_ra <- function(prob_unit = NULL,
+balanced_ra <- function(prob_unit = NULL,
                     prob_unit_each = NULL,
                     blocks = NULL,
                     clusters = NULL,
@@ -148,7 +153,7 @@ prob_ra <- function(prob_unit = NULL,
                     conditions = NULL,
                     check_inputs = TRUE) {
 
-  P <- prob_ra_matrix(prob_unit, prob_unit_each, blocks, clusters, N, num_arms,
+  P <- balanced_ra_matrix(prob_unit, prob_unit_each, blocks, clusters, N, num_arms,
                       check_inputs)
   Z <- if (is.null(clusters)) cube_assign(P, blocks) else
     cube_assign_clusters(P, clusters, blocks)
@@ -168,7 +173,7 @@ prob_ra <- function(prob_unit = NULL,
 #' Probabilities of assignment: heterogeneous-probability random assignment
 #'
 #' \strong{Experimental.} Returns the probability that each unit is assigned to
-#' each condition under [prob_ra()]. Because those probabilities are supplied by
+#' each condition under [balanced_ra()]. Because those probabilities are supplied by
 #' the caller rather than derived from a design, this function mainly validates
 #' and normalises them into the matrix form the other `_probabilities` functions
 #' return.
@@ -176,14 +181,14 @@ prob_ra <- function(prob_unit = NULL,
 #' These are the quantities inverse-probability weights are built from: weight
 #' each unit by the reciprocal of the probability of the condition it landed in.
 #'
-#' @inheritParams prob_ra
+#' @inheritParams balanced_ra
 #' @return A matrix of probabilities of assignment, one row per unit and one
 #'   column per condition, with columns named `prob_<condition>`.
-#' @seealso \code{\link{prob_ra}}
+#' @seealso \code{\link{balanced_ra}}
 #' @examples
-#' prob_ra_probabilities(prob_unit = c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5))
+#' balanced_ra_probabilities(prob_unit = c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5))
 #' @export
-prob_ra_probabilities <- function(prob_unit = NULL,
+balanced_ra_probabilities <- function(prob_unit = NULL,
                                   prob_unit_each = NULL,
                                   blocks = NULL,
                                   clusters = NULL,
@@ -191,7 +196,7 @@ prob_ra_probabilities <- function(prob_unit = NULL,
                                   num_arms = NULL,
                                   conditions = NULL,
                                   check_inputs = TRUE) {
-  P <- prob_ra_matrix(prob_unit, prob_unit_each, blocks, clusters, N, num_arms,
+  P <- balanced_ra_matrix(prob_unit, prob_unit_each, blocks, clusters, N, num_arms,
                       check_inputs)
   k <- ncol(P)
   if (is.null(conditions)) {
@@ -208,7 +213,7 @@ prob_ra_probabilities <- function(prob_unit = NULL,
 #'
 #' @keywords internal
 #' @noRd
-prob_ra_matrix <- function(prob_unit, prob_unit_each, blocks, clusters, N,
+balanced_ra_matrix <- function(prob_unit, prob_unit_each, blocks, clusters, N,
                            num_arms, check_inputs = TRUE) {
   if (is.null(prob_unit) && is.null(prob_unit_each)) {
     stop("Supply either `prob_unit` (two arms) or `prob_unit_each` (multiple arms).")

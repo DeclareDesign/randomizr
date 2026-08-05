@@ -1,6 +1,6 @@
 library(randomizr)
 
-# prob_ra guarantees three things at once, and each is a per-draw property, so
+# balanced_ra guarantees three things at once, and each is a per-draw property, so
 # every draw is a test of the first two. The marginals need repetition.
 #
 #   1. every unit gets exactly one condition
@@ -27,14 +27,14 @@ draw_int <- function(P, blocks = NULL, S = 2000) {
   # matrix() rather than bare replicate(): with a single unit, replicate drops
   # the dimension and returns a vector, which silently breaks apply() below.
   matrix(replicate(S, as.integer(as.character(
-    prob_ra(prob_unit_each = P, blocks = blocks, conditions = cond)))),
+    balanced_ra(prob_unit_each = P, blocks = blocks, conditions = cond)))),
     nrow = nrow(P))
 }
 
 test_that("two arms with unit-varying probabilities: exact marginals, fixed total", {
   set.seed(1)
   p <- c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5)     # sums to 3
-  r <- replicate(3000, prob_ra(prob_unit = p))
+  r <- replicate(3000, balanced_ra(prob_unit = p))
   expect_true(all(r %in% c(0, 1)))
   expect_true(all(colSums(r) == 3))         # tight, and the sum is an integer
   expect_equal(rowMeans(r), p, tolerance = 0.03)
@@ -42,18 +42,18 @@ test_that("two arms with unit-varying probabilities: exact marginals, fixed tota
 
 test_that("a scalar prob_unit takes its length from N, blocks or clusters", {
   set.seed(1)
-  expect_length(prob_ra(prob_unit = 0.5, N = 10), 10)
-  expect_length(prob_ra(prob_unit = 0.5, blocks = rep(1:2, each = 5)), 10)
-  expect_length(prob_ra(prob_unit = 0.5, clusters = rep(1:5, each = 2)), 10)
+  expect_length(balanced_ra(prob_unit = 0.5, N = 10), 10)
+  expect_length(balanced_ra(prob_unit = 0.5, blocks = rep(1:2, each = 5)), 10)
+  expect_length(balanced_ra(prob_unit = 0.5, clusters = rep(1:5, each = 2)), 10)
   # the call that errored in the original probra
-  expect_error(prob_ra(prob_unit = 0.5), "supply `N`, `blocks` or `clusters`")
+  expect_error(balanced_ra(prob_unit = 0.5), "supply `N`, `blocks` or `clusters`")
 })
 
 test_that("blocked assignment is tight within every block", {
   set.seed(2)
   # Macartan's example: two districts of three, three treated, target 1.5 each.
   districts <- rep(c("north", "south"), each = 3)
-  r <- replicate(2000, prob_ra(prob_unit = rep(0.5, 6), blocks = districts))
+  r <- replicate(2000, balanced_ra(prob_unit = rep(0.5, 6), blocks = districts))
   north <- colSums(r[districts == "north", ])
   south <- colSums(r[districts == "south", ])
   expect_true(all(north %in% 1:2))          # never 0, never 3
@@ -64,7 +64,7 @@ test_that("blocked assignment is tight within every block", {
 test_that("multi-arm counts are tight, which the sequential method could not do", {
   set.seed(3)
   # The case Macartan flagged as problematic. Arm 2 expects 1.13 units, so it
-  # must always receive 1 or 2. The original prob_ra returned 0 about 12% of
+  # must always receive 1 or 2. The original balanced_ra returned 0 about 12% of
   # the time.
   P <- cbind(c(.15, .47), c(.65, .48), c(.20, .05))
   Z <- draw_int(P, S = 3000)
@@ -103,31 +103,31 @@ test_that("blocked multi-arm is tight per block and per arm at once", {
 })
 
 test_that("invalid probabilities are refused, which probra accepted", {
-  expect_error(prob_ra(prob_unit = c(-0.5, 0.5, 1)), "between 0 and 1")
-  expect_error(prob_ra(prob_unit = c(0.5, 2, 0.5)), "between 0 and 1")
-  expect_error(prob_ra(prob_unit = c(0.5, NA, 0.5)), "must not be missing")
-  expect_error(prob_ra(prob_unit_each = cbind(c(.5, .5), c(.2, .2))), "sum to 1")
-  expect_error(prob_ra(), "Supply either")
-  expect_error(prob_ra(prob_unit = 0.5, prob_unit_each = matrix(.5, 2, 2)),
+  expect_error(balanced_ra(prob_unit = c(-0.5, 0.5, 1)), "between 0 and 1")
+  expect_error(balanced_ra(prob_unit = c(0.5, 2, 0.5)), "between 0 and 1")
+  expect_error(balanced_ra(prob_unit = c(0.5, NA, 0.5)), "must not be missing")
+  expect_error(balanced_ra(prob_unit_each = cbind(c(.5, .5), c(.2, .2))), "sum to 1")
+  expect_error(balanced_ra(), "Supply either")
+  expect_error(balanced_ra(prob_unit = 0.5, prob_unit_each = matrix(.5, 2, 2)),
                "only one of")
-  expect_error(prob_ra(prob_unit = c(.5, .5), blocks = c(1, 2, 3)), "`blocks` has length")
+  expect_error(balanced_ra(prob_unit = c(.5, .5), blocks = c(1, 2, 3)), "`blocks` has length")
 })
 
 test_that("conditions are named and typed like the rest of the package", {
   set.seed(6)
-  z <- prob_ra(prob_unit = rep(0.5, 6))
+  z <- balanced_ra(prob_unit = rep(0.5, 6))
   expect_true(is.numeric(z))
   expect_setequal(unique(z), c(0, 1))
-  z2 <- prob_ra(prob_unit = rep(0.5, 6), conditions = c("control", "treatment"))
+  z2 <- balanced_ra(prob_unit = rep(0.5, 6), conditions = c("control", "treatment"))
   expect_true(all(as.character(z2) %in% c("control", "treatment")))
   P <- matrix(1/3, 6, 3)
-  z3 <- prob_ra(prob_unit_each = P)
+  z3 <- balanced_ra(prob_unit_each = P)
   expect_true(all(as.character(z3) %in% c("T1", "T2", "T3")))
 })
 
-test_that("prob_ra_probabilities returns the supplied probabilities", {
+test_that("balanced_ra_probabilities returns the supplied probabilities", {
   p <- c(0.2, 0.4, 0.6)
-  M <- prob_ra_probabilities(prob_unit = p)
+  M <- balanced_ra_probabilities(prob_unit = p)
   expect_equal(colnames(M), c("prob_0", "prob_1"))
   expect_equal(M[, "prob_1"], p)
   expect_equal(rowSums(M), rep(1, 3))
@@ -141,7 +141,7 @@ test_that("whole clusters move together and the cluster count is tight", {
   set.seed(11)
   clusters <- rep(1:8, times = c(3, 1, 4, 2, 5, 2, 3, 4))
   pc <- c(.2, .4, .6, .8, .5, .5, .3, .7)          # per cluster, sums to 4
-  r <- replicate(2000, prob_ra(prob_unit = pc[clusters], clusters = clusters))
+  r <- replicate(2000, balanced_ra(prob_unit = pc[clusters], clusters = clusters))
   expect_true(all(apply(r, 2, function(z)
     all(tapply(z, factor(clusters), function(v) length(unique(v))) == 1))))
   expect_true(all(apply(r, 2, cl_counts, clusters = clusters) == 4))
@@ -153,7 +153,7 @@ test_that("blocks and clusters work at the same time", {
   set.seed(12)
   clusters <- rep(1:8, times = c(3, 1, 4, 2, 5, 2, 3, 4))
   blocks <- ifelse(clusters <= 4, "east", "west")
-  r <- replicate(1500, prob_ra(prob_unit = rep(0.5, length(clusters)),
+  r <- replicate(1500, balanced_ra(prob_unit = rep(0.5, length(clusters)),
                                clusters = clusters, blocks = blocks))
   east <- apply(r, 2, function(z) cl_counts(z[blocks == "east"], clusters[blocks == "east"]))
   west <- apply(r, 2, function(z) cl_counts(z[blocks == "west"], clusters[blocks == "west"]))
@@ -171,7 +171,7 @@ test_that("blocks, clusters and multiple arms combine", {
               c(.5,.3,.4,.2,.4,.4,.3,.5),
               c(.3,.2,.3,.2,.2,.3,.2,.3))
   P <- Pc[clusters, ]
-  r <- replicate(1200, prob_ra(prob_unit_each = P, clusters = clusters,
+  r <- replicate(1200, balanced_ra(prob_unit_each = P, clusters = clusters,
                                blocks = blocks, conditions = 1:3))
   for (b in c("east", "west")) for (j in 1:3) {
     tgt <- sum(Pc[unique(clusters[blocks == b]), j])
@@ -185,14 +185,14 @@ test_that("blocks, clusters and multiple arms combine", {
 test_that("clusters that break the rules are refused", {
   clusters <- rep(1:3, each = 2)
   # probabilities must be constant within a cluster
-  expect_error(prob_ra(prob_unit = c(.2, .8, .5, .5, .5, .5), clusters = clusters),
+  expect_error(balanced_ra(prob_unit = c(.2, .8, .5, .5, .5, .5), clusters = clusters),
                "same for every unit in a cluster")
   # clusters must nest inside blocks
-  expect_error(prob_ra(prob_unit = rep(0.5, 6), clusters = clusters,
+  expect_error(balanced_ra(prob_unit = rep(0.5, 6), clusters = clusters,
                        blocks = c("a", "b", "a", "a", "b", "b")),
                "entirely inside one block")
-  expect_error(prob_ra(prob_unit = rep(0.5, 6), clusters = rep(1:2, each = 2)),
+  expect_error(balanced_ra(prob_unit = rep(0.5, 6), clusters = rep(1:2, each = 2)),
                "`clusters` has length")
   # a scalar probability can take its length from clusters
-  expect_length(prob_ra(prob_unit = 0.5, clusters = clusters), 6)
+  expect_length(balanced_ra(prob_unit = 0.5, clusters = clusters), 6)
 })
