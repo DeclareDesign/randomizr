@@ -62,6 +62,14 @@ probs <- obtain_condition_probabilities(declaration, Z)
 table(probs)
 
 }
+\references{
+Blair, G., Cooper, J., Coppock, A. and Humphreys, M. (2019). Declaring and
+Diagnosing Research Designs. \emph{American Political Science Review} 113(3),
+838-859. \doi{10.1017/S0003055419000194}
+
+Gerber, A. S. and Green, D. P. (2012). \emph{Field Experiments: Design,
+Analysis, and Interpretation}. New York: W. W. Norton.
+}
 \seealso{
 Useful links:
 \itemize{

@@ -16,6 +16,10 @@
 #' @return a vector of probabilities
 #' @export
 #'
+#' @references
+#' Andrews, G. E. (1976). \emph{The Theory of Partitions}. Encyclopedia of
+#' Mathematics and its Applications, Volume 2. Reading, MA: Addison-Wesley.
+#'
 #' @examples
 #'
 #' declaration <- declare_ra(N = 5, prob_each = c(.49, .51))

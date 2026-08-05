@@ -86,6 +86,14 @@ When no cycle remains it moves along a path instead, which disturbs only the
 two conditions at the ends. Each move is a fair bet, so the probability of
 any unit landing in any condition is exactly what was asked for, and the
 process stops at a genuine assignment rather than a rounded one.
+
+Each number of conditions takes the route suited to it. With two, the state
+is a single vector, and the move reduces to picking two units in the same
+block and shifting mass from one to the other, which is the pivotal method of
+Deville and Tillé (1998). With three or more, the algorithm carries a working
+set of as many units as there are conditions, which is always enough to
+contain a cycle, and refills it as units settle; that is the fast cube
+algorithm of Chauvet and Tillé (2006) in the form this problem takes.
 }
 
 \section{What is guaranteed}{
@@ -172,7 +180,15 @@ table(blocks, Z)
 }
 \references{
 Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube
-method. \emph{Biometrika} 91(4), 893-912.
+method. \emph{Biometrika} 91(4), 893-912. \doi{10.1093/biomet/91.4.893}
+
+Deville, J.-C. and Tillé, Y. (1998). Unequal probability sampling without
+replacement through a splitting method. \emph{Biometrika} 85(1), 89-101.
+\doi{10.1093/biomet/85.1.89}
+
+Chauvet, G. and Tillé, Y. (2006). A fast algorithm for balanced sampling.
+\emph{Computational Statistics} 21(1), 53-62.
+\doi{10.1007/s00180-006-0250-2}
 }
 \seealso{
 \code{\link{balanced_ra_probabilities}}, \code{\link{complete_ra}},

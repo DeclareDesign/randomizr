@@ -17,6 +17,10 @@
 #' @importFrom utils combn
 #' @export
 #'
+#' @references
+#' Andrews, G. E. (1976). \emph{The Theory of Partitions}. Encyclopedia of
+#' Mathematics and its Applications, Volume 2. Reading, MA: Addison-Wesley.
+#'
 #' @examples
 #'
 #' # complete

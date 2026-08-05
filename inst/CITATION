@@ -1,0 +1,32 @@
+if (!exists("meta") || is.null(meta)) meta <- packageDescription("randomizr")
+
+citHeader(
+  "To cite randomizr in a publication, cite the package itself. The design ",
+  "framework it belongs to is described in Blair et al. (2019). The algorithms ",
+  "behind particular functions are cited on their own help pages; see ",
+  "?balanced_ra in particular."
+)
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "randomizr: Easy-to-Use Tools for Common Forms of Random Assignment and Sampling",
+  author   = person("Alexander", "Coppock"),
+  year     = "2026",
+  note     = paste("R package version", meta$Version),
+  url      = "https://declaredesign.org/r/randomizr/"
+)
+
+bibentry(
+  bibtype  = "Article",
+  title    = "Declaring and Diagnosing Research Designs",
+  author   = c(person("Graeme", "Blair"),
+               person("Jasper", "Cooper"),
+               person("Alexander", "Coppock"),
+               person("Macartan", "Humphreys")),
+  journal  = "American Political Science Review",
+  year     = "2019",
+  volume   = "113",
+  number   = "3",
+  pages    = "838--859",
+  doi      = "10.1017/S0003055419000194"
+)

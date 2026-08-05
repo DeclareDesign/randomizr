@@ -37,6 +37,10 @@ rowMeans(perms)
 perms \%*\% perm_probs
 
 }
+\references{
+Andrews, G. E. (1976). \emph{The Theory of Partitions}. Encyclopedia of
+Mathematics and its Applications, Volume 2. Reading, MA: Addison-Wesley.
+}
 \seealso{
 \code{\link{obtain_permutation_matrix}},
   \code{\link{obtain_num_permutations}}
