@@ -44,6 +44,12 @@
 #' tight counts are the overall ones. Both cannot be guaranteed at once in
 #' general, so `prob_ra` guarantees whichever the call asks for.
 #'
+#' With `clusters`, the assignment happens at the cluster level and the counts
+#' held tight are counts of clusters. Clusters of unequal size therefore give a
+#' fixed number of treated clusters and a varying number of treated units, which
+#' is how [cluster_ra()] behaves. `blocks` and `clusters` combine, giving a tight
+#' number of treated clusters within each block.
+#'
 #' @section Experimental:
 #' This function is new in randomizr 2.0.0 and its interface may change. It does
 #' not yet participate in [declare_ra()], so [conduct_ra()] and
@@ -59,6 +65,11 @@
 #'   condition, for a multi-arm design. Rows must sum to 1.
 #' @param blocks A vector of length N indicating which block each unit belongs
 #'   to. When supplied, counts are held tight within each block.
+#' @param clusters A vector of length N indicating which cluster each unit
+#'   belongs to. Whole clusters are assigned together, so the probabilities must
+#'   be the same for every unit in a cluster, and the tight counts become counts
+#'   of clusters rather than of units. May be combined with `blocks`, in which
+#'   case every cluster must sit entirely inside one block.
 #' @param N The number of units. Inferred from the other arguments when omitted.
 #' @param num_arms The number of treatment arms. Inferred when omitted.
 #' @param conditions A vector giving the names of the conditions.
@@ -102,17 +113,35 @@
 #' P <- cbind(c(.15, .47), c(.65, .48), c(.20, .05))
 #' table(replicate(1000, prob_ra(prob_unit_each = P))[1, ])
 #'
+#' # Whole clusters assigned together, with unequal cluster probabilities. The
+#' # number of treated clusters is fixed; the number of treated units is not,
+#' # because the clusters differ in size.
+#' clusters <- rep(1:6, times = c(3, 1, 4, 2, 5, 3))
+#' p_cluster <- c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5)
+#' Z <- prob_ra(prob_unit = p_cluster[clusters], clusters = clusters)
+#' table(clusters, Z)
+#'
+#' # Blocks and clusters together: a tight number of treated clusters in each
+#' # block.
+#' blocks <- ifelse(clusters <= 3, "east", "west")
+#' Z <- prob_ra(prob_unit = rep(0.5, length(clusters)),
+#'              clusters = clusters, blocks = blocks)
+#' table(blocks, Z)
+#'
 #' @export
 prob_ra <- function(prob_unit = NULL,
                     prob_unit_each = NULL,
                     blocks = NULL,
+                    clusters = NULL,
                     N = NULL,
                     num_arms = NULL,
                     conditions = NULL,
                     check_inputs = TRUE) {
 
-  P <- prob_ra_matrix(prob_unit, prob_unit_each, blocks, N, num_arms, check_inputs)
-  Z <- cube_assign(P, blocks)
+  P <- prob_ra_matrix(prob_unit, prob_unit_each, blocks, clusters, N, num_arms,
+                      check_inputs)
+  Z <- if (is.null(clusters)) cube_assign(P, blocks) else
+    cube_assign_clusters(P, clusters, blocks)
   k <- ncol(P)
 
   if (is.null(conditions)) {
@@ -147,11 +176,13 @@ prob_ra <- function(prob_unit = NULL,
 prob_ra_probabilities <- function(prob_unit = NULL,
                                   prob_unit_each = NULL,
                                   blocks = NULL,
+                                  clusters = NULL,
                                   N = NULL,
                                   num_arms = NULL,
                                   conditions = NULL,
                                   check_inputs = TRUE) {
-  P <- prob_ra_matrix(prob_unit, prob_unit_each, blocks, N, num_arms, check_inputs)
+  P <- prob_ra_matrix(prob_unit, prob_unit_each, blocks, clusters, N, num_arms,
+                      check_inputs)
   k <- ncol(P)
   if (is.null(conditions)) {
     conditions <- if (k == 2 && is.null(prob_unit_each)) c(0, 1) else paste0("T", seq_len(k))
@@ -167,8 +198,8 @@ prob_ra_probabilities <- function(prob_unit = NULL,
 #'
 #' @keywords internal
 #' @noRd
-prob_ra_matrix <- function(prob_unit, prob_unit_each, blocks, N, num_arms,
-                           check_inputs = TRUE) {
+prob_ra_matrix <- function(prob_unit, prob_unit_each, blocks, clusters, N,
+                           num_arms, check_inputs = TRUE) {
   if (is.null(prob_unit) && is.null(prob_unit_each)) {
     stop("Supply either `prob_unit` (two arms) or `prob_unit_each` (multiple arms).")
   }
@@ -182,10 +213,11 @@ prob_ra_matrix <- function(prob_unit, prob_unit_each, blocks, N, num_arms,
   } else {
     if (!is.numeric(prob_unit)) stop("`prob_unit` must be numeric.")
     if (length(prob_unit) == 1L) {
-      n <- N %||% (if (!is.null(blocks)) length(blocks) else NULL)
+      n <- N %||% (if (!is.null(blocks)) length(blocks)
+                   else if (!is.null(clusters)) length(clusters) else NULL)
       if (is.null(n)) {
-        stop("With a scalar `prob_unit`, supply `N` or `blocks` so the number ",
-             "of units is known.")
+        stop("With a scalar `prob_unit`, supply `N`, `blocks` or `clusters` ",
+             "so the number of units is known.")
       }
       prob_unit <- rep(prob_unit, n)
     }
@@ -212,8 +244,45 @@ prob_ra_matrix <- function(prob_unit, prob_unit_each, blocks, N, num_arms,
            ncol(P), " conditions.")
     }
     if (nrow(P) < 1L) stop("There must be at least one unit.")
+    if (!is.null(clusters)) {
+      if (length(clusters) != nrow(P)) {
+        stop("`clusters` has length ", length(clusters), " but the ",
+             "probabilities describe ", nrow(P), " units.")
+      }
+      cl <- factor(clusters)
+      spread <- max(vapply(seq_len(ncol(P)), function(j)
+        max(tapply(P[, j], cl, function(v) diff(range(v)))), numeric(1)))
+      if (spread > 1e-9) {
+        stop("Assignment probabilities must be the same for every unit in a ",
+             "cluster, since a cluster is assigned as a whole.")
+      }
+      if (!is.null(blocks)) {
+        nb <- tapply(as.character(blocks), cl, function(v) length(unique(v)))
+        if (any(nb > 1L)) {
+          stop("Each cluster must sit entirely inside one block. Clusters ",
+               "spanning blocks: ", paste(names(nb)[nb > 1L], collapse = ", "), ".")
+        }
+      }
+    }
   }
   P
+}
+
+#' Assign whole clusters
+#'
+#' Collapse to one row per cluster, assign at the cluster level, expand back.
+#' The probabilities are constant within a cluster by the time this is reached,
+#' so the first row of each cluster speaks for it.
+#'
+#' @keywords internal
+#' @noRd
+cube_assign_clusters <- function(P, clusters, blocks = NULL, tol = 1e-12) {
+  cl <- factor(clusters)
+  first <- match(levels(cl), as.character(cl))
+  Pc <- P[first, , drop = FALSE]
+  bc <- if (is.null(blocks)) NULL else blocks[first]
+  Zc <- cube_assign(Pc, bc, tol)
+  Zc[as.integer(cl), , drop = FALSE]
 }
 
 #' Cube-method flight and landing on the transportation polytope

@@ -8,6 +8,7 @@ prob_ra_probabilities(
   prob_unit = NULL,
   prob_unit_each = NULL,
   blocks = NULL,
+  clusters = NULL,
   N = NULL,
   num_arms = NULL,
   conditions = NULL,
@@ -26,6 +27,12 @@ condition, for a multi-arm design. Rows must sum to 1.}
 
 \item{blocks}{A vector of length N indicating which block each unit belongs
 to. When supplied, counts are held tight within each block.}
+
+\item{clusters}{A vector of length N indicating which cluster each unit
+belongs to. Whole clusters are assigned together, so the probabilities must
+be the same for every unit in a cluster, and the tight counts become counts
+of clusters rather than of units. May be combined with `blocks`, in which
+case every cluster must sit entirely inside one block.}
 
 \item{N}{The number of units. Inferred from the other arguments when omitted.}
 

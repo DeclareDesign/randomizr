@@ -8,6 +8,7 @@ prob_ra(
   prob_unit = NULL,
   prob_unit_each = NULL,
   blocks = NULL,
+  clusters = NULL,
   N = NULL,
   num_arms = NULL,
   conditions = NULL,
@@ -26,6 +27,12 @@ condition, for a multi-arm design. Rows must sum to 1.}
 
 \item{blocks}{A vector of length N indicating which block each unit belongs
 to. When supplied, counts are held tight within each block.}
+
+\item{clusters}{A vector of length N indicating which cluster each unit
+belongs to. Whole clusters are assigned together, so the probabilities must
+be the same for every unit in a cluster, and the tight counts become counts
+of clusters rather than of units. May be combined with `blocks`, in which
+case every cluster must sit entirely inside one block.}
 
 \item{N}{The number of units. Inferred from the other arguments when omitted.}
 
@@ -87,6 +94,12 @@ With `blocks`, the tight counts are the within-block ones, which is the
 blocked design generalised to unequal probabilities. Without `blocks`, the
 tight counts are the overall ones. Both cannot be guaranteed at once in
 general, so `prob_ra` guarantees whichever the call asks for.
+
+With `clusters`, the assignment happens at the cluster level and the counts
+held tight are counts of clusters. Clusters of unequal size therefore give a
+fixed number of treated clusters and a varying number of treated units, which
+is how [cluster_ra()] behaves. `blocks` and `clusters` combine, giving a tight
+number of treated clusters within each block.
 }
 
 \section{Experimental}{
@@ -124,6 +137,21 @@ table(colSums(reps[districts == "north", ]))
 # Three arms with unit-varying probabilities.
 P <- cbind(c(.15, .47), c(.65, .48), c(.20, .05))
 table(replicate(1000, prob_ra(prob_unit_each = P))[1, ])
+
+# Whole clusters assigned together, with unequal cluster probabilities. The
+# number of treated clusters is fixed; the number of treated units is not,
+# because the clusters differ in size.
+clusters <- rep(1:6, times = c(3, 1, 4, 2, 5, 3))
+p_cluster <- c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5)
+Z <- prob_ra(prob_unit = p_cluster[clusters], clusters = clusters)
+table(clusters, Z)
+
+# Blocks and clusters together: a tight number of treated clusters in each
+# block.
+blocks <- ifelse(clusters <= 3, "east", "west")
+Z <- prob_ra(prob_unit = rep(0.5, length(clusters)),
+             clusters = clusters, blocks = blocks)
+table(blocks, Z)
 
 }
 \references{

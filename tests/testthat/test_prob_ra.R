@@ -40,12 +40,13 @@ test_that("two arms with unit-varying probabilities: exact marginals, fixed tota
   expect_equal(rowMeans(r), p, tolerance = 0.03)
 })
 
-test_that("a scalar prob_unit works when N or blocks says how many units", {
+test_that("a scalar prob_unit takes its length from N, blocks or clusters", {
   set.seed(1)
   expect_length(prob_ra(prob_unit = 0.5, N = 10), 10)
   expect_length(prob_ra(prob_unit = 0.5, blocks = rep(1:2, each = 5)), 10)
+  expect_length(prob_ra(prob_unit = 0.5, clusters = rep(1:5, each = 2)), 10)
   # the call that errored in the original probra
-  expect_error(prob_ra(prob_unit = 0.5), "supply `N` or `blocks`")
+  expect_error(prob_ra(prob_unit = 0.5), "supply `N`, `blocks` or `clusters`")
 })
 
 test_that("blocked assignment is tight within every block", {
@@ -130,4 +131,68 @@ test_that("prob_ra_probabilities returns the supplied probabilities", {
   expect_equal(colnames(M), c("prob_0", "prob_1"))
   expect_equal(M[, "prob_1"], p)
   expect_equal(rowSums(M), rep(1, 3))
+})
+
+# ---- clusters ----
+
+cl_counts <- function(z, clusters) sum(tapply(z, factor(clusters), function(v) v[1]))
+
+test_that("whole clusters move together and the cluster count is tight", {
+  set.seed(11)
+  clusters <- rep(1:8, times = c(3, 1, 4, 2, 5, 2, 3, 4))
+  pc <- c(.2, .4, .6, .8, .5, .5, .3, .7)          # per cluster, sums to 4
+  r <- replicate(2000, prob_ra(prob_unit = pc[clusters], clusters = clusters))
+  expect_true(all(apply(r, 2, function(z)
+    all(tapply(z, factor(clusters), function(v) length(unique(v))) == 1))))
+  expect_true(all(apply(r, 2, cl_counts, clusters = clusters) == 4))
+  expect_equal(rowMeans(r)[!duplicated(clusters)], pc, tolerance = 0.04,
+               ignore_attr = TRUE)
+})
+
+test_that("blocks and clusters work at the same time", {
+  set.seed(12)
+  clusters <- rep(1:8, times = c(3, 1, 4, 2, 5, 2, 3, 4))
+  blocks <- ifelse(clusters <= 4, "east", "west")
+  r <- replicate(1500, prob_ra(prob_unit = rep(0.5, length(clusters)),
+                               clusters = clusters, blocks = blocks))
+  east <- apply(r, 2, function(z) cl_counts(z[blocks == "east"], clusters[blocks == "east"]))
+  west <- apply(r, 2, function(z) cl_counts(z[blocks == "west"], clusters[blocks == "west"]))
+  expect_true(all(east == 2))                      # 4 clusters, target 2
+  expect_true(all(west == 2))
+  expect_true(all(apply(r, 2, function(z)
+    all(tapply(z, factor(clusters), function(v) length(unique(v))) == 1))))
+})
+
+test_that("blocks, clusters and multiple arms combine", {
+  set.seed(13)
+  clusters <- rep(1:8, times = c(3, 1, 4, 2, 5, 2, 3, 4))
+  blocks <- ifelse(clusters <= 4, "east", "west")
+  Pc <- cbind(c(.2,.5,.3,.6,.4,.3,.5,.2),
+              c(.5,.3,.4,.2,.4,.4,.3,.5),
+              c(.3,.2,.3,.2,.2,.3,.2,.3))
+  P <- Pc[clusters, ]
+  r <- replicate(1200, prob_ra(prob_unit_each = P, clusters = clusters,
+                               blocks = blocks, conditions = 1:3))
+  for (b in c("east", "west")) for (j in 1:3) {
+    tgt <- sum(Pc[unique(clusters[blocks == b]), j])
+    got <- apply(r, 2, function(z)
+      cl_counts(z[blocks == b] == as.character(j), clusters[blocks == b]))
+    expect_true(all(got >= floor(tgt) & got <= ceiling(tgt)))
+  }
+  expect_equal(as.numeric(table(r[1, ]) / ncol(r)), Pc[1, ], tolerance = 0.05)
+})
+
+test_that("clusters that break the rules are refused", {
+  clusters <- rep(1:3, each = 2)
+  # probabilities must be constant within a cluster
+  expect_error(prob_ra(prob_unit = c(.2, .8, .5, .5, .5, .5), clusters = clusters),
+               "same for every unit in a cluster")
+  # clusters must nest inside blocks
+  expect_error(prob_ra(prob_unit = rep(0.5, 6), clusters = clusters,
+                       blocks = c("a", "b", "a", "a", "b", "b")),
+               "entirely inside one block")
+  expect_error(prob_ra(prob_unit = rep(0.5, 6), clusters = rep(1:2, each = 2)),
+               "`clusters` has length")
+  # a scalar probability can take its length from clusters
+  expect_length(prob_ra(prob_unit = 0.5, clusters = clusters), 6)
 })
