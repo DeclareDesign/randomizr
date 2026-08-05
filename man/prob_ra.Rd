@@ -102,6 +102,18 @@ is how [cluster_ra()] behaves. `blocks` and `clusters` combine, giving a tight
 number of treated clusters within each block.
 }
 
+\section{Cost}{
+
+The two-arm case runs in time linear in the number of units, which is what
+makes it usable inside a simulation loop: 2,000 units in 50 blocks takes
+about a millisecond and a half per draw. Designs with three or more
+conditions use the general walk, which rebuilds its graph on each move and so
+grows faster than linearly: about 5 milliseconds per draw at 60 units and
+three arms, 0.23 seconds at 600 units and four arms. The fast cube algorithm
+of Chauvet and Tillé (2006) would make the multi-arm case linear too and is
+the obvious next step if that cost bites.
+}
+
 \section{Experimental}{
 
 This function is new in randomizr 2.0.0 and its interface may change. It does
