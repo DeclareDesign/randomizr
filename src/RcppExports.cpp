@@ -24,3 +24,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cube_two_arm_cpp
+NumericVector cube_two_arm_cpp(NumericVector p, IntegerVector b, IntegerVector ord, double tol);
+RcppExport SEXP _randomizr_cube_two_arm_cpp(SEXP pSEXP, SEXP bSEXP, SEXP ordSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type p(pSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type b(bSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type ord(ordSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(cube_two_arm_cpp(p, b, ord, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cube_multi_cpp
+NumericMatrix cube_multi_cpp(NumericMatrix P, IntegerVector b, IntegerVector ord, double tol);
+RcppExport SEXP _randomizr_cube_multi_cpp(SEXP PSEXP, SEXP bSEXP, SEXP ordSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type b(bSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type ord(ordSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(cube_multi_cpp(P, b, ord, tol));
+    return rcpp_result_gen;
+END_RCPP
+}

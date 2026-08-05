@@ -12,6 +12,8 @@ Three things hold at once, and all three are guaranteed rather than approached: 
 
 The assignment is drawn by the cube method of Deville and Tillé (2004), specialised to this problem. The function originates in Macartan Humphreys's `probra` package, which introduced the design and the two motivating examples in the documentation; the algorithm here is different, and holds the counts tight for any number of arms rather than for one.
 
+Both of `balanced_ra()`'s paths are linear in the number of units and written in C++: 2,000 units take about a quarter of a millisecond with two conditions and about 9 milliseconds with four.
+
 `balanced_ra()` is marked experimental: its interface may change, and it does not yet participate in `declare_ra()`, so `conduct_ra()` and `obtain_condition_probabilities()` do not accept a `balanced_ra` design.
 
 ## Reproducibility of randomizr 1.x seeds

@@ -109,14 +109,13 @@ number of treated clusters within each block.
 
 \section{Cost}{
 
-The two-arm case runs in time linear in the number of units, which is what
-makes it usable inside a simulation loop: 2,000 units in 50 blocks takes
-about a millisecond and a half per draw. Designs with three or more
-conditions use the general walk, which rebuilds its graph on each move and so
-grows faster than linearly: about 5 milliseconds per draw at 60 units and
-three arms, 0.23 seconds at 600 units and four arms. The fast cube algorithm
-of Chauvet and Tillé (2006) would make the multi-arm case linear too and is
-the obvious next step if that cost bites.
+Both paths are linear in the number of units and written in C++, so a draw is
+cheap enough to sit inside a simulation loop. With two conditions, 2,000
+units in 50 blocks take about a quarter of a millisecond and 10,000 units
+about 1.2 milliseconds. With three or more, 2,000 units in four conditions
+take about 9 milliseconds and 10,000 units about 46. Cost grows with roughly
+the square of the number of conditions, so ten conditions on 2,000 units run
+to about 58 milliseconds.
 }
 
 \section{Experimental}{

@@ -56,14 +56,13 @@
 #' number of treated clusters within each block.
 #'
 #' @section Cost:
-#' The two-arm case runs in time linear in the number of units, which is what
-#' makes it usable inside a simulation loop: 2,000 units in 50 blocks takes
-#' about a millisecond and a half per draw. Designs with three or more
-#' conditions use the general walk, which rebuilds its graph on each move and so
-#' grows faster than linearly: about 5 milliseconds per draw at 60 units and
-#' three arms, 0.23 seconds at 600 units and four arms. The fast cube algorithm
-#' of Chauvet and Tillé (2006) would make the multi-arm case linear too and is
-#' the obvious next step if that cost bites.
+#' Both paths are linear in the number of units and written in C++, so a draw is
+#' cheap enough to sit inside a simulation loop. With two conditions, 2,000
+#' units in 50 blocks take about a quarter of a millisecond and 10,000 units
+#' about 1.2 milliseconds. With three or more, 2,000 units in four conditions
+#' take about 9 milliseconds and 10,000 units about 46. Cost grows with roughly
+#' the square of the number of conditions, so ten conditions on 2,000 units run
+#' to about 58 milliseconds.
 #'
 #' @section Experimental:
 #' This function is new in randomizr 2.0.0 and its interface may change. It does
@@ -341,90 +340,16 @@ cube_assign_clusters <- function(P, clusters, blocks = NULL, tol = 1e-12) {
 #'
 #' @keywords internal
 #' @noRd
-cube_two_arm <- function(p, blocks = NULL, tol = 1e-12) {
-  n <- length(p)
-  z <- p
+cube_assign <- function(P, blocks = NULL, tol = 1e-12) {
+  n <- nrow(P)
   b <- if (is.null(blocks)) rep(1L, n) else as.integer(factor(blocks))
   ord <- sample.int(n)                    # the input order must not matter
-  u <- runif(n + 1L)
-  ui <- 0L
-  for (bl in unique(b)) {
-    idx <- ord[b[ord] == bl]
-    open <- NA_integer_
-    for (t in idx) {
-      if (z[t] <= tol || z[t] >= 1 - tol) next
-      if (is.na(open)) { open <- t; next }
-      i <- open; j <- t
-      du <- min(1 - z[i], z[j])
-      dd <- min(z[i], 1 - z[j])
-      ui <- ui + 1L
-      if (u[ui] < dd / (du + dd)) { z[i] <- z[i] + du; z[j] <- z[j] - du }
-      else                        { z[i] <- z[i] - dd; z[j] <- z[j] + dd }
-      open <- if (z[i] > tol && z[i] < 1 - tol) i else j
-      if (z[open] <= tol || z[open] >= 1 - tol) open <- NA_integer_
-    }
-    # At most one unit per block survives; rounding it fairly moves that block's
-    # count by less than one, so it stays floor-or-ceiling.
-    if (!is.na(open)) { ui <- ui + 1L; z[open] <- as.numeric(u[ui] < z[open]) }
-  }
-  round(z)
-}
-
-cube_assign <- function(P, blocks = NULL, tol = 1e-12) {
-  n <- nrow(P); k <- ncol(P)
   # Two conditions collapse to a single vector, where the walk has a linear-time
-  # form. See cube_two_arm().
-  if (k == 2L) {
-    z <- cube_two_arm(P[, 2L], blocks, tol)
+  # form. Both paths are in src/cube.cpp.
+  if (ncol(P) == 2L) {
+    z <- cube_two_arm_cpp(P[, 2L], b, ord, tol)
     return(cbind(1 - z, z))
   }
-  b <- if (is.null(blocks)) rep(1L, n) else as.integer(factor(blocks))
-  Z <- P
-  # Each move fixes at least one of the n * k cells, so this cannot spin.
-  for (iter in seq_len(n * k + 1L)) {
-    fr <- which(Z > tol & Z < 1 - tol, arr.ind = TRUE)
-    if (!nrow(fr)) break
-    nE <- nrow(fr)
-    rid <- n + (b[fr[, "row"]] - 1L) * k + fr[, "col"]
-    ends <- cbind(fr[, "row"], rid)
-    # split() rather than a double loop appending with c(): the loop copies the
-    # growing vector on every append, which made this the dominant cost.
-    nv <- n + max(b) * k
-    adj <- split(rep.int(seq_len(nE), 2L), factor(c(ends[, 1L], ends[, 2L]),
-                                                 levels = seq_len(nv)))
-    deg <- lengths(adj)
-    leaf <- which(deg == 1L)
-    leaf <- leaf[leaf > n]
-    v <- if (length(leaf)) leaf[1L] else ends[1L, 1L]
-
-    used <- logical(nE)                     # membership test instead of setdiff
-    seen <- integer(nv)                     # position of each node in the walk
-    vs <- integer(nE + 1L); vs[1L] <- v; seen[v] <- 1L
-    es <- integer(nE); ne <- 0L; cyc <- NULL
-    repeat {
-      cand <- adj[[v]]
-      cand <- cand[!used[cand]]
-      if (!length(cand)) break
-      e <- cand[1L]
-      w <- if (ends[e, 1L] == v) ends[e, 2L] else ends[e, 1L]
-      used[e] <- TRUE
-      ne <- ne + 1L; es[ne] <- e
-      if (seen[w]) { cyc <- es[seen[w]:ne]; break }
-      vs[ne + 1L] <- w; seen[w] <- ne + 1L
-      v <- w
-    }
-    es <- es[seq_len(ne)]
-
-    idx <- fr[if (is.null(cyc)) es else cyc, , drop = FALSE]
-    sgn <- rep(c(1, -1), length.out = nrow(idx))
-    zz <- Z[idx]
-    dplus  <- min(ifelse(sgn > 0, 1 - zz, zz))
-    dminus <- min(ifelse(sgn > 0, zz, 1 - zz))
-    if (!is.finite(dplus + dminus) || dplus + dminus <= 0) break
-    Z[idx] <- if (runif(1L) < dminus / (dplus + dminus)) zz + sgn * dplus
-              else                                       zz - sgn * dminus
-    Z[Z < tol] <- 0
-    Z[Z > 1 - tol] <- 1
-  }
-  round(Z)
+  cube_multi_cpp(P, b, ord, tol)
 }
+
