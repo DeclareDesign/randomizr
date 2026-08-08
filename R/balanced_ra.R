@@ -68,21 +68,26 @@
 #' [complete_ra()], and to much the same degree: the covariance between two
 #' units' assignments is negative and of the same order under both, where under
 #' [simple_ra()] it is zero. The dependence is the price of fixing the count
-#' rather than anything new.
-#'
-#' It is also benign for the usual variance estimators. With equal
-#' probabilities, where this function amounts to complete random assignment,
-#' HC2 recovers the sampling distribution as well as it does there, and stays
-#' conservative when treatment effects vary.
+#' rather than anything new, and it is benign for the usual variance estimators.
+#' With equal probabilities, where this function amounts to complete random
+#' assignment, HC2 recovers the sampling distribution as well as it does there,
+#' and stays conservative when treatment effects vary.
 #'
 #' With unequal probabilities and an inverse-probability-weighted estimator, HC2
 #' runs one to two percent small, so a nominal 95 percent interval covers about
 #' 94.5. Most of that comes from the weighting rather than from the design,
 #' since simple random assignment with the same probabilities behaves the same
-#' way, and it shrinks as N grows. When effects are heterogeneous, HC2 is
-#' conservative again. For inference that leans on none of this, use
-#' randomization inference and draw the reference distribution with this same
-#' function.
+#' way, and it shrinks as N grows.
+#'
+#' \strong{Estimate blocked designs with block fixed effects.} Blocking on
+#' something that predicts the outcome is where this function earns its keep:
+#' with ten blocks cut from a covariate explaining 80 percent of the variance in
+#' the untreated outcome, the estimator is four times as precise as under simple
+#' random assignment, and the gain grows with how well the covariate predicts.
+#' An estimator that ignores the blocks still enjoys that precision but cannot
+#' see it, and reports standard errors twice as wide as they should be, for 100
+#' percent coverage of a nominal 95 percent interval. Adding the fixed effects
+#' recovers both the precision and the coverage.
 #'
 #' @section Cost:
 #' Both paths are linear in the number of units and written in C++, so a draw is
