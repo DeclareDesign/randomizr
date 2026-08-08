@@ -133,14 +133,27 @@ since simple random assignment with the same probabilities behaves the same
 way, and it shrinks as N grows.
 
 \strong{Estimate blocked designs with block fixed effects.} Blocking on
-something that predicts the outcome is where this function earns its keep:
-with ten blocks cut from a covariate explaining 80 percent of the variance in
-the untreated outcome, the estimator is four times as precise as under simple
-random assignment, and the gain grows with how well the covariate predicts.
-An estimator that ignores the blocks still enjoys that precision but cannot
-see it, and reports standard errors twice as wide as they should be, for 100
-percent coverage of a nominal 95 percent interval. Adding the fixed effects
-recovers both the precision and the coverage.
+something that predicts the outcome buys a great deal of precision. With
+blocks cut from a covariate explaining 80 percent of the variance in the
+untreated outcome, the estimator is four times as precise as under simple
+random assignment analysed the same way, and the gain grows with how well the
+covariate predicts. Adjusting for those same strata in the estimator buys
+most of the same thing, so blocking the design and adjusting the estimator
+are close substitutes rather than additive; doing both is only slightly
+better than either alone.
+
+What is not optional is the reporting. An estimator that ignores the blocks
+keeps every bit of that precision and cannot see any of it, reporting
+standard errors twice as wide as they should be, for 100 percent coverage of
+a nominal 95 percent interval. That holds for any blocked design, including
+[block_ra()], and block fixed effects repair it.
+
+\strong{Where [block_ra()] applies, the two agree.} With probabilities
+constant within block, this function and [block_ra()] are indistinguishable
+on the same blocks under the same estimator. `balanced_ra` is the
+generalisation rather than a competitor: [block_ra()] requires one
+probability per block and refuses unit-varying ones, which is the case this
+function exists to serve.
 }
 
 \section{Cost}{
