@@ -16,3 +16,5 @@ inst/doc
 src/*.so
 src/*.o
 docs
+# Private dev notes and logfile (mirrored to claude_control)
+notes/
