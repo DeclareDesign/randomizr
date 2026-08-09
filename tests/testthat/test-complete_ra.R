@@ -20,10 +20,10 @@ test_that("N=100, m=3", {
   )),
   structure(
     c(70L, 30L),
-    .Dim = 2L,
-    .Dimnames = structure(list(c(
+    dim = 2L,
+    dimnames = structure(list(c(
       "Control", "Treatment"
-    )), .Names = ""),
+    )), names = ""),
     class = "table"
   ))
 })

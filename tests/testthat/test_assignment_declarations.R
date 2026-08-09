@@ -442,8 +442,8 @@ test_that("_unit",{
   expect_equal(table(blocks, conduct_ra(d)),
                structure(
                  c(45L, 80L, 140L, 5L, 20L, 60L),
-                 .Dim = 3:2,
-                 .Dimnames = list(blocks = c("A", "B", "C"), c("0", "1")),
+                 dim = 3:2,
+                 dimnames = list(blocks = c("A", "B", "C"), c("0", "1")),
                  class = "table"
                ))
   expect_error(declare_ra(blocks = blocks, prob_unit = rep(c(.1, .2, .3), c(200, 100, 50))))
