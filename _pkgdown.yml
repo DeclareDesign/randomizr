@@ -10,6 +10,10 @@ template:
 development:
   mode: auto
 
+authors:
+  sidebar:
+    roles: [aut, cre, ctb]
+
 navbar:
   right:
   - text: "Software"
@@ -39,8 +43,6 @@ navbar:
     menu: 
      - text: Getting started with randomizr
        href: articles/randomizr_vignette.html
-     - text: Getting started with randomizr for Stata
-       href: articles/srandomizr_vignette.html 
 
 reference:
   - title: Random assignment

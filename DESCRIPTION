@@ -23,6 +23,10 @@ Encoding: UTF-8
 Suggests:
     knitr,
     dplyr,
+    tidyr,
+    purrr,
+    ggplot2,
+    estimatr,
     testthat,
     rmarkdown
 VignetteBuilder: knitr

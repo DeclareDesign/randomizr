@@ -12,12 +12,25 @@ vignette: >
   set.seed(17760701)
   knitr::opts_chunk$set(
     collapse = TRUE,
-    comment = "#>"
+    comment = "#>",
+    message = FALSE,
+    warning = FALSE,
+    fig.width = 7,
+    fig.height = 3.5
   )
   options(digits=2)
 ```
 
-**randomizr** is a small package for r that simplifies the design and analysis of randomized experiments. In particular, it makes the random assignment **procedure** transparent, flexible, and most importantly reproduceable. By the time that many experiments are written up and made public, the process by which some units received treatments is lost or imprecisely described. The **randomizr** package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.
+```{r}
+library(randomizr)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(estimatr)
+```
+
+**randomizr** is a small package for R that simplifies the design and analysis of randomized experiments. In particular, it makes the random assignment **procedure** transparent, flexible, and most importantly reproduceable. By the time that many experiments are written up and made public, the process by which some units received treatments is lost or imprecisely described. The **randomizr** package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.
 
 A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage. First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a **cluster**. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of average causal effects and the uncertainty attending to them may be incorrect.
 
@@ -29,17 +42,17 @@ We first need to transform the dataset, which has each row describe a **type** o
 ```{r}
 # Load built-in dataset
 data(HairEyeColor)
-HairEyeColor <- data.frame(HairEyeColor)
 
-# Transform so each row is a subject
-# Columns describe subject's hair color, eye color, and gender
-hec <- HairEyeColor[rep(1:nrow(HairEyeColor),
-                        times = HairEyeColor$Freq), 1:3]
+# Transform so each row is a subject, rather than a type of subject.
+# uncount() repeats each row Freq times, which is exactly what we want.
+hec <-
+  HairEyeColor |>
+  as.data.frame() |>
+  as_tibble() |>
+  uncount(Freq) |>
+  select(Hair, Eye, Sex)
 
 N <- nrow(hec)
-
-# Fix the rownames
-rownames(hec) <- NULL
 ```
 
 Typically, researchers know some basic information about their subjects before deploying treatment. For example, they usually know how many subjects there are in the experimental sample (N), and they usually know some basic demographic information about each subject.
@@ -55,13 +68,17 @@ If we were really running an experiment, we would only observe either `Y0` or `Y
 set.seed(343)
 
 # Create untreated and treated outcomes for all subjects
-hec <- within(hec,{
-  Y0 <- rnorm(n = N,mean = (2*as.numeric(Hair) + -4*as.numeric(Eye) + -6*as.numeric(Sex)), sd = 5)
-  Y1 <- Y0 + 6*as.numeric(Hair) + 4*as.numeric(Eye) + 2*as.numeric(Sex)
-})
+hec <-
+  hec |>
+  mutate(
+    Y0 = rnorm(n = N,
+               mean = 2 * as.numeric(Hair) - 4 * as.numeric(Eye) - 6 * as.numeric(Sex),
+               sd = 5),
+    Y1 = Y0 + 6 * as.numeric(Hair) + 4 * as.numeric(Eye) + 2 * as.numeric(Sex)
+  )
 
 # Calculate true ATE
-with(hec, mean(Y1 - Y0))
+hec |> summarize(ATE = mean(Y1 - Y0))
 ```
 
 We are now ready to allocate treatment assignments to subjects. Let's start by contrasting simple and complete random assignment.
@@ -75,20 +92,20 @@ The `simple_ra()` function has one required argument `N`, the total number of su
 ```{r echo=TRUE, results="hide"}
 library(randomizr)
 Z <- simple_ra(N = N)
-table(Z)
+tibble(Z) |> count(Z)
 ```
 ```{r echo=FALSE}
-knitr::kable(t(as.matrix(table(Z))))
+knitr::kable(tibble(Z) |> count(Z))
 ```
 
 To change the probability of assignment, specify the `prob` argument:
 
 ```{r echo=TRUE, results="hide"}
 Z <- simple_ra(N = N, prob = 0.30)
-table(Z)
+tibble(Z) |> count(Z)
 ```
 ```{r echo=FALSE}
-knitr::kable(t(as.matrix(table(Z))))
+knitr::kable(tibble(Z) |> count(Z))
 ```
 
 
@@ -96,20 +113,20 @@ If you specify `num_arms` without changing `prob_each`, `simple_ra()` will assum
 
 ```{r echo=TRUE, results="hide"}
 Z <- simple_ra(N = N, num_arms = 3)
-table(Z)
+tibble(Z) |> count(Z)
 ```
 ```{r echo=FALSE}
-knitr::kable(t(as.matrix(table(Z))))
+knitr::kable(tibble(Z) |> count(Z))
 ```
 
 You can also just specify the probabilities of your multiple arms. The probabilities must sum to 1. 
 
 ```{r echo=TRUE, results="hide"}
 Z <- simple_ra(N = N, prob_each = c(.2, .2, .6))
-table(Z)
+tibble(Z) |> count(Z)
 ```
 ```{r echo=FALSE}
-knitr::kable(t(as.matrix(table(Z))))
+knitr::kable(tibble(Z) |> count(Z))
 ```
 
 You can also name your treatment arms.
@@ -117,10 +134,10 @@ You can also name your treatment arms.
 ```{r echo=TRUE, results="hide"}
 Z <- simple_ra(N = N, prob_each = c(.2, .2, .6),
                conditions=c("control", "placebo", "treatment"))
-table(Z)
+tibble(Z) |> count(Z)
 ```
 ```{r echo=FALSE}
-knitr::kable(t(as.matrix(table(Z))))
+knitr::kable(tibble(Z) |> count(Z))
 ```
 
 ## Complete random assignment
@@ -132,20 +149,20 @@ If you only specify `N`, `complete_ra()` assigns exactly half of the subjects to
 
 ```{r echo=TRUE, results="hide"}
 Z <- complete_ra(N = N)
-table(Z)
+tibble(Z) |> count(Z)
 ```
 ```{r echo=FALSE}
-knitr::kable(t(as.matrix(table(Z))))
+knitr::kable(tibble(Z) |> count(Z))
 ```
 
 To change the number of units assigned, specify the `m` argument:
 
 ```{r echo=TRUE, results="hide"}
 Z <- complete_ra(N = N, m = 200)
-table(Z)
+tibble(Z) |> count(Z)
 ```
 ```{r echo=FALSE}
-knitr::kable(t(as.matrix(table(Z))))
+knitr::kable(tibble(Z) |> count(Z))
 ```
 
 
@@ -153,20 +170,20 @@ If you specify multiple arms, `complete_ra()` will assign an equal (within round
 
 ```{r echo=TRUE, results="hide"}
 Z <- complete_ra(N = N, num_arms = 3)
-table(Z)
+tibble(Z) |> count(Z)
 ```
 ```{r echo=FALSE}
-knitr::kable(t(as.matrix(table(Z))))
+knitr::kable(tibble(Z) |> count(Z))
 ```
 
 You can also specify exactly how many units should be assigned to each arm. The total of `m_each` must equal `N`. 
 
 ```{r echo=TRUE, results="hide"}
 Z <- complete_ra(N = N, m_each = c(100, 200, 292))
-table(Z)
+tibble(Z) |> count(Z)
 ```
 ```{r echo=FALSE}
-knitr::kable(t(as.matrix(table(Z))))
+knitr::kable(tibble(Z) |> count(Z))
 ```
 
 You can also name your treatment arms.
@@ -174,60 +191,115 @@ You can also name your treatment arms.
 ```{r echo=TRUE, results="hide"}
 Z <- complete_ra(N = N, m_each = c(100, 200, 292),
                conditions = c("control", "placebo", "treatment"))
-table(Z)
+tibble(Z) |> count(Z)
 ```
 ```{r echo=FALSE}
-knitr::kable(t(as.matrix(table(Z))))
+knitr::kable(tibble(Z) |> count(Z))
 ```
 
 ## Simple and Complete random assignment compared
 When should you use `simple_ra()` versus `complete_ra()`? Basically, if the number of units is known beforehand, `complete_ra()` is always preferred, for two reasons: 1. Researchers can plan exactly how many treatments will be deployed. 2. The standard errors associated with complete random assignment are generally smaller, increasing experimental power.
 
 Since you need to know `N` beforehand in order to use `simple_ra()`, it may seem like a useless function. Sometimes, however, the random assignment isn't directly in the researcher's control. For example, when deploying a survey experiment on a platform like Qualtrics, simple random assignment is the only possibility due to the inflexibility of the built-in random assignment tools. When reconstructing the random assignment for analysis after the experiment has been conducted, `simple_ra()` provides a convenient way to do so.  
-To demonstrate how `complete_ra()` is superior to `simple_ra()`, let's conduct a small simulation with our `HairEyeColor` dataset.
+To compare the two designs, let's conduct a small simulation with our `HairEyeColor` dataset. We draw a fresh assignment many times over, estimate the ATE each time, and collect the estimates. The spread of those estimates *is* the sampling distribution.
 
 ```{r}
 sims <- 1000
 
-# Set up empty vectors to collect results
-simple_ests <- rep(NA, sims)
-complete_ests <- rep(NA, sims)
+simulate_once <- function(i) {
+  hec <-
+    hec |>
+    mutate(
+      # Conduct both kinds of random assignment
+      Z_simple = simple_ra(N = N),
+      Z_complete = complete_ra(N = N),
+      # Reveal observed potential outcomes
+      Y_simple = if_else(Z_simple == 1, Y1, Y0),
+      Y_complete = if_else(Z_complete == 1, Y1, Y0)
+    )
 
-# Loop through simulation 2000 times
-for(i in 1:sims){
-  hec <- within(hec,{
-    
-    # Conduct both kinds of random assignment
-    Z_simple <- simple_ra(N = N)
-    Z_complete <- complete_ra(N = N)
-    
-    # Reveal observed potential outcomes
-    Y_simple <- Y1*Z_simple + Y0*(1-Z_simple)
-    Y_complete <- Y1*Z_complete + Y0*(1-Z_complete)
-    })
-  
-  # Estimate ATE under both models
-  fit_simple <- lm(Y_simple ~ Z_simple, data=hec)
-  fit_complete <- lm(Y_complete ~ Z_complete, data=hec)
-  
-  # Save the estimates
-  simple_ests[i] <- coef(fit_simple)[2]
-  complete_ests[i] <- coef(fit_complete)[2]
+  fit_simple <- lm_robust(Y_simple ~ Z_simple, data = hec)
+  fit_complete <- lm_robust(Y_complete ~ Z_complete, data = hec)
+
+  bind_rows(
+    tidy(fit_simple) |> filter(term == "Z_simple") |> mutate(design = "Simple"),
+    tidy(fit_complete) |> filter(term == "Z_complete") |> mutate(design = "Complete")
+  )
 }
+
+estimates <- map(1:sims, simulate_once) |> list_rbind()
 ```
 
-The standard error of an estimate is defined as the standard deviation of the sampling distribution of the estimator. When standard errors are estimated (i.e., by using the `summary()` command on a model fit), they are estimated using some approximation.  This simulation allows us to measure the standard error directly, since the vectors `simple_ests` and `complete_ests` describe the sampling distribution of each design.
+The standard error of an estimate is defined as the standard deviation of the sampling distribution of the estimator. When standard errors are estimated (i.e., by using the `summary()` command on a model fit), they are estimated using some approximation. This simulation allows us to measure the standard error directly, since `estimates` describes the sampling distribution of each design.
 
-```{r echo=TRUE, results="hide"}
-sd(simple_ests)
+```{r}
+estimates |>
+  group_by(design) |>
+  summarize(empirical_se = sd(estimate))
 ```
-`r sd(simple_ests)`
-```{r echo=TRUE, results="hide"}
-sd(complete_ests)
-```
-`r sd(complete_ests)`
 
-In this simulation complete random assignment led to a `r round((var(simple_ests) - var(complete_ests))/var(simple_ests) * 100, 2)`% decrease in sampling variability. This decrease was obtained with a small design tweak that costs the researcher essentially nothing.  
+Plotting the two sampling distributions side by side shows how similar they are:
+
+```{r}
+gg_df <-
+  estimates |>
+  mutate(design = factor(design, levels = c("Simple", "Complete")))
+
+ggplot(gg_df, aes(x = estimate)) +
+  geom_histogram(bins = 40) +
+  geom_vline(xintercept = mean(hec$Y1 - hec$Y0), linetype = "dashed") +
+  facet_wrap(~design) +
+  labs(x = "ATE estimate", y = "Count",
+       title = "Sampling distributions under simple and complete random assignment",
+       subtitle = "Dashed line is the true ATE") +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+Both designs are unbiased: each distribution is centered on the true ATE. Their spreads are also nearly identical, which may be surprising given that complete random assignment is supposed to be the more precise design.
+
+It is more precise, but by very little at this sample size, and the reason is worth understanding. Simple random assignment does not fix the number of treated units: `m` is a binomial draw that lands near `N/2` but wanders around it. Complete random assignment fixes `m` exactly. All of complete random assignment's advantage comes from removing that wandering, and the variance it removes shrinks like `1/N`. At `N = 592` the true reduction in sampling variance is about 0.2%, which is far too small to see in 1,000 simulations: the simulation error in this comparison is several percentage points, so re-running the code above can easily suggest that simple random assignment did better.
+
+The advantage is real, and it is visible when the sample is small. Repeating the same exercise with 10 units rather than 592:
+
+```{r}
+small_N <- 10
+
+small_estimates <-
+  map(1:sims, function(i) {
+    small <-
+      hec |>
+      slice(1:small_N) |>
+      mutate(
+        Z_simple = simple_ra(N = small_N),
+        Z_complete = complete_ra(N = small_N),
+        Y_simple = if_else(Z_simple == 1, Y1, Y0),
+        Y_complete = if_else(Z_complete == 1, Y1, Y0)
+      )
+
+    tibble(
+      # simple_ra() can put every unit in the same condition, which leaves the
+      # difference-in-means undefined. Those draws are exactly the cost of the design.
+      simple = if (n_distinct(small$Z_simple) == 2) {
+        mean(small$Y_simple[small$Z_simple == 1]) - mean(small$Y_simple[small$Z_simple == 0])
+      } else {
+        NA_real_
+      },
+      complete = mean(small$Y_complete[small$Z_complete == 1]) -
+        mean(small$Y_complete[small$Z_complete == 0])
+    )
+  }) |>
+  list_rbind()
+
+small_estimates |>
+  summarize(
+    se_simple = sd(simple, na.rm = TRUE),
+    se_complete = sd(complete),
+    undefined_simple_draws = sum(is.na(simple))
+  )
+```
+
+At `N = 10` the gap is large enough to see, and simple random assignment additionally produces draws in which every unit landed in the same condition and no treatment effect can be estimated at all. That is the practical case for `complete_ra()`: not that it buys a lot of precision in a large sample, but that it removes an avoidable source of variability, guarantees the number of units you can afford to treat, and never hands you a useless assignment.
 
 ## Block random assignment
 
@@ -241,38 +313,38 @@ The only required argument to `block_ra()` is `blocks`, which is a vector of len
 
 ```{r echo=TRUE, results="hide"}
 Z <- block_ra(blocks = hec$Hair)
-table(Z, hec$Hair)
+tibble(Hair = hec$Hair, Z) |> count(Hair, Z) |> pivot_wider(names_from = Z, values_from = n)
 ```
 ```{r echo=FALSE}
-knitr::kable(table(Z, hec$Hair))
+knitr::kable(tibble(Hair = hec$Hair, Z) |> count(Hair, Z) |> pivot_wider(names_from = Z, values_from = n))
 ```
 
 For multiple treatment arms, use the `num_arms` argument, with or without the `conditions` argument
 
 ```{r echo=TRUE, results="hide"}
 Z <- block_ra(blocks = hec$Hair, num_arms = 3)
-table(Z, hec$Hair)
+tibble(Hair = hec$Hair, Z) |> count(Hair, Z) |> pivot_wider(names_from = Z, values_from = n)
 ```
 ```{r echo=FALSE}
-knitr::kable(table(Z, hec$Hair))
+knitr::kable(tibble(Hair = hec$Hair, Z) |> count(Hair, Z) |> pivot_wider(names_from = Z, values_from = n))
 ```
 
 ```{r echo=TRUE, results="hide"}
 Z <- block_ra(blocks = hec$Hair, conditions = c("Control", "Placebo", "Treatment"))
-table(Z, hec$Hair)
+tibble(Hair = hec$Hair, Z) |> count(Hair, Z) |> pivot_wider(names_from = Z, values_from = n)
 ```
 ```{r echo=FALSE}
-knitr::kable(table(Z, hec$Hair))
+knitr::kable(tibble(Hair = hec$Hair, Z) |> count(Hair, Z) |> pivot_wider(names_from = Z, values_from = n))
 ```
 
 `block_ra()` provides a number of ways to adjust the number of subjects assigned to each conditions. The `prob_each` argument describes what proportion of each block should be assigned to treatment arm. Note of course, that `block_ra()` still uses complete random assignment within each block; the appropriate number of units to assign to treatment within each block is automatically determined.
 
 ```{r echo=TRUE, results="hide"}
 Z <- block_ra(blocks = hec$Hair, prob_each = c(.3, .7))
-table(Z, hec$Hair)
+tibble(Hair = hec$Hair, Z) |> count(Hair, Z) |> pivot_wider(names_from = Z, values_from = n)
 ```
 ```{r echo=FALSE}
-knitr::kable(table(Z, hec$Hair))
+knitr::kable(tibble(Hair = hec$Hair, Z) |> count(Hair, Z) |> pivot_wider(names_from = Z, values_from = n))
 ```
 
 For finer control, use the `block_m_each` argument, which takes a matrix with as many rows as there are blocks, and as many columns as there are treatment conditions.  Remember that the rows are in the same order as `sort(unique(blocks))`, a command that is good to run before constructing a `block_m_each` matrix. 
@@ -286,10 +358,10 @@ block_m_each <- rbind(c(78, 30),
 
 block_m_each
 Z <- block_ra(blocks = hec$Hair, block_m_each = block_m_each)
-table(Z, hec$Hair)
+tibble(Hair = hec$Hair, Z) |> count(Hair, Z) |> pivot_wider(names_from = Z, values_from = n)
 ```
 ```{r echo=FALSE}
-knitr::kable(table(Z, hec$Hair))
+knitr::kable(tibble(Hair = hec$Hair, Z) |> count(Hair, Z) |> pivot_wider(names_from = Z, values_from = n))
 ```
 
 In the example above, the different blocks have different probabilities of assignment to treatment. In this case, people with Black hair have a 30/108 = 27.8% chance of being treated, those with Brown hair have 100/286 = 35.0% change, etc. Left unaddressed, this discrepancy could bias treatment effects. We can see this directly with the `declare_ra()` function.
@@ -306,10 +378,16 @@ knitr::kable(head(declaration$probabilities_matrix))
 
 ```{r echo=TRUE, results="hide"}
 # Show that the probability of treatment is different within block
-table(hec$Hair, round(declaration$probabilities_matrix[,2], 3))
+tibble(Hair = hec$Hair,
+       prob = round(declaration$probabilities_matrix[, 2], 3)) |>
+  count(Hair, prob) |>
+  pivot_wider(names_from = prob, values_from = n)
 ```
 ```{r echo=FALSE}
-knitr::kable(table(hec$Hair, round(declaration$probabilities_matrix[,2], 3)))
+knitr::kable(tibble(Hair = hec$Hair,
+                    prob = round(declaration$probabilities_matrix[, 2], 3)) |>
+               count(Hair, prob) |>
+               pivot_wider(names_from = prob, values_from = n))
 ```
 
 There are two common ways to address this problem: LSDV (Least-Squares Dummy Variable, also known as "control for blocks") or IPW (Inverse-probability weights).
@@ -317,39 +395,44 @@ There are two common ways to address this problem: LSDV (Least-Squares Dummy Var
 The following code snippet shows how to use either the LSDV approach or the IPW approach. A note for scrupulous readers: the estimands of these two approaches are subtly different from one another. The LSDV approach estimates the average **block-level** treatment effect. The IPW approach estimates the average **individual-level** treatment effect. They can be different. Since the average block-level treatment effect is not what most people have in mind when thinking about causal effects, analysts using this approach should present both. The `obtain_condition_probabilities()` function used to calculate the probabilities of assignment is explained below.
 
 ```{r echo=TRUE, results="hide"}
-hec <- within(hec,{
-  Z_blocked <- block_ra(blocks = hec$Hair,
-                        block_m_each = block_m_each)
-  Y_blocked <- Y1*(Z_blocked) + Y0*(1-Z_blocked)
-  cond_prob <- obtain_condition_probabilities(declaration, Z_blocked)
-  IPW_weights <- 1/(cond_prob)
-})
+hec <-
+  hec |>
+  mutate(
+    Z_blocked = block_ra(blocks = Hair, block_m_each = block_m_each),
+    Y_blocked = if_else(Z_blocked == 1, Y1, Y0),
+    cond_prob = obtain_condition_probabilities(declaration, Z_blocked),
+    IPW_weights = 1 / cond_prob
+  )
 
-fit_LSDV <- lm(Y_blocked ~ Z_blocked + Hair, data=hec)
-fit_IPW <- lm(Y_blocked ~ Z_blocked, weights = IPW_weights, data = hec)
+fit_LSDV <- lm_robust(Y_blocked ~ Z_blocked + Hair, data = hec)
+fit_IPW <- lm_robust(Y_blocked ~ Z_blocked, weights = IPW_weights, data = hec)
 
-summary(fit_LSDV)
+tidy(fit_LSDV)
 ```
 ```{r echo=FALSE}
-knitr::kable(summary(fit_LSDV)$coefficients)
+knitr::kable(tidy(fit_LSDV))
 ```
 
 ```{r echo=TRUE, results="hide"}
-summary(fit_IPW)
+tidy(fit_IPW)
 ```
 ```{r echo=FALSE}
-knitr::kable(summary(fit_IPW)$coefficients)
+knitr::kable(tidy(fit_IPW))
 ```
 
 How to create blocks? In the `HairEyeColor` dataset, we could make blocks for each unique combination of hair color, eye color, and sex.
 
 ```{r echo=TRUE, results="hide"}
-blocks <- with(hec, paste(Hair, Eye, Sex, sep = "_"))
+# A standalone vector, not a column: `blocks` is built from the cluster sizes
+# further down, and two different things should not share one column name.
+blocks <- paste(hec$Hair, hec$Eye, hec$Sex, sep = "_")
 Z <- block_ra(blocks = blocks)
-head(table(blocks, Z))
+tibble(blocks, Z) |> count(blocks, Z) |>
+  pivot_wider(names_from = Z, values_from = n) |> head()
 ```
 ```{r echo=FALSE}
-knitr::kable(head(table(blocks, Z)))
+knitr::kable(tibble(blocks, Z) |> count(blocks, Z) |>
+               pivot_wider(names_from = Z, values_from = n) |> head())
 ```
 
 An alternative is to use the `blockTools` package, which constructs matched pairs, trios, quartets, etc. from pretreatment covariates. 
@@ -368,11 +451,14 @@ out <- block(df_forBT, n.tr = 3, id.vars = "id_var",
              block.vars = colnames(df_forBT)[-1])
 
 # Extact the block_ids
-hec$block_id <- createBlockIDs(out, df_forBT, id.var = "id_var")
+hec <- hec |> mutate(block_id = createBlockIDs(out, df_forBT, id.var = "id_var"))
 
 # Conduct actual random assignment with randomizr
 Z_blocked <- block_ra(blocks = hec$block_id, num_arms = 3)
-head(table(hec$block_id, Z_blocked))
+tibble(block_id = hec$block_id, Z_blocked) |>
+  count(block_id, Z_blocked) |>
+  pivot_wider(names_from = Z_blocked, values_from = n) |>
+  head()
 ```
 
 A note for `blockTools` users: that package also has an assignment function. My preference is to extract the blocking variable, then conduct the assignment with `block_ra()`, so that fewer steps are required to reconstruct the random assignment or generate new random assignments for a randomization inference procedure.
@@ -390,15 +476,17 @@ Clustered assignment decreases the effective sample size of an experiment. In th
 The only required argument for the `cluster_ra()` function is the `clusters` argument, which is a vector of length `N` that indicates which cluster each subject belongs to. Let's pretend that for some reason, we have to assign treatments according to the unique combinations of hair color, eye color, and gender. 
 
 ```{r echo=TRUE, results="hide"}
-clusters <- with(hec, paste(Hair, Eye, Sex, sep = "_"))
-hec$clusters <- clusters
+hec <- hec |> mutate(clusters = paste(Hair, Eye, Sex, sep = "_"))
+clusters <- hec$clusters
 
 Z_clust <- cluster_ra(clusters = clusters)
 
-head(table(clusters, Z_clust))
+tibble(clusters, Z_clust) |> count(clusters, Z_clust) |>
+  pivot_wider(names_from = Z_clust, values_from = n) |> head()
 ```
 ```{r echo=FALSE}
-knitr::kable(head(table(clusters, Z_clust)))
+knitr::kable(tibble(clusters, Z_clust) |> count(clusters, Z_clust) |>
+               pivot_wider(names_from = Z_clust, values_from = n) |> head())
 ```
 
 This shows that each cluster is either assigned to treatment or control. No two units within the same cluster are assigned to different conditions.
@@ -407,10 +495,12 @@ As with all functions in `randomizr`, you can specify multiple treatment arms in
 
 ```{r echo=TRUE, results="hide"}
 Z_clust <- cluster_ra(clusters = clusters, num_arms = 3)
-head(table(clusters, Z_clust))
+tibble(clusters, Z_clust) |> count(clusters, Z_clust) |>
+  pivot_wider(names_from = Z_clust, values_from = n) |> head()
 ```
 ```{r echo=FALSE}
-knitr::kable(head(table(clusters, Z_clust)))
+knitr::kable(tibble(clusters, Z_clust) |> count(clusters, Z_clust) |>
+               pivot_wider(names_from = Z_clust, values_from = n) |> head())
 ```
 
 ... or using `conditions`
@@ -418,20 +508,24 @@ knitr::kable(head(table(clusters, Z_clust)))
 ```{r echo=TRUE, results="hide"}
 Z_clust <- cluster_ra(clusters=clusters, 
                       conditions=c("Control", "Placebo", "Treatment"))
-head(table(clusters, Z_clust))
+tibble(clusters, Z_clust) |> count(clusters, Z_clust) |>
+  pivot_wider(names_from = Z_clust, values_from = n) |> head()
 ```
 ```{r echo=FALSE}
-knitr::kable(head(table(clusters, Z_clust)))
+knitr::kable(tibble(clusters, Z_clust) |> count(clusters, Z_clust) |>
+               pivot_wider(names_from = Z_clust, values_from = n) |> head())
 ```
 
 ... or using `m_each`, which describes how many clusters should be assigned to each condition.  `m_each` must sum to the number of clusters.
 
 ```{r echo=TRUE, results="hide"}
 Z_clust <- cluster_ra(clusters=clusters, m_each=c(5, 15, 12))
-head(table(clusters, Z_clust))
+tibble(clusters, Z_clust) |> count(clusters, Z_clust) |>
+  pivot_wider(names_from = Z_clust, values_from = n) |> head()
 ```
 ```{r echo=FALSE}
-knitr::kable(head(table(clusters, Z_clust)))
+knitr::kable(tibble(clusters, Z_clust) |> count(clusters, Z_clust) |>
+               pivot_wider(names_from = Z_clust, values_from = n) |> head())
 ```
 
 ## Blocked and clustered assignment
@@ -443,25 +537,29 @@ As an example, let's group our clusters into blocks by size using `dplyr`
 ```{r echo=TRUE, results="hide", message=FALSE}
 suppressMessages(library(dplyr))
 cluster_level_df <- 
-  hec %>%
-  group_by(clusters) %>%
-  summarize(cluster_size = n()) %>%
-  arrange(cluster_size) %>%
+  hec |>
+  group_by(clusters) |>
+  summarize(cluster_size = n()) |>
+  arrange(cluster_size) |>
   mutate(blocks = paste0("block_", sprintf("%02d",rep(1:16, each=2))))
 
-hec <- left_join(hec, cluster_level_df)
+hec <- left_join(hec, cluster_level_df, by = "clusters")
 
 # Extract the cluster and block variables
 clusters <- hec$clusters
 blocks <- hec$blocks
 
 Z <- block_and_cluster_ra(clusters = clusters, blocks = blocks)
-head(table(clusters, Z))
-head(table(blocks, Z))
+tibble(clusters, Z) |> count(clusters, Z) |>
+  pivot_wider(names_from = Z, values_from = n) |> head()
+tibble(blocks, Z) |> count(blocks, Z) |>
+  pivot_wider(names_from = Z, values_from = n) |> head()
 ```
 ```{r echo=FALSE}
-knitr::kable(head(table(clusters, Z_clust)))
-knitr::kable(head(table(blocks, Z_clust)))
+knitr::kable(tibble(clusters, Z) |> count(clusters, Z) |>
+               pivot_wider(names_from = Z, values_from = n) |> head())
+knitr::kable(tibble(blocks, Z) |> count(blocks, Z) |>
+               pivot_wider(names_from = Z, values_from = n) |> head())
 ```
 
 ## Calculating probabilities of assignment
@@ -480,13 +578,14 @@ block_m_each <-
 Z <- block_ra(blocks = hec$Hair,
               block_m_each = block_m_each)
 
-table(hec$Hair, Z)
+tibble(Hair = hec$Hair, Z) |>
+  count(Hair, Z) |>
+  pivot_wider(names_from = Z, values_from = n)
 ```
 ```{r echo=FALSE}
-junk = table(hec$Hair, Z)
-junk[, 1] = round(junk[, 1], 2)
-
-knitr::kable(table(hec$Hair, Z))
+knitr::kable(tibble(Hair = hec$Hair, Z) |>
+               count(Hair, Z) |>
+               pivot_wider(names_from = Z, values_from = n))
 ```
 
 In order to calculate the probabilities of assignment, we call the `declare_ra()` function with the same exact arguments as we used for the `block_ra()` call. The `declaration` object contains a matrix of probabilities of assignment:
@@ -507,14 +606,14 @@ In order to use inverse-probability weights, we need to know the probability of 
 
 ```{r echo=TRUE, results="hide"}
 cond_prob <- obtain_condition_probabilities(declaration, Z)
-table(cond_prob, Z)
+tibble(cond_prob = round(cond_prob, 2), Z) |>
+  count(cond_prob, Z) |>
+  pivot_wider(names_from = Z, values_from = n)
 ```
 ```{r echo=FALSE}
-# Hack to override that the digits parameter won't work because table sets rownames
-# to a character vector version of the numbers before output.
-junk = table(cond_prob, Z)
-rownames(junk) = as.character(round(as.numeric(rownames(junk)), 2))
-knitr::kable(junk)
+knitr::kable(tibble(cond_prob = round(cond_prob, 2), Z) |>
+               count(cond_prob, Z) |>
+               pivot_wider(names_from = Z, values_from = n))
 ```
 
 # Best practices
@@ -551,10 +650,10 @@ school_ra <- function(m){
 }
 
 Z <- school_ra(200)
-table(Z)
+tibble(Z) |> count(Z)
 ```
 ```{r echo=FALSE}
-knitr::kable(t(as.matrix(table(Z))))
+knitr::kable(tibble(Z) |> count(Z))
 ```
 
 This assignment procedure is complicated by the sibling rule, which has two effects: first, students are cluster-assigned by family, and second, the probability of assignment varies student to student. Obviously, families who have two children in the lottery have a higher probability of winning the lottery because they effectively have two "tickets." There may be better ways of running this assignment procedure (for example, with `cluster_ra()`), but the purpose of this example is to show how complicated *real-world* procedures can be written up in a simple function. With this function, the random assignment procedure can be reproduced exactly, the complicated probabilities of assignment can be calculated, and the analysis is greatly simplified.
@@ -568,7 +667,14 @@ For many designs, the probability of assignment to treatment can be calculated a
 
 ```{r}
 Z_matrix <- replicate(1000, school_ra(200))
-plot(rowMeans(Z_matrix))
+
+gg_df <- tibble(student = seq_len(nrow(Z_matrix)),
+                prob = rowMeans(Z_matrix))
+
+ggplot(gg_df, aes(x = student, y = prob)) +
+  geom_point(size = 0.8) +
+  labs(x = "Student", y = "Estimated probability of assignment") +
+  theme_bw()
 ```
 
 This plot shows that the students who have a sibling in the lottery have a higher probability of assignment. The more simulations, the more precise the estimate of the probability of assignment.
@@ -577,10 +683,15 @@ This plot shows that the students who have a sibling in the lottery have a highe
 Whenever you conduct a random assignment for use in an experiment, save it! At a minimum, the random assignment should be saved with an id variable in a csv.
 
 ```{r,eval=FALSE}
-hec <- within(hec,{
-  Z_blocked <- complete_ra(N = N, m_each = c(100, 200, 292),
-               conditions = c("control", "placebo", "treatment"))
-  id_var <- 1:nrow(hec)
-})
-write.csv(hec[,c("id_var", "Z_blocked")], file = "MyRandomAssignment.csv")
+hec <-
+  hec |>
+  mutate(
+    Z_blocked = complete_ra(N = N, m_each = c(100, 200, 292),
+                            conditions = c("control", "placebo", "treatment")),
+    id_var = row_number()
+  )
+
+hec |>
+  select(id_var, Z_blocked) |>
+  readr::write_csv("MyRandomAssignment.csv")
 ```
