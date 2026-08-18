@@ -51,8 +51,8 @@ reference:
     - complete_ra
     - simple_ra
     - conduct_ra
-    - custom_ra
     - declare_ra
+    - balanced_ra
   
   - title: Functions for calculating probabilities of assignment
     contents:
@@ -63,7 +63,7 @@ reference:
     - block_and_cluster_ra_probabilities
     - block_ra_probabilities
     - cluster_ra_probabilities
-    - custom_ra_probabilities
+    - balanced_ra_probabilities
     - simple_ra_probabilities
     - complete_ra_probabilities
 
