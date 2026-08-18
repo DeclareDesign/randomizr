@@ -7,13 +7,13 @@
 #' than \code{maximum_permutations}, a random sample of them is returned
 #' instead, which approximates the same distribution.
 #'
-#' @seealso \code{\link{obtain_num_permutations}},
-#'   \code{\link{obtain_permutation_probabilities}}, \code{\link{declare_ra}}
+#' @seealso \code{\link{obtain_num_permutations}()},
+#'   \code{\link{obtain_permutation_probabilities}()}, \code{\link{declare_ra}()}
 #'
-#' @param declaration A random assignment declaration, created by \code{\link{declare_ra}}.
-#' @param maximum_permutations If the number of possible random assignments exceeds maximum_permutations, obtain_permutation_matrix will return a random sample of maximum_permutations permutations. Defaults to 10,000.
+#' @param declaration A random assignment declaration, created by \code{\link{declare_ra}()}. (required)
+#' @param maximum_permutations If the number of possible random assignments exceeds \code{maximum_permutations}, \code{obtain_permutation_matrix} returns a random sample of \code{maximum_permutations} of them instead of enumerating all of them. Defaults to 10,000. (optional)
 #'
-#' @return a matrix of all possible (or a random sample of all possible) random assignments consistent with a declaration.
+#' @return A matrix with one row per unit and one column per assignment, whose entries are condition names. The columns are all of the assignments the declared design could produce, or a random sample of \code{maximum_permutations} of them if there are more than that. Column order carries no meaning, but it is the order \code{\link{obtain_permutation_probabilities}()} returns its probabilities in.
 #' @importFrom utils combn
 #' @export
 #'

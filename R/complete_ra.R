@@ -6,7 +6,7 @@
 #'
 #' If only \code{N} is specified, a balanced two-arm trial (\code{prob = 0.5}) is assumed. When \code{N} is odd, either \code{floor(N/2)} or \code{ceiling(N/2)} units are assigned to treatment.
 #'
-#' @seealso \code{\link{simple_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, \code{\link{complete_rs}}, \code{\link{complete_ra_probabilities}}
+#' @seealso \code{\link{simple_ra}()}, \code{\link{block_ra}()}, \code{\link{cluster_ra}()}, \code{\link{complete_rs}()}, \code{\link{complete_ra_probabilities}()}
 #'
 #' @param N The number of units. Must be a positive integer. (required)
 #' @param m Use for a two-arm design: exactly \code{m} units are assigned to treatment and \code{N-m} to control. (optional)
@@ -17,7 +17,7 @@
 #' @param prob_each Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count assigned to each condition may differ slightly from draw to draw, but the overall probability of assignment is exactly \code{prob_each}. (optional)
 #' @param num_arms The number of treatment arms. If unspecified, determined from the other arguments. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)
-#' @param check_inputs Logical. Defaults to \code{TRUE}.
+#' @param check_inputs Logical. Whether to verify before assigning that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that vectors are of length N, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the assignment needs must be supplied explicitly. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)
 #'
 #' @return A vector of length N indicating the treatment condition of each unit. Numeric in a two-arm trial; a factor (ordered by \code{conditions}) in a multi-arm trial.
 #' @export
@@ -30,10 +30,10 @@
 #' Z <- complete_ra(N = 100, m = 50)
 #' table(Z)
 #' 
-#' Z <- complete_ra(N = 100, m_unit = rep(50, 100))
+#' Z <- complete_ra(N = 100, m_unit = rep(30, 100))
 #' table(Z)
 #'
-#' Z <- complete_ra(N = 100, prob = .111)
+#' Z <- complete_ra(N = 100, prob = 0.111)
 #' table(Z)
 #' 
 #' Z <- complete_ra(N = 100, prob_unit = rep(0.1, 100))
@@ -50,7 +50,7 @@
 #' Z <- complete_ra(N = 100, m_each = c(30, 30, 40))
 #' table(Z)
 #'
-#' Z <- complete_ra(N = 100, prob_each = c(.1, .2, .7))
+#' Z <- complete_ra(N = 100, prob_each = c(0.1, 0.2, 0.7))
 #' table(Z)
 #'
 #' Z <- complete_ra(N = 100, conditions = c("control", "placebo", "treatment"))
@@ -61,12 +61,15 @@
 #' Z <- complete_ra(N = 100, num_arms = 2)
 #' table(Z)
 #'
-#' # If N = m, assign with 100% probability
-#' complete_ra(N=2, m=2)
+#' # If N = m, every unit is assigned to treatment with probability 1
+#' complete_ra(N = 2, m = 2)
 #'
-#' # Up through randomizr 0.12.0, 
-#' complete_ra(N=1, m=1) # assigned with 50% probability
-#' # This behavior has been deprecated
+#' # The single-unit case works the same way: m = 1 out of N = 1 is treated
+#' # with probability 1. Up through randomizr 0.12.0 this case was instead
+#' # treated as a coin flip, so the unit was assigned to treatment only half of
+#' # the time. The change is noted here because it silently alters the
+#' # probabilities of assignment in code written against those versions.
+#' complete_ra(N = 1, m = 1)
 #'
 complete_ra <- function(N,
                         m = NULL,
@@ -230,43 +233,43 @@ complete_ra <- function(N,
 #'
 #' These are the quantities inverse-probability weights are built from: weight
 #' each unit by the reciprocal of the probability of the condition it landed in,
-#' which \code{\link{obtain_condition_probabilities}} extracts for you.
+#' which \code{\link{obtain_condition_probabilities}()} extracts for you.
 #'
-#' @seealso \code{\link{complete_ra}}
+#' @seealso \code{\link{complete_ra}()}
 #'
 #' @inheritParams complete_ra
-#' @return A matrix of probabilities of assignment
+#' @return A matrix with N rows and one column per treatment condition, with columns named \code{prob_<condition>}. Entry (i, j) is the probability that unit i is assigned to condition j, and every row sums to 1.
 #'
 #' @examples
 #' # 2-arm designs
-#' prob_mat <- complete_ra_probabilities(N=100)
+#' prob_mat <- complete_ra_probabilities(N = 100)
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, m=50)
+#' prob_mat <- complete_ra_probabilities(N = 100, m = 50)
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, prob = .3)
+#' prob_mat <- complete_ra_probabilities(N = 100, prob = 0.3)
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, m_each = c(30, 70),
+#' prob_mat <- complete_ra_probabilities(N = 100, m_each = c(30, 70),
 #'                           conditions = c("control", "treatment"))
 #' head(prob_mat)
 #'
 #' # Multi-arm Designs
-#' prob_mat <- complete_ra_probabilities(N=100, num_arms=3)
+#' prob_mat <- complete_ra_probabilities(N = 100, num_arms = 3)
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40))
+#' prob_mat <- complete_ra_probabilities(N = 100, m_each = c(30, 30, 40))
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40),
-#'                           conditions=c("control", "placebo", "treatment"))
+#' prob_mat <- complete_ra_probabilities(N = 100, m_each = c(30, 30, 40),
+#'                           conditions = c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, conditions=c("control", "placebo", "treatment"))
+#' prob_mat <- complete_ra_probabilities(N = 100, conditions = c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))
+#' prob_mat <- complete_ra_probabilities(N = 100, prob_each = c(0.2, 0.7, 0.1))
 #' head(prob_mat)
 #'
 #' @export

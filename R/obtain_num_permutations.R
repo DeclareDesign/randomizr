@@ -5,14 +5,14 @@
 #' randomization inference p-value can have: a design with 70 possible
 #' assignments cannot produce a p-value below 1/70. Counting is exact and cheap
 #' even when the number is far too large to enumerate, which is why it is worth
-#' calling before \code{\link{obtain_permutation_matrix}}.
+#' calling before \code{\link{obtain_permutation_matrix}()}.
 #'
-#' @seealso \code{\link{obtain_permutation_matrix}},
-#'   \code{\link{obtain_permutation_probabilities}}, \code{\link{declare_ra}}
+#' @seealso \code{\link{obtain_permutation_matrix}()},
+#'   \code{\link{obtain_permutation_probabilities}()}, \code{\link{declare_ra}()}
 #'
-#' @param declaration A random assignment or sampling declaration, created by \code{\link{declare_ra}} or \code{\link{declare_rs}}.
+#' @param declaration A random assignment or sampling declaration, created by \code{\link{declare_ra}()} or \code{\link{declare_rs}()}. (required)
 #'
-#' @return a scalar
+#' @return A single number: how many distinct assignments (or samples) the declared design can produce. It can be far larger than any matrix you would want to build, which is the point of counting first.
 #' @export
 #'
 #' @examples

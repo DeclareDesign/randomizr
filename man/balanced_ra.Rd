@@ -19,35 +19,36 @@ balanced_ra(
 \item{prob_unit}{A numeric vector of length N giving each unit's probability
 of assignment to treatment, for a two-arm design. Unlike elsewhere in
 randomizr these need not be equal across units; varying them is the point
-of this function.}
+of this function. Supply either \code{prob_unit} or \code{prob_unit_each}. (optional)}
 
 \item{prob_unit_each}{A numeric matrix with one row per unit and one column
 per condition, giving each unit's probability of assignment to each
-condition, for a multi-arm design. Rows must sum to 1.}
+condition, for a multi-arm design. Rows must sum to 1. Supply either
+\code{prob_unit} or \code{prob_unit_each}. (optional)}
 
 \item{blocks}{A vector of length N indicating which block each unit belongs
-to. When supplied, counts are held tight within each block.}
+to. When supplied, counts are held tight within each block. (optional)}
 
 \item{clusters}{A vector of length N indicating which cluster each unit
 belongs to. Whole clusters are assigned together, so the probabilities must
 be the same for every unit in a cluster, and the tight counts become counts
-of clusters rather than of units. May be combined with `blocks`, in which
-case every cluster must sit entirely inside one block.}
+of clusters rather than of units. May be combined with \code{blocks}, in which
+case every cluster must sit entirely inside one block. (optional)}
 
-\item{N}{The number of units. Inferred from the other arguments when omitted.}
+\item{N}{The number of units. Inferred from the other arguments when omitted. (optional)}
 
-\item{num_arms}{The number of treatment arms. Inferred when omitted.}
+\item{num_arms}{The number of treatment arms. Inferred when omitted. (optional)}
 
-\item{conditions}{A vector giving the names of the conditions.}
+\item{conditions}{A vector giving the names of the conditions. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1, that rows of a probability matrix sum to 1, that probabilities are constant within a cluster, and that clusters nest within blocks. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many assignments from probabilities that have already been verified. (optional)}
 }
 \value{
 A vector of length N giving the condition of each unit, numeric in a
-  two-arm design and a factor (ordered by `conditions`) in a multi-arm design.
+  two-arm design and a factor (ordered by \code{conditions}) in a multi-arm design.
 }
 \description{
-\strong{Experimental.} `balanced_ra` assigns units to conditions when the
+\strong{Experimental.} \code{balanced_ra} assigns units to conditions when the
 probability of assignment varies from unit to unit, holding the number
 assigned to each condition as close to its target as arithmetic allows. It
 fills the gap between [simple_ra()], which honours unit-varying probabilities
@@ -60,7 +61,7 @@ Tillé (2004), meaning that the realised counts are held against their
 targets. It does not refer to covariate balance, which is a different idea
 and not what this function does.
 
-Two situations motivate it, both due to Macartan Humphreys, whose `probra`
+Two situations motivate it, both due to Macartan Humphreys, whose \code{probra}
 package is the origin of this function.
 
 Imagine a race between contestants with unequal chances of winning, and you
@@ -103,15 +104,15 @@ receiving each condition is exactly the probability supplied. The number of
 units in each condition is either the floor or the ceiling of that
 condition's expected count, never further away.
 
-With `blocks`, the tight counts are the within-block ones, which is the
-blocked design generalised to unequal probabilities. Without `blocks`, the
+With \code{blocks}, the tight counts are the within-block ones, which is the
+blocked design generalised to unequal probabilities. Without \code{blocks}, the
 tight counts are the overall ones. Both cannot be guaranteed at once in
-general, so `balanced_ra` guarantees whichever the call asks for.
+general, so \code{balanced_ra} guarantees whichever the call asks for.
 
-With `clusters`, the assignment happens at the cluster level and the counts
+With \code{clusters}, the assignment happens at the cluster level and the counts
 held tight are counts of clusters. Clusters of unequal size therefore give a
 fixed number of treated clusters and a varying number of treated units, which
-is how [cluster_ra()] behaves. `blocks` and `clusters` combine, giving a tight
+is how [cluster_ra()] behaves. \code{blocks} and \code{clusters} combine, giving a tight
 number of treated clusters within each block.
 }
 
@@ -150,7 +151,7 @@ a nominal 95 percent interval. That holds for any blocked design, including
 
 \strong{Where [block_ra()] applies, the two agree.} With probabilities
 constant within block, this function and [block_ra()] are indistinguishable
-on the same blocks under the same estimator. `balanced_ra` is the
+on the same blocks under the same estimator. \code{balanced_ra} is the
 generalisation rather than a competitor: [block_ra()] requires one
 probability per block and refuses unit-varying ones, which is the case this
 function exists to serve.
@@ -171,8 +172,8 @@ to about 58 milliseconds.
 
 This function is new in randomizr 2.0.0 and its interface may change. It does
 not yet participate in [declare_ra()], so [conduct_ra()] and
-[obtain_condition_probabilities()] do not accept a `balanced_ra` design. Use
-`balanced_ra_probabilities()` to recover assignment probabilities.
+[obtain_condition_probabilities()] do not accept a \code{balanced_ra} design. Use
+\code{balanced_ra_probabilities()} to recover assignment probabilities.
 }
 
 \examples{
@@ -200,7 +201,7 @@ reps <- replicate(1000, balanced_ra(prob_unit = rep(0.5, 6), blocks = districts)
 table(colSums(reps[districts == "north", ]))
 
 # Three arms with unit-varying probabilities.
-P <- cbind(c(.15, .47), c(.65, .48), c(.20, .05))
+P <- cbind(c(0.15, 0.47), c(0.65, 0.48), c(0.20, 0.05))
 table(replicate(1000, balanced_ra(prob_unit_each = P))[1, ])
 
 # Whole clusters assigned together, with unequal cluster probabilities. The
@@ -236,6 +237,6 @@ sampling. \emph{Journal of Statistical Planning and Inference} 128(2),
 569-591. \doi{10.1016/j.jspi.2003.11.011}
 }
 \seealso{
-\code{\link{balanced_ra_probabilities}}, \code{\link{complete_ra}},
-  \code{\link{block_ra}}, \code{\link{simple_ra}}
+\code{\link{balanced_ra_probabilities}()}, \code{\link{complete_ra}()},
+  \code{\link{block_ra}()}, \code{\link{simple_ra}()}
 }

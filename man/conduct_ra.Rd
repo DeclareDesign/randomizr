@@ -2,7 +2,7 @@
 % Please edit documentation in R/declare_ra.R
 \name{conduct_ra}
 \alias{conduct_ra}
-\title{Conduct a random assignment}
+\title{Conduct a Random Assignment}
 \usage{
 conduct_ra(
   declaration = NULL,
@@ -27,7 +27,7 @@ conduct_ra(
 )
 }
 \arguments{
-\item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
+\item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}()}. Supply either a declaration or the design arguments listed below, which are the ones \code{declare_ra()} takes: given those, \code{conduct_ra} builds a declaration internally and draws one assignment from it. (optional)}
 
 \item{N}{The number of units. Must be a positive integer. (required)}
 
@@ -61,9 +61,9 @@ conduct_ra(
 
 \item{simple}{Logical, defaults to \code{FALSE}. If \code{TRUE}, simple random assignment is used. Do not specify \code{m}, \code{m_each}, \code{block_m}, or \code{block_m_each} when \code{simple = TRUE}. (optional)}
 
-\item{permutation_matrix}{For custom random assignment procedures. (optional)}
+\item{permutation_matrix}{For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)}
 
-\item{check_inputs}{Logical. Defaults to \code{TRUE}.}
+\item{check_inputs}{Logical. Whether to verify before declaring that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that block-level arguments have one entry per block, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the design needs must be supplied explicitly. It is skipped entirely when \code{permutation_matrix} is supplied. (optional)}
 }
 \value{
 A vector of length N giving the treatment condition of each unit,
@@ -72,22 +72,24 @@ A vector of length N giving the treatment condition of each unit,
 }
 \description{
 \code{conduct_ra} draws one random assignment from a design. Give it a
-declaration made by \code{\link{declare_ra}}, or describe the design inline
-with the same arguments \code{declare_ra} takes. Declaring first pays off
+declaration made by \code{\link{declare_ra}()}, or describe the design inline
+with the same arguments \code{declare_ra()} takes. Declaring first pays off
 when the same design is drawn repeatedly, or when the assignment
-probabilities are needed later by \code{\link{obtain_condition_probabilities}}.
+probabilities are needed later by \code{\link{obtain_condition_probabilities}()}.
 }
 \examples{
+# Declare the design once, then draw from it
 declaration <- declare_ra(N = 100, m_each = c(30, 30, 40))
+
 Z <- conduct_ra(declaration = declaration)
 table(Z)
 
-# equivalent to
-
+# Equivalent, and convenient for a one-off assignment: describe the design
+# inline and skip the declaration
 Z <- conduct_ra(N = 100, m_each = c(30, 30, 40))
 table(Z)
 
 }
 \seealso{
-\code{\link{declare_ra}}, \code{\link{obtain_condition_probabilities}}
+\code{\link{declare_ra}()}, \code{\link{obtain_condition_probabilities}()}
 }

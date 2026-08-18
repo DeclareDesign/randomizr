@@ -36,7 +36,7 @@ complete_ra(
 
 \item{conditions}{A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)}
 
-\item{check_inputs}{Logical. Defaults to \code{TRUE}.}
+\item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that vectors are of length N, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the assignment needs must be supplied explicitly. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)}
 }
 \value{
 A vector of length N indicating the treatment condition of each unit. Numeric in a two-arm trial; a factor (ordered by \code{conditions}) in a multi-arm trial.
@@ -57,10 +57,10 @@ table(Z)
 Z <- complete_ra(N = 100, m = 50)
 table(Z)
 
-Z <- complete_ra(N = 100, m_unit = rep(50, 100))
+Z <- complete_ra(N = 100, m_unit = rep(30, 100))
 table(Z)
 
-Z <- complete_ra(N = 100, prob = .111)
+Z <- complete_ra(N = 100, prob = 0.111)
 table(Z)
 
 Z <- complete_ra(N = 100, prob_unit = rep(0.1, 100))
@@ -77,7 +77,7 @@ table(Z)
 Z <- complete_ra(N = 100, m_each = c(30, 30, 40))
 table(Z)
 
-Z <- complete_ra(N = 100, prob_each = c(.1, .2, .7))
+Z <- complete_ra(N = 100, prob_each = c(0.1, 0.2, 0.7))
 table(Z)
 
 Z <- complete_ra(N = 100, conditions = c("control", "placebo", "treatment"))
@@ -88,14 +88,17 @@ table(Z)
 Z <- complete_ra(N = 100, num_arms = 2)
 table(Z)
 
-# If N = m, assign with 100\% probability
-complete_ra(N=2, m=2)
+# If N = m, every unit is assigned to treatment with probability 1
+complete_ra(N = 2, m = 2)
 
-# Up through randomizr 0.12.0, 
-complete_ra(N=1, m=1) # assigned with 50\% probability
-# This behavior has been deprecated
+# The single-unit case works the same way: m = 1 out of N = 1 is treated
+# with probability 1. Up through randomizr 0.12.0 this case was instead
+# treated as a coin flip, so the unit was assigned to treatment only half of
+# the time. The change is noted here because it silently alters the
+# probabilities of assignment in code written against those versions.
+complete_ra(N = 1, m = 1)
 
 }
 \seealso{
-\code{\link{simple_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, \code{\link{complete_rs}}, \code{\link{complete_ra_probabilities}}
+\code{\link{simple_ra}()}, \code{\link{block_ra}()}, \code{\link{cluster_ra}()}, \code{\link{complete_rs}()}, \code{\link{complete_ra_probabilities}()}
 }

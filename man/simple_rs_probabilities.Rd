@@ -13,18 +13,18 @@ simple_rs_probabilities(
 )
 }
 \arguments{
-\item{N}{The number of units. N must be a positive integer. (required)}
+\item{N}{The number of units in the sampling frame. Must be a positive integer. (required)}
 
-\item{prob}{prob is the probability of being sampled must be a real number between 0 and 1 inclusive, and must be of length 1. (optional)}
+\item{prob}{The probability of being sampled; must be a real number between 0 and 1 inclusive and of length 1. (optional)}
 
-\item{prob_unit}{prob is the probability of being sampled must be a real number between 0 and 1 inclusive, and must be of length N. (optional)}
+\item{prob_unit}{The probability of being sampled for each unit; must be a real number between 0 and 1 inclusive and of length N. Because units are drawn independently, this probability may differ from unit to unit. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Whether to verify before sampling that the arguments are internally consistent: that probabilities lie between 0 and 1, that vectors are of length N, and that only one of \code{prob} and \code{prob_unit} is supplied. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many samples from arguments that have already been verified; declaring the design once with \code{\link{declare_rs}()} and drawing from it with \code{\link{draw_rs}()} does this for you. (optional)}
 
-\item{simple}{logical. internal use only.}
+\item{simple}{Logical. Internal use only; leave at its default. \code{simple_rs} always draws units independently, and this argument exists so that the argument checker knows as much. (optional)}
 }
 \value{
-A vector length N indicating the probability of being sampled.
+A numeric vector of length N giving each unit's probability of being included in the sample.
 }
 \description{
 Returns each unit's probability of being sampled under simple random
@@ -34,16 +34,16 @@ depend on which other units were drawn.
 \details{
 These are the quantities inverse-probability weights are built from: weight
 each sampled unit by the reciprocal of its inclusion probability, which
-\code{\link{obtain_inclusion_probabilities}} extracts for you.
+\code{\link{obtain_inclusion_probabilities}()} extracts for you.
 }
 \examples{
-probs <- simple_ra_probabilities(N = 100)
+probs <- simple_rs_probabilities(N = 100)
 table(probs)
 
-probs <- simple_ra_probabilities(N = 100, prob = 0.3)
+probs <- simple_rs_probabilities(N = 100, prob = 0.3)
 table(probs)
 
 }
 \seealso{
-\code{\link{simple_rs}}
+\code{\link{simple_rs}()}
 }

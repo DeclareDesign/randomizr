@@ -19,38 +19,39 @@ balanced_ra_probabilities(
 \item{prob_unit}{A numeric vector of length N giving each unit's probability
 of assignment to treatment, for a two-arm design. Unlike elsewhere in
 randomizr these need not be equal across units; varying them is the point
-of this function.}
+of this function. Supply either \code{prob_unit} or \code{prob_unit_each}. (optional)}
 
 \item{prob_unit_each}{A numeric matrix with one row per unit and one column
 per condition, giving each unit's probability of assignment to each
-condition, for a multi-arm design. Rows must sum to 1.}
+condition, for a multi-arm design. Rows must sum to 1. Supply either
+\code{prob_unit} or \code{prob_unit_each}. (optional)}
 
 \item{blocks}{A vector of length N indicating which block each unit belongs
-to. When supplied, counts are held tight within each block.}
+to. When supplied, counts are held tight within each block. (optional)}
 
 \item{clusters}{A vector of length N indicating which cluster each unit
 belongs to. Whole clusters are assigned together, so the probabilities must
 be the same for every unit in a cluster, and the tight counts become counts
-of clusters rather than of units. May be combined with `blocks`, in which
-case every cluster must sit entirely inside one block.}
+of clusters rather than of units. May be combined with \code{blocks}, in which
+case every cluster must sit entirely inside one block. (optional)}
 
-\item{N}{The number of units. Inferred from the other arguments when omitted.}
+\item{N}{The number of units. Inferred from the other arguments when omitted. (optional)}
 
-\item{num_arms}{The number of treatment arms. Inferred when omitted.}
+\item{num_arms}{The number of treatment arms. Inferred when omitted. (optional)}
 
-\item{conditions}{A vector giving the names of the conditions.}
+\item{conditions}{A vector giving the names of the conditions. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1, that rows of a probability matrix sum to 1, that probabilities are constant within a cluster, and that clusters nest within blocks. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many assignments from probabilities that have already been verified. (optional)}
 }
 \value{
 A matrix of probabilities of assignment, one row per unit and one
-  column per condition, with columns named `prob_<condition>`.
+  column per condition, with columns named \code{prob_<condition>}.
 }
 \description{
 \strong{Experimental.} Returns the probability that each unit is assigned to
 each condition under [balanced_ra()]. Because those probabilities are supplied by
 the caller rather than derived from a design, this function mainly validates
-and normalises them into the matrix form the other `_probabilities` functions
+and normalises them into the matrix form the other \code{_probabilities} functions
 return.
 }
 \details{
@@ -61,5 +62,5 @@ each unit by the reciprocal of the probability of the condition it landed in.
 balanced_ra_probabilities(prob_unit = c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5))
 }
 \seealso{
-\code{\link{balanced_ra}}
+\code{\link{balanced_ra}()}
 }

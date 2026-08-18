@@ -1,10 +1,10 @@
 #' Simple Random Assignment
 #'
-#' \code{simple_ra} assigns units to treatment conditions independently, with each unit's assignment drawn as a separate Bernoulli trial. Because units are assigned independently, the number of units assigned to each condition varies from draw to draw. For most experimental applications in which the number of units is known in advance, \code{\link{complete_ra}} is preferable because it fixes the counts in each condition and thereby reduces sampling variability.
+#' \code{simple_ra} assigns units to treatment conditions independently, with each unit's assignment drawn as a separate Bernoulli trial. Because units are assigned independently, the number of units assigned to each condition varies from draw to draw. For most experimental applications in which the number of units is known in advance, \code{\link{complete_ra}()} is preferable because it fixes the counts in each condition and thereby reduces sampling variability.
 #'
 #' Simple random assignment is appropriate when units arrive sequentially and the total sample size is not known in advance, or when the assignment must proceed without coordinating across units. If only \code{N} is specified, a two-arm trial with \code{prob = 0.5} is assumed.
 #'
-#' @seealso \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{simple_rs}}, \code{\link{simple_ra_probabilities}}
+#' @seealso \code{\link{complete_ra}()}, \code{\link{block_ra}()}, \code{\link{simple_rs}()}, \code{\link{simple_ra_probabilities}()}
 #'
 #' @param N The number of units. Must be a positive integer. (required)
 #' @param prob Use for a two-arm design. The probability of assignment to treatment; must be a real number between 0 and 1 and of length 1. (optional)
@@ -12,8 +12,8 @@
 #' @param prob_each Use for a multi-arm design. A numeric vector or N-by-conditions matrix giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. (optional)
 #' @param num_arms The number of treatment arms. If unspecified, determined from the other arguments. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)
-#' @param check_inputs Logical. Defaults to \code{TRUE}.
-#' @param simple Logical. Internal use only.
+#' @param check_inputs Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1 and sum to 1, that vectors are of length N, that only one of \code{prob}, \code{prob_unit}, and \code{prob_each} is supplied, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the assignment needs must be supplied explicitly. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)
+#' @param simple Logical. Internal use only; leave at its default. \code{simple_ra} always assigns units independently, and this argument exists so that the argument checker knows as much. Setting it to \code{FALSE} does not change how units are assigned, but it will cause a \code{prob_unit} that varies across units to be rejected. (optional)
 #'
 #' @return A vector of length N indicating the treatment condition of each unit. Numeric in a two-arm trial; a factor (ordered by \code{conditions}) in a multi-arm trial.
 #' @export
@@ -21,28 +21,39 @@
 #' @examples
 #' # Two Group Designs
 #'
-#' Z <- simple_ra(N=100)
+#' Z <- simple_ra(N = 100)
 #' table(Z)
 #'
-#' Z <- simple_ra(N=100, prob=0.5)
+#' Z <- simple_ra(N = 100, prob = 0.5)
 #' table(Z)
 #'
-#' Z <- simple_ra(N=100, prob_each = c(0.3, 0.7),
+#' Z <- simple_ra(N = 100, prob_each = c(0.3, 0.7),
 #'                conditions = c("control", "treatment"))
 #' table(Z)
 #'
+#' # A probability of assignment that varies unit by unit
+#' Z <- simple_ra(N = 100, prob_unit = seq(0.1, 0.9, length.out = 100))
+#' table(Z)
+#'
+#' # Skipping the input checks. The checks are also what fill in defaults, so
+#' # conditions has to be given explicitly once they are skipped. In a
+#' # simulation, declare_ra() and conduct_ra() are the tidier way to check the
+#' # arguments once and then draw many assignments from them.
+#' Z <- simple_ra(N = 100, prob = 0.3, conditions = c(0, 1), check_inputs = FALSE)
+#' table(Z)
+#'
 #' # Multi-arm Designs
-#' Z <- simple_ra(N=100, num_arms=3)
+#' Z <- simple_ra(N = 100, num_arms = 3)
 #' table(Z)
 #'
-#' Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4))
+#' Z <- simple_ra(N = 100, prob_each = c(0.3, 0.3, 0.4))
 #' table(Z)
 #'
-#' Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4),
-#'                conditions=c("control", "placebo", "treatment"))
+#' Z <- simple_ra(N = 100, prob_each = c(0.3, 0.3, 0.4),
+#'                conditions = c("control", "placebo", "treatment"))
 #' table(Z)
 #'
-#' Z <- simple_ra(N=100, conditions=c("control", "placebo", "treatment"))
+#' Z <- simple_ra(N = 100, conditions = c("control", "placebo", "treatment"))
 #' table(Z)
 simple_ra <- function(N,
                       prob = NULL,
@@ -69,37 +80,37 @@ simple_ra <- function(N,
 #'
 #' These are the quantities inverse-probability weights are built from: weight
 #' each unit by the reciprocal of the probability of the condition it landed in,
-#' which \code{\link{obtain_condition_probabilities}} extracts for you.
+#' which \code{\link{obtain_condition_probabilities}()} extracts for you.
 #'
-#' @seealso \code{\link{simple_ra}}
+#' @seealso \code{\link{simple_ra}()}
 #'
 #' @inheritParams simple_ra
-#' @return A matrix of probabilities of assignment
+#' @return A matrix with N rows and one column per treatment condition, with columns named \code{prob_<condition>}. Entry (i, j) is the probability that unit i is assigned to condition j, and every row sums to 1.
 #'
 #' @examples
 #' # Two Group Designs
-#' prob_mat <- simple_ra_probabilities(N=100)
+#' prob_mat <- simple_ra_probabilities(N = 100)
 #' head(prob_mat)
 #'
-#' prob_mat <- simple_ra_probabilities(N=100, prob=0.5)
+#' prob_mat <- simple_ra_probabilities(N = 100, prob = 0.5)
 #' head(prob_mat)
 #'
-#' prob_mat <- simple_ra_probabilities(N=100, prob_each = c(0.3, 0.7),
+#' prob_mat <- simple_ra_probabilities(N = 100, prob_each = c(0.3, 0.7),
 #'                         conditions = c("control", "treatment"))
 #' head(prob_mat)
 #'
 #' # Multi-arm Designs
-#' prob_mat <- simple_ra_probabilities(N=100, num_arms=3)
+#' prob_mat <- simple_ra_probabilities(N = 100, num_arms = 3)
 #' head(prob_mat)
 #'
-#' prob_mat <- simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4))
+#' prob_mat <- simple_ra_probabilities(N = 100, prob_each = c(0.3, 0.3, 0.4))
 #' head(prob_mat)
 #'
-#' prob_mat <- simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4),
-#'                         conditions=c("control", "placebo", "treatment"))
+#' prob_mat <- simple_ra_probabilities(N = 100, prob_each = c(0.3, 0.3, 0.4),
+#'                         conditions = c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
-#' prob_mat <- simple_ra_probabilities(N=100, conditions=c("control", "placebo", "treatment"))
+#' prob_mat <- simple_ra_probabilities(N = 100, conditions = c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
 #' @export

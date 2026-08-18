@@ -14,27 +14,28 @@ complete_rs(
 )
 }
 \arguments{
-\item{N}{The number of units. N must be a positive integer. (required)}
+\item{N}{The number of units in the sampling frame. Must be a positive integer. (required)}
 
-\item{n}{Use for a design in which exactly n units are sampled. (optional)}
+\item{n}{Use for a design in which exactly \code{n} units are sampled. (optional)}
 
-\item{n_unit}{unique(n_unit) will be passed to \code{n}. Must be the same for all units (optional)}
+\item{n_unit}{\code{unique(n_unit)} will be passed to \code{n}; must be the same for all units and of length N. (optional)}
 
-\item{prob}{Use for a design in which either floor(N*prob) or ceiling(N*prob) units are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units will be sampled and with probability prob, ceiling(N*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
+\item{prob}{Use for a design in which either \code{floor(N*prob)} or \code{ceiling(N*prob)} units are sampled, chosen so that each unit's probability of inclusion is exactly \code{prob}. Must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{prob_unit}{unique(prob_unit) will be passed to the prob argument and must be the same for all units.}
+\item{prob_unit}{\code{unique(prob_unit)} will be passed to \code{prob}; must be the same for all units and of length N. Under complete random sampling the probability cannot vary by unit; use \code{\link{simple_rs}()} if it must. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Whether to verify before sampling that the arguments are internally consistent: that \code{n} does not exceed N, that probabilities lie between 0 and 1, that vectors are of length N, and so on. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many samples from arguments that have already been verified; declaring the design once with \code{\link{declare_rs}()} and drawing from it with \code{\link{draw_rs}()} does this for you. (optional)}
 }
 \value{
-A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
+A numeric vector of length N indicating whether each unit is sampled (1) or not (0).
 }
 \description{
-complete_rs implements a random sampling procedure in which fixed numbers of units are sampled. The canonical example of complete random sampling is a procedure in which exactly n of N units are sampled.\cr \cr
-Users can set the exact number of units to sample with n. Alternatively, users can specify the probability of being sampled with prob and complete_rs will infer the correct number of units to sample.
-complete_rs will either sample floor(N*prob) or ceiling(N*prob) units, choosing between these two values to ensure that the overall probability of being sampled is exactly prob.
-Users should specify N and not more than one of n or prob. \cr \cr
-If only N is specified, N/2 units will be sampled. If N is odd, either floor(N/2) units or ceiling(N/2) units will be sampled.
+\code{complete_rs} draws a sample of a fixed size: exactly \code{n} of \code{N} units are sampled on every draw. Fixing the sample size is what distinguishes it from simple random sampling, where the realized size varies.
+}
+\details{
+Set the number of units to sample directly with \code{n}, or give a target probability with \code{prob} and let \code{complete_rs} work out the number. When \code{N*prob} is not a whole number, either \code{floor(N*prob)} or \code{ceiling(N*prob)} units are sampled: the ceiling is drawn with probability equal to the fractional part of \code{N*prob} and the floor otherwise, which makes each unit's probability of inclusion exactly \code{prob}. Specify \code{N} and not more than one of \code{n} or \code{prob}.
+
+If only \code{N} is specified, half the units are sampled. When \code{N} is odd, either \code{floor(N/2)} or \code{ceiling(N/2)} units are sampled.
 }
 \examples{
 S <- complete_rs(N = 100)
@@ -43,24 +44,27 @@ table(S)
 S <- complete_rs(N = 100, n = 50)
 table(S)
 
-S <- complete_rs(N = 100, n_unit = rep(50, 100))
+S <- complete_rs(N = 100, n_unit = rep(30, 100))
 table(S)
 
-S <- complete_rs(N = 100, prob = .111)
+S <- complete_rs(N = 100, prob = 0.111)
 table(S)
 
-S <- complete_rs(N = 100, prob_unit = rep(.1, 100))
+S <- complete_rs(N = 100, prob_unit = rep(0.1, 100))
 table(S)
 
-# If N = n, sample with 100\% probability...
-complete_rs(N=2, n=2)
+# If N = n, every unit is sampled with probability 1
+complete_rs(N = 2, n = 2)
 
-# Up through randomizr 0.12.0, 
-# This behavior has been deprecated
-complete_rs(N=1, n=1) # sampled with 50\% probability
+# The single-unit case works the same way: n = 1 out of N = 1 is sampled
+# with probability 1. Up through randomizr 0.12.0 this case was instead
+# treated as a coin flip, so the unit was sampled only half of the time.
+# The change is noted here because it silently alters the inclusion
+# probabilities in code written against those versions.
+complete_rs(N = 1, n = 1)
 
 
 }
 \seealso{
-\code{\link{simple_rs}}, \code{\link{strata_rs}}, \code{\link{cluster_rs}}, \code{\link{complete_ra}}, \code{\link{complete_rs_probabilities}}
+\code{\link{simple_rs}()}, \code{\link{strata_rs}()}, \code{\link{cluster_rs}()}, \code{\link{complete_ra}()}, \code{\link{complete_rs_probabilities}()}
 }

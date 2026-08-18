@@ -2,7 +2,7 @@
 % Please edit documentation in R/declare_ra.R
 \name{obtain_condition_probabilities}
 \alias{obtain_condition_probabilities}
-\title{Obtain the probabilities of units being in the conditions that they are in.}
+\title{Obtain the Probability of the Condition Each Unit Is In}
 \usage{
 obtain_condition_probabilities(
   declaration = NULL,
@@ -28,9 +28,9 @@ obtain_condition_probabilities(
 )
 }
 \arguments{
-\item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
+\item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}()}. Supply either a declaration or the design arguments that \code{declare_ra()} takes. (optional)}
 
-\item{assignment}{A vector of random assignments, often created by \code{\link{conduct_ra}}.}
+\item{assignment}{A vector of random assignments, often created by \code{\link{conduct_ra}()}. (required)}
 
 \item{N}{The number of units. Must be a positive integer. (required)}
 
@@ -64,9 +64,9 @@ obtain_condition_probabilities(
 
 \item{simple}{Logical, defaults to \code{FALSE}. If \code{TRUE}, simple random assignment is used. Do not specify \code{m}, \code{m_each}, \code{block_m}, or \code{block_m_each} when \code{simple = TRUE}. (optional)}
 
-\item{permutation_matrix}{For custom random assignment procedures. (optional)}
+\item{permutation_matrix}{For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)}
 
-\item{check_inputs}{Logical. Defaults to \code{TRUE}.}
+\item{check_inputs}{Logical. Whether to verify before declaring that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that block-level arguments have one entry per block, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the design needs must be supplied explicitly. It is skipped entirely when \code{permutation_matrix} is supplied. (optional)}
 }
 \value{
 A vector of length N giving, for each unit, the probability that it
@@ -75,23 +75,26 @@ A vector of length N giving, for each unit, the probability that it
   reciprocal of its value here.
 }
 \description{
-Give obtain_condition_probabilities() a declaration made by \code{\link{declare_ra}}, or describe the design inline with the same arguments \code{declare_ra} takes.\cr \cr
-This function is especially useful when units have different probabilities of assignment and the analyst plans to use inverse-probability weights.
+A declaration holds the probability of every condition for every unit. \code{obtain_condition_probabilities} picks out, for each unit, the one probability that corresponds to the condition it was actually assigned to. Give it a declaration made by \code{\link{declare_ra}()}, or describe the design inline with the same arguments \code{declare_ra()} takes.\cr \cr
+This function is especially useful when units have different probabilities of assignment and the analyst plans to use inverse-probability weights: the weights are the reciprocals of what it returns.
 }
 \examples{
 
-# Conduct a block random assignment
-blocks <- rep(c("A", "B","C"), times=c(50, 100, 200))
+# Conduct a block random assignment in which the blocks have different
+# probabilities of assignment to treatment
+blocks <- rep(c("A", "B", "C"), times = c(50, 100, 200))
+
 block_m_each <- rbind(c(10, 40),
-                 c(30, 70),
-                 c(50, 150))
+                      c(30, 70),
+                      c(50, 150))
+
 declaration <- declare_ra(blocks = blocks, block_m_each = block_m_each)
+
 Z <- conduct_ra(declaration = declaration)
 table(Z, blocks)
 
 observed_probabilities <-
    obtain_condition_probabilities(declaration = declaration, assignment = Z)
-
 
 # Probabilities in the control group:
 table(observed_probabilities[Z == 0], blocks[Z == 0])
@@ -99,17 +102,22 @@ table(observed_probabilities[Z == 0], blocks[Z == 0])
 # Probabilities in the treatment group:
 table(observed_probabilities[Z == 1], blocks[Z == 1])
 
+# The weights for an inverse-probability-weighted regression
+ipw <- 1 / observed_probabilities
+
 
 # Sometimes it is convenient to skip the declaration step
 Z <- conduct_ra(blocks = blocks, block_m_each = block_m_each)
+
 observed_probabilities <-
    obtain_condition_probabilities(assignment = Z,
                                   blocks = blocks,
                                   block_m_each = block_m_each)
+
 table(observed_probabilities[Z == 0], blocks[Z == 0])
 table(observed_probabilities[Z == 1], blocks[Z == 1])
 
 }
 \seealso{
-\code{\link{declare_ra}}, \code{\link{conduct_ra}}
+\code{\link{declare_ra}()}, \code{\link{conduct_ra}()}
 }

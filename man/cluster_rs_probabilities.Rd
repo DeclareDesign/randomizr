@@ -15,22 +15,22 @@ cluster_rs_probabilities(
 )
 }
 \arguments{
-\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N indicating which cluster each unit belongs to. (required)}
 
-\item{n}{Use for a design in which n clusters are sampled. (optional)}
+\item{n}{Use for a design in which exactly \code{n} clusters are sampled. (optional)}
 
-\item{n_unit}{unique(n_unit) will be passed to \code{n}. Must be the same for all units (optional)}
+\item{n_unit}{\code{unique(n_unit)} will be passed to \code{n}; must be the same for all units and of length N. (optional)}
 
-\item{prob}{Use for a design in which either floor(N_clusters*prob) or ceiling(N_clusters*prob) clusters are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters*prob) clusters will be sampled and with probability prob, ceiling(N_clusters*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
+\item{prob}{Use for a design in which either \code{floor(N_clusters*prob)} or \code{ceiling(N_clusters*prob)} clusters are sampled. Which of the two is used is itself random: the ceiling is drawn with probability equal to the fractional part of \code{N_clusters*prob} and the floor otherwise, which makes each cluster's probability of inclusion exactly \code{prob}. Must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{prob_unit}{unique(prob_unit) will be passed to the prob argument and must be the same for all units.}
+\item{prob_unit}{\code{unique(prob_unit)} will be passed to \code{prob}; must be the same for all units and of length N. (optional)}
 
-\item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling of clusters. When simple = TRUE, please do not specify n.}
+\item{simple}{Logical, defaults to \code{FALSE}. If \code{TRUE}, clusters are drawn independently (simple random sampling of clusters), so the number of sampled clusters varies from draw to draw. Do not specify \code{n} when \code{simple = TRUE}. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Whether to verify before sampling that the arguments are internally consistent: that \code{n} does not exceed the number of clusters, that probabilities lie between 0 and 1, and so on. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many samples from arguments that have already been verified; declaring the design once with \code{\link{declare_rs}()} and drawing from it with \code{\link{draw_rs}()} does this for you. (optional)}
 }
 \value{
-A vector length N indicating the probability of being sampled.
+A numeric vector of length N giving each unit's probability of being included in the sample. Every unit in a cluster shares one probability.
 }
 \description{
 Returns each unit's probability of being sampled when whole clusters are
@@ -39,23 +39,23 @@ drawn. Every unit in a cluster shares its cluster's probability.
 \details{
 These are the quantities inverse-probability weights are built from: weight
 each sampled unit by the reciprocal of its inclusion probability, which
-\code{\link{obtain_inclusion_probabilities}} extracts for you.
+\code{\link{obtain_inclusion_probabilities}()} extracts for you.
 }
 \examples{
 
-# Two Group Designs
-clusters <- rep(letters, times = 1:26)
+clusters <- rep(letters[1:10], times = 1:10)
+
 probs <- cluster_rs_probabilities(clusters = clusters)
 table(probs, clusters)
 
-prob_mat <- cluster_rs_probabilities(clusters = clusters, n = 10)
+probs <- cluster_rs_probabilities(clusters = clusters, n = 4)
 table(probs, clusters)
 
-prob_mat <- cluster_rs_probabilities(clusters = clusters, prob = .3)
+probs <- cluster_rs_probabilities(clusters = clusters, prob = 0.3)
 table(probs, clusters)
 
 
 }
 \seealso{
-\code{\link{cluster_rs}}
+\code{\link{cluster_rs}()}
 }

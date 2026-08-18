@@ -1,10 +1,10 @@
 #' Declare a Random Assignment Procedure
 #'
-#' \code{declare_ra} creates a reusable declaration object that captures all the parameters of a random assignment procedure. The declaration separates the specification of the design from the act of conducting it: call \code{declare_ra} once to fix the design, then call \code{\link{conduct_ra}} repeatedly (for example, across simulation iterations) to draw assignments from the declared procedure. The declaration also precomputes and caches the probability of assignment for each unit, which \code{\link{obtain_condition_probabilities}} returns for use in inverse-probability-weighted estimators.
+#' \code{declare_ra} creates a reusable declaration object that captures all the parameters of a random assignment procedure. The declaration separates the specification of the design from the act of conducting it: call \code{declare_ra} once to fix the design, then call \code{\link{conduct_ra}()} repeatedly (for example, across simulation iterations) to draw assignments from the declared procedure. The declaration also precomputes and caches the probability of assignment for each unit, which \code{\link{obtain_condition_probabilities}()} returns for use in inverse-probability-weighted estimators.
 #'
-#' \code{declare_ra} supports simple, complete, blocked, clustered, and blocked-and-clustered designs. It dispatches to the appropriate low-level function (\code{\link{simple_ra}}, \code{\link{complete_ra}}, \code{\link{block_ra}}, \code{\link{cluster_ra}}, or \code{\link{block_and_cluster_ra}}) based on which arguments are supplied.
+#' \code{declare_ra} supports simple, complete, blocked, clustered, and blocked-and-clustered designs. It dispatches to the appropriate low-level function (\code{\link{simple_ra}()}, \code{\link{complete_ra}()}, \code{\link{block_ra}()}, \code{\link{cluster_ra}()}, or \code{\link{block_and_cluster_ra}()}) based on which arguments are supplied.
 #'
-#' @seealso \code{\link{conduct_ra}}, \code{\link{obtain_condition_probabilities}}, \code{\link{declare_rs}}
+#' @seealso \code{\link{conduct_ra}()}, \code{\link{obtain_condition_probabilities}()}, \code{\link{declare_rs}()}
 #'
 #' @param N The number of units. Must be a positive integer. (required)
 #' @param blocks A vector of length N indicating which block each unit belongs to. Supply to use blocked random assignment. (optional)
@@ -22,8 +22,8 @@
 #' @param num_arms The number of treatment arms. If unspecified, determined from the other arguments. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)
 #' @param simple Logical, defaults to \code{FALSE}. If \code{TRUE}, simple random assignment is used. Do not specify \code{m}, \code{m_each}, \code{block_m}, or \code{block_m_each} when \code{simple = TRUE}. (optional)
-#' @param permutation_matrix For custom random assignment procedures. (optional)
-#' @param check_inputs Logical. Defaults to \code{TRUE}.
+#' @param permutation_matrix For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)
+#' @param check_inputs Logical. Whether to verify before declaring that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that block-level arguments have one entry per block, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the design needs must be supplied explicitly. It is skipped entirely when \code{permutation_matrix} is supplied. (optional)
 #'
 #' @return A list of class \code{"ra_declaration"} with entries:
 #'   \describe{
@@ -35,10 +35,11 @@
 #'   }
 #'
 #' @examples
-#' # The declare_ra function is used in three ways:
+#' # A declaration is used in three ways.
 #'
 #' # 1. To obtain some basic facts about a randomization:
-#' declaration <- declare_ra(N=100, m_each=c(30, 30, 40))
+#'
+#' declaration <- declare_ra(N = 100, m_each = c(30, 30, 40))
 #' declaration
 #'
 #' # 2. To conduct a random assignment:
@@ -46,57 +47,69 @@
 #' Z <- conduct_ra(declaration)
 #' table(Z)
 #'
-#' # 3. To obtain observed condition probabilities
+#' # 3. To obtain the probability that each unit is in the condition it is in:
 #'
 #' probs <- obtain_condition_probabilities(declaration, Z)
 #' table(probs, Z)
 #'
+#'
 #' # Simple Random Assignment Declarations
 #'
-#' declare_ra(N=100, simple = TRUE)
-#' declare_ra(N=100, prob = .4, simple = TRUE)
-#' declare_ra(N=100, prob_each=c(0.3, 0.3, 0.4),
-#'            conditions=c("control", "placebo", "treatment"), simple=TRUE)
+#' declare_ra(N = 100, simple = TRUE)
+#'
+#' declare_ra(N = 100, prob = 0.4, simple = TRUE)
+#'
+#' declare_ra(N = 100, prob_each = c(0.3, 0.3, 0.4),
+#'            conditions = c("control", "placebo", "treatment"), simple = TRUE)
+#'
 #'
 #' # Complete Random Assignment Declarations
 #'
-#' declare_ra(N=100)
-#' declare_ra(N=100, m_each = c(30, 70),
+#' declare_ra(N = 100)
+#'
+#' declare_ra(N = 100, m_each = c(30, 70),
 #'            conditions = c("control", "treatment"))
-#' declare_ra(N=100, m_each=c(30, 30, 40))
+#'
+#' declare_ra(N = 100, m_each = c(30, 30, 40))
 #'
 #'
 #' # Block Random Assignment Declarations
 #'
-#' blocks <- rep(c("A", "B","C"), times = c(50, 100, 200))
-#  declare_ra(blocks = blocks)
+#' blocks <- rep(c("A", "B", "C"), times = c(50, 100, 200))
+#' declare_ra(blocks = blocks)
 #'
+#' # One row per block, one column per arm
 #' block_m_each <- rbind(c(10, 40),
-#'                  c(30, 70),
-#'                  c(50, 150))
+#'                       c(30, 70),
+#'                       c(50, 150))
+#'
 #' declare_ra(blocks = blocks, block_m_each = block_m_each)
 #'
 #'
 #' # Cluster Random Assignment Declarations
 #'
-#' clusters <- rep(letters, times = 1:26)
+#' clusters <- rep(letters[1:10], times = 1:10)
+#'
 #' declare_ra(clusters = clusters)
-#' declare_ra(clusters = clusters, m_each = c(7, 7, 12))
+#'
+#' declare_ra(clusters = clusters, m_each = c(3, 3, 4))
+#'
 #'
 #' # Blocked and Clustered Random Assignment Declarations
 #'
-#' clusters <- rep(letters, times=1:26)
+#' clusters <- rep(letters[1:12], times = 1:12)
+#'
 #' blocks <- rep(NA, length(clusters))
-#' blocks[clusters %in% letters[1:5]] <- "block_1"
-#' blocks[clusters %in% letters[6:10]] <- "block_2"
-#' blocks[clusters %in% letters[11:15]] <- "block_3"
-#' blocks[clusters %in% letters[16:20]] <- "block_4"
-#' blocks[clusters %in% letters[21:26]] <- "block_5"
+#' blocks[clusters %in% letters[1:3]] <- "block_1"
+#' blocks[clusters %in% letters[4:6]] <- "block_2"
+#' blocks[clusters %in% letters[7:9]] <- "block_3"
+#' blocks[clusters %in% letters[10:12]] <- "block_4"
 #'
 #' table(blocks, clusters)
 #'
 #' declare_ra(clusters = clusters, blocks = blocks)
-#' declare_ra(clusters = clusters, blocks = blocks, prob_each = c(.2, .5, .3))
+#'
+#' declare_ra(clusters = clusters, blocks = blocks, prob_each = c(0.2, 0.5, 0.3))
 #'
 #' @export
 declare_ra <- function(N = NULL,
@@ -184,30 +197,32 @@ declare_ra <- function(N = NULL,
 }
 
 
-#' Conduct a random assignment
+#' Conduct a Random Assignment
 #'
 #' \code{conduct_ra} draws one random assignment from a design. Give it a
-#' declaration made by \code{\link{declare_ra}}, or describe the design inline
-#' with the same arguments \code{declare_ra} takes. Declaring first pays off
+#' declaration made by \code{\link{declare_ra}()}, or describe the design inline
+#' with the same arguments \code{declare_ra()} takes. Declaring first pays off
 #' when the same design is drawn repeatedly, or when the assignment
-#' probabilities are needed later by \code{\link{obtain_condition_probabilities}}.
+#' probabilities are needed later by \code{\link{obtain_condition_probabilities}()}.
 #'
-#' @param declaration A random assignment declaration, created by \code{\link{declare_ra}}.
+#' @param declaration A random assignment declaration, created by \code{\link{declare_ra}()}. Supply either a declaration or the design arguments listed below, which are the ones \code{declare_ra()} takes: given those, \code{conduct_ra} builds a declaration internally and draws one assignment from it. (optional)
 #' @inheritParams declare_ra
 #' @examples
+#' # Declare the design once, then draw from it
 #' declaration <- declare_ra(N = 100, m_each = c(30, 30, 40))
+#'
 #' Z <- conduct_ra(declaration = declaration)
 #' table(Z)
 #'
-#' # equivalent to
-#'
+#' # Equivalent, and convenient for a one-off assignment: describe the design
+#' # inline and skip the declaration
 #' Z <- conduct_ra(N = 100, m_each = c(30, 30, 40))
 #' table(Z)
 #'
 #' @return A vector of length N giving the treatment condition of each unit,
 #'   numeric in a two-arm design and a factor (ordered by \code{conditions}) in
 #'   a multi-arm design.
-#' @seealso \code{\link{declare_ra}}, \code{\link{obtain_condition_probabilities}}
+#' @seealso \code{\link{declare_ra}()}, \code{\link{obtain_condition_probabilities}()}
 #' @export
 conduct_ra <- function(declaration = NULL) {
   if (is.null(declaration)) {
@@ -221,30 +236,33 @@ conduct_ra <- function(declaration = NULL) {
 
 formals(conduct_ra) <- c(formals(conduct_ra), formals(declare_ra))
 
-#' Obtain the probabilities of units being in the conditions that they are in.
+#' Obtain the Probability of the Condition Each Unit Is In
 #'
-#' Give obtain_condition_probabilities() a declaration made by \code{\link{declare_ra}}, or describe the design inline with the same arguments \code{declare_ra} takes.\cr \cr
-#' This function is especially useful when units have different probabilities of assignment and the analyst plans to use inverse-probability weights.
+#' A declaration holds the probability of every condition for every unit. \code{obtain_condition_probabilities} picks out, for each unit, the one probability that corresponds to the condition it was actually assigned to. Give it a declaration made by \code{\link{declare_ra}()}, or describe the design inline with the same arguments \code{declare_ra()} takes.\cr \cr
+#' This function is especially useful when units have different probabilities of assignment and the analyst plans to use inverse-probability weights: the weights are the reciprocals of what it returns.
 #'
 #'
-#' @param declaration A random assignment declaration, created by \code{\link{declare_ra}}.
-#' @param assignment A vector of random assignments, often created by \code{\link{conduct_ra}}.
+#' @param declaration A random assignment declaration, created by \code{\link{declare_ra}()}. Supply either a declaration or the design arguments that \code{declare_ra()} takes. (optional)
+#' @param assignment A vector of random assignments, often created by \code{\link{conduct_ra}()}. (required)
 #' @inheritParams declare_ra
 #'
 #' @examples
 #'
-#' # Conduct a block random assignment
-#' blocks <- rep(c("A", "B","C"), times=c(50, 100, 200))
+#' # Conduct a block random assignment in which the blocks have different
+#' # probabilities of assignment to treatment
+#' blocks <- rep(c("A", "B", "C"), times = c(50, 100, 200))
+#'
 #' block_m_each <- rbind(c(10, 40),
-#'                  c(30, 70),
-#'                  c(50, 150))
+#'                       c(30, 70),
+#'                       c(50, 150))
+#'
 #' declaration <- declare_ra(blocks = blocks, block_m_each = block_m_each)
+#'
 #' Z <- conduct_ra(declaration = declaration)
 #' table(Z, blocks)
 #'
 #' observed_probabilities <-
 #'    obtain_condition_probabilities(declaration = declaration, assignment = Z)
-#'
 #'
 #' # Probabilities in the control group:
 #' table(observed_probabilities[Z == 0], blocks[Z == 0])
@@ -252,13 +270,18 @@ formals(conduct_ra) <- c(formals(conduct_ra), formals(declare_ra))
 #' # Probabilities in the treatment group:
 #' table(observed_probabilities[Z == 1], blocks[Z == 1])
 #'
+#' # The weights for an inverse-probability-weighted regression
+#' ipw <- 1 / observed_probabilities
+#'
 #'
 #' # Sometimes it is convenient to skip the declaration step
 #' Z <- conduct_ra(blocks = blocks, block_m_each = block_m_each)
+#'
 #' observed_probabilities <-
 #'    obtain_condition_probabilities(assignment = Z,
 #'                                   blocks = blocks,
 #'                                   block_m_each = block_m_each)
+#'
 #' table(observed_probabilities[Z == 0], blocks[Z == 0])
 #' table(observed_probabilities[Z == 1], blocks[Z == 1])
 #'
@@ -266,7 +289,7 @@ formals(conduct_ra) <- c(formals(conduct_ra), formals(declare_ra))
 #'   was assigned to the condition it is actually in. These are the quantities
 #'   inverse-probability weights are built from: weight each unit by the
 #'   reciprocal of its value here.
-#' @seealso \code{\link{declare_ra}}, \code{\link{conduct_ra}}
+#' @seealso \code{\link{declare_ra}()}, \code{\link{conduct_ra}()}
 #' @export
 obtain_condition_probabilities <-
   function(declaration = NULL,

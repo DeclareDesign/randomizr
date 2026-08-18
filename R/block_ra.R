@@ -4,10 +4,10 @@
 #'
 #' In the simplest two-arm case with no arguments beyond \code{blocks}, the function assigns approximately half the units in each block to treatment. Researchers can specify exact counts (via \code{block_m}) or target probabilities that are held constant (via \code{prob}) or allowed to vary (via \code{block_prob}) across blocks.
 #'
-#' @seealso \code{\link{complete_ra}}, \code{\link{block_and_cluster_ra}}, \code{\link{strata_rs}}, \code{\link{block_ra_probabilities}}
+#' @seealso \code{\link{complete_ra}()}, \code{\link{block_and_cluster_ra}()}, \code{\link{strata_rs}()}, \code{\link{block_ra_probabilities}()}
 #'
 #' @param blocks A vector of length N indicating which block each unit belongs to. Can be character, factor, or numeric. (required)
-#' @param prob Use for a two-arm design in which either \code{floor(N_block*prob)} or \code{ceiling(N_block*prob)} units are assigned to treatment within each block. The probability of assignment to treatment is exactly \code{prob} because with probability \code{1-prob}, \code{floor(N_block*prob)} units will be assigned to treatment and with probability \code{prob}, \code{ceiling(N_block*prob)} units will be assigned to treatment. Must be a real number between 0 and 1. (optional)
+#' @param prob Use for a two-arm design in which either \code{floor(N_block*prob)} or \code{ceiling(N_block*prob)} units are assigned to treatment within each block. Which of the two is used is itself random: the ceiling is drawn with probability equal to the fractional part of \code{N_block*prob} and the floor otherwise, which makes each unit's probability of assignment exactly \code{prob}. When \code{N_block*prob} is a whole number the count is fixed. Must be a real number between 0 and 1. (optional)
 #' @param prob_unit Use for a two-arm design. Must be of length N. \code{tapply(prob_unit, blocks, unique)} will be passed to \code{block_prob}. (optional)
 #' @param prob_each Use for a multi-arm design in which the values of \code{prob_each} determine the probabilities of assignment to each treatment condition. Must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 and the total must sum to 1. Because of integer rounding, the exact number of units assigned to each condition may differ slightly from assignment to assignment, but the overall probability of assignment is exactly \code{prob_each}. (optional)
 #' @param m Use for a two-arm design in which the scalar \code{m} gives the fixed number of units to assign to treatment within every block. This count does not vary across blocks. (optional)
@@ -18,9 +18,9 @@
 #' @param block_prob_each Use for a multi-arm design in which assignment probabilities vary across blocks. Must be a matrix with one row per block and one column per treatment arm. Each row must sum to 1. Rows respect the ordering of \code{sort(unique(blocks))}. (optional)
 #' @param num_arms The number of treatment arms. If unspecified, determined from the other arguments. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)
-#' @param check_inputs Logical. Defaults to \code{TRUE}.
-#' @param .block_int Internal use only. Pre-computed integer encoding of \code{blocks}, passed by \code{conduct_ra} when a declaration was created with \code{declare_ra}. Users should never set this argument.
-#' @param .N_per_block Internal use only. Pre-computed block sizes corresponding to \code{.block_int}, passed by \code{conduct_ra}. Users should never set this argument.
+#' @param check_inputs Logical. Whether to verify before assigning that the arguments are internally consistent: that counts sum to the block sizes, that probabilities lie between 0 and 1 and sum to 1, that matrices have one row per block, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the assignment needs must be supplied explicitly. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)
+#' @param .block_int Internal use only. Pre-computed integer encoding of \code{blocks}, passed by \code{\link{conduct_ra}()} when a declaration was created with \code{\link{declare_ra}()}. Users should never set this argument. (optional)
+#' @param .N_per_block Internal use only. Pre-computed block sizes corresponding to \code{.block_int}, passed by \code{\link{conduct_ra}()}. Users should never set this argument. (optional)
 #'
 #' @return A vector of length N indicating the treatment condition of each unit. Numeric in a two-arm trial; a factor (ordered by \code{conditions}) in a multi-arm trial.
 #' @export
@@ -34,14 +34,14 @@
 #' Z <- block_ra(blocks = blocks)
 #' table(blocks, Z)
 #'
-#' Z <- block_ra(blocks = blocks, prob = .3)
+#' Z <- block_ra(blocks = blocks, prob = 0.3)
 #' table(blocks, Z)
 #'
-#' Z <- block_ra(blocks = blocks, block_prob = c(.1, .2, .3))
+#' Z <- block_ra(blocks = blocks, block_prob = c(0.1, 0.2, 0.3))
 #' table(blocks, Z)
 #' 
 #' Z <- block_ra(blocks = blocks, 
-#'               prob_unit = rep(c(.1, .2, .3), 
+#'               prob_unit = rep(c(0.1, 0.2, 0.3), 
 #'                               times = c(50, 100, 200)))
 #' table(blocks, Z)
 #'
@@ -85,7 +85,7 @@
 #'               conditions = c("control", "placebo", "treatment"))
 #' table(blocks, Z)
 #'
-#' Z <- block_ra(blocks = blocks, prob_each = c(.1, .1, .8))
+#' Z <- block_ra(blocks = blocks, prob_each = c(0.1, 0.1, 0.8))
 #' table(blocks, Z)
 #'
 #'
@@ -203,12 +203,12 @@ block_ra <- function(blocks = NULL,
 #'
 #' These are the quantities inverse-probability weights are built from: weight
 #' each unit by the reciprocal of the probability of the condition it landed in,
-#' which \code{\link{obtain_condition_probabilities}} extracts for you.
+#' which \code{\link{obtain_condition_probabilities}()} extracts for you.
 #'
-#' @seealso \code{\link{block_ra}}
+#' @seealso \code{\link{block_ra}()}
 #'
 #' @inheritParams block_ra
-#' @return A matrix of probabilities of assignment
+#' @return A matrix with N rows and one column per treatment condition, with columns named \code{prob_<condition>}. Entry (i, j) is the probability that unit i is assigned to condition j, and every row sums to 1.
 #'
 #' @examples
 #'
@@ -244,11 +244,11 @@ block_ra <- function(blocks = NULL,
 #' prob_mat <- block_ra_probabilities(blocks = blocks, block_m_each = block_m_each)
 #' head(prob_mat)
 #'
-#' prob_mat <- block_ra_probabilities(blocks=blocks, block_m_each=block_m_each,
-#'                        conditions=c("control", "placebo", "treatment"))
+#' prob_mat <- block_ra_probabilities(blocks = blocks, block_m_each = block_m_each,
+#'                        conditions = c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
-#' prob_mat <- block_ra_probabilities(blocks=blocks, prob_each=c(.1, .1, .8))
+#' prob_mat <- block_ra_probabilities(blocks = blocks, prob_each = c(0.1, 0.1, 0.8))
 #' head(prob_mat)
 #'
 #' @export

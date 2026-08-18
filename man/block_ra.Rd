@@ -25,7 +25,7 @@ block_ra(
 \arguments{
 \item{blocks}{A vector of length N indicating which block each unit belongs to. Can be character, factor, or numeric. (required)}
 
-\item{prob}{Use for a two-arm design in which either \code{floor(N_block*prob)} or \code{ceiling(N_block*prob)} units are assigned to treatment within each block. The probability of assignment to treatment is exactly \code{prob} because with probability \code{1-prob}, \code{floor(N_block*prob)} units will be assigned to treatment and with probability \code{prob}, \code{ceiling(N_block*prob)} units will be assigned to treatment. Must be a real number between 0 and 1. (optional)}
+\item{prob}{Use for a two-arm design in which either \code{floor(N_block*prob)} or \code{ceiling(N_block*prob)} units are assigned to treatment within each block. Which of the two is used is itself random: the ceiling is drawn with probability equal to the fractional part of \code{N_block*prob} and the floor otherwise, which makes each unit's probability of assignment exactly \code{prob}. When \code{N_block*prob} is a whole number the count is fixed. Must be a real number between 0 and 1. (optional)}
 
 \item{prob_unit}{Use for a two-arm design. Must be of length N. \code{tapply(prob_unit, blocks, unique)} will be passed to \code{block_prob}. (optional)}
 
@@ -47,11 +47,11 @@ block_ra(
 
 \item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)}
 
-\item{check_inputs}{Logical. Defaults to \code{TRUE}.}
+\item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that counts sum to the block sizes, that probabilities lie between 0 and 1 and sum to 1, that matrices have one row per block, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the assignment needs must be supplied explicitly. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)}
 
-\item{.block_int}{Internal use only. Pre-computed integer encoding of \code{blocks}, passed by \code{conduct_ra} when a declaration was created with \code{declare_ra}. Users should never set this argument.}
+\item{.block_int}{Internal use only. Pre-computed integer encoding of \code{blocks}, passed by \code{\link{conduct_ra}()} when a declaration was created with \code{\link{declare_ra}()}. Users should never set this argument. (optional)}
 
-\item{.N_per_block}{Internal use only. Pre-computed block sizes corresponding to \code{.block_int}, passed by \code{conduct_ra}. Users should never set this argument.}
+\item{.N_per_block}{Internal use only. Pre-computed block sizes corresponding to \code{.block_int}, passed by \code{\link{conduct_ra}()}. Users should never set this argument. (optional)}
 }
 \value{
 A vector of length N indicating the treatment condition of each unit. Numeric in a two-arm trial; a factor (ordered by \code{conditions}) in a multi-arm trial.
@@ -70,14 +70,14 @@ blocks <- rep(c("A", "B","C"), times = c(50, 100, 200))
 Z <- block_ra(blocks = blocks)
 table(blocks, Z)
 
-Z <- block_ra(blocks = blocks, prob = .3)
+Z <- block_ra(blocks = blocks, prob = 0.3)
 table(blocks, Z)
 
-Z <- block_ra(blocks = blocks, block_prob = c(.1, .2, .3))
+Z <- block_ra(blocks = blocks, block_prob = c(0.1, 0.2, 0.3))
 table(blocks, Z)
 
 Z <- block_ra(blocks = blocks, 
-              prob_unit = rep(c(.1, .2, .3), 
+              prob_unit = rep(c(0.1, 0.2, 0.3), 
                               times = c(50, 100, 200)))
 table(blocks, Z)
 
@@ -121,12 +121,12 @@ Z <- block_ra(blocks = blocks, block_m_each = block_m_each,
               conditions = c("control", "placebo", "treatment"))
 table(blocks, Z)
 
-Z <- block_ra(blocks = blocks, prob_each = c(.1, .1, .8))
+Z <- block_ra(blocks = blocks, prob_each = c(0.1, 0.1, 0.8))
 table(blocks, Z)
 
 
 
 }
 \seealso{
-\code{\link{complete_ra}}, \code{\link{block_and_cluster_ra}}, \code{\link{strata_rs}}, \code{\link{block_ra_probabilities}}
+\code{\link{complete_ra}()}, \code{\link{block_and_cluster_ra}()}, \code{\link{strata_rs}()}, \code{\link{block_ra_probabilities}()}
 }

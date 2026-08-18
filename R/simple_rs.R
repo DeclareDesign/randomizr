@@ -1,14 +1,18 @@
 #' Simple Random Sampling
 #'
-#' simple_rs implements a random sampling procedure in which units are independently sampled. Because units are sampled independently, the number of units that are sampled can vary from sample to sample. For most applications in which the number of units in the sampling frame is known in advance, \code{\link{complete_rs}} is better because the number of units sampled is fixed across sampled.\cr\cr
+#' \code{simple_rs} draws a sample in which every unit is included or not independently of the others, as a separate coin flip. Because the draws are independent, the size of the realized sample varies from draw to draw. For most applications in which the size of the sampling frame is known in advance, \code{\link{complete_rs}()} is preferable because it fixes the number of units sampled.
 #'
-#' @param N The number of units. N must be a positive integer. (required)
-#' @param prob prob is the probability of being sampled must be a real number between 0 and 1 inclusive, and must be of length 1. (optional)
-#' @param prob_unit prob is the probability of being sampled must be a real number between 0 and 1 inclusive, and must be of length N. (optional)
-#' @param check_inputs logical. Defaults to TRUE.
-#' @param simple logical. internal use only.
+#' If \code{prob} is not specified, each unit is sampled with probability 0.5.
 #'
-#' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
+#' @seealso \code{\link{complete_rs}()}, \code{\link{strata_rs}()}, \code{\link{simple_ra}()}, \code{\link{simple_rs_probabilities}()}
+#'
+#' @param N The number of units in the sampling frame. Must be a positive integer. (required)
+#' @param prob The probability of being sampled; must be a real number between 0 and 1 inclusive and of length 1. (optional)
+#' @param prob_unit The probability of being sampled for each unit; must be a real number between 0 and 1 inclusive and of length N. Because units are drawn independently, this probability may differ from unit to unit. (optional)
+#' @param check_inputs Logical. Whether to verify before sampling that the arguments are internally consistent: that probabilities lie between 0 and 1, that vectors are of length N, and that only one of \code{prob} and \code{prob_unit} is supplied. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many samples from arguments that have already been verified; declaring the design once with \code{\link{declare_rs}()} and drawing from it with \code{\link{draw_rs}()} does this for you. (optional)
+#' @param simple Logical. Internal use only; leave at its default. \code{simple_rs} always draws units independently, and this argument exists so that the argument checker knows as much. (optional)
+#'
+#' @return A numeric vector of length N indicating whether each unit is sampled (1) or not (0).
 #' @export
 #'
 #' @examples
@@ -17,6 +21,10 @@
 #' table(S)
 #'
 #' S <- simple_rs(N = 100, prob = 0.3)
+#' table(S)
+#'
+#' # A probability of inclusion that varies unit by unit
+#' S <- simple_rs(N = 100, prob_unit = seq(0.1, 0.9, length.out = 100))
 #' table(S)
 #'
 simple_rs <- 
@@ -38,18 +46,18 @@ simple_rs <-
 #'
 #' These are the quantities inverse-probability weights are built from: weight
 #' each sampled unit by the reciprocal of its inclusion probability, which
-#' \code{\link{obtain_inclusion_probabilities}} extracts for you.
+#' \code{\link{obtain_inclusion_probabilities}()} extracts for you.
 #'
-#' @seealso \code{\link{simple_rs}}
+#' @seealso \code{\link{simple_rs}()}
 #'
 #' @inheritParams simple_rs
-#' @return A vector length N indicating the probability of being sampled.
+#' @return A numeric vector of length N giving each unit's probability of being included in the sample.
 #'
 #' @examples
-#' probs <- simple_ra_probabilities(N = 100)
+#' probs <- simple_rs_probabilities(N = 100)
 #' table(probs)
 #'
-#' probs <- simple_ra_probabilities(N = 100, prob = 0.3)
+#' probs <- simple_rs_probabilities(N = 100, prob = 0.3)
 #' table(probs)
 #'
 #' @export

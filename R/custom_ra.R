@@ -8,7 +8,7 @@
 #'
 #' @param permutation_matrix A matrix with one row per unit and one column per
 #'   possible assignment, as produced by
-#'   \code{\link{obtain_permutation_matrix}}.
+#'   \code{\link{obtain_permutation_matrix}()}.
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.
 #'

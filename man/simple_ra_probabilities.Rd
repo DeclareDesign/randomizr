@@ -28,12 +28,12 @@ simple_ra_probabilities(
 
 \item{conditions}{A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)}
 
-\item{check_inputs}{Logical. Defaults to \code{TRUE}.}
+\item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1 and sum to 1, that vectors are of length N, that only one of \code{prob}, \code{prob_unit}, and \code{prob_each} is supplied, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the assignment needs must be supplied explicitly. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)}
 
-\item{simple}{Logical. Internal use only.}
+\item{simple}{Logical. Internal use only; leave at its default. \code{simple_ra} always assigns units independently, and this argument exists so that the argument checker knows as much. Setting it to \code{FALSE} does not change how units are assigned, but it will cause a \code{prob_unit} that varies across units to be rejected. (optional)}
 }
 \value{
-A matrix of probabilities of assignment
+A matrix with N rows and one column per treatment condition, with columns named \code{prob_<condition>}. Entry (i, j) is the probability that unit i is assigned to condition j, and every row sums to 1.
 }
 \description{
 Returns the probability that each unit is assigned to each condition under
@@ -43,35 +43,35 @@ probabilities do not depend on how the other units came out.
 \details{
 These are the quantities inverse-probability weights are built from: weight
 each unit by the reciprocal of the probability of the condition it landed in,
-which \code{\link{obtain_condition_probabilities}} extracts for you.
+which \code{\link{obtain_condition_probabilities}()} extracts for you.
 }
 \examples{
 # Two Group Designs
-prob_mat <- simple_ra_probabilities(N=100)
+prob_mat <- simple_ra_probabilities(N = 100)
 head(prob_mat)
 
-prob_mat <- simple_ra_probabilities(N=100, prob=0.5)
+prob_mat <- simple_ra_probabilities(N = 100, prob = 0.5)
 head(prob_mat)
 
-prob_mat <- simple_ra_probabilities(N=100, prob_each = c(0.3, 0.7),
+prob_mat <- simple_ra_probabilities(N = 100, prob_each = c(0.3, 0.7),
                         conditions = c("control", "treatment"))
 head(prob_mat)
 
 # Multi-arm Designs
-prob_mat <- simple_ra_probabilities(N=100, num_arms=3)
+prob_mat <- simple_ra_probabilities(N = 100, num_arms = 3)
 head(prob_mat)
 
-prob_mat <- simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4))
+prob_mat <- simple_ra_probabilities(N = 100, prob_each = c(0.3, 0.3, 0.4))
 head(prob_mat)
 
-prob_mat <- simple_ra_probabilities(N=100, prob_each=c(0.3, 0.3, 0.4),
-                        conditions=c("control", "placebo", "treatment"))
+prob_mat <- simple_ra_probabilities(N = 100, prob_each = c(0.3, 0.3, 0.4),
+                        conditions = c("control", "placebo", "treatment"))
 head(prob_mat)
 
-prob_mat <- simple_ra_probabilities(N=100, conditions=c("control", "placebo", "treatment"))
+prob_mat <- simple_ra_probabilities(N = 100, conditions = c("control", "placebo", "treatment"))
 head(prob_mat)
 
 }
 \seealso{
-\code{\link{simple_ra}}
+\code{\link{simple_ra}()}
 }

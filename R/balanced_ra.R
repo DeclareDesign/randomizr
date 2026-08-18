@@ -1,6 +1,6 @@
 #' Random assignment with heterogeneous probabilities
 #'
-#' \strong{Experimental.} `balanced_ra` assigns units to conditions when the
+#' \strong{Experimental.} \code{balanced_ra} assigns units to conditions when the
 #' probability of assignment varies from unit to unit, holding the number
 #' assigned to each condition as close to its target as arithmetic allows. It
 #' fills the gap between [simple_ra()], which honours unit-varying probabilities
@@ -12,7 +12,7 @@
 #' targets. It does not refer to covariate balance, which is a different idea
 #' and not what this function does.
 #'
-#' Two situations motivate it, both due to Macartan Humphreys, whose `probra`
+#' Two situations motivate it, both due to Macartan Humphreys, whose \code{probra}
 #' package is the origin of this function.
 #'
 #' Imagine a race between contestants with unequal chances of winning, and you
@@ -52,15 +52,15 @@
 #' units in each condition is either the floor or the ceiling of that
 #' condition's expected count, never further away.
 #'
-#' With `blocks`, the tight counts are the within-block ones, which is the
-#' blocked design generalised to unequal probabilities. Without `blocks`, the
+#' With \code{blocks}, the tight counts are the within-block ones, which is the
+#' blocked design generalised to unequal probabilities. Without \code{blocks}, the
 #' tight counts are the overall ones. Both cannot be guaranteed at once in
-#' general, so `balanced_ra` guarantees whichever the call asks for.
+#' general, so \code{balanced_ra} guarantees whichever the call asks for.
 #'
-#' With `clusters`, the assignment happens at the cluster level and the counts
+#' With \code{clusters}, the assignment happens at the cluster level and the counts
 #' held tight are counts of clusters. Clusters of unequal size therefore give a
 #' fixed number of treated clusters and a varying number of treated units, which
-#' is how [cluster_ra()] behaves. `blocks` and `clusters` combine, giving a tight
+#' is how [cluster_ra()] behaves. \code{blocks} and \code{clusters} combine, giving a tight
 #' number of treated clusters within each block.
 #'
 #' @section Inference:
@@ -97,7 +97,7 @@
 #'
 #' \strong{Where [block_ra()] applies, the two agree.} With probabilities
 #' constant within block, this function and [block_ra()] are indistinguishable
-#' on the same blocks under the same estimator. `balanced_ra` is the
+#' on the same blocks under the same estimator. \code{balanced_ra} is the
 #' generalisation rather than a competitor: [block_ra()] requires one
 #' probability per block and refuses unit-varying ones, which is the case this
 #' function exists to serve.
@@ -114,30 +114,31 @@
 #' @section Experimental:
 #' This function is new in randomizr 2.0.0 and its interface may change. It does
 #' not yet participate in [declare_ra()], so [conduct_ra()] and
-#' [obtain_condition_probabilities()] do not accept a `balanced_ra` design. Use
-#' `balanced_ra_probabilities()` to recover assignment probabilities.
+#' [obtain_condition_probabilities()] do not accept a \code{balanced_ra} design. Use
+#' \code{balanced_ra_probabilities()} to recover assignment probabilities.
 #'
 #' @param prob_unit A numeric vector of length N giving each unit's probability
 #'   of assignment to treatment, for a two-arm design. Unlike elsewhere in
 #'   randomizr these need not be equal across units; varying them is the point
-#'   of this function.
+#'   of this function. Supply either \code{prob_unit} or \code{prob_unit_each}. (optional)
 #' @param prob_unit_each A numeric matrix with one row per unit and one column
 #'   per condition, giving each unit's probability of assignment to each
-#'   condition, for a multi-arm design. Rows must sum to 1.
+#'   condition, for a multi-arm design. Rows must sum to 1. Supply either
+#'   \code{prob_unit} or \code{prob_unit_each}. (optional)
 #' @param blocks A vector of length N indicating which block each unit belongs
-#'   to. When supplied, counts are held tight within each block.
+#'   to. When supplied, counts are held tight within each block. (optional)
 #' @param clusters A vector of length N indicating which cluster each unit
 #'   belongs to. Whole clusters are assigned together, so the probabilities must
 #'   be the same for every unit in a cluster, and the tight counts become counts
-#'   of clusters rather than of units. May be combined with `blocks`, in which
-#'   case every cluster must sit entirely inside one block.
-#' @param N The number of units. Inferred from the other arguments when omitted.
-#' @param num_arms The number of treatment arms. Inferred when omitted.
-#' @param conditions A vector giving the names of the conditions.
-#' @param check_inputs logical. Defaults to TRUE.
+#'   of clusters rather than of units. May be combined with \code{blocks}, in which
+#'   case every cluster must sit entirely inside one block. (optional)
+#' @param N The number of units. Inferred from the other arguments when omitted. (optional)
+#' @param num_arms The number of treatment arms. Inferred when omitted. (optional)
+#' @param conditions A vector giving the names of the conditions. (optional)
+#' @param check_inputs Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1, that rows of a probability matrix sum to 1, that probabilities are constant within a cluster, and that clusters nest within blocks. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many assignments from probabilities that have already been verified. (optional)
 #'
 #' @return A vector of length N giving the condition of each unit, numeric in a
-#'   two-arm design and a factor (ordered by `conditions`) in a multi-arm design.
+#'   two-arm design and a factor (ordered by \code{conditions}) in a multi-arm design.
 #'
 #' @references
 #' Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube
@@ -155,8 +156,8 @@
 #' sampling. \emph{Journal of Statistical Planning and Inference} 128(2),
 #' 569-591. \doi{10.1016/j.jspi.2003.11.011}
 #'
-#' @seealso \code{\link{balanced_ra_probabilities}}, \code{\link{complete_ra}},
-#'   \code{\link{block_ra}}, \code{\link{simple_ra}}
+#' @seealso \code{\link{balanced_ra_probabilities}()}, \code{\link{complete_ra}()},
+#'   \code{\link{block_ra}()}, \code{\link{simple_ra}()}
 #'
 #' @examples
 #' # A race between contestants with unequal chances, in which exactly one wins
@@ -183,7 +184,7 @@
 #' table(colSums(reps[districts == "north", ]))
 #'
 #' # Three arms with unit-varying probabilities.
-#' P <- cbind(c(.15, .47), c(.65, .48), c(.20, .05))
+#' P <- cbind(c(0.15, 0.47), c(0.65, 0.48), c(0.20, 0.05))
 #' table(replicate(1000, balanced_ra(prob_unit_each = P))[1, ])
 #'
 #' # Whole clusters assigned together, with unequal cluster probabilities. The
@@ -233,7 +234,7 @@ balanced_ra <- function(prob_unit = NULL,
 #' \strong{Experimental.} Returns the probability that each unit is assigned to
 #' each condition under [balanced_ra()]. Because those probabilities are supplied by
 #' the caller rather than derived from a design, this function mainly validates
-#' and normalises them into the matrix form the other `_probabilities` functions
+#' and normalises them into the matrix form the other \code{_probabilities} functions
 #' return.
 #'
 #' These are the quantities inverse-probability weights are built from: weight
@@ -241,8 +242,8 @@ balanced_ra <- function(prob_unit = NULL,
 #'
 #' @inheritParams balanced_ra
 #' @return A matrix of probabilities of assignment, one row per unit and one
-#'   column per condition, with columns named `prob_<condition>`.
-#' @seealso \code{\link{balanced_ra}}
+#'   column per condition, with columns named \code{prob_<condition>}.
+#' @seealso \code{\link{balanced_ra}()}
 #' @examples
 #' balanced_ra_probabilities(prob_unit = c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5))
 #' @export
@@ -374,7 +375,7 @@ cube_assign_clusters <- function(P, clusters, blocks = NULL, tol = 1e-12) {
 #' condition-to-condition path, or every degree is at least 2 and a cycle must
 #' exist. There is no third case.
 #'
-#' With `blocks`, the right-hand nodes are (block, condition) pairs rather than
+#' With \code{blocks}, the right-hand nodes are (block, condition) pairs rather than
 #' conditions, which moves the tight counts inside the blocks. Nothing else
 #' changes.
 #'

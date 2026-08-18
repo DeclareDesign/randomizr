@@ -17,26 +17,26 @@ strata_and_cluster_rs(
 )
 }
 \arguments{
-\item{strata}{A vector of length N that indicates which stratum each unit belongs to.}
+\item{strata}{A vector of length N indicating which stratum each unit belongs to. Every unit in a cluster must belong to the same stratum. (required)}
 
-\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N indicating which cluster each unit belongs to. (required)}
 
-\item{prob}{Use for a design in which either floor(N_clusters_stratum*prob) or ceiling(N_clusters_stratum*prob) clusters are sampled within each stratum. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters_stratum*prob) clusters will be sampled and with probability prob, ceiling(N_clusters_stratum*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
+\item{prob}{Use for a design in which either \code{floor(N_clusters_stratum*prob)} or \code{ceiling(N_clusters_stratum*prob)} clusters are sampled within each stratum. Which of the two is used is itself random: the ceiling is drawn with probability equal to the fractional part of \code{N_clusters_stratum*prob} and the floor otherwise, which makes each cluster's probability of inclusion exactly \code{prob}. Must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{prob_unit}{Must of be of length N. tapply(prob_unit, blocks, unique) will be passed to \code{strata_prob}.}
+\item{prob_unit}{Must be of length N. \code{tapply(prob_unit, strata, unique)} will be passed to \code{strata_prob}, so it must be constant within each stratum. (optional)}
 
-\item{n}{Use for a design in which the scalar n describes the fixed number of units to sample in each stratum. This number does not vary across strata.}
+\item{n}{Use for a design in which the scalar \code{n} gives the fixed number of clusters to sample in every stratum. This count does not vary across strata. (optional)}
 
-\item{n_unit}{Must be of length N. tapply(m_unit, blocks, unique) will be passed to \code{strata_n}.}
+\item{n_unit}{Must be of length N. \code{tapply(n_unit, strata, unique)} will be passed to \code{strata_n}, so it must be constant within each stratum. (optional)}
 
-\item{strata_n}{Use for a design in which strata_n describes the number of units to sample within each stratum.}
+\item{strata_n}{Use for a design in which \code{strata_n} gives the number of clusters to sample within each stratum. Must be as long as the number of strata, in the same order as \code{sort(unique(strata))}. (optional)}
 
-\item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
+\item{strata_prob}{Use for a design in which \code{strata_prob} gives the probability of being sampled within each stratum. Must be in the same order as \code{sort(unique(strata))}. Differs from \code{prob} in that the probability of being sampled can vary across strata. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Whether to verify before sampling that the arguments are internally consistent: that clusters nest within strata, that counts do not exceed the number of clusters in a stratum, that probabilities lie between 0 and 1, and so on. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many samples from arguments that have already been verified; declaring the design once with \code{\link{declare_rs}()} and drawing from it with \code{\link{draw_rs}()} does this for you. (optional)}
 }
 \value{
-A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
+A numeric vector of length N indicating whether each unit is sampled (1) or not (0). Every unit in a cluster receives the same value.
 }
 \description{
 \code{strata_and_cluster_rs} draws whole clusters, sampling separately within
@@ -51,14 +51,14 @@ Clusters must nest within strata: every unit in a cluster has to belong to
 the same stratum.
 }
 \examples{
-clusters <- rep(letters, times = 1:26)
+# Twelve clusters, of sizes 1 through 12, nested in four strata of three
+clusters <- rep(letters[1:12], times = 1:12)
 
 strata <- rep(NA, length(clusters))
-strata[clusters \%in\% letters[1:5]] <- "stratum_1"
-strata[clusters \%in\% letters[6:10]] <- "stratum_2"
-strata[clusters \%in\% letters[11:15]] <- "stratum_3"
-strata[clusters \%in\% letters[16:20]] <- "stratum_4"
-strata[clusters \%in\% letters[21:26]] <- "stratum_5"
+strata[clusters \%in\% letters[1:3]] <- "stratum_1"
+strata[clusters \%in\% letters[4:6]] <- "stratum_2"
+strata[clusters \%in\% letters[7:9]] <- "stratum_3"
+strata[clusters \%in\% letters[10:12]] <- "stratum_4"
 
 table(strata, clusters)
 
@@ -71,21 +71,21 @@ table(S, clusters)
 
 S <- strata_and_cluster_rs(clusters = clusters,
                            strata = strata,
-                           prob = .5)
+                           prob = 0.5)
 
 table(S, clusters)
 table(S, strata)
 
 S <- strata_and_cluster_rs(clusters = clusters,
                            strata = strata,
-                           strata_n = c(2, 3, 2, 3, 2))
+                           strata_n = c(1, 2, 1, 2))
 
 table(S, clusters)
 table(S, strata)
 
 S <- strata_and_cluster_rs(clusters = clusters,
                            strata = strata,
-                           strata_prob = c(.1, .2, .3, .4, .5))
+                           strata_prob = c(0.2, 0.4, 0.6, 0.8))
 
 table(S, clusters)
 table(S, strata)
@@ -93,6 +93,6 @@ table(S, strata)
 
 }
 \seealso{
-\code{\link{cluster_rs}}, \code{\link{strata_rs}},
-  \code{\link{block_and_cluster_ra}}
+\code{\link{cluster_rs}()}, \code{\link{strata_rs}()},
+  \code{\link{block_and_cluster_ra}()}
 }

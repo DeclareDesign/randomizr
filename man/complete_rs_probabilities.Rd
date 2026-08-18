@@ -14,20 +14,20 @@ complete_rs_probabilities(
 )
 }
 \arguments{
-\item{N}{The number of units. N must be a positive integer. (required)}
+\item{N}{The number of units in the sampling frame. Must be a positive integer. (required)}
 
-\item{n}{Use for a design in which exactly n units are sampled. (optional)}
+\item{n}{Use for a design in which exactly \code{n} units are sampled. (optional)}
 
-\item{n_unit}{unique(n_unit) will be passed to \code{n}. Must be the same for all units (optional)}
+\item{n_unit}{\code{unique(n_unit)} will be passed to \code{n}; must be the same for all units and of length N. (optional)}
 
-\item{prob}{Use for a design in which either floor(N*prob) or ceiling(N*prob) units are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units will be sampled and with probability prob, ceiling(N*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
+\item{prob}{Use for a design in which either \code{floor(N*prob)} or \code{ceiling(N*prob)} units are sampled, chosen so that each unit's probability of inclusion is exactly \code{prob}. Must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{prob_unit}{unique(prob_unit) will be passed to the prob argument and must be the same for all units.}
+\item{prob_unit}{\code{unique(prob_unit)} will be passed to \code{prob}; must be the same for all units and of length N. Under complete random sampling the probability cannot vary by unit; use \code{\link{simple_rs}()} if it must. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Whether to verify before sampling that the arguments are internally consistent: that \code{n} does not exceed N, that probabilities lie between 0 and 1, that vectors are of length N, and so on. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many samples from arguments that have already been verified; declaring the design once with \code{\link{declare_rs}()} and drawing from it with \code{\link{draw_rs}()} does this for you. (optional)}
 }
 \value{
-A vector length N indicating the probability of being sampled.
+A numeric vector of length N giving each unit's probability of being included in the sample.
 }
 \description{
 Returns each unit's probability of being sampled under complete random
@@ -36,7 +36,7 @@ sampling, where the sample size is fixed on every draw.
 \details{
 These are the quantities inverse-probability weights are built from: weight
 each sampled unit by the reciprocal of its inclusion probability, which
-\code{\link{obtain_inclusion_probabilities}} extracts for you.
+\code{\link{obtain_inclusion_probabilities}()} extracts for you.
 }
 \examples{
 probs <- complete_rs_probabilities(N = 100)
@@ -45,10 +45,10 @@ table(probs)
 probs <- complete_rs_probabilities(N = 100, n = 50)
 table(probs)
 
-probs <- complete_rs_probabilities(N=100, prob = .3)
+probs <- complete_rs_probabilities(N = 100, prob = 0.3)
 table(probs)
 
 }
 \seealso{
-\code{\link{complete_rs}}
+\code{\link{complete_rs}()}
 }

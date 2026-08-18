@@ -4,33 +4,35 @@
 #'
 #' By default, \code{cluster_ra} conducts complete random assignment at the cluster level: a fixed number of clusters are assigned to each condition on every draw. Setting \code{simple = TRUE} switches to independent Bernoulli assignment of clusters.
 #'
-#' @seealso \code{\link{complete_ra}}, \code{\link{block_and_cluster_ra}}, \code{\link{cluster_rs}}, \code{\link{cluster_ra_probabilities}}
+#' @seealso \code{\link{complete_ra}()}, \code{\link{block_and_cluster_ra}()}, \code{\link{cluster_rs}()}, \code{\link{cluster_ra_probabilities}()}
 #'
 #' @param clusters A vector of length N indicating which cluster each unit belongs to. (required)
 #' @param m Use for a two-arm design in which exactly \code{m} clusters are assigned to treatment. (optional)
 #' @param m_unit Use for a two-arm design. \code{unique(m_unit)} clusters are assigned to treatment; must be the same for all units and of length N. (optional)
 #' @param m_each Use for a multi-arm design. A numeric vector giving the number of clusters assigned to each condition; must sum to the total number of clusters. (optional)
-#' @param prob Use for a two-arm design in which either \code{floor(N_clusters*prob)} or \code{ceiling(N_clusters*prob)} clusters are assigned to treatment. The probability of assignment to treatment is exactly \code{prob}. Must be between 0 and 1. (optional)
+#' @param prob Use for a two-arm design in which either \code{floor(N_clusters*prob)} or \code{ceiling(N_clusters*prob)} clusters are assigned to treatment. Which of the two is used is itself random: the ceiling is drawn with probability equal to the fractional part of \code{N_clusters*prob} and the floor otherwise, so that each cluster's probability of assignment is exactly \code{prob}. When \code{N_clusters*prob} is a whole number the count is fixed. Must be between 0 and 1. (optional)
 #' @param prob_unit Use for a two-arm design. \code{unique(prob_unit)} will be passed to the \code{prob} argument and must be the same for all units. (optional)
 #' @param prob_each Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative, sum to 1. Because of integer rounding, the exact number of clusters assigned to each condition may differ slightly from assignment to assignment, but the overall probability of assignment is exactly \code{prob_each}. (optional)
 #' @param num_arms The total number of treatment arms. If unspecified, determined from \code{m_each} or \code{conditions}. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, groups will be named T1, T2, T3, etc. (optional)
-#' @param simple Logical, defaults to \code{FALSE}. If \code{TRUE}, clusters are assigned to conditions independently (simple random assignment). Do not specify \code{m} or \code{m_each} when \code{simple = TRUE}.
-#' @param check_inputs Logical. Defaults to \code{TRUE}.
+#' @param simple Logical, defaults to \code{FALSE}. If \code{TRUE}, clusters are assigned to conditions independently (simple random assignment at the cluster level), so the number of treated clusters varies from draw to draw. Do not specify \code{m} or \code{m_each} when \code{simple = TRUE}. (optional)
+#' @param check_inputs Logical. Whether to verify before assigning that the arguments are internally consistent: that counts sum to the number of clusters, that probabilities lie between 0 and 1 and sum to 1, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the assignment needs must be supplied explicitly. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)
 #'
-#' @return A vector of length N indicating the treatment condition of each unit.
+#' @return A vector of length N indicating the treatment condition of each unit. Every unit in a cluster receives the same value. Numeric in a two-arm trial; a factor (ordered by \code{conditions}) in a multi-arm trial.
 #' @export
 #' @examples
+#' # Ten clusters, of sizes 1 through 10
+#' clusters <- rep(letters[1:10], times = 1:10)
+#'
 #' # Two Group Designs
-#' clusters <- rep(letters, times=1:26)
 #'
 #' Z <- cluster_ra(clusters = clusters)
 #' table(Z, clusters)
 #'
-#' Z <- cluster_ra(clusters = clusters, m = 13)
+#' Z <- cluster_ra(clusters = clusters, m = 4)
 #' table(Z, clusters)
 #'
-#' Z <- cluster_ra(clusters = clusters, m_each = c(10, 16),
+#' Z <- cluster_ra(clusters = clusters, m_each = c(6, 4),
 #'                 conditions = c("control", "treatment"))
 #' table(Z, clusters)
 #'
@@ -38,10 +40,10 @@
 #' Z <- cluster_ra(clusters = clusters, num_arms = 3)
 #' table(Z, clusters)
 #'
-#' Z <- cluster_ra(clusters = clusters, m_each = c(7, 7, 12))
+#' Z <- cluster_ra(clusters = clusters, m_each = c(3, 3, 4))
 #' table(Z, clusters)
 #'
-#' Z <- cluster_ra(clusters = clusters, m_each = c(7, 7, 12),
+#' Z <- cluster_ra(clusters = clusters, m_each = c(3, 3, 4),
 #'                 conditions = c("control", "placebo", "treatment"))
 #' table(Z, clusters)
 #'
@@ -95,45 +97,45 @@ cluster_ra <- function(clusters = NULL,
 #'
 #' These are the quantities inverse-probability weights are built from: weight
 #' each unit by the reciprocal of the probability of the condition it landed in,
-#' which \code{\link{obtain_condition_probabilities}} extracts for you.
+#' which \code{\link{obtain_condition_probabilities}()} extracts for you.
 #'
-#' @seealso \code{\link{cluster_ra}}
+#' @seealso \code{\link{cluster_ra}()}
 #'
 #' @inheritParams cluster_ra
 #'
-#' @return A matrix of probabilities of assignment
+#' @return A matrix with N rows and one column per treatment condition, with columns named \code{prob_<condition>}. Entry (i, j) is the probability that unit i is assigned to condition j, and every row sums to 1.
 #'
 #' @examples
 #'
 #' # Two Group Designs
-#' clusters <- rep(letters, times = 1:26)
+#' clusters <- rep(letters[1:10], times = 1:10)
 #' prob_mat <- cluster_ra_probabilities(clusters = clusters)
 #' head(prob_mat)
 #'
-#' prob_mat <- cluster_ra_probabilities(clusters = clusters, m = 10)
+#' prob_mat <- cluster_ra_probabilities(clusters = clusters, m = 4)
 #' head(prob_mat)
 #'
 #' prob_mat <- cluster_ra_probabilities(clusters = clusters,
-#'                                      m_each = c(9, 17),
+#'                                      m_each = c(6, 4),
 #'                                      conditions = c("control", "treatment"))
 #'
 #' # Multi-arm Designs
 #' prob_mat <- cluster_ra_probabilities(clusters = clusters, num_arms = 3)
 #' head(prob_mat)
 #'
-#' prob_mat <- cluster_ra_probabilities(clusters = clusters, m_each = c(7, 7, 12))
+#' prob_mat <- cluster_ra_probabilities(clusters = clusters, m_each = c(3, 3, 4))
 #' head(prob_mat)
 #'
-#' prob_mat <- cluster_ra_probabilities(clusters = clusters, m_each = c(7, 7, 12),
-#'                          conditions=c("control", "placebo", "treatment"))
-#' head(prob_mat)
-#'
-#' prob_mat <- cluster_ra_probabilities(clusters = clusters,
-#'                          conditions=c("control", "placebo", "treatment"))
+#' prob_mat <- cluster_ra_probabilities(clusters = clusters, m_each = c(3, 3, 4),
+#'                          conditions = c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
 #' prob_mat <- cluster_ra_probabilities(clusters = clusters,
-#'                                      prob_each = c(.1, .2, .7))
+#'                          conditions = c("control", "placebo", "treatment"))
+#' head(prob_mat)
+#'
+#' prob_mat <- cluster_ra_probabilities(clusters = clusters,
+#'                                      prob_each = c(0.1, 0.2, 0.7))
 #' head(prob_mat)
 #'
 #'

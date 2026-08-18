@@ -2,7 +2,7 @@
 % Please edit documentation in R/declare_rs.R
 \name{obtain_inclusion_probabilities}
 \alias{obtain_inclusion_probabilities}
-\title{Obtain inclusion probabilities}
+\title{Obtain Inclusion Probabilities}
 \usage{
 obtain_inclusion_probabilities(
   declaration = NULL,
@@ -20,59 +20,63 @@ obtain_inclusion_probabilities(
 )
 }
 \arguments{
-\item{declaration}{A random sampling declaration, created by \code{\link{declare_rs}}.}
+\item{declaration}{A random sampling declaration, created by \code{\link{declare_rs}()}. Supply either a declaration or the design arguments that \code{declare_rs()} takes. (optional)}
 
-\item{N}{The number of units. N must be a positive integer. (required)}
+\item{N}{The number of units in the sampling frame. Must be a positive integer. (required)}
 
-\item{strata}{A vector of length N that indicates which stratum each unit belongs to.}
+\item{strata}{A vector of length N indicating which stratum each unit belongs to. Supply to use stratified random sampling. (optional)}
 
-\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N indicating which cluster each unit belongs to. Supply to sample whole clusters. (optional)}
 
-\item{n}{Use for a design in which n units (or clusters) are sampled. In a stratified design, exactly n units in each stratum will be sampled. (optional)}
+\item{n}{Use for a design in which exactly \code{n} units (or clusters) are sampled. In a stratified design, exactly \code{n} units in each stratum are sampled. (optional)}
 
-\item{n_unit}{Under complete random sampling, must be constant across units. Under stratified random sampling, must be constant within strata.}
+\item{n_unit}{Of length N. Under complete random sampling, must be constant across units. Under stratified random sampling, must be constant within strata. (optional)}
 
-\item{prob}{Use for a design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be sampled and with probability prob, ceiling(N*prob) units (or clusters) will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
+\item{prob}{Use for a design in which either \code{floor(N*prob)} or \code{ceiling(N*prob)} units (or clusters) are sampled. Which of the two is used is itself random: the ceiling is drawn with probability equal to the fractional part of \code{N*prob} and the floor otherwise, which makes each unit's probability of inclusion exactly \code{prob}. Must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{prob_unit}{Must of be of length N. Under simple random sampling, can be different for each unit or cluster.  Under complete random sampling, must be constant across units. Under stratified random sampling, must be constant within strata.}
+\item{prob_unit}{Of length N. Under simple random sampling, may differ for each unit or cluster. Under complete random sampling, must be constant across units. Under stratified random sampling, must be constant within strata. (optional)}
 
-\item{strata_n}{Use for a design in which strata_n describes the number of units to sample within each stratum.}
+\item{strata_n}{Use for a design in which \code{strata_n} gives the number of units to sample within each stratum, in the order of \code{sort(unique(strata))}. (optional)}
 
-\item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
+\item{strata_prob}{Use for a design in which \code{strata_prob} gives the probability of being sampled within each stratum, in the order of \code{sort(unique(strata))}. Differs from \code{prob} in that the probability of being sampled can vary across strata. (optional)}
 
-\item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling is used. When \code{simple = TRUE}, please do not specify n or strata_n. When \code{simple = TRUE}, \code{prob} may vary by unit.}
+\item{simple}{Logical, defaults to \code{FALSE}. If \code{TRUE}, simple random sampling is used, so the size of the realized sample varies from draw to draw. Do not specify \code{n} or \code{strata_n} when \code{simple = TRUE}; \code{prob} may then vary by unit. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Whether to verify before declaring that the arguments are internally consistent: that counts do not exceed the frame, that probabilities lie between 0 and 1, that stratum-level arguments have one entry per stratum, and so on. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when declaring many designs from arguments that have already been verified. (optional)}
 }
 \value{
-A vector of length N giving each unit's probability of being included
-  in the sample. These are the quantities inverse-probability weights are
-  built from: weight each sampled unit by the reciprocal of its value here.
+A numeric vector of length N giving each unit's probability of being
+  included in the sample. These are the quantities inverse-probability
+  weights are built from: weight each sampled unit by the reciprocal of its
+  value here.
 }
 \description{
-Give obtain_inclusion_probabilities() a declaration made by \code{\link{declare_rs}}, or describe the design inline with the same arguments \code{declare_rs} takes.\cr \cr
-This function is especially useful when units have different inclusion probabilities and the analyst plans to use inverse-probability weights.
+Returns each unit's probability of being included in the sample under a declared design. Give \code{obtain_inclusion_probabilities()} a declaration made by \code{\link{declare_rs}()}, or describe the design inline with the same arguments \code{declare_rs()} takes.\cr \cr
+This function is especially useful when units have different inclusion probabilities and the analyst plans to use inverse-probability weights: the weights are the reciprocals of what it returns.
 }
 \examples{
 
-# Draw a stratified random sample
-strata <- rep(c("A", "B","C"), times=c(50, 100, 200))
+# A stratified design in which the strata are sampled at different rates
+strata <- rep(c("A", "B", "C"), times = c(50, 100, 200))
 
-declaration <- declare_rs(strata = strata)
+declaration <- declare_rs(strata = strata, strata_n = c(20, 30, 40))
 
 observed_probabilities <-
    obtain_inclusion_probabilities(declaration = declaration)
 
 table(strata, observed_probabilities)
 
+# The weights for an inverse-probability-weighted analysis
+ipw <- 1 / observed_probabilities
+
 
 # Sometimes it is convenient to skip the declaration step
 observed_probabilities <-
-   obtain_inclusion_probabilities(strata = strata)
+   obtain_inclusion_probabilities(strata = strata, strata_n = c(20, 30, 40))
 
 table(strata, observed_probabilities)
 
 }
 \seealso{
-\code{\link{declare_rs}}, \code{\link{draw_rs}}
+\code{\link{declare_rs}()}, \code{\link{draw_rs}()}
 }

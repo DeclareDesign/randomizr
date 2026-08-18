@@ -27,7 +27,7 @@ cluster_ra(
 
 \item{m_each}{Use for a multi-arm design. A numeric vector giving the number of clusters assigned to each condition; must sum to the total number of clusters. (optional)}
 
-\item{prob}{Use for a two-arm design in which either \code{floor(N_clusters*prob)} or \code{ceiling(N_clusters*prob)} clusters are assigned to treatment. The probability of assignment to treatment is exactly \code{prob}. Must be between 0 and 1. (optional)}
+\item{prob}{Use for a two-arm design in which either \code{floor(N_clusters*prob)} or \code{ceiling(N_clusters*prob)} clusters are assigned to treatment. Which of the two is used is itself random: the ceiling is drawn with probability equal to the fractional part of \code{N_clusters*prob} and the floor otherwise, so that each cluster's probability of assignment is exactly \code{prob}. When \code{N_clusters*prob} is a whole number the count is fixed. Must be between 0 and 1. (optional)}
 
 \item{prob_unit}{Use for a two-arm design. \code{unique(prob_unit)} will be passed to the \code{prob} argument and must be the same for all units. (optional)}
 
@@ -37,12 +37,12 @@ cluster_ra(
 
 \item{conditions}{A character vector giving the names of the treatment groups. If unspecified, groups will be named T1, T2, T3, etc. (optional)}
 
-\item{simple}{Logical, defaults to \code{FALSE}. If \code{TRUE}, clusters are assigned to conditions independently (simple random assignment). Do not specify \code{m} or \code{m_each} when \code{simple = TRUE}.}
+\item{simple}{Logical, defaults to \code{FALSE}. If \code{TRUE}, clusters are assigned to conditions independently (simple random assignment at the cluster level), so the number of treated clusters varies from draw to draw. Do not specify \code{m} or \code{m_each} when \code{simple = TRUE}. (optional)}
 
-\item{check_inputs}{Logical. Defaults to \code{TRUE}.}
+\item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that counts sum to the number of clusters, that probabilities lie between 0 and 1 and sum to 1, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the assignment needs must be supplied explicitly. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)}
 }
 \value{
-A vector of length N indicating the treatment condition of each unit.
+A vector of length N indicating the treatment condition of each unit. Every unit in a cluster receives the same value. Numeric in a two-arm trial; a factor (ordered by \code{conditions}) in a multi-arm trial.
 }
 \description{
 \code{cluster_ra} assigns entire groups of units (clusters) to treatment conditions, so that all units within a cluster share the same treatment status. Cluster assignment is appropriate when the intervention can only be delivered at the group level (for example, a school-wide program that cannot be withheld from individual students), when spillovers within groups make individual-level assignment infeasible, or when the treatment is itself defined as a group-level condition. Because all units in a cluster move together, the effective sample size for estimating average effects is the number of clusters, not the number of units. Clustering therefore typically increases sampling variability relative to complete or block random assignment; the precision loss grows with the intra-cluster correlation in potential outcomes.
@@ -51,16 +51,18 @@ A vector of length N indicating the treatment condition of each unit.
 By default, \code{cluster_ra} conducts complete random assignment at the cluster level: a fixed number of clusters are assigned to each condition on every draw. Setting \code{simple = TRUE} switches to independent Bernoulli assignment of clusters.
 }
 \examples{
+# Ten clusters, of sizes 1 through 10
+clusters <- rep(letters[1:10], times = 1:10)
+
 # Two Group Designs
-clusters <- rep(letters, times=1:26)
 
 Z <- cluster_ra(clusters = clusters)
 table(Z, clusters)
 
-Z <- cluster_ra(clusters = clusters, m = 13)
+Z <- cluster_ra(clusters = clusters, m = 4)
 table(Z, clusters)
 
-Z <- cluster_ra(clusters = clusters, m_each = c(10, 16),
+Z <- cluster_ra(clusters = clusters, m_each = c(6, 4),
                 conditions = c("control", "treatment"))
 table(Z, clusters)
 
@@ -68,10 +70,10 @@ table(Z, clusters)
 Z <- cluster_ra(clusters = clusters, num_arms = 3)
 table(Z, clusters)
 
-Z <- cluster_ra(clusters = clusters, m_each = c(7, 7, 12))
+Z <- cluster_ra(clusters = clusters, m_each = c(3, 3, 4))
 table(Z, clusters)
 
-Z <- cluster_ra(clusters = clusters, m_each = c(7, 7, 12),
+Z <- cluster_ra(clusters = clusters, m_each = c(3, 3, 4),
                 conditions = c("control", "placebo", "treatment"))
 table(Z, clusters)
 
@@ -80,5 +82,5 @@ Z <- cluster_ra(clusters = clusters,
 table(Z, clusters)
 }
 \seealso{
-\code{\link{complete_ra}}, \code{\link{block_and_cluster_ra}}, \code{\link{cluster_rs}}, \code{\link{cluster_ra_probabilities}}
+\code{\link{complete_ra}()}, \code{\link{block_and_cluster_ra}()}, \code{\link{cluster_rs}()}, \code{\link{cluster_ra_probabilities}()}
 }
