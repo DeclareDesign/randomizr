@@ -71,13 +71,23 @@ IntegerVector block_assign_cpp(IntegerVector block_int,
 
     } else if (mode == 1) {
       double p = prob_b[g];
-      int mf0 = (int) std::floor(n_b * (1.0 - p));
-      int mf1 = (int) std::floor(n_b * p);
+      // np0 and np1 are materialised and reused rather than written inline
+      // twice. Inline, the compiler contracts the multiply and the subtract
+      // below into a single FMA, the product never rounds to a double, and
+      // e.g. 5 * 0.9 - 4 comes out as 4.4e-16 where R, which rounds at every
+      // step, gets exactly 0. The difference is far below any probability
+      // anyone can observe and it still decides the draw, because draw_two()
+      // resolves an exact tie the opposite way from a near-tie. That silently
+      // ended 1.x seed reproducibility for four of the designs tested.
+      double np0 = n_b * (1.0 - p);
+      double np1 = n_b * p;
+      int mf0 = (int) std::floor(np0);
+      int mf1 = (int) std::floor(np1);
       int rem = n_b - mf0 - mf1;
       for (int i = mf0; i < mf0 + mf1; ++i) v[i] = 1;
       if (rem > 0) {
-        double fix0 = (n_b * (1.0 - p) - mf0) / rem;
-        double fix1 = (n_b * p - mf1) / rem;
+        double fix0 = (np0 - mf0) / rem;
+        double fix1 = (np1 - mf1) / rem;
         // conditions = c(0, 1); the drawn arm's unit is appended at the end.
         if (!draw_two(fix0, fix1)) v[mf0 + mf1] = 1;
       }
