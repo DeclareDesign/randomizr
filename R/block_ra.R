@@ -157,6 +157,43 @@ block_ra <- function(blocks = NULL,
     return(clean_condition_names(assignment, conditions))
   }
 
+  # Multi-arm fast path: the three cases block_ra_helper() routes to
+  # complete_ra()'s prob_each and m_each branches, done in one C++ call instead
+  # of one R call per block. m, block_m and block_prob are excluded because they
+  # are the two-arm kernel's cases above; prob_unit and m_unit are excluded
+  # because block_ra_helper() turns them into block_prob and block_m, which are
+  # likewise two-arm. conditions has to be known, which the argument check
+  # guarantees whenever it runs.
+  if (!is.null(conditions) &&
+      is.null(m) && is.null(m_unit) && is.null(block_m) &&
+      is.null(prob_unit) && is.null(block_prob)) {
+    G <- length(N_per_block)
+    if (!is.null(block_m_each)) {
+      param <- matrix(as.numeric(as.matrix(block_m_each)), nrow = G)
+      multi_mode <- 0L
+    } else if (!is.null(block_prob_each)) {
+      param <- matrix(as.numeric(as.matrix(block_prob_each)), nrow = G)
+      multi_mode <- 1L
+    } else {
+      # block_ra_helper() infers prob_each from prob, or from num_arms, and
+      # hands the same vector to every block.
+      pe <- if (!is.null(prob_each)) {
+        prob_each
+      } else if (!is.null(prob)) {
+        c(1 - prob, prob)
+      } else {
+        rep(1 / num_arms, num_arms)
+      }
+      param <- matrix(rep(as.numeric(pe), each = G), nrow = G)
+      multi_mode <- 1L
+    }
+
+    if (ncol(param) == length(conditions)) {
+      raw <- block_assign_multi_cpp(block_int, param, multi_mode)
+      return(clean_condition_names(conditions[raw + 1L], conditions))
+    }
+  }
+
   block_spots <-
     unlist(split(seq_along(blocks), blocks), FALSE, FALSE)
 

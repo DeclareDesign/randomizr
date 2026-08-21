@@ -37,6 +37,18 @@ Measured on an Apple M4 Pro under R 4.6.0, `block_ra()` on a two-arm design:
 
 The gain comes from removing an R-level function call per block rather than from drawing fewer random numbers. Drawing the same numbers as 1.x costs roughly a third of the achievable speedup and is what makes seeds reproduce, which is the better trade for a package whose output is cited in pre-registrations.
 
+Assignment to three or more arms, and to two arms whenever the call reaches `complete_ra()` through `prob_each` or `m_each`, runs in `src/block_assign_multi.cpp` on the same principle. It reproduces 1.x's draw as well, which for these branches means reproducing R's own weighted sampling without replacement, `revsort()`'s descending sort included, since that is what decides which arm receives a leftover unit when a block does not divide evenly.
+
+| design, N = 20,000 in 2,000 blocks | 1.0.1 | 2.0.0 |
+|---|---|---|
+| 3 arms | 21.8 ms | 1.2 ms |
+| 4 arms | 22.4 ms | 1.3 ms |
+| 3 arms via `prob_each` | 16.9 ms | 1.2 ms |
+| 3 arms via `block_m_each` | 16.7 ms | 1.2 ms |
+| 2 arms via `prob_each` | 8.7 ms | 1.1 ms |
+
+`block_prob_each` gains less, because most of what it spends goes to validating that every row of the matrix sums to 1 rather than to assigning.
+
 ## Internal restructuring
 
 ### RS functions unified with RA counterparts

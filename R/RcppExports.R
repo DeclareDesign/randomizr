@@ -5,6 +5,10 @@ block_assign_cpp <- function(block_int, m_given, prob_b, mode) {
     .Call('_randomizr_block_assign_cpp', PACKAGE = 'randomizr', block_int, m_given, prob_b, mode)
 }
 
+block_assign_multi_cpp <- function(block_int, param, mode) {
+    .Call('_randomizr_block_assign_multi_cpp', PACKAGE = 'randomizr', block_int, param, mode)
+}
+
 cube_two_arm_cpp <- function(p, b, ord, tol) {
     .Call('_randomizr_cube_two_arm_cpp', PACKAGE = 'randomizr', p, b, ord, tol)
 }

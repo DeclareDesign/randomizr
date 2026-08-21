@@ -24,6 +24,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// block_assign_multi_cpp
+IntegerVector block_assign_multi_cpp(IntegerVector block_int, NumericMatrix param, int mode);
+RcppExport SEXP _randomizr_block_assign_multi_cpp(SEXP block_intSEXP, SEXP paramSEXP, SEXP modeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type block_int(block_intSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type param(paramSEXP);
+    Rcpp::traits::input_parameter< int >::type mode(modeSEXP);
+    rcpp_result_gen = Rcpp::wrap(block_assign_multi_cpp(block_int, param, mode));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cube_two_arm_cpp
 NumericVector cube_two_arm_cpp(NumericVector p, IntegerVector b, IntegerVector ord, double tol);
 RcppExport SEXP _randomizr_cube_two_arm_cpp(SEXP pSEXP, SEXP bSEXP, SEXP ordSEXP, SEXP tolSEXP) {
