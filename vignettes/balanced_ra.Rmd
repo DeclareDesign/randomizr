@@ -29,30 +29,23 @@ The function is **experimental**. Declare it with `declare_ra(..., ra_type = "ba
 
 # 1. Short demonstration
 
-The two-district design is the case that complete random assignment inside each block cannot handle on its own. Two districts of three villages, three villages to treat, equal probabilities, blocked by district: the per-district target is 1.5. Each district should receive one or two treated villages, never zero and never three, and the total should be three on every draw.
+The two-district design is a simple case that complete random assignment inside each block cannot handle on its own. Two districts of three villages, three villages to treat, equal probabilities, blocked by district: the per-district target is 1.5. Each district should receive one or two treated villages, never zero and never three, and the total should be three on every draw.
 
 ```{r}
 blocks <- rep(1:2, each = 3)
-p <- (1:6)/12
-balanced_ra(blocks = blocks, prob_unit = p)
+balanced_ra(blocks = blocks)
 ```
 
 Repeating the draw, the unit means sit at 0.5, each district contributes 1 or 2, and the total is always 3.
 
 ```{r}
-reps <- replicate(5000, balanced_ra(blocks = blocks, prob_unit = p))
+reps <- replicate(5000, balanced_ra(blocks = blocks))
 
 # individual assignment probabilities
-cbind(target = p, average = rowMeans(reps))
+cbind(target = .5, average = rowMeans(reps))
 
 # block totals
 table(colSums(reps[blocks == 1, ]), colSums(reps[blocks == 2, ]))
-```
-
-`balanced_ra(4)` is the same idea with no blocks and the default probability 0.5: complete assignment of two treated out of four.
-
-```{r}
-table(balanced_ra(4))
 ```
 
 The rest of the vignette explains why those counts stay tight, how the C++ does it, and where the guarantee stops.
@@ -211,7 +204,7 @@ sort(table(apply(zn, 2, pat)))
 
 With blocks, $(1,1,0,0)$ does not appear. Without blocks the overall total is still 2, and $(1,1,0,0)$ does appear. The first two units are never both treated once the block constraint is on.
 
-One shuffle and one sequence of uniforms produce a 0-1 assignment. The wrapper shuffles the units. This path uses the order $1,2,3,4$. The uniforms are $0.20$, $0.50$, $0.40$. The four panels are that path. A filled cell is the chosen assignment. A grey cell with an X is settled at 0. A number is still fractional. A heavier border marks the cells that moved in that step. Panel titles name the procedure. The numbered paragraphs immediately below the figure walk through each step: which units are still open, which sampling rule is used, what the uniform selected, and which cell was filled or deleted and why.
+One shuffle and one sequence of uniforms produce a 0-1 assignment. The wrapper shuffles the units. This path uses the order $1,2,3,4$. The uniforms are $0.20$, $0.50$, $0.40$. Each row below is one step: the left cell is what happened; the right cell is the probability matrix after that step. A filled cell is the chosen assignment. A grey cell with an X is settled at 0. A number is still fractional. A heavier border marks the cells that moved in that step.
 
 ```{r}
 pivot <- function(z, i, j, u) {
@@ -236,8 +229,10 @@ colnames(S) <- paste0("z", 1:4)
 
 ```{r, echo = FALSE}
 cube_tile_plot <- function(states, panel_labs, arm_labels, unit_labels,
-                           hline = NULL, ncol = 2, text_size = 4.2) {
-  long <- do.call(rbind, lapply(seq_along(states), function(s) {
+                           hline = NULL, ncol = 2, text_size = 4.2,
+                           which = NULL, caption = NULL) {
+  idx <- if (is.null(which)) seq_along(states) else which
+  long <- do.call(rbind, lapply(idx, function(s) {
     M <- states[[s]]
     prev <- if (s == 1L) NULL else states[[s - 1L]]
     d <- expand.grid(unit = seq_len(nrow(M)), arm = seq_len(ncol(M)),
@@ -270,9 +265,7 @@ cube_tile_plot <- function(states, panel_labs, arm_labels, unit_labels,
     scale_linewidth_manual(values = c(same = 0.35, moved = 1.2),
                            guide = "none") +
     scale_y_discrete(limits = rev) +
-    facet_wrap(~ panel, ncol = ncol) +
-    labs(x = NULL, y = NULL,
-         caption = "Filled = assigned (1).   Grey + X = out (0).   Number = still fractional.   Heavy border = cells that moved.") +
+    labs(x = NULL, y = NULL, caption = caption) +
     theme_minimal(base_size = 11) +
     theme(
       panel.grid = element_blank(),
@@ -282,6 +275,9 @@ cube_tile_plot <- function(states, panel_labs, arm_labels, unit_labels,
       plot.caption = element_text(hjust = 0, size = 8, colour = "grey30"),
       panel.spacing = unit(0.8, "lines")
     )
+  if (length(idx) > 1L) {
+    g <- g + facet_wrap(~ panel, ncol = ncol)
+  }
   if (!is.null(hline)) {
     g <- g + geom_hline(yintercept = hline, linetype = 2, colour = "grey45",
                         linewidth = 0.4)
@@ -290,30 +286,90 @@ cube_tile_plot <- function(states, panel_labs, arm_labels, unit_labels,
 }
 ```
 
-```{r, echo = FALSE, fig.width = 6.8, fig.height = 7.6, fig.cap = "Four states of the probability matrix on the path to (1, 0, 0, 1). Panel titles name the procedure. Numbered paragraphs below walk through each step. Filled = assigned (1). Grey cell with an X = settled at 0. Number = still fractional. Heavier border = cells that moved in that step."}
+```{r, echo = FALSE}
 as_P <- function(z) cbind(Control = 1 - as.numeric(z), Treat = as.numeric(z))
+states2 <- lapply(seq_len(nrow(S)), function(i) as_P(S[i, ]))
 panel_labs <- c(
   "Step 1 — start",
   "Step 2 — pivotal pair, block 1",
   "Step 3 — pivotal pair, block 2",
-  "Step 4 — leftover pair\nacross blocks"
+  "Step 4 — leftover pair across blocks"
 )
-cube_tile_plot(
-  states = lapply(seq_len(nrow(S)), function(i) as_P(S[i, ])),
+walk2_args <- list(
+  states = states2,
   panel_labs = panel_labs,
   arm_labels = c("Control", "Treat"),
   unit_labels = c("B1 · 1", "B1 · 2", "B2 · 3", "B2 · 4"),
-  hline = 2.5
+  hline = 2.5,
+  text_size = 3.8
 )
 ```
 
-1. **Step 1 — start.** All four units are still open (fractional). Treatment probabilities are $0.2$, $0.4$, $0.6$, and $0.8$. No pairing has been drawn yet. The pass stores unit 1 as block 1's open unit and waits for a second fractional unit in that block.
+<style>
+table.cube-walk { width: 100%; border-collapse: collapse; margin: 0.6em 0 1.2em; }
+table.cube-walk td { vertical-align: top; border-bottom: 1px solid #ddd; padding: 0.7em 0.5em; }
+table.cube-walk td.walk-text { width: 58%; }
+table.cube-walk td.walk-fig { width: 42%; }
+</style>
 
-2. **Step 2 — pivotal pair, block 1.** Units 1 and 2 are both still open and sit in the same block, so we take a *pivotal pair*: one transfer of treated mass between them that leaves the block total at $0.6$. There are two directions. Plus moves as much as possible from unit 2 onto unit 1 (landing at $0.6$ and $0$). Minus moves as much as possible the other way (landing at $0$ and $0.6$). We take plus with probability $1/3$. Imagine we happened to choose plus. Then $0.4$ moves from unit 2 to unit 1: unit 2's treatment cell is crossed out (that was all of its mass) and unit 1 is raised to $0.6$. Unit 2 is settled as control. The first two units cannot both still be treated: their combined mass is only $0.6$, so this pair always drives one of them to $0$ before either can hit $1$. Minus would have settled unit 1 instead. Either way, one of the two is already out.
+<table class="cube-walk">
+<tr>
+<td class="walk-text">
 
-3. **Step 3 — pivotal pair, block 2.** Still open: unit 1 at $0.6$ (the leftover from block 1) and both units in block 2. Unit 3 opened the block; unit 4 pairs with it. Same kind of pair: plus lands at (unit 3 to $1$, unit 4 to $0.4$); minus lands at (unit 3 to $0.4$, unit 4 to $1$). We take plus with probability $1/3$. Imagine we happened to choose minus. Then $0.2$ moves from unit 3 to unit 4: unit 4's treatment cell fills (the gap from $0.8$ to $1$) and unit 3 is lowered to $0.4$ so the block total stays $1.4$. Unit 4 is settled as treated; unit 3 remains open.
+**Step 1 — start.** All four units are still open (fractional). Treatment probabilities are $0.2$, $0.4$, $0.6$, and $0.8$. No pairing has been drawn yet. The pass stores unit 1 as block 1's open unit and waits for a second fractional unit in that block.
 
-4. **Step 4 — leftover pair across blocks.** Still open: unit 1 at $0.6$ and unit 3 at $0.4$. Units 2 and 4 are already settled. We pair the leftovers as if they shared a block, so the same step preserves their combined total of $1$ and the overall treated count stays at $2$. Plus lands at (unit 1 to $1$, unit 3 to $0$); minus lands at (unit 1 to $0$, unit 3 to $1$). We take plus with probability $0.6$. Imagine we happened to choose plus. Then $0.4$ moves from unit 3 to unit 1: unit 1 fills and unit 3 is crossed out. Nothing remains for a Bernoulli draw. If one leftover had remained, it would be rounded by a fair coin at its current $z$.
+</td>
+<td class="walk-fig">
+
+```{r, echo = FALSE, fig.width = 3.2, fig.height = 3.4, fig.cap = ""}
+do.call(cube_tile_plot, c(walk2_args, list(which = 1)))
+```
+
+</td>
+</tr>
+<tr>
+<td class="walk-text">
+
+**Step 2 — pivotal pair, block 1.** Units 1 and 2 are both still open and sit in the same block, so we take a *pivotal pair*: one transfer of treated mass between them that leaves the block total at $0.6$. There are two directions. Plus moves as much as possible from unit 2 onto unit 1 (landing at $0.6$ and $0$). Minus moves as much as possible the other way (landing at $0$ and $0.6$). The largest plus step that stays in $[0,1]$ is $\delta_+=\min(1-z_1,z_2)=\min(0.8,0.4)=0.4$. The largest minus step is $\delta_-=\min(z_1,1-z_2)=\min(0.2,0.6)=0.2$. The fair bet takes plus with probability $\delta_-/(\delta_++\delta_-)=0.2/0.6=1/3$, so the current probabilities are a martingale. Imagine we happened to choose plus. Then $0.4$ moves from unit 2 to unit 1: unit 2's treatment cell is crossed out (that was all of its mass) and unit 1 is raised to $0.6$. Unit 2 is settled as control. The first two units cannot both still be treated: their combined mass is only $0.6$, so this pair always drives one of them to $0$ before either can hit $1$. Minus would have settled unit 1 instead. Either way, one of the two is already out.
+
+</td>
+<td class="walk-fig">
+
+```{r, echo = FALSE, fig.width = 3.2, fig.height = 3.4, fig.cap = ""}
+do.call(cube_tile_plot, c(walk2_args, list(which = 2)))
+```
+
+</td>
+</tr>
+<tr>
+<td class="walk-text">
+
+**Step 3 — pivotal pair, block 2.** Still open: unit 1 at $0.6$ (the leftover from block 1) and both units in block 2. Unit 3 opened the block; unit 4 pairs with it. Same kind of pair: plus lands at (unit 3 to $1$, unit 4 to $0.4$); minus lands at (unit 3 to $0.4$, unit 4 to $1$). Again $\delta_+=0.4$, $\delta_-=0.2$, so plus has probability $0.2/0.6=1/3$. Imagine we happened to choose minus. Then $0.2$ moves from unit 3 to unit 4: unit 4's treatment cell fills (the gap from $0.8$ to $1$) and unit 3 is lowered to $0.4$ so the block total stays $1.4$. Unit 4 is settled as treated; unit 3 remains open.
+
+</td>
+<td class="walk-fig">
+
+```{r, echo = FALSE, fig.width = 3.2, fig.height = 3.4, fig.cap = ""}
+do.call(cube_tile_plot, c(walk2_args, list(which = 3)))
+```
+
+</td>
+</tr>
+<tr>
+<td class="walk-text">
+
+**Step 4 — leftover pair across blocks.** Still open: unit 1 at $0.6$ and unit 3 at $0.4$. Units 2 and 4 are already settled. We pair the leftovers as if they shared a block, so the same step preserves their combined total of $1$ and the overall treated count stays at $2$. Plus lands at (unit 1 to $1$, unit 3 to $0$); minus lands at (unit 1 to $0$, unit 3 to $1$). Here $\delta_+=\min(1-0.6,0.4)=0.4$ and $\delta_-=\min(0.6,1-0.4)=0.6$, so plus has probability $0.6/(0.4+0.6)=0.6$. Imagine we happened to choose plus. Then $0.4$ moves from unit 3 to unit 1: unit 1 fills and unit 3 is crossed out. Nothing remains for a Bernoulli draw. If one leftover had remained, it would be rounded by a fair coin at its current $z$.
+
+</td>
+<td class="walk-fig">
+
+```{r, echo = FALSE, fig.width = 3.2, fig.height = 3.4, fig.cap = ""}
+do.call(cube_tile_plot, c(walk2_args, list(which = 4)))
+```
+
+</td>
+</tr>
+</table>
 
 The treatment column of those four matrices is the state table.
 
@@ -435,7 +491,7 @@ P3
 colSums(P3)
 ```
 
-The window holds three units, so the first move is a cycle. The walk below is the unused-edge walk from `cube_step`, then the fair bet from `cube_move`. An unused-edge cycle is a closed walk on the 2-core of the bipartite graph of still-open units and arms: from a starting vertex, take the first unused allowed edge, and continue until a vertex is revisited. Because every remaining vertex has degree at least 2, that walk cannot dead-end and must close. A cycle has no ends, so every row total and every column total is unchanged. A *path* would appear only if the 2-core were empty; then the walk would run from one leftover arm to another and only those two column totals would move. Order is $1,2,3,4$. This path chooses plus, plus, plus, minus, plus. The walk ends at arms $(1,2,3,1)$. The counts are $(2,1,1)$. Panel titles name the procedure. The numbered paragraphs immediately below the figure walk through each step.
+The window holds three units, so the first move is a cycle. The walk below is the unused-edge walk from `cube_step`, then the fair bet from `cube_move`. An unused-edge cycle is a closed walk on the 2-core of the bipartite graph of still-open units and arms: from a starting vertex, take the first unused allowed edge, and continue until a vertex is revisited. Because every remaining vertex has degree at least 2, that walk cannot dead-end and must close. A cycle has no ends, so every row total and every column total is unchanged. A *path* would appear only if the 2-core were empty; then the walk would run from one leftover arm to another and only those two column totals would move. Order is $1,2,3,4$. This path chooses plus, plus, plus, minus, plus. The walk ends at arms $(1,2,3,1)$. The counts are $(2,1,1)$. Each row below is one step: text on the left, the matrix after that step on the right.
 
 ```{r}
 cube_move <- function(Z, cu, ca, u) {
@@ -475,36 +531,110 @@ Z3 <- cube_move(Z3, c(2, 3, 3, 2), c(2, 2, 3, 3), 0.10)
 S3$cycle5 <- Z3
 ```
 
-```{r, echo = FALSE, fig.width = 7.0, fig.height = 10.2, fig.cap = "Six states of a four-by-three cube walk to arms (1, 2, 3, 1). Panel titles name the procedure. Numbered paragraphs below walk through each step. Filled = assigned (1). Grey cell with an X = settled at 0. Number = still fractional. Heavier border = cells that moved in that step."}
+```{r, echo = FALSE}
 panel_labs3 <- c(
   "Step 1 — start",
-  "Step 2 — unused-edge cycle\nunits 1–2",
-  "Step 3 — unused-edge cycle\nunit 1 fills",
-  "Step 4 — unused-edge cycle\nunit 4 enters",
-  "Step 5 — unused-edge cycle\nunit 4 fills",
-  "Step 6 — leftover 4-cycle\nnot a path"
+  "Step 2 — unused-edge cycle, units 1–2",
+  "Step 3 — unused-edge cycle; unit 1 fills",
+  "Step 4 — unused-edge cycle; unit 4 enters",
+  "Step 5 — unused-edge cycle; unit 4 fills",
+  "Step 6 — leftover 4-cycle, not a path"
 )
-cube_tile_plot(
+walk3_args <- list(
   states = S3,
   panel_labs = panel_labs3,
   arm_labels = c("1", "2", "3"),
   unit_labels = as.character(1:4),
-  ncol = 2,
-  text_size = 3.8
+  text_size = 3.6
 )
 ```
 
-1. **Step 1 — start.** All twelve cells are still open. Column targets are $2$, $1$, and $1$. The working window fills with units 1, 2, and 3 — the first three units that still have at least two fractional cells. Three such units on three arms force a cycle: at least six edges on at most six nodes is not a forest. No move has been drawn yet.
+<table class="cube-walk">
+<tr>
+<td class="walk-text">
 
-2. **Step 2 — unused-edge cycle on units 1–2, arms 1–2.** Still open: all four units. The first unused edges on the 2-core close on units 1 and 2 and arms 1 and 2. That is the same fair bet as the pivotal pair, now along a cycle: even cells $(1,1)$ and $(2,2)$ go up and odd cells $(2,1)$ and $(1,2)$ go down (or the reverse). Plus lands with the odd cells at $0$; minus goes the other way. We take plus with probability $1/3$. Imagine we happened to choose plus. Then $0.4$ leaves each odd cell — that was all of their mass — and the even cells rise by $0.4$. Every row total and every column total is unchanged.
+**Step 1 — start.** All twelve cells are still open. Column targets are $2$, $1$, and $1$. The working window fills with units 1, 2, and 3 — the first three units that still have at least two fractional cells. Three such units on three arms force a cycle: at least six edges on at most six nodes is not a forest. No move has been drawn yet.
 
-3. **Step 3 — unused-edge cycle; unit 1 fills.** Still open: unit 1 (arm 1 at $0.6$ and arm 3 at $0.4$) and units 2–4. The walk now closes on units 1, 3, and 2 and all three arms. We take plus with probability $1/3$. Imagine we happened to choose plus. Then $0.4$ fills unit 1's arm-1 cell (the gap from $0.6$ to $1$) and crosses out its arm-3 cell. Unit 1 drops from the window. Unit 4 enters.
+</td>
+<td class="walk-fig">
 
-4. **Step 4 — unused-edge cycle; unit 4's arm-2 cell hits 0.** Still open: units 2, 3, and 4. The cycle is on units 3 and 4 and arms 1 and 2. Plus takes a step of $0.1$; minus a step of $0.6$. We take plus with probability about $0.86$. Imagine we happened to choose plus. Then unit 4's arm-2 cell is crossed out (that was all of its mass). Column totals are still untouched.
+```{r, echo = FALSE, fig.width = 3.4, fig.height = 3.2, fig.cap = ""}
+do.call(cube_tile_plot, c(walk3_args, list(which = 1)))
+```
 
-5. **Step 5 — unused-edge cycle; unit 4 fills.** Still open: units 2, 3, and 4 (unit 4 still has arm 1 at $0.9$ and arm 3 at $0.1$). Plus would step $0.7$; minus $0.1$. We take plus with probability $0.125$. Imagine we happened to choose minus. Then $0.1$ fills unit 4's arm-1 cell and crosses out its arm-3 cell. Unit 4 is assigned to arm 1. Arm 1's column is now the integer $2$.
+</td>
+</tr>
+<tr>
+<td class="walk-text">
 
-6. **Step 6 — leftover 4-cycle, not a path.** Still open: units 2 and 3 on arms 2 and 3. That graph is a 4-cycle — every vertex has degree 2 — so the 2-core is nonempty and we still take a cycle, not a landing path. Plus fills the even cells $(2,2)$ and $(3,3)$; minus does the reverse. We take plus with probability $0.2$. Imagine we happened to choose plus. Those even cells fill and the odd cells are crossed out. Arms are $(1,2,3,1)$. Counts are $(2,1,1)$. A path would appear only if the 2-core were empty and a column were still fractional. That is the two-unit design with rows $(0.5,0.3,0.2)$ and targets $1$, $0.6$, and $0.4$: two cycles, then a path on the leftover unit between the two arms that are still fractional. Here every target is an integer, so flight finishes.
+**Step 2 — unused-edge cycle on units 1–2, arms 1–2.** Still open: all four units. The first unused edges on the 2-core close on units 1 and 2 and arms 1 and 2. That is the same fair bet as the pivotal pair, now along a cycle: even cells $(1,1)$ and $(2,2)$ go up and odd cells $(2,1)$ and $(1,2)$ go down (or the reverse). Plus lands with the odd cells at $0$; minus goes the other way. The largest plus step is $\delta_+=0.4$ (the odd cells' mass); the largest minus step is $\delta_-=0.2$. Plus has probability $\delta_-/(\delta_++\delta_-)=0.2/0.6=1/3$. Imagine we happened to choose plus. Then $0.4$ leaves each odd cell — that was all of their mass — and the even cells rise by $0.4$. Every row total and every column total is unchanged.
+
+</td>
+<td class="walk-fig">
+
+```{r, echo = FALSE, fig.width = 3.4, fig.height = 3.2, fig.cap = ""}
+do.call(cube_tile_plot, c(walk3_args, list(which = 2)))
+```
+
+</td>
+</tr>
+<tr>
+<td class="walk-text">
+
+**Step 3 — unused-edge cycle; unit 1 fills.** Still open: unit 1 (arm 1 at $0.6$ and arm 3 at $0.4$) and units 2–4. The walk now closes on units 1, 3, and 2 and all three arms. Again $\delta_+=0.4$, $\delta_-=0.2$, so plus has probability $1/3$. Imagine we happened to choose plus. Then $0.4$ fills unit 1's arm-1 cell (the gap from $0.6$ to $1$) and crosses out its arm-3 cell. Unit 1 drops from the window. Unit 4 enters.
+
+</td>
+<td class="walk-fig">
+
+```{r, echo = FALSE, fig.width = 3.4, fig.height = 3.2, fig.cap = ""}
+do.call(cube_tile_plot, c(walk3_args, list(which = 3)))
+```
+
+</td>
+</tr>
+<tr>
+<td class="walk-text">
+
+**Step 4 — unused-edge cycle; unit 4's arm-2 cell hits 0.** Still open: units 2, 3, and 4. The cycle is on units 3 and 4 and arms 1 and 2. Plus takes a step of $\delta_+=0.1$; minus a step of $\delta_-=0.6$. Plus has probability $0.6/(0.1+0.6)\approx 0.86$. Imagine we happened to choose plus. Then unit 4's arm-2 cell is crossed out (that was all of its mass). Column totals are still untouched.
+
+</td>
+<td class="walk-fig">
+
+```{r, echo = FALSE, fig.width = 3.4, fig.height = 3.2, fig.cap = ""}
+do.call(cube_tile_plot, c(walk3_args, list(which = 4)))
+```
+
+</td>
+</tr>
+<tr>
+<td class="walk-text">
+
+**Step 5 — unused-edge cycle; unit 4 fills.** Still open: units 2, 3, and 4 (unit 4 still has arm 1 at $0.9$ and arm 3 at $0.1$). Plus would step $\delta_+=0.7$; minus $\delta_-=0.1$. Plus has probability $0.1/(0.7+0.1)=0.125$. Imagine we happened to choose minus. Then $0.1$ fills unit 4's arm-1 cell and crosses out its arm-3 cell. Unit 4 is assigned to arm 1. Arm 1's column is now the integer $2$.
+
+</td>
+<td class="walk-fig">
+
+```{r, echo = FALSE, fig.width = 3.4, fig.height = 3.2, fig.cap = ""}
+do.call(cube_tile_plot, c(walk3_args, list(which = 5)))
+```
+
+</td>
+</tr>
+<tr>
+<td class="walk-text">
+
+**Step 6 — leftover 4-cycle, not a path.** Still open: units 2 and 3 on arms 2 and 3. That graph is a 4-cycle — every vertex has degree 2 — so the 2-core is nonempty and we still take a cycle, not a landing path. Plus fills the even cells $(2,2)$ and $(3,3)$; minus does the reverse. Here $\delta_+=0.8$ and $\delta_-=0.2$, so plus has probability $0.2/(0.8+0.2)=0.2$. Imagine we happened to choose plus. Those even cells fill and the odd cells are crossed out. Arms are $(1,2,3,1)$. Counts are $(2,1,1)$. A path would appear only if the 2-core were empty and a column were still fractional. That is the two-unit design with rows $(0.5,0.3,0.2)$ and targets $1$, $0.6$, and $0.4$: two cycles, then a path on the leftover unit between the two arms that are still fractional. Here every target is an integer, so flight finishes.
+
+</td>
+<td class="walk-fig">
+
+```{r, echo = FALSE, fig.width = 3.4, fig.height = 3.2, fig.cap = ""}
+do.call(cube_tile_plot, c(walk3_args, list(which = 6)))
+```
+
+</td>
+</tr>
+</table>
 
 The six matrices are the state list.
 
