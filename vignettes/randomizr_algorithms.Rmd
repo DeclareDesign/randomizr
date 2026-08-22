@@ -24,7 +24,7 @@ A random assignment procedure is characterized by a probability distribution ove
 
 ## Simple random assignment
 
-`simple_ra` assigns each unit independently. Each unit draws a condition from a multinomial distribution with probabilities `prob_each`. This is the simplest algorithm: generate N independent uniform random numbers and threshold them to select conditions. The implementation uses `vsample`, a vectorized C routine that draws N multinomial samples in a single pass.
+`simple_ra` assigns each unit independently. Each unit draws a condition from a multinomial distribution with probabilities `prob_each`. The algorithm is the simplest in the package: generate N independent uniform random numbers and threshold them to select conditions. The implementation uses `vsample`, a vectorized C routine that draws N multinomial samples in a single pass.
 
 Simple random assignment is the right choice when units arrive in a stream and the total N is not known in advance. In all other settings, `complete_ra` is preferred because fixing the count in each condition removes a source of variability and narrows the sampling distribution of the estimator.
 
@@ -68,9 +68,9 @@ For two-arm designs, `block_ra` calls `block_assign_cpp`, a C++ routine compiled
 
 **Phase 1: counting sort.** Group unit indices into contiguous runs by block. First count the number of units in each block (one pass over N). Compute prefix sums to find where each block's run starts in the output array. Then fill in the output array: one more pass over N places each unit's index into the correct position. Total work: O(N) with no comparisons and no memory allocation beyond the output array.
 
-**Phase 2: partial Knuth shuffle within each block.** For block g with $n_b$ units and $m_b$ to treat, shuffle the first $m_b$ positions of block g's run in the output array using the partial Fisher-Yates shuffle described above. Mark those positions as treated. Total RNG draws across all blocks: $\sum_g m_b \leq N/2$ on average for balanced designs.
+**Phase 2: partial Knuth shuffle within each block.** For block $b$ with $n_b$ units and $m_b$ to treat, shuffle the first $m_b$ positions of that block's run in the output array using the partial Fisher-Yates shuffle described above. Mark those positions as treated. Total RNG draws across all blocks: $\sum_b m_b \leq N/2$ on average for balanced designs.
 
-The total cost is O(N) for the sort plus O(sum of m_b) for the shuffles. In practice this is several times faster than the alternative of calling R's `order()` on a sort key, which uses a comparison sort at O(N log N), or calling a separate `complete_ra` for each block, which pays per-block R dispatch overhead.
+The total cost is O(N) for the sort plus O(sum of m_b) for the shuffles. The counting sort is several times faster than the alternatives: calling R's `order()` on a sort key, which uses a comparison sort at O(N log N), or calling a separate `complete_ra` for each block, which pays per-block R dispatch overhead.
 
 ```{r}
 blocks <- rep(c("A", "B", "C"), times = c(50, 100, 200))
@@ -124,9 +124,9 @@ with(data.frame(Z, blocks, clusters),
 
 ## Probability calculations
 
-For every design type, a companion `*_probabilities` function returns the matrix of assignment probabilities (N rows by number-of-arms columns). These probabilities are used in inverse-probability-weighted estimators and are stored in the declaration object returned by `declare_ra`.
+For every design type, a companion `*_probabilities` function returns the matrix of assignment probabilities, one row per unit and one column per arm. Inverse-probability-weighted estimators use these probabilities, and `declare_ra` stores them in the declaration object.
 
-For complete random assignment, the probability of assignment to treatment is simply `m / N`. For block random assignment, it is `m_b / n_b` within each block g, where `m_b` is the number treated and `n_b` is the block size. For cluster designs, every unit in a cluster inherits the cluster's assignment probability. `declare_ra` precomputes these probabilities once at declaration time, so `obtain_condition_probabilities` is fast regardless of design complexity.
+For complete random assignment, the probability of assignment to treatment is simply `m / N`. For block random assignment, it is `m_b / n_b` within each block $b$, where `m_b` is the number treated and `n_b` is the block size. For cluster designs, every unit in a cluster inherits the cluster's assignment probability. `declare_ra` precomputes these probabilities once at declaration time, so `obtain_condition_probabilities` is fast regardless of design complexity.
 
 ```{r}
 # Assignment probabilities for a blocked design with varying block probabilities

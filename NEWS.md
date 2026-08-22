@@ -26,13 +26,13 @@ This release is a significant internal restructuring. Every public interface is 
 
 ## New: assignment with heterogeneous probabilities (experimental)
 
-`balanced_ra()` and `balanced_ra_probabilities()` assign units when the probability of assignment varies from unit to unit, holding the number assigned to each condition as close to its target as arithmetic allows. They fill the gap between `simple_ra()`, which honours unit-varying probabilities but lets the number treated wander, and `complete_ra()`, which fixes the number treated but requires every unit to share the same probability.
+`balanced_ra()` and `balanced_ra_probabilities()` assign units when the probability of assignment varies from unit to unit, holding the number assigned to each condition as close to its target as arithmetic allows. They fill the gap between `simple_ra()`, which honors unit-varying probabilities but lets the number treated wander, and `complete_ra()`, which fixes the number treated but requires every unit to share the same probability.
 
 Three things hold at once, and all three are guaranteed rather than approached: every unit receives exactly one condition; each unit's probability of each condition is exactly the probability supplied; and each condition's count is the floor or the ceiling of its expected count. With `blocks`, the tight counts are the within-block ones. This closes issue #35, load balancing across blocks, which earlier releases listed as out of scope.
 
 `clusters` assigns whole groups together, in which case the tight counts are counts of clusters rather than of units, and `blocks` and `clusters` may be used at the same time.
 
-The assignment is drawn by the cube method of Deville and Tillé (2004), specialised to this problem. The algorithm holds the counts tight for any number of arms.
+The assignment is drawn by the cube method of Deville and Tillé (2004), specialized to this problem. The algorithm holds the counts tight for any number of arms.
 
 Both of `balanced_ra()`'s paths are linear in the number of units and written in C++: 2,000 units take about a tenth of a millisecond with two conditions and about a millisecond with four, measured with a different probability drawn for every unit.
 

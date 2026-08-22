@@ -23,7 +23,7 @@ library(randomizr)
 library(ggplot2)
 ```
 
-`balanced_ra()` assigns units to conditions when assignment probabilities vary from unit to unit, and it holds the number assigned to each condition at the floor or the ceiling of that condition's expected count. Three things hold on every draw: each unit receives exactly one condition; each unit's probability of each condition is the probability supplied; and the realised counts sit at the floor or the ceiling of their targets. With two arms and `blocks`, those tight counts are both within each block and overall. With three or more arms and `blocks`, tightness is within each block; the overall count is the sum of independent block landings and can move by more than one. Section 1 is a short demonstration. Section 2 gives the logic and states what the published papers guarantee versus what this implementation guarantees. Section 3 walks through the C++. Section 4 gives worked examples. Section 5 reports a concise validation. Section 6 lists the caveats.
+`balanced_ra()` assigns units to conditions when assignment probabilities vary from unit to unit, and it holds the number assigned to each condition at the floor or the ceiling of that condition's expected count. Three things hold on every draw: each unit receives exactly one condition; each unit's probability of each condition is the probability supplied; and the realized counts sit at the floor or the ceiling of their targets. With two arms and `blocks`, those tight counts are both within each block and overall. With three or more arms and `blocks`, tightness is within each block; the overall count is the sum of independent block landings and can move by more than one. Section 1 is a short demonstration. Section 2 gives the logic and states what the published papers guarantee versus what this implementation guarantees. Section 3 walks through the C++. Section 4 gives worked examples. Section 5 reports a concise validation. Section 6 lists the caveats.
 
 The function is **experimental**. Declare it with `declare_ra(..., ra_type = "balanced")` or by supplying `prob_unit_each`.
 
@@ -57,7 +57,7 @@ The rest of the vignette explains why those counts stay tight, how the C++ does 
 
 `balanced_ra()` is cube/pivotal assignment with unit-varying probabilities, on the same interface as `complete_ra()` and `block_ra()`. For two-arm blocked designs leftover pairing keeps the counts tight within each block and overall.
 
-The input is an $N \times k$ matrix $\pi$ of assignment probabilities. Row $i$ sums to 1. Column $j$ sums to a target $t_j = \sum_i \pi_{ij}$. The output is a 0-1 matrix $Z$ with the same row sums, so each unit receives one condition, and with $E[Z]=\pi$. The column sums of $Z$ are required to be as close to $t$ as integer arithmetic allows: each realised count $n_j$ satisfies $n_j \in \{\lfloor t_j \rfloor, \lceil t_j \rceil\}$.
+The input is an $N \times k$ matrix $\pi$ of assignment probabilities. Row $i$ sums to 1. Column $j$ sums to a target $t_j = \sum_i \pi_{ij}$. The output is a 0-1 matrix $Z$ with the same row sums, so each unit receives one condition, and with $E[Z]=\pi$. The column sums of $Z$ are required to be as close to $t$ as integer arithmetic allows: each realized count $n_j$ satisfies $n_j \in \{\lfloor t_j \rfloor, \lceil t_j \rceil\}$.
 
 One way to picture the algorithm is as a flow on the bipartite graph of units and conditions. An edge exists where a cell is still fractional. A cycle in that graph is a closed walk that alternates between units and conditions. Pushing a constant $\delta$ forward along the even edges and backward along the odd edges leaves every row total and every column total unchanged, and a large enough $\delta$ drives at least one cell to 0 or 1. Repeat until no cycle remains.
 
@@ -679,7 +679,7 @@ balanced_ra(prob_unit = 0.5)
 
 # 5. Validation
 
-The claims in Section 2 are per-draw properties plus a marginal. This section reports them on a short set of designs. Replicates are 2,000 throughout. What is shown is the largest absolute gap between an empirical share and the supplied probability, and the table of realised counts.
+The claims in Section 2 are per-draw properties plus a marginal. This section reports them on a short set of designs. Replicates are 2,000 throughout. What is shown is the largest absolute gap between an empirical share and the supplied probability, and the table of realized counts.
 
 ## Unequal probabilities, no blocks
 

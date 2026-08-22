@@ -3,12 +3,12 @@
 #' \strong{Experimental.} \code{balanced_ra} assigns units to conditions when the
 #' probability of assignment varies from unit to unit, holding the number
 #' assigned to each condition as close to its target as arithmetic allows. It
-#' fills the gap between [simple_ra()], which honours unit-varying probabilities
+#' fills the gap between [simple_ra()], which honors unit-varying probabilities
 #' but lets the number treated wander, and [complete_ra()], which fixes the
 #' number treated but requires every unit to share the same probability.
 #'
 #' The "balanced" in the name is balanced sampling in the sense of Deville and
-#' Tillé (2004). With the default arguments the realised counts are held
+#' Tillé (2004). With the default arguments the realized counts are held
 #' against their targets. Pass \code{formula} to add linear balancing
 #' constraints on covariates (cube-on-X): the flight keeps \eqn{X'Z} near
 #' \eqn{X'\pi}. Landing may drop a constraint, so exact tightness on every
@@ -48,7 +48,7 @@
 #' 0.020, and the Horvitz-Thompson residual for the \eqn{x} total, from 4.91 to
 #' 1.01.
 #'
-#' In short, \code{formula} does not equalise the arms when \eqn{p_i} varies, and
+#' In short, \code{formula} does not equalize the arms when \eqn{p_i} varies, and
 #' it is not meant to. Weight by the reciprocal of the assignment probability, as
 #' for any unequal-probability design;
 #' \code{\link{balanced_ra_probabilities}()} returns the probabilities to weight
@@ -187,7 +187,7 @@
 #' Z <- balanced_ra(prob_unit = p)
 #' table(Z)
 #'
-#' # Repeating the draw: probabilities are honoured, and exactly 3 are treated
+#' # Repeating the draw: probabilities are honored, and exactly 3 are treated
 #' # every time because the probabilities sum to 3.
 #' reps <- replicate(1000, balanced_ra(prob_unit = p))
 #' rowMeans(reps)          # close to p
@@ -290,7 +290,7 @@ balanced_ra <- function(N = NULL,
 #' \strong{Experimental.} Returns the probability that each unit is assigned to
 #' each condition under [balanced_ra()]. Because those probabilities are supplied by
 #' the caller rather than derived from a design, this function mainly validates
-#' and normalises them into the matrix form the other \code{_probabilities} functions
+#' and normalizes them into the matrix form the other \code{_probabilities} functions
 #' return.
 #'
 #' These are the quantities inverse-probability weights are built from: weight

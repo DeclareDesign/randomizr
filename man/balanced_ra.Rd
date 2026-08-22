@@ -70,13 +70,13 @@ A vector of length N giving the condition of each unit, numeric in a
 \strong{Experimental.} \code{balanced_ra} assigns units to conditions when the
 probability of assignment varies from unit to unit, holding the number
 assigned to each condition as close to its target as arithmetic allows. It
-fills the gap between [simple_ra()], which honours unit-varying probabilities
+fills the gap between [simple_ra()], which honors unit-varying probabilities
 but lets the number treated wander, and [complete_ra()], which fixes the
 number treated but requires every unit to share the same probability.
 }
 \details{
 The "balanced" in the name is balanced sampling in the sense of Deville and
-Tillé (2004). With the default arguments the realised counts are held
+Tillé (2004). With the default arguments the realized counts are held
 against their targets. Pass \code{formula} to add linear balancing
 constraints on covariates (cube-on-X): the flight keeps \eqn{X'Z} near
 \eqn{X'\pi}. Landing may drop a constraint, so exact tightness on every
@@ -119,7 +119,7 @@ tightens is the spread of that difference around its target, from 0.099 to
 0.020, and the Horvitz-Thompson residual for the \eqn{x} total, from 4.91 to
 1.01.
 
-In short, \code{formula} does not equalise the arms when \eqn{p_i} varies, and
+In short, \code{formula} does not equalize the arms when \eqn{p_i} varies, and
 it is not meant to. Weight by the reciprocal of the assignment probability, as
 for any unequal-probability design;
 \code{\link{balanced_ra_probabilities}()} returns the probabilities to weight
@@ -206,7 +206,7 @@ p <- c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5)
 Z <- balanced_ra(prob_unit = p)
 table(Z)
 
-# Repeating the draw: probabilities are honoured, and exactly 3 are treated
+# Repeating the draw: probabilities are honored, and exactly 3 are treated
 # every time because the probabilities sum to 3.
 reps <- replicate(1000, balanced_ra(prob_unit = p))
 rowMeans(reps)          # close to p

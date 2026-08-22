@@ -64,7 +64,7 @@ A matrix of probabilities of assignment, one row per unit and one
 \strong{Experimental.} Returns the probability that each unit is assigned to
 each condition under [balanced_ra()]. Because those probabilities are supplied by
 the caller rather than derived from a design, this function mainly validates
-and normalises them into the matrix form the other \code{_probabilities} functions
+and normalizes them into the matrix form the other \code{_probabilities} functions
 return.
 }
 \details{
