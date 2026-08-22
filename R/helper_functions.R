@@ -21,6 +21,76 @@
 
 #f <- function(N,n) {.invoke_check(function(a) list(n = a[["n"]] + 1)); n}
 
+ra_conflict_args <- c(
+  "prob",
+  "prob_each",
+  "prob_unit",
+  "m",
+  "m_unit",
+  "m_each",
+  "block_prob",
+  "block_prob_each",
+  "block_m",
+  "block_m_each"
+)
+
+#' Fill in num_arms and conditions when the caller left them implicit
+#'
+#' Every assignment function needs both, and neither can be recovered from the
+#' other arguments at the point of use: which one is implied depends on which of
+#' the ten mutually exclusive design arguments was supplied, and whether it is a
+#' block argument, an each argument, or a matrix. The validator used to derive
+#' them as a side effect, which meant \code{check_inputs = FALSE} skipped the
+#' derivation along with the validation and left the function without values it
+#' cannot run without. Both paths call this now.
+#'
+#' @keywords internal
+#' @noRd
+derive_arms_and_conditions <- function(all_args) {
+  num_arms <- all_args$num_arms
+  conditions <- all_args$conditions
+
+  specified_args <- Filter(
+    Negate(is.null),
+    all_args[intersect(ra_conflict_args, names(all_args))]
+  )
+
+  if (is.null(num_arms)) {
+    num_arms <- if (!is.null(conditions)) {
+      length(conditions)
+    } else if (length(specified_args) == 0) {
+      2
+    } else {
+      arg <- names(specified_args)[1]
+      if (!grepl("_each$", arg)) {
+        2
+      } else if (!grepl("^block_", arg) && !is.matrix(specified_args[[1]])) {
+        length(specified_args[[1]])
+      } else {
+        ncol(specified_args[[1]])
+      }
+    }
+
+    if (num_arms == 2 && is.null(conditions)) conditions <- 0:1
+  }
+
+  if (is.null(conditions)) conditions <- paste0("T", seq_len(num_arms))
+
+  list(num_arms = num_arms, conditions = conditions)
+}
+
+#' Derive without validating, for check_inputs = FALSE
+#'
+#' @keywords internal
+#' @noRd
+.invoke_derive <- function() {
+  definition <- sys.function(sys.parent())
+  envir <- parent.frame(1)
+  all_args <- mget(names(formals(definition)), envir)
+  list2env(derive_arms_and_conditions(all_args), envir)
+  invisible(NULL)
+}
+
 check_randomizr_arguments_new <-
   function(all_args)
     do.call("check_randomizr_arguments", all_args)
@@ -103,20 +173,7 @@ check_randomizr_arguments <-
     }
     
     # Each of these should be a unique specifier, consistent with above general args
-    conflict_args <-
-      c(
-        "prob",
-        "prob_each",
-        "prob_unit",
-        "m",
-        "m_unit",
-        "m_each",
-        "block_prob",
-        "block_prob_each",
-        "block_m",
-        "block_m_each"
-      )
-    specified_args <- Filter(Negate(is.null), mget(conflict_args))
+    specified_args <- Filter(Negate(is.null), mget(ra_conflict_args))
     
     if (length(specified_args) > 1) {
       stop("Please specify only one of ",
@@ -157,30 +214,13 @@ check_randomizr_arguments <-
     
     # learn about design
     
-    # obtain num_arms
-    
-    if (is.null(num_arms)) {
-      num_arms <- if (!is.null(conditions))
-        length(conditions)
-      else if (length(specified_args) == 0)
-        2
-      else if (!arg_each)
-        2
-      else if (!arg_block &&
-               !is.matrix(specified_args[[1]]))
-        length(specified_args[[1]])
-      else
-        ncol(specified_args[[1]])
-      
-      if (num_arms == 2 && is.null(conditions))
-        conditions <- 0:1
-    }
-    
-    # obtain conditions, wasn't set by num_arms guess
-    if (is.null(conditions)) {
-      conditions <- paste0("T", 1:num_arms)
-    }
-    
+    # specified_args is already the filtered set of design arguments, so hand it
+    # over rather than re-reading the frame.
+    design <- derive_arms_and_conditions(
+      c(list(num_arms = num_arms, conditions = conditions), specified_args)
+    )
+    num_arms <- design$num_arms
+    conditions <- design$conditions
     
     ret <- list(
       num_arms = num_arms,

@@ -12,7 +12,7 @@
 #' @param prob_each Use for a multi-arm design. A numeric vector or N-by-conditions matrix giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. (optional)
 #' @param num_arms The number of treatment arms. If unspecified, determined from the other arguments. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)
-#' @param check_inputs Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1 and sum to 1, that vectors are of length N, that only one of \code{prob}, \code{prob_unit}, and \code{prob_each} is supplied, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the assignment needs must be supplied explicitly. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)
+#' @param check_inputs Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1 and sum to 1, that vectors are of length N, that only one of \code{prob}, \code{prob_unit}, and \code{prob_each} is supplied, and so on. Defaults to \code{TRUE}. \code{FALSE} skips the checking only: \code{num_arms} and \code{conditions} are still derived from the other arguments, so the same call draws the same assignment either way. What goes is the verification, and an impossible design is then no longer refused. \code{block_m} larger than a block, for instance, quietly treats the whole block. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)
 #' @param simple Logical. Internal use only; leave at its default. \code{simple_ra} always assigns units independently, and this argument exists so that the argument checker knows as much. Setting it to \code{FALSE} does not change how units are assigned, but it will cause a \code{prob_unit} that varies across units to be rejected. (optional)
 #'
 #' @return A vector of length N indicating the treatment condition of each unit. Numeric in a two-arm trial; a factor (ordered by \code{conditions}) in a multi-arm trial.
@@ -65,6 +65,8 @@ simple_ra <- function(N,
                       simple = TRUE) {
   if (check_inputs) {
     .invoke_check(check_randomizr_arguments_new)
+  } else {
+    .invoke_derive()
   }
   prob_mat <- simple_ra_probabilities(N, prob, prob_unit, prob_each, num_arms, conditions, FALSE)
   assignment <- conditions[vsample(prob_mat)]
@@ -123,7 +125,7 @@ simple_ra_probabilities <-
            conditions = NULL,
            check_inputs = TRUE, 
            simple = TRUE) {
-    if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+    if (check_inputs) .invoke_check(check_randomizr_arguments_new) else .invoke_derive()
     
     # Three easy cases
     condition_probabilities <-

@@ -26,7 +26,7 @@
 #' @param block_prob_each Use for a multi-arm design in which assignment probabilities vary across blocks. Must be a matrix with one row per block and one column per treatment arm; each row must sum to 1. Rows respect the ordering of \code{sort(unique(blocks))}. Use only if the probabilities of assignment should vary by block, otherwise use \code{prob_each}. (optional)
 #' @param num_arms The number of treatment arms. If unspecified, determined from the other arguments. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)
-#' @param check_inputs Logical. Whether to verify before assigning that the arguments are internally consistent: that clusters nest within blocks, that counts sum to the number of clusters in each block, that probabilities lie between 0 and 1 and sum to 1, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the assignment needs must be supplied explicitly. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)
+#' @param check_inputs Logical. Whether to verify before assigning that the arguments are internally consistent: that clusters nest within blocks, that counts sum to the number of clusters in each block, that probabilities lie between 0 and 1 and sum to 1, and so on. Defaults to \code{TRUE}. \code{FALSE} skips the checking only: \code{num_arms} and \code{conditions} are still derived from the other arguments, so the same call draws the same assignment either way. What goes is the verification, and an impossible design is then no longer refused. \code{block_m} larger than a block, for instance, quietly treats the whole block. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)
 #'
 #' @return A vector of length N indicating the treatment condition of each unit. Every unit in a cluster receives the same value. Numeric in a two-arm trial; a factor (ordered by \code{conditions}) in a multi-arm trial.
 #'
@@ -90,7 +90,7 @@ block_and_cluster_ra <-
            conditions = NULL,
            check_inputs = TRUE) {
     
-    if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+    if (check_inputs) .invoke_check(check_randomizr_arguments_new) else .invoke_derive()
     
 
     # Setup: obtain unique clusters
@@ -200,7 +200,7 @@ block_and_cluster_ra_probabilities <-
            check_inputs = TRUE) {
     
 
-    if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+    if (check_inputs) .invoke_check(check_randomizr_arguments_new) else .invoke_derive()
     
     
     # Setup: obtain unique clusters

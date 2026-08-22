@@ -47,8 +47,37 @@ IntegerVector block_assign_cpp(IntegerVector block_int,
   int N = block_int.size();
   int G = m_given.size();
 
+  // Bounds, before anything writes. Each of the three modes below fills v by
+  // counting down from n_b, so a block count or probability outside its range
+  // makes the loop start at a negative index and write off the front of the
+  // buffer. check_inputs = FALSE waives the checking of a design; it cannot be
+  // allowed to waive memory safety, and reaching here with a bad m_b used to
+  // corrupt the heap and take R down with a bus error.
+  for (int i = 0; i < N; ++i) {
+    int b = block_int[i];
+    if (b < 1 || b > G) {
+      stop("Block index %d at unit %d is outside 1:%d.", b, i + 1, G);
+    }
+  }
+
   std::vector<int> count(G, 0);
   for (int i = 0; i < N; ++i) count[block_int[i] - 1]++;
+
+  for (int g = 0; g < G; ++g) {
+    if (mode == 0) {
+      int m_b = m_given[g];
+      if (m_b < 0 || m_b > count[g]) {
+        stop("Block %d has %d units but %d were requested for treatment.",
+             g + 1, count[g], m_b);
+      }
+    } else {
+      double p = prob_b[g];
+      if (!R_finite(p) || p < 0.0 || p > 1.0) {
+        stop("Block %d has assignment probability %f, which is not in [0, 1].",
+             g + 1, p);
+      }
+    }
+  }
   std::vector<int> start(G + 1, 0);
   for (int g = 0; g < G; ++g) start[g + 1] = start[g] + count[g];
   std::vector<int> group_units(N);
