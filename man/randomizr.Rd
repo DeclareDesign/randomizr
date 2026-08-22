@@ -82,11 +82,6 @@ Useful links:
 \author{
 \strong{Maintainer}: Alexander Coppock \email{acoppock@gmail.com} (\href{https://orcid.org/0000-0002-5733-2386}{ORCID})
 
-Authors:
-\itemize{
-  \item Alexander Coppock \email{acoppock@gmail.com} (\href{https://orcid.org/0000-0002-5733-2386}{ORCID})
-}
-
 Other contributors:
 \itemize{
   \item Jasper Cooper \email{jaspercooper@gmail.com} (\href{https://orcid.org/0000-0002-8639-3188}{ORCID}) [contributor]

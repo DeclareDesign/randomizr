@@ -42,23 +42,46 @@ test_that("two arms with unit-varying probabilities: exact marginals, fixed tota
 
 test_that("a scalar prob_unit takes its length from N, blocks or clusters", {
   set.seed(1)
+  expect_length(balanced_ra(N = 10), 10)
+  expect_length(balanced_ra(4), 4)
   expect_length(balanced_ra(prob_unit = 0.5, N = 10), 10)
   expect_length(balanced_ra(prob_unit = 0.5, blocks = rep(1:2, each = 5)), 10)
   expect_length(balanced_ra(prob_unit = 0.5, clusters = rep(1:5, each = 2)), 10)
-  # the call that errored in the original probra
   expect_error(balanced_ra(prob_unit = 0.5), "supply `N`, `blocks` or `clusters`")
+  expect_error(balanced_ra(), "supply `N`, `blocks` or `clusters`")
+  expect_error(balanced_ra(c(0.2, 0.4, 0.6)), "single positive integer")
 })
 
-test_that("blocked assignment is tight within every block", {
+test_that("balanced_ra(N) is complete assignment at p = 0.5", {
+  set.seed(1)
+  r <- replicate(1000, balanced_ra(4))
+  expect_true(all(colSums(r) == 2))
+  expect_equal(rowMeans(r), rep(0.5, 4), tolerance = 0.05)
+})
+
+test_that("blocked assignment is tight within every block and overall", {
   set.seed(2)
-  # Macartan's example: two districts of three, three treated, target 1.5 each.
+  # Two districts of three, three treated, target 1.5 each. Both the
+  # per-district counts and the overall total stay tight.
   districts <- rep(c("north", "south"), each = 3)
-  r <- replicate(2000, balanced_ra(prob_unit = rep(0.5, 6), blocks = districts))
+  r <- replicate(2000, balanced_ra(blocks = districts))
   north <- colSums(r[districts == "north", ])
   south <- colSums(r[districts == "south", ])
   expect_true(all(north %in% 1:2))          # never 0, never 3
   expect_true(all(south %in% 1:2))
+  expect_true(all(colSums(r) == 3))         # never 2, never 4
+  expect_true(all(north + south == 3))      # only (1,2) and (2,1)
   expect_equal(rowMeans(r), rep(0.5, 6), tolerance = 0.04)
+})
+
+test_that("many fractional blocks stay tight overall", {
+  set.seed(21)
+  blocks <- rep(1:10, each = 3)
+  r <- replicate(1500, balanced_ra(blocks = blocks))
+  expect_true(all(colSums(r) %in% 14:16))   # target 15
+  for (b in 1:10) {
+    expect_true(all(colSums(r[blocks == b, , drop = FALSE]) %in% 1:2))
+  }
 })
 
 test_that("multi-arm counts are tight, which the sequential method could not do", {
@@ -107,7 +130,7 @@ test_that("invalid probabilities are refused, which probra accepted", {
   expect_error(balanced_ra(prob_unit = c(0.5, 2, 0.5)), "between 0 and 1")
   expect_error(balanced_ra(prob_unit = c(0.5, NA, 0.5)), "must not be missing")
   expect_error(balanced_ra(prob_unit_each = cbind(c(.5, .5), c(.2, .2))), "sum to 1")
-  expect_error(balanced_ra(), "Supply either")
+  expect_error(balanced_ra(), "supply `N`, `blocks` or `clusters`")
   expect_error(balanced_ra(prob_unit = 0.5, prob_unit_each = matrix(.5, 2, 2)),
                "only one of")
   expect_error(balanced_ra(prob_unit = c(.5, .5), blocks = c(1, 2, 3)), "`blocks` has length")
@@ -147,6 +170,19 @@ test_that("whole clusters move together and the cluster count is tight", {
   expect_true(all(apply(r, 2, cl_counts, clusters = clusters) == 4))
   expect_equal(rowMeans(r)[!duplicated(clusters)], pc, tolerance = 0.04,
                ignore_attr = TRUE)
+})
+
+test_that("blocks and clusters with a fractional per-block target stay tight overall", {
+  set.seed(14)
+  clusters <- rep(1:6, times = c(3, 1, 4, 2, 5, 3))
+  blocks <- ifelse(clusters <= 3, "east", "west")
+  r <- replicate(1500, balanced_ra(prob_unit = 0.5, clusters = clusters,
+                               blocks = blocks))
+  east <- apply(r, 2, function(z) cl_counts(z[blocks == "east"], clusters[blocks == "east"]))
+  west <- apply(r, 2, function(z) cl_counts(z[blocks == "west"], clusters[blocks == "west"]))
+  expect_true(all(east %in% 1:2))
+  expect_true(all(west %in% 1:2))
+  expect_true(all(east + west == 3))
 })
 
 test_that("blocks and clusters work at the same time", {

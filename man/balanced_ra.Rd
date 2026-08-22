@@ -5,21 +5,25 @@
 \title{Random assignment with heterogeneous probabilities}
 \usage{
 balanced_ra(
-  prob_unit = NULL,
+  N = NULL,
+  prob_unit = 0.5,
   prob_unit_each = NULL,
   blocks = NULL,
   clusters = NULL,
-  N = NULL,
   num_arms = NULL,
   conditions = NULL,
   check_inputs = TRUE
 )
 }
 \arguments{
-\item{prob_unit}{A numeric vector of length N giving each unit's probability
-of assignment to treatment, for a two-arm design. Unlike elsewhere in
-randomizr these need not be equal across units; varying them is the point
-of this function. Supply either \code{prob_unit} or \code{prob_unit_each}. (optional)}
+\item{N}{The number of units. Inferred from \code{prob_unit}, \code{blocks}, or
+\code{clusters} when omitted. A single positive integer. (optional)}
+
+\item{prob_unit}{A scalar or a numeric vector of length N giving each unit's
+probability of assignment to treatment, for a two-arm design. Unlike
+elsewhere in randomizr these need not be equal across units; varying them
+is the point of this function. A scalar is recycled to length N. Defaults
+to 0.5. Supply either \code{prob_unit} or \code{prob_unit_each}. (optional)}
 
 \item{prob_unit_each}{A numeric matrix with one row per unit and one column
 per condition, giving each unit's probability of assignment to each
@@ -27,15 +31,14 @@ condition, for a multi-arm design. Rows must sum to 1. Supply either
 \code{prob_unit} or \code{prob_unit_each}. (optional)}
 
 \item{blocks}{A vector of length N indicating which block each unit belongs
-to. When supplied, counts are held tight within each block. (optional)}
+to. When supplied, two-arm counts are held tight within each block and
+overall; with three or more arms the tight counts are the within-block ones. (optional)}
 
 \item{clusters}{A vector of length N indicating which cluster each unit
 belongs to. Whole clusters are assigned together, so the probabilities must
 be the same for every unit in a cluster, and the tight counts become counts
 of clusters rather than of units. May be combined with \code{blocks}, in which
 case every cluster must sit entirely inside one block. (optional)}
-
-\item{N}{The number of units. Inferred from the other arguments when omitted. (optional)}
 
 \item{num_arms}{The number of treatment arms. Inferred when omitted. (optional)}
 
@@ -104,10 +107,11 @@ receiving each condition is exactly the probability supplied. The number of
 units in each condition is either the floor or the ceiling of that
 condition's expected count, never further away.
 
-With \code{blocks}, the tight counts are the within-block ones, which is the
-blocked design generalised to unequal probabilities. Without \code{blocks}, the
-tight counts are the overall ones. Both cannot be guaranteed at once in
-general, so \code{balanced_ra} guarantees whichever the call asks for.
+With \code{blocks} and two conditions, counts are held tight both within each
+block and overall: each block is at the floor or ceiling of its target, and
+so is the total. With three or more conditions the tight counts are the
+within-block ones; the overall count is their sum. Without \code{blocks}, the
+tight counts are the overall ones.
 
 With \code{clusters}, the assignment happens at the cluster level and the counts
 held tight are counts of clusters. Clusters of unequal size therefore give a
@@ -177,6 +181,9 @@ not yet participate in [declare_ra()], so [conduct_ra()] and
 }
 
 \examples{
+# Four units, default probability 0.5: complete assignment of two treated.
+table(balanced_ra(4))
+
 # A race between contestants with unequal chances, in which exactly one wins
 # because the chances sum to 1.
 chances <- c(0.5, 0.3, 0.15, 0.05)
@@ -195,10 +202,11 @@ rowMeans(reps)          # close to p
 table(colSums(reps))    # always 3
 
 # Two districts of three villages, three to be treated, blocked by district.
-# The per-district target is 1.5, so each district gets one or two.
+# Each district gets one or two; the total is always three.
 districts <- rep(c("north", "south"), each = 3)
-reps <- replicate(1000, balanced_ra(prob_unit = rep(0.5, 6), blocks = districts))
-table(colSums(reps[districts == "north", ]))
+reps <- replicate(1000, balanced_ra(blocks = districts))
+table(colSums(reps))                           # always 3
+table(colSums(reps[districts == "north", ]))   # 1 or 2
 
 # Three arms with unit-varying probabilities.
 P <- cbind(c(0.15, 0.47), c(0.65, 0.48), c(0.20, 0.05))

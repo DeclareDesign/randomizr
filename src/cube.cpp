@@ -15,20 +15,22 @@ using namespace Rcpp;
 // exist and every maximal path is unit-block-unit. The general walk collapses
 // to "hold one open unit per block, pair the next fractional unit with it, move
 // one up and the other down", which is a single pass.
+//
+// Independent Bernoulli rounding of the leftover in each block would keep each
+// block tight and let the overall count drift by up to the number of blocks.
+// A second pass pairs those leftovers as one group, so the overall count stays
+// tight as well. Each leftover is still 0 or 1, so no block moves by more than
+// one from its target.
 
-// [[Rcpp::export]]
-NumericVector cube_two_arm_cpp(NumericVector p, IntegerVector b,
-                               IntegerVector ord, double tol) {
-  int n = p.size();
-  NumericVector z = clone(p);
-  int nb = 0;
-  for (int i = 0; i < n; i++) if (b[i] > nb) nb = b[i];
-
+// Pair fractional units that share a block id. Leaves at most one fractional
+// unit per id; does not round the leftovers.
+static void cube_pivot_pass(NumericVector& z, const std::vector<int>& seq,
+                            const int* blk, int nb, double tol) {
   std::vector<int> open(nb + 1, -1);
-  for (int t = 0; t < n; t++) {
-    int j = ord[t] - 1;
+  for (size_t t = 0; t < seq.size(); t++) {
+    int j = seq[t];
     if (z[j] <= tol || z[j] >= 1.0 - tol) continue;
-    int bl = b[j];
+    int bl = blk[j];
     if (open[bl] < 0) { open[bl] = j; continue; }
 
     int i = open[bl];
@@ -40,11 +42,34 @@ NumericVector cube_two_arm_cpp(NumericVector p, IntegerVector b,
     int keep = (z[i] > tol && z[i] < 1.0 - tol) ? i : j;
     open[bl] = (z[keep] > tol && z[keep] < 1.0 - tol) ? keep : -1;
   }
+}
 
-  // At most one unit per block survives. Rounding it fairly moves that block's
-  // count by less than one, so the count stays floor-or-ceiling.
-  for (int bl = 1; bl <= nb; bl++) {
-    if (open[bl] >= 0) z[open[bl]] = (unif_rand() < z[open[bl]]) ? 1.0 : 0.0;
+// [[Rcpp::export]]
+NumericVector cube_two_arm_cpp(NumericVector p, IntegerVector b,
+                               IntegerVector ord, double tol) {
+  int n = p.size();
+  NumericVector z = clone(p);
+  int nb = 0;
+  for (int i = 0; i < n; i++) if (b[i] > nb) nb = b[i];
+
+  std::vector<int> seq(n);
+  for (int t = 0; t < n; t++) seq[t] = ord[t] - 1;
+  cube_pivot_pass(z, seq, b.begin(), nb, tol);
+
+  std::vector<int> left;
+  left.reserve(nb);
+  for (int t = 0; t < n; t++) {
+    int j = seq[t];
+    if (z[j] > tol && z[j] < 1.0 - tol) left.push_back(j);
+  }
+  if (left.size() > 1) {
+    std::vector<int> one(n, 1);
+    cube_pivot_pass(z, left, one.data(), 1, tol);
+  }
+
+  for (int i = 0; i < n; i++) {
+    if (z[i] > tol && z[i] < 1.0 - tol)
+      z[i] = (unif_rand() < z[i]) ? 1.0 : 0.0;
   }
   for (int i = 0; i < n; i++) z[i] = (z[i] > 0.5) ? 1.0 : 0.0;
   return z;
@@ -62,8 +87,9 @@ NumericVector cube_two_arm_cpp(NumericVector p, IntegerVector b,
 //
 // So each move only ever examines k units, and since every move settles at
 // least one of the n*k cells the whole draw is linear in the number of units.
-// Paths are needed only once per block, on the fewer than k units left after
-// the block runs out, which is the landing phase.
+// Flight (cycles) stays inside each block. Landing is a second pass on the
+// leftover units only, treated as one group, so overall arm totals stay tight
+// as well as the within-block ones when each block has at most one leftover.
 
 // Move along the given walk, alternating the sign of the step. Consecutive
 // edges share a node, so alternating leaves every unit's row total and every
@@ -113,10 +139,12 @@ struct CubeWork {
   }
 };
 
-// One move on the working set: a cycle if the graph has one, a path otherwise.
+// One move on the working set: a cycle if the graph has one, a path otherwise
+// (unless allow_path is false, in which case a forest is left for later).
 // Returns false when there is nothing fractional left to move.
 static bool cube_step(std::vector<double>& Z, int n, int k,
-                      const std::vector<int>& W, double tol, CubeWork& ws) {
+                      const std::vector<int>& W, double tol, CubeWork& ws,
+                      bool allow_path) {
   int w = W.size();
   int nv = w + k;
 
@@ -164,6 +192,7 @@ static bool cube_step(std::vector<double>& Z, int n, int k,
   if (core) {
     for (int e = 0; e < ne; e++) ws.allowed[e] = !ws.edead[e];
   } else {
+    if (!allow_path) return false;
     for (int e = 0; e < ne; e++) ws.allowed[e] = 1;
     // A forest. Every unit has degree at least two, so every leaf is an arm,
     // and starting at one gives a maximal arm-to-arm path.
@@ -200,6 +229,40 @@ static bool cube_step(std::vector<double>& Z, int n, int k,
   return true;
 }
 
+static int cube_nfrac(const std::vector<double>& Z, int n, int k, int u,
+                      double tol) {
+  int nf = 0;
+  for (int j = 0; j < k; j++) {
+    double z = Z[u + (size_t) j * n];
+    if (z > tol && z < 1.0 - tol) nf++;
+  }
+  return nf;
+}
+
+// Windowed cube on a list of units. allow_path = false is flight: stop when
+// the working set is a forest, leaving leftovers for a later coupled landing.
+static void cube_process(std::vector<double>& Z, int n, int k,
+                         const std::vector<int>& units, double tol,
+                         CubeWork& ws, bool allow_path) {
+  size_t ptr = 0;
+  std::vector<int> W;
+  W.reserve(k);
+  long long guard = (long long) units.size() * k + 10;
+  while (guard-- > 0) {
+    while ((int) W.size() < k && ptr < units.size()) {
+      int u = units[ptr++];
+      if (cube_nfrac(Z, n, k, u, tol) >= 2) W.push_back(u);
+    }
+    if (W.empty()) break;
+    if (!cube_step(Z, n, k, W, tol, ws, allow_path)) break;
+    std::vector<int> keep;
+    for (size_t t = 0; t < W.size(); t++) {
+      if (cube_nfrac(Z, n, k, W[t], tol) >= 2) keep.push_back(W[t]);
+    }
+    W.swap(keep);
+  }
+}
+
 // [[Rcpp::export]]
 NumericMatrix cube_multi_cpp(NumericMatrix P, IntegerVector b,
                              IntegerVector ord, double tol) {
@@ -212,39 +275,14 @@ NumericMatrix cube_multi_cpp(NumericMatrix P, IntegerVector b,
   std::vector<std::vector<int> > bu(nb + 1);
   for (int t = 0; t < n; t++) { int i = ord[t] - 1; bu[b[i]].push_back(i); }
 
-  for (int bl = 1; bl <= nb; bl++) {
-    std::vector<int>& units = bu[bl];
-    size_t ptr = 0;
-    std::vector<int> W;
-    W.reserve(k);
-    // Every move settles at least one cell, so this bound cannot be reached.
-    long long guard = (long long) units.size() * k + 10;
-
-    while (guard-- > 0) {
-      while ((int) W.size() < k && ptr < units.size()) {
-        int u = units[ptr++];
-        int nf = 0;
-        for (int j = 0; j < k; j++) {
-          double z = Z[u + (size_t) j * n];
-          if (z > tol && z < 1.0 - tol) nf++;
-        }
-        if (nf >= 2) W.push_back(u);
-      }
-      if (W.empty()) break;
-      if (!cube_step(Z, n, k, W, tol, ws)) break;
-
-      std::vector<int> keep;
-      for (size_t t = 0; t < W.size(); t++) {
-        int nf = 0;
-        for (int j = 0; j < k; j++) {
-          double z = Z[W[t] + (size_t) j * n];
-          if (z > tol && z < 1.0 - tol) nf++;
-        }
-        if (nf >= 2) keep.push_back(W[t]);
-      }
-      W.swap(keep);
-    }
-  }
+  // Two-arm leftover coupling does not extend: a block can keep several
+  // leftover units, and landing them as one global group can push a
+  // block-arm count more than one away from its target. Each block is
+  // therefore landed on its own. Overall tightness then follows when every
+  // block target is an integer, and may slip when several remainders land
+  // the same way.
+  for (int bl = 1; bl <= nb; bl++)
+    cube_process(Z, n, k, bu[bl], tol, ws, true);
 
   NumericMatrix out(n, k);
   for (int i = 0; i < n * k; i++) out[i] = (Z[i] > 0.5) ? 1.0 : 0.0;

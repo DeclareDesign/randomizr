@@ -5,21 +5,25 @@
 \title{Probabilities of assignment: heterogeneous-probability random assignment}
 \usage{
 balanced_ra_probabilities(
-  prob_unit = NULL,
+  N = NULL,
+  prob_unit = 0.5,
   prob_unit_each = NULL,
   blocks = NULL,
   clusters = NULL,
-  N = NULL,
   num_arms = NULL,
   conditions = NULL,
   check_inputs = TRUE
 )
 }
 \arguments{
-\item{prob_unit}{A numeric vector of length N giving each unit's probability
-of assignment to treatment, for a two-arm design. Unlike elsewhere in
-randomizr these need not be equal across units; varying them is the point
-of this function. Supply either \code{prob_unit} or \code{prob_unit_each}. (optional)}
+\item{N}{The number of units. Inferred from \code{prob_unit}, \code{blocks}, or
+\code{clusters} when omitted. A single positive integer. (optional)}
+
+\item{prob_unit}{A scalar or a numeric vector of length N giving each unit's
+probability of assignment to treatment, for a two-arm design. Unlike
+elsewhere in randomizr these need not be equal across units; varying them
+is the point of this function. A scalar is recycled to length N. Defaults
+to 0.5. Supply either \code{prob_unit} or \code{prob_unit_each}. (optional)}
 
 \item{prob_unit_each}{A numeric matrix with one row per unit and one column
 per condition, giving each unit's probability of assignment to each
@@ -27,15 +31,14 @@ condition, for a multi-arm design. Rows must sum to 1. Supply either
 \code{prob_unit} or \code{prob_unit_each}. (optional)}
 
 \item{blocks}{A vector of length N indicating which block each unit belongs
-to. When supplied, counts are held tight within each block. (optional)}
+to. When supplied, two-arm counts are held tight within each block and
+overall; with three or more arms the tight counts are the within-block ones. (optional)}
 
 \item{clusters}{A vector of length N indicating which cluster each unit
 belongs to. Whole clusters are assigned together, so the probabilities must
 be the same for every unit in a cluster, and the tight counts become counts
 of clusters rather than of units. May be combined with \code{blocks}, in which
 case every cluster must sit entirely inside one block. (optional)}
-
-\item{N}{The number of units. Inferred from the other arguments when omitted. (optional)}
 
 \item{num_arms}{The number of treatment arms. Inferred when omitted. (optional)}
 

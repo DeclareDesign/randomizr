@@ -1,3 +1,9 @@
+# randomizr 2.0.1
+
+`balanced_ra()` now holds two-arm counts tight at both the block level and overall when `blocks` is supplied. Two districts of three villages with `prob_unit = 0.5` always treat exactly three villages, and each district gets one or two. Independently landing each block had let the total wander. Three or more arms remain tight within each block.
+
+`N` is the first argument and `prob_unit` defaults to 0.5, so `balanced_ra(4)` is complete assignment of four units. A vector passed as `N` is refused: use `prob_unit` for probabilities.
+
 # randomizr 2.0.0
 
 This release is a significant internal restructuring. Every public interface is unchanged: function names, parameter names, return types, S3 classes, and object field names. Existing code that works with randomizr 1.x continues to work without modification, and with one documented exception it returns the same assignments.
