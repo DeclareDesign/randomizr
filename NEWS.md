@@ -12,7 +12,7 @@ Three things hold at once, and all three are guaranteed rather than approached: 
 
 The assignment is drawn by the cube method of Deville and Tillé (2004), specialised to this problem. The function originates in Macartan Humphreys's `probra` package, which introduced the design and the two motivating examples in the documentation; the algorithm here is different, and holds the counts tight for any number of arms rather than for one.
 
-Both of `balanced_ra()`'s paths are linear in the number of units and written in C++: 2,000 units take about a quarter of a millisecond with two conditions and about 9 milliseconds with four.
+Both of `balanced_ra()`'s paths are linear in the number of units and written in C++: 2,000 units take about a tenth of a millisecond with two conditions and about a millisecond with four, measured with a different probability drawn for every unit.
 
 `balanced_ra()` is marked experimental: its interface may change, and it does not yet participate in `declare_ra()`, so `conduct_ra()` and `obtain_condition_probabilities()` do not accept a `balanced_ra` design.
 
@@ -22,7 +22,7 @@ Assignments are reproducible across the 1.x boundary. `set.seed(s)` followed by 
 
 This is not automatic for a rewrite, because the random number stream depends on how many uniforms are drawn and in what order, not only on the sampling design. Two-arm blocked assignment now runs in C++ (see Performance), and the implementation deliberately reproduces the draw sequence of `sample(rep(conditions, c(n - m, m)))` per block, including the separate draw that decides the treated count when `n * prob` is not an integer, in the order 1.x performed them. `tests/testthat/test_stream_compat.R` records the output of randomizr 1.0.1 for a range of designs and fails if any of it moves.
 
-**The one exception is `strata_rs()` and `strata_and_cluster_rs()` with strata of odd size**, where assignments differ from 1.x. This follows from the RS/RA unification described below: `strata_rs()` now delegates to `block_ra()`, which uses `complete_ra()` where 1.x used `complete_rs()`, and those two functions disagreed with each other at odd sizes in 1.x itself. Sampling probabilities are unchanged and correct; only the particular draw for a given seed differs. Even-sized strata are unaffected.
+**The one exception is `strata_rs()` and `strata_and_cluster_rs()`**, where the draw for a given seed can differ from 1.x. It follows from the RS/RA unification described below, and the rule is exact: **2.0's `strata_rs()` returns what randomizr 1.x's `block_ra()` returned**. In 1.x the sampling and assignment families were written separately and did not agree with each other, so the draw moves precisely where 1.x's own `strata_rs()` and `block_ra()` disagreed. That is strata of odd size, and any use of `strata_prob`, including strata of even size. Sampling probabilities are unchanged and correct, and the realized count distributions are unchanged; only the particular draw for a given seed differs.
 
 ## Performance
 
@@ -55,7 +55,7 @@ Assignment to three or more arms, and to two arms whenever the call reaches `com
 
 The random sampling (RS) family has always been a two-condition special case of the random assignment (RA) family: sample/not-sampled is equivalent to assignment with `conditions = c(0, 1)`. The RS implementations previously duplicated RA logic in parallel. They now delegate directly:
 
-- `strata_rs()` and `strata_rs_probabilities()` delegate to `block_ra()` and `block_ra_probabilities()` with `conditions = c(0, 1)`. The `strata`/`n`/`strata_n`/`strata_prob` parameters map to `blocks`/`m`/`block_m`/`block_prob` internally. This is the change responsible for the one reproducibility exception noted above: `complete_rs()` and `complete_ra()` selected different assignments at odd sizes in 1.x, and `strata_rs()` now takes the `complete_ra()` result.
+- `strata_rs()` and `strata_rs_probabilities()` delegate to `block_ra()` and `block_ra_probabilities()` with `conditions = c(0, 1)`. The `strata`/`n`/`strata_n`/`strata_prob` parameters map to `blocks`/`m`/`block_m`/`block_prob` internally. This is the change responsible for the one reproducibility exception noted above: `complete_rs()` and `complete_ra()` selected different assignments for the same seed in 1.x, at odd sizes and wherever a per-stratum probability left a unit over, and `strata_rs()` now takes the `complete_ra()` result.
 - `simple_rs()` and `simple_rs_probabilities()` already delegated to `simple_ra()` in 1.x. No change.
 - `cluster_rs()` and `strata_and_cluster_rs()` already delegated internally. No change.
 
@@ -80,7 +80,7 @@ Error message "The probabilties of assignment..." → "The probabilities of assi
 
 **#99, correctness of unequal-probability `simple_ra`.** The issue claimed that `simple_ra()` uses `base::sample()` in a way that does not maintain correct selection probabilities for unequal-probability designs. This does not apply to the current implementation: `simple_ra()` uses `vsample()` (a C function added by Neal Fultz) which performs correct inverse-CDF multinomial sampling. Empirical simulation confirms that assignment probabilities match specified `prob_each` to within Monte Carlo error. The terminology concerns in #99 (the package's use of "complete random sampling" vs the probability-sampling-theory definition) are a documentation matter, not a code defect.
 
-**#35, load balancing across blocks.** Out of scope for this release.
+**#35, load balancing across blocks.** Addressed by `balanced_ra()`, described above. Earlier releases listed it as out of scope.
 
 ## ri2 compatibility
 
