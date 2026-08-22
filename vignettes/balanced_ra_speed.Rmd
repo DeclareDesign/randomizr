@@ -28,6 +28,8 @@ Three results from the grid below. First, on two-arm complete assignment `comple
 
 `balanced_ra()` is the general tool. The specialized functions exist to be faster on the equal-$p$ cases. Use them when they apply.
 
+A later section times two-arm cube-on-X against `BalancedSampling::cube` and `sampling::samplecube`. `BalancedSampling` is faster on that problem. That is not a reason to drop the C++ for the count path, leftover pairing, or multi-arm assignment.
+
 # What is timed
 
 Each cell draws the same two-arm design twice, once with the specialized function and once with `balanced_ra()`, and records elapsed seconds for a fixed number of draws. The ratio is balanced time divided by specialized time. A ratio above 1 means `balanced_ra()` is slower.
@@ -177,3 +179,117 @@ On blocked-and-clustered assignment `balanced_ra()` is faster, often by a factor
 None of these comparisons is a reason to call `balanced_ra()` when probabilities are constant. They say only what the general function costs on the cases the specialized functions already cover. When probabilities vary by unit, those specialized functions do not apply.
 
 The takeaway is the division of labor. Use `complete_ra()`, `block_ra()`, or `block_and_cluster_ra()` when every unit (or cluster) shares a probability. Use `balanced_ra()` when they do not.
+
+# Cube-on-X versus the survey packages
+
+Two-arm cube-on-X is the survey problem: the sample is the treated group. `BalancedSampling::cube` and `sampling::samplecube` already implement it. Wrapping either would avoid maintaining `src/cube_on_x.cpp` for that case.
+
+The rest of `balanced_ra` is not that problem. The count path when `formula` is `NULL`, leftover pairing inside blocks, multi-arm assignment, and `declare_ra` have no counterpart in those packages. The APIs also differ: `pik` and `X` versus `conditions` and `prob_unit_each`. Landing rules differ. A wrapper would not control two-arm block leftover pairing. Adding either package as an Import has CRAN weight; `sampling` is the slower of the two.
+
+The package keeps its own C++. A later option is to dispatch two-arm `formula` to `BalancedSampling::cube` when that package is installed. That is not implemented here.
+
+The timings below are the reason the survey packages belong in the comparison, not a reason to wrap them as the implementation.
+
+## What is timed
+
+Each method draws a two-arm assignment with intercept plus a continuous $x$ and $p_i = 0.5$. `balanced_ra(formula = ~ x)` builds $X$ as `model.matrix(~ x)`. `BalancedSampling::cube` is called as `cube(pik, cbind(pik, x))`, the documented way to hold the sample size. `sampling::samplecube` is called on `cbind(1, x)` with `comment = FALSE` and `method = 2` (drop variables at landing, not the linear-programming landing). When $p$ is constant those two $X$ matrices span the same space as the formula. `fastflightcube` is the flight phase only; it is not a 0-1 assignment.
+
+The timed loop sets `check_inputs = FALSE` on `balanced_ra`. $N \in \{200, 2000\}$. Median milliseconds per draw, over batches. Chunks for `BalancedSampling` and `sampling` run only if the package is installed.
+
+```{r}
+has_bs <- requireNamespace("BalancedSampling", quietly = TRUE)
+has_samp <- requireNamespace("sampling", quietly = TRUE)
+
+median_ms <- function(n_batch, nrep, f) {
+  elapsed <- replicate(n_batch, {
+    system.time(for (i in seq_len(nrep)) f())[["elapsed"]]
+  })
+  1000 * median(elapsed) / nrep
+}
+
+nrep_cube <- function(N) if (N <= 200L) 400L else 80L
+Ns_cube <- c(200L, 2000L)
+n_batch_cube <- 5L
+
+cube_rows <- list()
+for (N in Ns_cube) {
+  x <- rnorm(N)
+  pik <- rep(0.5, N)
+  dat <- data.frame(x = x)
+  X_int <- cbind(1, x)
+  X_pik <- cbind(pik, x)
+  nrep <- nrep_cube(N)
+
+  cube_rows[[length(cube_rows) + 1L]] <- data.frame(
+    N = N, method = "balanced_ra(formula = ~ x)",
+    ms = median_ms(n_batch_cube, nrep, function() {
+      balanced_ra(N = N, formula = ~ x, data = dat, check_inputs = FALSE)
+    }),
+    stringsAsFactors = FALSE
+  )
+
+  if (has_bs) {
+    cube_rows[[length(cube_rows) + 1L]] <- data.frame(
+      N = N, method = "BalancedSampling::cube",
+      ms = median_ms(n_batch_cube, nrep, function() {
+        s <- BalancedSampling::cube(pik, X_pik)
+        z <- integer(N)
+        z[s] <- 1L
+        z
+      }),
+      stringsAsFactors = FALSE
+    )
+  }
+
+  if (has_samp) {
+    nrep_s <- if (N <= 200L) 20L else 3L
+    cube_rows[[length(cube_rows) + 1L]] <- data.frame(
+      N = N, method = "sampling::samplecube",
+      ms = median_ms(3L, nrep_s, function() {
+        sampling::samplecube(X_int, pik, order = 1, comment = FALSE, method = 2)
+      }),
+      stringsAsFactors = FALSE
+    )
+    cube_rows[[length(cube_rows) + 1L]] <- data.frame(
+      N = N, method = "sampling::fastflightcube",
+      ms = median_ms(3L, nrep_s, function() {
+        sampling::fastflightcube(X_int, pik, order = 1, comment = FALSE)
+      }),
+      stringsAsFactors = FALSE
+    )
+  }
+}
+
+cube_times <- do.call(rbind, cube_rows)
+cube_times$ms <- round(cube_times$ms, 3)
+```
+
+```{r, eval = !has_bs, echo = FALSE, results = "asis"}
+cat("*BalancedSampling is not installed; that series is omitted.*\n")
+```
+
+```{r, eval = !has_samp, echo = FALSE, results = "asis"}
+cat("*sampling is not installed; that series is omitted.*\n")
+```
+
+```{r}
+knitr::kable(
+  cube_times,
+  caption = "Median milliseconds per draw. Two-arm cube-on-X, intercept plus continuous $x$, $p = 0.5$. `fastflightcube` is flight only."
+)
+```
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "Median milliseconds per draw against N for two-arm cube-on-X. Absolute times vary by machine; the ranking is the object of interest."}
+ggplot(cube_times, aes(N, ms, color = method, shape = method)) +
+  geom_line() +
+  geom_point() +
+  scale_x_log10(breaks = Ns_cube) +
+  scale_y_log10() +
+  labs(x = "N", y = "ms per draw (median)", color = NULL, shape = NULL) +
+  theme_bw(base_size = 9) +
+  theme(legend.position = "bottom")
+```
+
+On this grid `BalancedSampling::cube` has the smallest median time. `sampling::samplecube` has the largest. `balanced_ra(formula = ~ x)` sits between them. `fastflightcube` is close to `samplecube`: the R flight, not landing, is what costs. Absolute times vary by machine; the ranking is the finding.
+
+That ranking is a reason to consider a later dispatch of two-arm `formula` to `BalancedSampling` if it is installed. It is not a reason to replace the C++ as the implementation of `balanced_ra`. The count path, leftover pairing, and multi-arm assignment still need code this package owns.

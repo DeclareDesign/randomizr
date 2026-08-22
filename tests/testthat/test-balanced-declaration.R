@@ -265,13 +265,13 @@ test_that("count arguments and permutation_matrix are refused on the balanced pa
 
 test_that("declare_ra passes formula through to balanced_ra", {
   x <- c(0, 1, 5, 6, 8, 9)
-  d <- declare_ra(prob_unit = 0.5, formula = ~ x)
+  d <- declare_ra(formula = ~ x)
   expect_equal(class(d)[2], "ra_balanced")
   expect_true(inherits(d$formula, "formula"))
   set.seed(51)
   z_decl <- conduct_ra(d)
   set.seed(51)
-  z_direct <- balanced_ra(prob_unit = 0.5, formula = ~ x)
+  z_direct <- balanced_ra(formula = ~ x)
   expect_equal(z_decl, z_direct)
   expect_true(all(z_decl %in% 0:1))
 

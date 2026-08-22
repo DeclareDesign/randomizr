@@ -33,7 +33,9 @@ conduct_ra(
 \arguments{
 \item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}()}. Supply either a declaration or the design arguments listed below, which are the ones \code{declare_ra()} takes: given those, \code{conduct_ra} builds a declaration internally and draws one assignment from it. (optional)}
 
-\item{N}{The number of units. Must be a positive integer. (required)}
+\item{N}{The number of units. A positive integer. Optional when
+\code{formula} or the length of \code{prob_unit} (or \code{blocks},
+\code{clusters}, or \code{data}) identifies N.}
 
 \item{blocks}{A vector of length N indicating which block each unit belongs to. Supply to use blocked random assignment. (optional)}
 
@@ -71,7 +73,9 @@ conduct_ra(
 
 \item{formula}{For balanced assignment. A model formula whose model matrix is the balancing matrix \(X\) in the cube method, e.g. \code{~ x + B}. The intercept is the count constraint. Do not also pass \code{blocks}. Supplying \code{formula} selects \code{\link{balanced_ra}()}. Two-arm only. (optional)}
 
-\item{data}{An optional data frame for \code{formula}. Names not found here are looked up in the environment of the formula. (optional)}
+\item{data}{An optional data frame for \code{formula}. If omitted, formula
+variables are looked up in the calling environment (as in
+\code{\link[stats]{lm}}). (optional)}
 
 \item{permutation_matrix}{For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)}
 

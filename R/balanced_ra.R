@@ -42,8 +42,9 @@
 #' HC2 coverage under these designs is in
 #' \code{vignette("balanced_ra_hc2", package = "randomizr")}.
 #'
-#' @param N The number of units. Inferred from \code{prob_unit}, \code{blocks},
-#'   \code{clusters}, or \code{data} when omitted. A single positive integer. (optional)
+#' @param N The number of units. Optional when \code{formula} or the length of
+#'   \code{prob_unit} (or \code{blocks}, \code{clusters}, or \code{data})
+#'   identifies N. A single positive integer. If supplied it must match. (optional)
 #' @param prob_unit A scalar or a numeric vector of length N giving each unit's
 #'   probability of assignment to treatment, for a two-arm design. Unlike
 #'   elsewhere in randomizr these need not be equal across units; varying them
@@ -66,11 +67,12 @@
 #' @param formula A model formula whose model matrix is the balancing matrix
 #'   \(X\) in the cube method, e.g. \code{~ x + B}. The intercept column is the
 #'   count constraint; \code{~ 0 + x} drops it and the treated count may wander.
-#'   Names are looked up in \code{data} or in the environment of the formula.
-#'   Two-arm only. Cannot be combined with \code{blocks} or
-#'   \code{prob_unit_each}. (optional)
+#'   Names are looked up in \code{data} if supplied, otherwise in the calling
+#'   environment (as in \code{\link[stats]{lm}}). Two-arm only. Cannot be
+#'   combined with \code{blocks} or \code{prob_unit_each}. (optional)
 #' @param data An optional data frame (or object accepted by
-#'   \code{\link[stats]{model.matrix}()}) for \code{formula}. (optional)
+#'   \code{\link[stats]{model.matrix}()}) for \code{formula}. If omitted,
+#'   formula variables are looked up in the calling environment. (optional)
 #' @param check_inputs Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1, that rows of a probability matrix sum to 1, that probabilities are constant within a cluster, and that clusters nest within blocks. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many assignments from probabilities that have already been verified. (optional)
 #'
 #' @return A vector of length N giving the condition of each unit, numeric in a
@@ -145,9 +147,10 @@
 #' table(blocks, Z)
 #'
 #' # Cube-on-X: keep the treated total of a continuous covariate near its
-#' # target. The intercept in ~ x is the count constraint.
+#' # target. The intercept in ~ x is the count constraint. N is inferred
+#' # from the looked-up formula variables.
 #' x <- c(0, 1, 5, 6, 8, 9)
-#' Z <- balanced_ra(prob_unit = 0.5, formula = ~ x)
+#' Z <- balanced_ra(formula = ~ x)
 #' sum(x * Z)   # near 14.5
 #'
 #' @export
@@ -174,13 +177,13 @@ balanced_ra <- function(N = NULL,
   if (!is.null(formula) && is.null(N) &&
       (is.null(prob_unit) || length(prob_unit) == 1L) &&
       is.null(prob_unit_each)) {
-    N <- n_from_formula(formula, data)
+    N <- n_from_formula(formula, data, envir = parent.frame())
   }
   P <- balanced_ra_matrix(if (is.null(prob_unit_each)) prob_unit else NULL,
                       prob_unit_each, blocks, clusters, N, num_arms,
                       check_inputs)
   Z <- if (!is.null(formula)) {
-    X <- balanced_formula_matrix(formula, data, nrow(P))
+    X <- balanced_formula_matrix(formula, data, nrow(P), envir = parent.frame())
     z <- if (is.null(clusters)) cube_on_x_cpp(P[, 2L], X, 1e-12) else
       cube_on_x_clusters(P[, 2L], X, clusters)
     cbind(1 - z, z)
@@ -236,7 +239,7 @@ balanced_ra_probabilities <- function(N = NULL,
   if (!is.null(formula) && is.null(N) &&
       (is.null(prob_unit) || length(prob_unit) == 1L) &&
       is.null(prob_unit_each)) {
-    N <- n_from_formula(formula, data)
+    N <- n_from_formula(formula, data, envir = parent.frame())
   }
   P <- balanced_ra_matrix(if (is.null(prob_unit_each)) prob_unit else NULL,
                       prob_unit_each, blocks, clusters, N, num_arms,
@@ -347,26 +350,85 @@ cube_assign_clusters <- function(P, clusters, blocks = NULL, tol = 1e-12) {
   Zc[as.integer(cl), , drop = FALSE]
 }
 
-n_from_formula <- function(formula, data) {
+n_from_formula <- function(formula, data, envir = parent.frame()) {
   if (!is.null(data)) return(NROW(data))
-  tryCatch(nrow(stats::model.matrix(formula, data = data)),
-           error = function(e) NULL)
+  if (length(all.vars(formula)) == 0L) return(NULL)
+  tryCatch(
+    nrow(stats::model.matrix(formula, data = formula_lookup_data(formula, envir))),
+    error = function(e) stop(conditionMessage(e), call. = FALSE)
+  )
+}
+
+#' Resolve formula data from `data` or the calling environment
+#'
+#' When \code{data} is omitted, look in \code{envir} (typically
+#' \code{parent.frame()} of [balanced_ra()]), then walk the call stack, then
+#' the formula environment. Matches \code{\link[stats]{lm}}:
+#' \code{model.frame(formula, data = parent.frame())}.
+#'
+#' @keywords internal
+#' @noRd
+formula_lookup_data <- function(formula, envir) {
+  vars <- all.vars(formula)
+  try_env <- function(env) {
+    if (is.null(env) || !is.environment(env)) return(NULL)
+    ok <- tryCatch({
+      stats::model.frame(formula, data = env)
+      TRUE
+    }, error = function(e) FALSE)
+    if (ok) env else NULL
+  }
+
+  found <- try_env(envir)
+  if (!is.null(found)) return(found)
+
+  n <- sys.nframe()
+  if (n > 1L) {
+    for (i in seq.int(n - 1L, 1L, by = -1L)) {
+      found <- try_env(sys.frame(i))
+      if (!is.null(found)) return(found)
+    }
+  }
+
+  found <- try_env(environment(formula))
+  if (!is.null(found)) return(found)
+
+  stop("Could not find formula variable",
+       if (length(vars) == 1L) " " else "s ",
+       paste0("`", vars, "`", collapse = ", "),
+       " in `data` or the calling environment.",
+       call. = FALSE)
 }
 
 #' Model matrix for cube-on-X
 #'
 #' @keywords internal
 #' @noRd
-balanced_formula_matrix <- function(formula, data, n) {
+balanced_formula_matrix <- function(formula, data, n, envir = parent.frame()) {
   if (!inherits(formula, "formula")) {
     stop("`formula` must be a formula, e.g. ~ x + B.")
   }
   if (is.null(data)) {
-    data <- data.frame(row.names = seq_len(n))
+    data <- if (length(all.vars(formula)) == 0L) {
+      data.frame(row.names = seq_len(n))
+    } else {
+      formula_lookup_data(formula, envir)
+    }
   }
   X <- tryCatch(
     stats::model.matrix(formula, data = data),
-    error = function(e) stop(conditionMessage(e), call. = FALSE)
+    error = function(e) {
+      msg <- conditionMessage(e)
+      if (grepl("not found", msg, ignore.case = TRUE)) {
+        vars <- all.vars(formula)
+        stop("Could not find formula variable",
+             if (length(vars) == 1L) " " else "s ",
+             paste0("`", vars, "`", collapse = ", "),
+             " in `data` or the calling environment.",
+             call. = FALSE)
+      }
+      stop(msg, call. = FALSE)
+    }
   )
   if (nrow(X) != n) {
     stop("`formula` produces ", nrow(X), " rows but the probabilities describe ",

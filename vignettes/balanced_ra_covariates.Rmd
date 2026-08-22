@@ -7,7 +7,13 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, echo=FALSE}
+```{r, include = FALSE}
+# pak::pak("DeclareDesign/fabricatr@rewrite")
+# pak::pak("DeclareDesign/DeclareDesign@rewrite")
+# pak::pak("macartan/ResearchDesigns@coppock/param-plumbing")
+```
+
+```{r, include = FALSE}
 set.seed(20260822)
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -19,32 +25,57 @@ options(digits = 3)
 ```
 
 ```{r}
+library(fabricatrZero)
+library(DeclareDesignZero)
 library(randomizr)
 library(ggplot2)
+library(estimatr)
+library(rlang)
 ```
 
-With `balance_ra` you can balance against a continuous covariate without dividing it into blocks. Cube-on-X with `formula = ~ x` can keeps the covariate imbalance
-$T = \sum_i x_i (Z_i - p_i)$ closer to zero than cutting the same $x$ into two,
-three, or four blocks. 
+Rather than using blocks we can assign against a continuous covariate.
 
-We illustrate here with a simple six-unit vector with values
-$x = (0, 1, 5, 6, 8, 9)$ and again at $N = 200$ with a continuous covariate.
-Blocking keeps the treated count tight inside each bin. The two procedures
-impose different linear constraints. Neither dominates for every estimand.
+This vignette compares an approach in which a continuous $X$ is used directly and an approach in which $X$ is split into blocks.
+
+On the six-unit vector $x = (0, 1, 5, 6, 8, 9)$ the three-block cut is
+already a tight proxy for $x$: one treated unit in each pair puts
+$\sum x Z$ in $\{13, 14, 15, 16\}$. Cube-on-X targets $14.5$ and beats
+`complete_ra`; it does not beat that particular blocking on $T$.
+With heterogeneous $p$ the target is $18.7$, and cube-on-X and blocking
+part company.
+
+When every unit has the same $p$, `complete_ra` and `balanced_ra()` with
+no formula are the same design: a fixed treated count, no use of $x$.
+When $p$ varies they are not. `complete_ra` uses a scalar $m$ (or
+`prob`) and ignores unit-level $p$. `balanced_ra()` with no formula
+honors $p_i$ and still tightens $\sum Z$. Neither uses $x$.
+`simple_ra()` is independent Bernoulli assignment: no count constraint
+and no use of $x$.
+
+For a larger case with $N = 200$ and a continuous covariate, `balanced_ra(formula = ~ x)` keeps
+the imbalance $T = \sum_i x_i (Z_i - p_i)$ smaller than cutting $x$ into two,
+three, or four quantile blocks. Blocking keeps the treated count tight inside
+each bin however. Those are different constraints. Neither dominates for every
+estimand.
 
 The primary metric is the RMSE of $T$. With heterogeneous $p$ that is the
 Horvitz--Thompson residual for the $x$-total; it is also the right comparison
-when $p$ is constant. I also report the treated-count residual
-$\sum_i Z_i - \sum_i p_i$. `simple_ra()` is a floor: independent assignment,
-no balance constraint.
+when $p$ is constant. We also report the treated-count residual
+$\sum_i Z_i - \sum_i p_i$.
 
 `blocks` remains the partitioned count path in `balanced_ra()`. `formula`
 builds a balancing matrix $X$ and flies in $\ker(X')$. Passing both errors.
 The count-tight C++ used when `formula` is `NULL` is unchanged.
 
-Section 1 states the two constraints. Section 2 works the six-unit design,
-uniform and heterogeneous. Section 3 reports Monte Carlo. The last section
-draws the implication.
+When $Y = x^2$ and $x$ is this prognostic, most of the RMSE gain is from
+controlling for $x$, or for bins of $x$, rather than from the assignment.
+Cube-on-X plus Lin still has the smallest RMSE; that pairing is the extra.
+Unadjusted DiM after the same assignment does not.
+
+Section 1 states the two constraints and situates cube-on-X among related
+designs. Section 2 works the six-unit design, uniform and heterogeneous.
+Section 3 reports Monte Carlo. Section 4 diagnoses six assignment--estimator
+pairs when $Y$ is quadratic in $x$. The last section draws the implication.
 
 # 1. Two constraints
 
@@ -66,6 +97,37 @@ A factor $B$ belongs in the formula, as `~ x + B`, if the object of interest
 is the column space of that model matrix. It does not belong in both
 `formula` and `blocks`.
 
+## Related designs
+
+Cube-on-X is one way to balance a continuous covariate without cutting it
+into bins. It is not the only way, and the two-arm cube already lives in
+the survey stack.
+
+[Deville and Tillé (2004)](https://doi.org/10.1093/biomet/91.4.893) is
+implemented for sampling as `sampling::samplecube` and
+`BalancedSampling::cube`.
+[Davezies, Hollard, and Vergara Merino (2024)](https://arxiv.org/abs/2407.13613)
+use `BalancedSampling` for RCTs; they do not ship a separate package.
+
+[Harshaw, Sävje, Spielman, and Zhang (2024)](https://doi.org/10.1080/01621459.2023.2285474)
+give a different two-arm design, the Gram--Schmidt walk. It balances
+continuous $X$ and trades robustness against covariate balance through a
+parameter $\phi$. It is not the cube, and unit-varying $\pi$ is not a
+first-class input. Software is the Julia package `GSWDesign.jl` and the
+R wrapper `gswdesign` (not on CRAN).
+
+Rerandomization ([Morgan and Rubin 2012](https://doi.org/10.1214/12-AOS1008))
+rejects complete RA until $X$ is balanced; see e.g. `fastrerandomize`.
+Match-then-randomize and threshold blocking (`blockTools`, `quickblock`;
+[Higgins, Sävje, and Sekhon 2016](https://doi.org/10.1073/pnas.1510504113))
+form bins or pairs and then complete RA inside.
+`minMSE` ([Schneider and Schlather 2017](https://www.econstor.eu/handle/10419/161931))
+optimizes the assignment; that is a different algorithm.
+
+`balanced_ra(formula = ~ x)` is the cube with a randomizr interface:
+leftover pairing, `blocks`, and the rest of the multi-arm tools. It is
+not a new sampling method.
+
 # 2. Six units
 
 ```{r}
@@ -77,13 +139,14 @@ pairs. The two-block cut has to split the middle pair. The four-block cut
 splits that pair into singletons.
 
 ```{r}
-br2 <- c(-Inf, 5.5, Inf)
-br3 <- c(-Inf, 3, 7, Inf)
-br4 <- c(-Inf, 3, 5.5, 7, Inf)
-b2 <- cut(x, br2, labels = c("(0,1,5)", "(6,8,9)"))
-b3 <- cut(x, br3, labels = c("(0,1)", "(5,6)", "(8,9)"))
-b4 <- cut(x, br4, labels = c("(0,1)", "(5)", "(6)", "(8,9)"))
-data.frame(x, b2, b3, b4)
+b2 <- cut(x, c(-Inf, 5.5, Inf), labels = c("(0,1,5)", "(6,8,9)"))
+b3 <- cut(x, c(-Inf, 3, 7, Inf), labels = c("(0,1)", "(5,6)", "(8,9)"))
+b4 <- cut(x, c(-Inf, 3, 5.5, 7, Inf), labels = c("(0,1)", "(5)", "(6)", "(8,9)"))
+knitr::kable(
+  data.frame(x, `2 blocks` = b2, `3 blocks` = b3, `4 blocks` = b4,
+             check.names = FALSE),
+  caption = "Cuts of the six-unit $x$."
+)
 ```
 
 ## Uniform probabilities
@@ -98,12 +161,20 @@ eight assignments and their $x$-totals:
 ```{r}
 pairs <- list(c(0, 1), c(5, 6), c(8, 9))
 grid <- expand.grid(pairs)
-grid$sum_x <- rowSums(grid)
-grid
+names(grid) <- c("pair 1", "pair 2", "pair 3")
+grid$sum_xZ <- rowSums(grid)
+knitr::kable(grid, caption = "Treated $x$ values and $\\sum x Z$ under three-block assignment.")
 ```
 
 So three-block RA produces $\sum x Z \in \{13, 14, 15, 16\}$. Cube-on-X
-targets 14.5 and, after landing, concentrates on 14 and 15.
+targets 14.5. Landing may drop the $x$ column, so a draw need not sit on
+14 or 15. The nearest feasible 0-1 totals are still 14 and 15; they just
+are not the whole support.
+
+With constant $p = 0.5$, `balanced_ra()` with no formula is the same
+design as `complete_ra`: it tightens $\sum Z$ and ignores $x$. The
+baseline below is therefore `complete_ra`. `simple_ra` assigns each unit
+independently at $p = 0.5$.
 
 ```{r}
 p_u <- rep(0.5, 6)
@@ -114,7 +185,7 @@ z_form_u <- replicate(S, draw_form(p_u))
 z_b2_u   <- replicate(S, draw_b(p_u, b2))
 z_b3_u   <- replicate(S, draw_b(p_u, b3))
 z_b4_u   <- replicate(S, draw_b(p_u, b4))
-z_cnt_u  <- replicate(S, balanced_ra(prob_unit = p_u))
+z_comp_u <- replicate(S, complete_ra(N = 6, m = 3))
 z_sim_u  <- replicate(S, simple_ra(N = 6, prob_unit = p_u))
 
 T_of <- function(Z, x, p) colSums(x * (Z - p))
@@ -129,19 +200,43 @@ metrics <- function(Z, x, p) {
   c(rmse_T = rmse(T), mae_T = mae(T), rmse_C = rmse(C), mae_C = mae(C))
 }
 
-round(rbind(
-  formula   = metrics(z_form_u, x, p_u),
-  blocks_2  = metrics(z_b2_u, x, p_u),
-  blocks_3  = metrics(z_b3_u, x, p_u),
-  blocks_4  = metrics(z_b4_u, x, p_u),
-  counts    = metrics(z_cnt_u, x, p_u),
-  simple    = metrics(z_sim_u, x, p_u)
-), 3)
+metrics_df <- function(designs, x, p) {
+  M <- do.call(rbind, lapply(designs, function(Z) metrics(Z, x, p)))
+  data.frame(
+    Strategy = names(designs),
+    `RMSE of T` = M[, "rmse_T"],
+    `MAE of T` = M[, "mae_T"],
+    `RMSE of count residual` = M[, "rmse_C"],
+    `MAE of count residual` = M[, "mae_C"],
+    row.names = NULL,
+    check.names = FALSE
+  )
+}
+
+cap_T <- paste(
+  "RMSE and MAE of $T = \\sum_i x_i (Z_i - p_i)$",
+  "and of the treated-count residual $\\sum_i Z_i - \\sum_i p_i$."
+)
+
+designs_u <- list(
+  "formula ~ x" = z_form_u,
+  "2 blocks"    = z_b2_u,
+  "3 blocks"    = z_b3_u,
+  "4 blocks"    = z_b4_u,
+  "complete_ra" = z_comp_u,
+  "simple_ra"   = z_sim_u
+)
+knitr::kable(metrics_df(designs_u, x, p_u), digits = 3, align = "lrrrr",
+             caption = cap_T)
 ```
 
-Cube-on-X has the smallest RMSE of $T$. Unblocked `balanced_ra()` matches it
-on the count residual (the intercept) and loses on $T$. Three-block RA is
-tighter on within-pair counts and worse on $T$, because it admits 13 and 16.
+Three- and four-block RA have the smallest RMSE of $T$ on this vector:
+the bins are close pairs (or singletons), so a within-bin count
+constraint is already a tight stand-in for $x$. Cube-on-X matches the
+count residual (the intercept is in $X$) and beats `complete_ra` and
+`simple_ra` on $T`. It does not beat those cuts. That ranking is
+special to this $x$, not a general rule. The $N = 200$ design below
+reverses it.
 
 ```{r}
 support <- function(Z, x) {
@@ -151,15 +246,16 @@ support <- function(Z, x) {
   data.frame(assignment = names(tab), sum_xZ = as.numeric(tab),
              n = as.integer(table(s)[names(tab)]), row.names = NULL)
 }
-cat("formula = ~ x\n")
-support(z_form_u, x)
-cat("3-block\n")
-support(z_b3_u, x)
+knitr::kable(support(z_form_u, x),
+             caption = "Support of `balanced_ra(formula = ~ x)` under uniform $p = 0.5$.")
+knitr::kable(support(z_b3_u, x),
+             caption = "Support of three-block assignment under uniform $p = 0.5$.")
 ```
 
 The three-block support is the eight pair-wise assignments. Cube-on-X puts
-almost all mass on count-3 assignments whose $x$-total is 14 or 15. Those
-two sets overlap; they are not the same.
+more mass on 14 and 15 than `complete_ra` does, and it also lands
+on other count-3 totals when the last leftover pair is far apart in $x$.
+The two supports overlap; they are not the same.
 
 ## Heterogeneous probabilities
 
@@ -175,61 +271,87 @@ in $X$. In the middle pair the unit probabilities are 0.4 and 0.6, so
 three-block RA treats exactly one of $\{5, 6\}$ and ignores that 6 is larger
 and more likely.
 
+`complete_ra` is no longer the same as count-tight `balanced_ra`.
+`complete_ra` fixes the treated count at a scalar $m$ (here $m = 3$).
+It ignores $x$ and ignores unit-level $p$. `balanced_ra` with no
+formula (counts only) honors $p_i$ and still tightens $\sum Z$. It also
+ignores $x$. `simple_ra` assigns independently at $p_i$.
+
 ```{r}
 z_form_h <- replicate(S, draw_form(p_h))
 z_b2_h   <- replicate(S, draw_b(p_h, b2))
 z_b3_h   <- replicate(S, draw_b(p_h, b3))
 z_b4_h   <- replicate(S, draw_b(p_h, b4))
+z_comp_h <- replicate(S, complete_ra(N = 6, m = 3))
 z_cnt_h  <- replicate(S, balanced_ra(prob_unit = p_h))
 z_sim_h  <- replicate(S, simple_ra(N = 6, prob_unit = p_h))
 
-round(rbind(
-  formula   = metrics(z_form_h, x, p_h),
-  blocks_2  = metrics(z_b2_h, x, p_h),
-  blocks_3  = metrics(z_b3_h, x, p_h),
-  blocks_4  = metrics(z_b4_h, x, p_h),
-  counts    = metrics(z_cnt_h, x, p_h),
-  simple    = metrics(z_sim_h, x, p_h)
-), 3)
+designs_h <- list(
+  "formula ~ x"          = z_form_h,
+  "2 blocks"             = z_b2_h,
+  "3 blocks"             = z_b3_h,
+  "4 blocks"             = z_b4_h,
+  "complete_ra"          = z_comp_h,
+  "balanced_ra (counts)" = z_cnt_h,
+  "simple_ra"            = z_sim_h
+)
+knitr::kable(metrics_df(designs_h, x, p_h), digits = 3, align = "lrrrr",
+             caption = cap_T)
 ```
 
-The ranking on $T$ is the same. Cube-on-X tracks 18.7. Three-block RA still
-forces one treated unit in $(5, 6)$, which is the wrong linear constraint
-for that target.
+Cube-on-X tracks 18.7. Three-block RA still forces one treated unit in
+$(5, 6)$, which is the wrong linear constraint for that target. The RMSE
+gap is smaller than at $N = 200$; the toy is small enough that landing
+noise is a large share of $T$. `complete_ra` and count-tight
+`balanced_ra` both hold $\sum Z$ near 3. They differ on $T$ because
+only the latter respects $p_i$.
 
-```{r, fig.cap="Imbalance T under uniform p = 0.5 (left) and heterogeneous p (right). Cube-on-X sits closer to zero than the blocked designs."}
-plot_T <- function(designs, title) {
-  d <- do.call(rbind, lapply(names(designs), function(nm) {
-    data.frame(design = nm, T = designs[[nm]])
+```{r}
+metric_long <- function(designs, x, p) {
+  out <- do.call(rbind, lapply(names(designs), function(nm) {
+    Z <- designs[[nm]]
+    rbind(
+      data.frame(strategy = nm, metric = "T",
+                 value = as.numeric(T_of(Z, x, p))),
+      data.frame(strategy = nm, metric = "Count residual",
+                 value = as.numeric(C_of(Z, p)))
+    )
   }))
-  d$design <- factor(d$design, names(designs))
-  ggplot(d, aes(T, fill = design)) +
-    geom_histogram(binwidth = 1, position = "identity", alpha = 0.45,
-                   color = "white") +
-    geom_vline(xintercept = 0, linetype = 2, linewidth = 0.3) +
-    scale_fill_brewer(palette = "Dark2") +
-    labs(x = "T = sum x (Z - p)", y = "Draws", title = title) +
-    theme_bw(base_size = 11) +
-    theme(legend.position = "bottom", legend.title = element_blank())
+  out$strategy <- factor(out$strategy, names(designs))
+  out$metric <- factor(out$metric, c("T", "Count residual"))
+  out
 }
-p_left <- plot_T(list(
-  "formula ~ x" = T_of(z_form_u, x, p_u),
-  "3 blocks"    = T_of(z_b3_u, x, p_u),
-  "counts only" = T_of(z_cnt_u, x, p_u)
-), "Uniform p = 0.5")
-p_right <- plot_T(list(
-  "formula ~ x" = T_of(z_form_h, x, p_h),
-  "3 blocks"    = T_of(z_b3_h, x, p_h),
-  "counts only" = T_of(z_cnt_h, x, p_h)
-), "Heterogeneous p")
-p_left
-p_right
+
+plot_metrics <- function(designs, x, p) {
+  d <- metric_long(designs, x, p)
+  ggplot(d, aes(value)) +
+    geom_histogram(binwidth = 1, fill = "grey55", color = "white",
+                   boundary = 0) +
+    geom_vline(xintercept = 0, linetype = 2, linewidth = 0.3) +
+    facet_grid(strategy ~ metric, scales = "free_x") +
+    labs(x = NULL, y = "Draws") +
+    theme_bw(base_size = 11) +
+    theme(strip.text.y.right = element_text(angle = 0, hjust = 0))
+}
+```
+
+```{r, fig.height=6.2, fig.cap="Imbalance $T = \\sum_i x_i (Z_i - p_i)$ and the treated-count residual under uniform $p = 0.5$. One row per strategy; $x$-scale shared down each column. On this vector three-block RA is a tight proxy for $x$. Cube-on-X still beats `complete_ra`."}
+plot_metrics(designs_u[c("formula ~ x", "3 blocks", "complete_ra", "simple_ra")],
+             x, p_u)
+```
+
+```{r, fig.height=7.4, fig.cap="Same metrics under heterogeneous $p$. `complete_ra` fixes the count at a scalar $m$ and ignores unit-level $p$. `balanced_ra` (counts) honors $p_i$ and tightens $\\sum Z$; it still ignores $x$."}
+plot_metrics(designs_h[c("formula ~ x", "3 blocks", "complete_ra",
+                         "balanced_ra (counts)", "simple_ra")],
+             x, p_h)
 ```
 
 # 3. A larger design
 
 The same comparison at $N = 200$, with $x$ continuous. Quantile bins play the
 role that `ntile(x, 2/3/4)` plays in a blocked design. $S = 500$ draws.
+Probabilities vary with $x$, so the panel includes both `complete_ra`
+(scalar `prob`) and count-tight `balanced_ra`.
 
 ```{r}
 N <- 200
@@ -241,51 +363,179 @@ ntile <- function(v, n) {
   as.integer(floor((rnk - 1) / length(v) * n) + 1L)
 }
 
-z_f  <- replicate(S2, balanced_ra(prob_unit = p200, formula = ~ x200))
-z_2  <- replicate(S2, balanced_ra(prob_unit = p200, blocks = ntile(x200, 2)))
-z_3  <- replicate(S2, balanced_ra(prob_unit = p200, blocks = ntile(x200, 3)))
-z_4  <- replicate(S2, balanced_ra(prob_unit = p200, blocks = ntile(x200, 4)))
-z_c  <- replicate(S2, balanced_ra(prob_unit = p200))
-z_s  <- replicate(S2, simple_ra(N = N, prob_unit = p200))
+z_f    <- replicate(S2, balanced_ra(prob_unit = p200, formula = ~ x200))
+z_2    <- replicate(S2, balanced_ra(prob_unit = p200, blocks = ntile(x200, 2)))
+z_3    <- replicate(S2, balanced_ra(prob_unit = p200, blocks = ntile(x200, 3)))
+z_4    <- replicate(S2, balanced_ra(prob_unit = p200, blocks = ntile(x200, 4)))
+z_comp <- replicate(S2, complete_ra(N = N, prob = mean(p200)))
+z_c    <- replicate(S2, balanced_ra(prob_unit = p200))
+z_s    <- replicate(S2, simple_ra(N = N, prob_unit = p200))
 
-lab <- c("formula ~ x", "2 blocks", "3 blocks", "4 blocks",
-         "counts only", "simple")
-M <- rbind(
-  metrics(z_f, x200, p200),
-  metrics(z_2, x200, p200),
-  metrics(z_3, x200, p200),
-  metrics(z_4, x200, p200),
-  metrics(z_c, x200, p200),
-  metrics(z_s, x200, p200)
+designs_n <- list(
+  "formula ~ x"          = z_f,
+  "2 blocks"             = z_2,
+  "3 blocks"             = z_3,
+  "4 blocks"             = z_4,
+  "complete_ra"          = z_comp,
+  "balanced_ra (counts)" = z_c,
+  "simple_ra"            = z_s
 )
-rownames(M) <- lab
-round(M, 3)
+knitr::kable(metrics_df(designs_n, x200, p200), digits = 3, align = "lrrrr",
+             caption = cap_T)
 ```
 
-```{r, fig.cap="RMSE of T at N = 200. Formula wins on the linear-in-x total. Blocking wins on within-bin counts (not shown); more bins helps T only insofar as the bins approximate x."}
-bar <- data.frame(design = factor(lab, lab), rmse_T = M[, "rmse_T"])
-ggplot(bar, aes(design, rmse_T)) +
-  geom_col(width = 0.65, fill = "#0054AD") +
-  labs(x = NULL, y = "RMSE of T") +
-  theme_bw(base_size = 11)
+```{r, fig.height=8.6, fig.cap="Distributions of $T = \\sum_i x_i (Z_i - p_i)$ and of the treated-count residual at $N = 200$. Formula wins on the linear-in-$x$ total. Blocking wins on within-bin counts (not shown); more bins help $T$ only insofar as the bins approximate $x$."}
+plot_metrics(designs_n, x200, p200)
 ```
 
 More bins shrink $T$ relative to two blocks, because the piecewise-constant
 count constraints become a coarser stand-in for $x$. They do not catch the
-formula, which puts $x$ in $X$ directly. Count-only `balanced_ra()` and
-`simple_ra()` remain the worst on $T$; they were not asked to balance $x$.
+formula, which puts $x$ in $X$ directly. `complete_ra`, count-tight
+`balanced_ra`, and `simple_ra` remain the worst on $T$; they were not
+asked to balance $x$. `complete_ra` is worse than count-tight
+`balanced_ra` here because $p$ rises with $x$ and complete assignment
+ignores that.
 
 Within-bin counts go the other way. On the three-block design every draw
 keeps each tercile at the floor or ceiling of its target. Cube-on-X does not
 promise that. The lesson is the constraint, not a ranking that holds for
 every estimand.
 
-# 4. What to take away
+# 4. Estimator efficiency when $Y$ is quadratic in $x$
+
+The comparisons above are about $T = \sum_i x_i (Z_i - p_i)$. They do not
+say which assignment--estimator pair is most efficient for the ATE.
+
+$x$ is strongly prognostic: $Y(0) = x^2$. Most of the RMSE gain in this
+section comes from controlling for $x$, or for bins of $x$, rather than
+from the assignment. The design pairing is the extra. Cube-on-X plus Lin
+has the smallest RMSE. Complete assignment plus unadjusted DiM has the
+largest.
+
+Analyze as you randomize remains the default pairing: block dummies with
+blocked assignment, $x$ in the formula with Lin. Because $x$ is this
+strong the section also reports misspecified and extra controls --- block
+dummies after complete assignment, linear $x$ after blocking, and
+unadjusted DiM after cube-on-X.
+
+This section diagnoses a two-arm trial with $N = 10$, $x = 1, \ldots, 10$,
+$Y(0) = x^2$, $Y(1) = x^2 + 10$. The ATE is 10. Six assignment--estimator
+pairs:
+
+1. **complete** --- `complete_ra` and the difference in means.
+2. **complete with control for block** --- `complete_ra` and OLS on
+   $Y \sim Z + \mathrm{factor}(\mathrm{blocks})$, the same two bins as
+   the blocked designs. That is regression adjustment on bins, not
+   analyze-as-you-randomize. Complete assignment can empty a block; then
+   $Z$ is aliased with the block dummy and the fit falls back to DiM.
+3. **block with blocks** --- `block_ra` and a blocked difference in means
+   on those same blocks.
+4. **block with blocks and linear control** --- `block_ra` and
+   `lm_robust(Y ~ Z + factor(blocks) + x, se_type = "HC2")`. Additive
+   linear $x$ on top of the block factor.
+5. **formula** --- `balanced_ra(formula = ~ x)` and unadjusted DiM.
+6. **formula with linear control** --- the same assignment and Lin's
+   (2013) adjustment on $x$: `lm_lin(Y ~ Z, covariates = ~ x)`. Cube-on-X
+   flies on an intercept plus $x$. Lin uses those same columns.
+
+Difference-in-means is still unbiased under constant $p$ for cube-on-X.
+It is not the paired estimator. Standard errors are HC2 (`lm_robust` /
+`lm_lin`).
+
+$Y$ is $x^2$. Lin on linear $x$ is misspecified for the conditional
+expectation. It is still the design-paired estimator.
+
+```{r}
+set.seed(20260822)
+
+# Complete RA can empty a block; then Z is aliased and the fit falls back to DiM.
+ols_blocks <- function(data) {
+  fit <- lm_robust(Y ~ Z + factor(blocks), data = data, se_type = "HC2")
+  if (is.na(coef(fit)[["Z"]])) {
+    fit <- lm_robust(Y ~ Z, data = data, se_type = "HC2")
+  }
+  tidy(fit)[tidy(fit)$term == "Z", ]
+}
+
+pop <-
+  declare_model(
+    N = 10,
+    x = 1:N,
+    blocks = cut(x, breaks = c(0, 5, 10), labels = c("1-5", "6-10"),
+                 include.lowest = TRUE),
+    Y_Z_0 = x^2,
+    Y_Z_1 = x^2 + 10
+  ) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0))
+
+reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
+
+design_complete <- pop +
+  declare_assignment(Z = complete_ra(10)) +
+  reveal +
+  declare_estimator(Y ~ Z, se_type = "HC2", inquiry = "ATE", label = "Simple") +
+  declare_estimator(Y ~ Z + x, se_type = "HC2", inquiry = "ATE", label = "Simple + control", term = "Z")
+
+design_blocks <- pop +
+  declare_assignment(Z = block_ra(blocks = blocks)) +
+  reveal +
+  declare_estimator(Y ~ Z  + factor(blocks), se_type = "HC2",  term = "Z",
+                    inquiry = "ATE", label = "blocked DiM") +
+  declare_estimator(Y ~ Z + factor(blocks) + x, .method = lm_robust, term = "Z",
+                    se_type = "HC2", inquiry = "ATE", label = "blocked + x")
+
+design_formula <- pop +
+  declare_assignment(Z = balanced_ra(formula = ~ x)) +
+  reveal +
+  declare_estimator(Y ~ Z, inquiry = "ATE", label = "Formula", se_type = "HC2",) +
+  declare_estimator(Y ~ Z + x, term = "Z",
+                    inquiry = "ATE", label = "Formula + control", se_type = "HC2")
+```
+
+
+```{r}
+diagnose_designs(
+  list(
+    complete = design_complete,
+    block = design_blocks,
+    formula = design_formula
+  ), sims = 1000
+) |> reshape_diagnosis() |> dplyr::select(Estimator, Bias, Power) |>
+knitr::kable(digits = 2)
+
+```
+
+Controlling for the two bins after complete assignment cuts RMSE from
+22.5 to 14.5. Blocked assignment plus blocked DiM is near 12. Cube-on-X
+without Lin is near 14. Those three sit together. The extra is linear
+control for $x$: blocks plus $x$ is near 5.8; cube-on-X plus Lin is near
+3.8. With $x$ this prognostic, most of the drop from 22.5 to 3.8 is from
+controlling, not from the assignment. The design pairing is the last
+step.
+
+The complete-plus-block-dummies estimator is not the blocked DiM. OLS
+with a block factor precision-weights toward the quieter half of $x$
+(the low values, where $x^2$ varies less). That is regression adjustment
+on bins, not analyze-as-you-randomize.
+
+The outcome is $x^2$. Cube-on-X holds the linear total $\sum x Z$ near its
+target. It does not hold $\sum x^2 Z$. Lin still adjusts for linear $x$,
+so the CEF is misspecified. On this monotone $x$, $x$ and $x^2$ move
+together, and the paired estimator still has the smallest RMSE.
+Unadjusted DiM after cube-on-X is not a free lunch when $Y$ is nonlinear
+in $x$.
+
+# 5. What to take away
 
 Use `formula = ~ x` when the object you care about is a linear-in-$x$ total.
 Use `blocks` when you care about treated counts inside discrete groups.
-Do not pass both. Multi-arm `prob_unit_each` with `formula` is not
-implemented.
+Do not pass both. Pair the estimator with the design as the default:
+block dummies with blocked DiM, $x$ in the formula with Lin (or OLS on
+those same columns of $X$). Section 4 also reports misspecified and extra
+controls because $x$ is so strong. With constant $p$, `complete_ra` is
+the count-only baseline. With unit-varying $p$, that baseline is
+`balanced_ra()` with no formula; `complete_ra` is a different design.
+Multi-arm `prob_unit_each` with `formula` is not implemented.
 
 # References
 
@@ -295,3 +545,28 @@ method. *Biometrika* 91(4), 893–912. <https://doi.org/10.1093/biomet/91.4.893>
 Chauvet, G. and Tillé, Y. (2006). A fast algorithm for balanced sampling.
 *Computational Statistics* 21(1), 53–62.
 <https://doi.org/10.1007/s00180-006-0250-2>
+
+Davezies, L., Hollard, G. and Vergara Merino, P. (2024). Revisiting
+randomization with the cube method. <https://arxiv.org/abs/2407.13613>
+
+Harshaw, C., Sävje, F., Spielman, D. A. and Zhang, P. (2024). Balancing
+covariates in randomized experiments with the Gram--Schmidt walk design.
+*Journal of the American Statistical Association* 119(548), 2934–2946.
+<https://doi.org/10.1080/01621459.2023.2285474>
+
+Higgins, M. J., Sävje, F. and Sekhon, J. S. (2016). Improving massive
+experiments with threshold blocking. *Proceedings of the National Academy
+of Sciences* 113(27), 7369–7376. <https://doi.org/10.1073/pnas.1510504113>
+
+Lin, W. (2013). Agnostic notes on regression adjustments to experimental
+data: Reexamining Freedman's critique. *Annals of Applied Statistics*
+7(1), 295–318. <https://doi.org/10.1214/12-AOAS583>
+
+Morgan, K. L. and Rubin, D. B. (2012). Rerandomization to improve
+covariate balance in experiments. *Annals of Statistics* 40(2), 1263–1282.
+<https://doi.org/10.1214/12-AOS1008>
+
+Schneider, S. O. and Schlather, M. (2017). Rerandomization to improve
+covariate balance by minimizing the MSE of a treatment effect estimator.
+Max Planck Institute for Research on Collective Goods.
+<https://www.econstor.eu/handle/10419/161931>

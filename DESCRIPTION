@@ -27,6 +27,10 @@ Suggests:
     purrr,
     ggplot2,
     estimatr,
+    DeclareDesignZero,
+    fabricatrZero,
+    BalancedSampling,
+    sampling,
     testthat,
     rmarkdown
 VignetteBuilder: knitr

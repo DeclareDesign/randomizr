@@ -143,13 +143,19 @@ static bool cube_on_x_step(NumericVector& z, const std::vector<int>& W,
   return true;
 }
 
-static void collect_free(const NumericVector& z, const std::vector<int>& ord,
-                         std::vector<int>& free, double tol) {
-  free.clear();
-  for (size_t t = 0; t < ord.size(); t++) {
-    int i = ord[t];
-    if (z[i] > tol && z[i] < 1.0 - tol) free.push_back(i);
+static bool try_window(NumericVector& z, const std::vector<int>& W,
+                       const std::vector<double>& Xs, int n, int q_use,
+                       std::vector<double>& A, std::vector<double>& u,
+                       double tol) {
+  int w = (int) W.size();
+  A.assign((size_t) q_use * w, 0.0);
+  for (int j = 0; j < w; j++) {
+    int i = W[j];
+    for (int c = 0; c < q_use; c++)
+      A[(size_t) c * w + j] = Xs[(size_t) i + (size_t) c * n];
   }
+  return kernel_vector(A, q_use, w, u, 1e-10) &&
+         cube_on_x_step(z, W, u, tol);
 }
 
 // [[Rcpp::export]]
@@ -188,61 +194,54 @@ NumericVector cube_on_x_cpp(NumericVector p, NumericMatrix X, double tol) {
     fisher_yates(ord);
   }
 
+  std::vector<int> queue;
+  queue.reserve(n);
+  for (int t = 0; t < n; t++) {
+    int i = ord[t];
+    if (z[i] > tol && z[i] < 1.0 - tol) queue.push_back(i);
+  }
+
   int q_use = q;
-  std::vector<int> free;
-  free.reserve(n);
   std::vector<double> A, u;
   long long guard = (long long) n * (q + 3) + 20;
   while (guard-- > 0) {
-    collect_free(z, ord, free, tol);
-    int nf = (int) free.size();
+    int nf = (int) queue.size();
     if (nf == 0) break;
     if (q_use < 0) q_use = 0;
     if (q_use == 0) {
       for (int t = 0; t < nf; t++) {
-        int i = free[t];
+        int i = queue[t];
         z[i] = (unif_rand() < z[i]) ? 1.0 : 0.0;
       }
       break;
     }
 
-    // Chauvet–Tillé window of q+1 in covariate order. Slide the window
-    // before dropping a constraint; only drop when no kernel can exist
-    // (fewer free units than columns) or every window fails numerically.
+    // Fast flight: first q+1 of the queue. Survivors go to the back so
+    // a leftover from the low end is not carried across the range and
+    // paired with the opposite extreme.
     int w = std::min(nf, q_use + 1);
-    bool moved = false;
-    int n_start = (w < nf) ? (nf - w + 1) : 1;
-    for (int start = 0; start < n_start && !moved; start++) {
-      std::vector<int> W(free.begin() + start, free.begin() + start + w);
-      A.assign((size_t) q_use * w, 0.0);
-      for (int j = 0; j < w; j++) {
-        int i = W[j];
-        for (int c = 0; c < q_use; c++)
-          A[(size_t) c * w + j] = Xs[(size_t) i + (size_t) c * n];
-      }
-      if (kernel_vector(A, q_use, w, u, 1e-10) &&
-          cube_on_x_step(z, W, u, tol)) {
-        moved = true;
-      }
-    }
+    std::vector<int> W(queue.begin(), queue.begin() + w);
+    bool moved = try_window(z, W, Xs, n, q_use, A, u, tol);
     if (!moved && w < nf) {
-      w = nf;
-      std::vector<int> W(free.begin(), free.end());
-      A.assign((size_t) q_use * w, 0.0);
-      for (int j = 0; j < w; j++) {
-        int i = W[j];
-        for (int c = 0; c < q_use; c++)
-          A[(size_t) c * w + j] = Xs[(size_t) i + (size_t) c * n];
-      }
-      if (kernel_vector(A, q_use, w, u, 1e-10) &&
-          cube_on_x_step(z, W, u, tol)) {
-        moved = true;
-      }
+      moved = try_window(z, queue, Xs, n, q_use, A, u, tol);
+      if (moved) W = queue;
     }
     if (!moved) {
-      // Intercept, if present, is column 0 and is kept until last.
       q_use--;
+      continue;
     }
+
+    std::vector<int> next;
+    next.reserve(nf);
+    for (int t = w; t < nf; t++) {
+      int i = queue[t];
+      if (z[i] > tol && z[i] < 1.0 - tol) next.push_back(i);
+    }
+    for (int t = 0; t < w; t++) {
+      int i = W[t];
+      if (z[i] > tol && z[i] < 1.0 - tol) next.push_back(i);
+    }
+    queue.swap(next);
   }
 
   for (int i = 0; i < n; i++) {
