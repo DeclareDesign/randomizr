@@ -28,3 +28,4 @@ CONDUCT.md
 ^\.git$
 ^doc$
 ^Meta$
+^figure$

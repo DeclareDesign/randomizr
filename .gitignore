@@ -31,3 +31,4 @@ revdep/.cache.rds
 revdep/*.noindex
 /doc/
 /Meta/
+/figure/
