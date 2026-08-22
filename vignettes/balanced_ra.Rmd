@@ -23,7 +23,7 @@ library(randomizr)
 library(ggplot2)
 ```
 
-`balanced_ra()` assigns units to conditions when assignment probabilities vary from unit to unit, and it holds the number assigned to each condition at the floor or the ceiling of that condition's expected count. Three things hold on every draw: each unit receives exactly one condition; each unit's probability of each condition is the probability supplied; and the realised counts sit at the floor or the ceiling of their targets. With two arms and `blocks`, those tight counts are both within each block and overall. With three or more arms and `blocks`, tightness is within each block; the overall count is the sum of independent block landings and can move by more than one. Section 1 is a short demonstration. Section 2 gives the logic and states what the published papers guarantee versus what this implementation guarantees. Section 3 walks through the C++. Section 4 ports the designs from the original `prob_ra` documentation. Section 5 reports a concise validation. Section 6 lists the caveats.
+`balanced_ra()` assigns units to conditions when assignment probabilities vary from unit to unit, and it holds the number assigned to each condition at the floor or the ceiling of that condition's expected count. Three things hold on every draw: each unit receives exactly one condition; each unit's probability of each condition is the probability supplied; and the realised counts sit at the floor or the ceiling of their targets. With two arms and `blocks`, those tight counts are both within each block and overall. With three or more arms and `blocks`, tightness is within each block; the overall count is the sum of independent block landings and can move by more than one. Section 1 is a short demonstration. Section 2 gives the logic and states what the published papers guarantee versus what this implementation guarantees. Section 3 walks through the C++. Section 4 gives worked examples. Section 5 reports a concise validation. Section 6 lists the caveats.
 
 The function is **experimental**. Declare it with `declare_ra(..., ra_type = "balanced")` or by supplying `prob_unit_each`.
 
@@ -55,7 +55,7 @@ The rest of the vignette explains why those counts stay tight, how the C++ does 
 
 # 2. Logic
 
-`balanced_ra()` is the randomizr port of `prob_ra`: cube/pivotal assignment with unit-varying probabilities, on the same interface as `complete_ra()` and `block_ra()`. For two-arm blocked designs the implementation pairs leftovers across blocks so that within-block tightness and overall tightness hold together.
+`balanced_ra()` is cube/pivotal assignment with unit-varying probabilities, on the same interface as `complete_ra()` and `block_ra()`. For two-arm blocked designs leftover pairing keeps the counts tight within each block and overall.
 
 The input is an $N \times k$ matrix $\pi$ of assignment probabilities. Row $i$ sums to 1. Column $j$ sums to a target $t_j = \sum_i \pi_{ij}$. The output is a 0-1 matrix $Z$ with the same row sums, so each unit receives one condition, and with $E[Z]=\pi$. The column sums of $Z$ are required to be as close to $t$ as integer arithmetic allows: each realised count $n_j$ satisfies $n_j \in \{\lfloor t_j \rfloor, \lceil t_j \rceil\}$.
 
@@ -510,7 +510,7 @@ Arm counts are $(2,1,1)$. The five cycle moves preserved every total. That is fl
 
 # 4. Examples
 
-Each example below is an analogue of a use in the original `prob_ra` documentation, translated to `balanced_ra()`. The point of each is in the paragraph that precedes the code.
+Each example below is a `balanced_ra()` design. The point of each is in the paragraph that precedes the code.
 
 ## A race with unequal chances
 
@@ -545,7 +545,7 @@ No draw treats zero or three in a district. No draw treats two or four overall.
 
 ## Random probabilities, one treated arm
 
-One hundred units, five blocks of uneven size, probabilities drawn from the unit interval. The design is the one-arm illustration from the `prob_ra` vignette. Unit-level means should track $p$; the scatter is the check that they do. Tightness of the totals is left to Section 5.
+One hundred units, five blocks of uneven size, probabilities drawn from the unit interval. Unit-level means should track $p$; the scatter is the check that they do. Tightness of the totals is left to Section 5.
 
 ```{r}
 set.seed(3)
@@ -563,9 +563,9 @@ ggplot(data.frame(p, share), aes(p, share)) +
   theme(panel.grid.minor = element_blank())
 ```
 
-## Three arms, a matrix that sequential assignment left empty
+## Three arms, a tight $2 \times 3$ matrix
 
-The $2 \times 3$ matrix below is the case the sequential `prob_ra` method handled poorly. Arm 2 has expected count $1.13$, so a tight assignment gives that arm 1 or 2 units every time. Sequential assignment, which locked arm 1 first, left arm 2 empty on about 12 percent of draws. Column order changed the defect; it did not remove it.
+The $2 \times 3$ matrix below has arm 2 with expected count $1.13$, so a tight assignment gives that arm 1 or 2 units every time.
 
 ```{r}
 P <- cbind(c(0.15, 0.47), c(0.65, 0.48), c(0.20, 0.05))
@@ -650,7 +650,7 @@ set.seed(10)
 table(balanced_ra(blocks = rep(1:5, each = 3)))
 ```
 
-## Interface differences relative to `prob_ra`
+## Interface refusals
 
 Three refusals are deliberate. They are not papered over.
 
@@ -663,7 +663,7 @@ balanced_ra(prob_unit_each = cbind(c(0.25, 0.35, 0.40),
 
 Add the residual column if that is the design: `cbind(P, 1 - rowSums(P))`.
 
-Probabilities outside $[0,1]$ are refused. `prob_ra` accepted values such as $1.2$ and treated them as expected counts.
+Probabilities outside $[0,1]$ are refused. Values such as $1.2$ are not treated as expected counts.
 
 ```{r, error=TRUE}
 balanced_ra(prob_unit = c(1.2, 0.8, 2.1, 0.9))
@@ -757,7 +757,7 @@ table(colSums(replicate(1000, complete_ra(N = 4))))
 
 # 6. Warnings / caveats
 
-`balanced_ra()` puts cube/pivotal assignment inside randomizr, with the same interface family as `complete_ra()` and `block_ra()`: `N`, `prob_unit`, `blocks`, `clusters`, `conditions`. Exclusive assignment, exact marginals, probabilities in $[0,1]$. For two-arm blocked designs leftover pairing keeps both the within-block counts and the overall count tight. That is the two-district case, where `prob_ra`'s leftover handling and an earlier independent-per-block leftover path disagreed.
+`balanced_ra()` is cube/pivotal assignment on the same interface family as `complete_ra()` and `block_ra()`: `N`, `prob_unit`, `blocks`, `clusters`, `conditions`. Exclusive assignment, exact marginals, probabilities in $[0,1]$. For two-arm blocked designs leftover pairing keeps both the within-block counts and the overall count tight. Independently landing each block's leftover had let the overall count wander; that is the two-district case.
 
 The function is experimental. The interface may change. Declare a design with `declare_ra(..., ra_type = "balanced")` or by supplying `prob_unit_each`; `conduct_ra()` and `obtain_condition_probabilities()` then dispatch as they do for the other assignment functions.
 
@@ -777,8 +777,6 @@ Arm 1's overall count is not confined to $\{1,2\}$. That coupling is feasible â€
 There is no residual condition if the rows of `prob_unit_each` do not sum to 1. There is no interpretation of a probability greater than 1 as an expected count. Both are refused, as in Section 4.
 
 `check_inputs = FALSE` skips those checks. It is for simulation loops whose probabilities have already been verified. It is not a way to pass illegal designs.
-
-On small $N$, the R wrapper around the C++ can lose to a pure-R sequential method such as `prob_ra`. On large $N$ the C++ path is the faster of the two. The difference is not a reason to prefer the sequential method on designs where that method leaves an arm empty.
 
 HC2 coverage under these designs is in `vignette("balanced_ra_hc2", package = "randomizr")`.
 

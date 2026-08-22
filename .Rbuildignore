@@ -26,3 +26,5 @@ CONDUCT.md
 ^notes$
 ^revdep$
 ^\.git$
+^doc$
+^Meta$

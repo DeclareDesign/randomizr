@@ -64,10 +64,10 @@ Tillé (2004), meaning that the realised counts are held against their
 targets. It does not refer to covariate balance, which is a different idea
 and not what this function does.
 
-Two motivating cases, both from the original \code{probra} package: a race in
-which contestants have unequal chances and exactly one must win; and two
-districts of three villages, three to treat, blocked by district, so that
-each district should receive one or two and the total should be three.
+Two motivating cases: a race in which contestants have unequal chances and
+exactly one must win; and two districts of three villages, three to treat,
+blocked by district, so that each district should receive one or two and
+the total should be three.
 }
 \section{What is guaranteed}{
 

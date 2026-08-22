@@ -10,7 +10,7 @@
 
 `%||%` is used internally when a scalar `prob_unit` needs `N` inferred from `blocks` or `clusters`. The operator is defined in the package so the call works on R < 4.4, where it is not yet in base.
 
-`balanced_ra()` pairs leftovers across blocks so that two-arm blocked designs are tight within each block and overall. Two districts of three villages with `prob_unit = 0.5` always treat exactly three villages, and each district gets one or two. Independently landing each block — the earlier path, and the leftover handling in `prob_ra` — had let the total wander. With three or more arms and `blocks`, tightness remains within each block; overall counts need not be tight.
+`balanced_ra()` pairs leftovers across blocks so that two-arm blocked designs are tight within each block and overall. Two districts of three villages with `prob_unit = 0.5` always treat exactly three villages, and each district gets one or two. Independently landing each block had let the total wander. With three or more arms and `blocks`, tightness remains within each block; overall counts need not be tight.
 
 `N` is the first argument and `prob_unit` defaults to 0.5, so `balanced_ra(4)` is complete assignment of four units. A vector passed as `N` is refused: use `prob_unit` for probabilities.
 
@@ -26,7 +26,7 @@ Three things hold at once, and all three are guaranteed rather than approached: 
 
 `clusters` assigns whole groups together, in which case the tight counts are counts of clusters rather than of units, and `blocks` and `clusters` may be used at the same time.
 
-The assignment is drawn by the cube method of Deville and Tillé (2004), specialised to this problem. The function originates in Macartan Humphreys's `probra` package, which introduced the design and the two motivating examples in the documentation; the algorithm here is different, and holds the counts tight for any number of arms rather than for one.
+The assignment is drawn by the cube method of Deville and Tillé (2004), specialised to this problem. The algorithm holds the counts tight for any number of arms.
 
 Both of `balanced_ra()`'s paths are linear in the number of units and written in C++: 2,000 units take about a tenth of a millisecond with two conditions and about a millisecond with four, measured with a different probability drawn for every unit.
 

@@ -12,10 +12,10 @@
 #' targets. It does not refer to covariate balance, which is a different idea
 #' and not what this function does.
 #'
-#' Two motivating cases, both from the original \code{probra} package: a race in
-#' which contestants have unequal chances and exactly one must win; and two
-#' districts of three villages, three to treat, blocked by district, so that
-#' each district should receive one or two and the total should be three.
+#' Two motivating cases: a race in which contestants have unequal chances and
+#' exactly one must win; and two districts of three villages, three to treat,
+#' blocked by district, so that each district should receive one or two and
+#' the total should be three.
 #'
 #' @section What is guaranteed:
 #' Every unit receives exactly one condition. Each unit's probability of each
@@ -202,8 +202,8 @@ balanced_ra_probabilities <- function(N = NULL,
 
 #' Build and validate the unit-by-condition probability matrix
 #'
-#' The validation probra never had. randomizr refuses probabilities outside
-#' [0, 1] everywhere else, and this keeps that promise here.
+#' randomizr refuses probabilities outside [0, 1] everywhere else, and this
+#' keeps that promise here.
 #'
 #' @keywords internal
 #' @noRd
