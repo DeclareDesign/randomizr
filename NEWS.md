@@ -1,6 +1,16 @@
 # randomizr 2.0.1
 
-`balanced_ra()` now holds two-arm counts tight at both the block level and overall when `blocks` is supplied. Two districts of three villages with `prob_unit = 0.5` always treat exactly three villages, and each district gets one or two. Independently landing each block had let the total wander. Three or more arms remain tight within each block.
+`declare_ra()` now accepts balanced assignment. Set `ra_type = "balanced"` or supply `prob_unit_each`. `conduct_ra()` and `obtain_condition_probabilities()` then dispatch to `balanced_ra()` and `balanced_ra_probabilities()`. Existing calls such as `declare_ra(N, prob = 0.5)` remain complete assignment. A varying `prob_unit` without `ra_type` still errors as it did for complete assignment; it does not silently take the cube path. Count arguments (`m`, `block_m`, and the rest) are refused on the balanced path. `num_arms` or `conditions` without probabilities expand to equal-probability balanced assignment, as they do for complete assignment. `obtain_num_permutations()` reports `Inf` for these designs (the cube support is not enumerated). `obtain_permutation_probabilities()` errors: the support is not listed and the assignments are not equally likely.
+
+`vignette("balanced_ra")` walks through one two-arm draw as a four-panel figure whose titles state why a cell is driven to 0, not only the result, and one four-unit, three-arm draw from `prob_unit_each` rows (0.2, 0.4, 0.4), (0.4, 0.3, 0.3), (0.6, 0.2, 0.2), (0.8, 0.1, 0.1).
+
+`vignette("balanced_ra_hc2")` re-simulates inverse-probability-weighted HC2 coverage under the current `balanced_ra()` implementation. Assignment is dependent; on the two-arm, blocked, and three-arm designs in that vignette, 95 percent intervals sit near 95 percent.
+
+`vignette("balanced_ra_speed")` times `balanced_ra()` against `complete_ra()`, `block_ra()`, and `block_and_cluster_ra()` on the equal-probability cases those specialized functions already handle.
+
+`%||%` is used internally when a scalar `prob_unit` needs `N` inferred from `blocks` or `clusters`. The operator is defined in the package so the call works on R < 4.4, where it is not yet in base.
+
+`balanced_ra()` pairs leftovers across blocks so that two-arm blocked designs are tight within each block and overall. Two districts of three villages with `prob_unit = 0.5` always treat exactly three villages, and each district gets one or two. Independently landing each block — the earlier path, and the leftover handling in `prob_ra` — had let the total wander. With three or more arms and `blocks`, tightness remains within each block; overall counts need not be tight.
 
 `N` is the first argument and `prob_unit` defaults to 0.5, so `balanced_ra(4)` is complete assignment of four units. A vector passed as `N` is refused: use `prob_unit` for probabilities.
 

@@ -1,0 +1,219 @@
+---
+title: "HC2 coverage under balanced assignment"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{HC2 coverage under balanced assignment}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE}
+set.seed(20260822)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 3.4
+)
+options(digits = 3)
+```
+
+```{r}
+library(randomizr)
+library(estimatr)
+library(ggplot2)
+```
+
+Under the designs simulated here, HC2 95 percent intervals cover the ATE at 0.945 (two-arm), 0.941 (blocked two-arm), and 0.954 (three-arm), each from 2,000 draws. Independent Bernoulli assignment on the same two-arm DGP covers at 0.935. Assignment dependence is real: the mean pairwise correlation is $-0.20$ under balanced assignment and $0.00$ under simple assignment, and the treated count does not wander. That dependence does not throw HC2 off on these designs. Two-arm coverage sits a shade below 95 percent; three-arm coverage sits a shade above. Section 1 states why one might have worried. Section 2 reports the simulations. The claim is limited to the designs below. It is not a theorem about every cube design.
+
+# 1. Why one might have worried
+
+`simple_ra()` draws each unit independently. Pairwise assignment correlations are zero. The treated count wanders.
+
+`complete_ra()` and `block_ra()` fix the treated count, or the count within each block. Pairwise assignment is then negatively dependent. The usual two-arm complete design has $\mathrm{Corr}(Z_i,Z_j)=-1/(N-1)$. That is still a design in which every unit has the same probability.
+
+`balanced_ra()` keeps unit-varying probabilities *and* holds the counts tight. The cube walk (two-arm: the pivotal method) pairs leftover units. With `blocks`, two-arm leftover pairing also couples units across blocks. Pairwise assignment is not independent Bernoulli. That is the point of the design: less assignment noise. It is also why people ask whether heteroskedasticity-consistent intervals, built from a working independence model, still cover.
+
+The estimator here is inverse-probability-weighted least squares with HC2 standard errors ([MacKinnon and White 1985](https://doi.org/10.1016/0304-4076(85)90158-7)), via `estimatr::lm_robust(..., se_type = "HC2")`. When $p_i$ varies, unweighted difference-in-means is not the ATE. The weights are $Z_i/p_i + (1-Z_i)/(1-p_i)$.
+
+The next block makes the dependence visible on a six-unit design. `balanced_ra()` holds the treated count at 3. `simple_ra()` does not. Off-diagonal assignment correlations are near zero under simple assignment and about $-0.20$ under balanced assignment.
+
+```{r}
+p <- c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5)
+n_dep <- 4000L
+Z_bal <- replicate(n_dep, balanced_ra(prob_unit = p, check_inputs = FALSE))
+Z_sim <- replicate(n_dep, simple_ra(N = 6, prob_unit = p,
+                                    conditions = 0:1, check_inputs = FALSE))
+
+c(balanced_treated = var(colSums(Z_bal)),
+  simple_treated   = var(colSums(Z_sim)))
+
+mean_offdiag <- function(S) {
+  C <- cor(t(S))
+  mean(C[upper.tri(C)])
+}
+c(balanced_pair_cor = mean_offdiag(Z_bal),
+  simple_pair_cor   = mean_offdiag(Z_sim))
+```
+
+# 2. Coverage
+
+Potential outcomes are fixed. Treatment effects are constant. $Y_i(0)$ is correlated with $p_i$, so inverse-probability weights are needed. Each cell redraws assignment from the current `balanced_ra()` implementation, estimates the ATE by IPW least squares, and records whether the HC2 interval covers the true ATE. Tight loops set `check_inputs = FALSE`. Two thousand draws for the three main designs; one thousand for the grids. Monte Carlo error on a 95 percent coverage rate at 2,000 draws is about half a percentage point.
+
+```{r}
+cover_ipw <- function(assign, p, y0, tau, nrep) {
+  cover <- logical(nrep)
+  se <- est <- numeric(nrep)
+  for (r in seq_len(nrep)) {
+    Z <- assign()
+    Y <- y0 + tau * Z
+    w <- Z / p + (1 - Z) / (1 - p)
+    fit <- lm_robust(Y ~ Z, weights = w, se_type = "HC2")
+    est[r] <- fit$coefficients[["Z"]]
+    se[r]  <- fit$std.error[["Z"]]
+    cover[r] <- fit$conf.low[["Z"]] <= tau && tau <= fit$conf.high[["Z"]]
+  }
+  data.frame(
+    coverage = mean(cover),
+    mean_est = mean(est),
+    mean_se  = mean(se),
+    nrep = nrep,
+    stringsAsFactors = FALSE
+  )
+}
+
+tau <- 1
+nrep_main <- 2000L
+```
+
+## Two-arm, unit-varying $p$
+
+$N=80$. $p_i$ runs from 0.2 to 0.8. $Y_i(0)=2p_i+\varepsilon_i$. The same potential outcomes are also assigned with `simple_ra()`, so the comparison isolates assignment dependence.
+
+```{r}
+N <- 80L
+p80 <- seq(0.2, 0.8, length.out = N)
+y0_80 <- 2 * p80 + rnorm(N)
+
+two_arm <- rbind(
+  cbind(design = "balanced",
+        cover_ipw(function() balanced_ra(prob_unit = p80, check_inputs = FALSE),
+                  p80, y0_80, tau, nrep_main)),
+  cbind(design = "simple",
+        cover_ipw(function() simple_ra(N = N, prob_unit = p80,
+                                      conditions = 0:1, check_inputs = FALSE),
+                  p80, y0_80, tau, nrep_main))
+)
+two_arm
+```
+
+## Blocked two-arm
+
+Eight blocks of ten. $p_i$ varies within each block. Counts are tight within blocks and overall.
+
+```{r}
+blocks <- rep(seq_len(8L), each = 10L)
+p_blk <- as.vector(replicate(8L, seq(0.25, 0.75, length.out = 10L)))
+y0_blk <- 2 * p_blk + rnorm(length(p_blk))
+
+blocked <- cbind(
+  design = "balanced, blocked",
+  cover_ipw(function() balanced_ra(prob_unit = p_blk, blocks = blocks,
+                               check_inputs = FALSE),
+            p_blk, y0_blk, tau, nrep_main)
+)
+blocked
+```
+
+## Three-arm
+
+$N=90$. Each unit has its own row of probabilities. The estimand is the T2-versus-T1 contrast. Weights are the reciprocal of the probability of the condition the unit landed in.
+
+```{r}
+cover_multi <- function(P, y0, tau, nrep) {
+  cover <- est <- se <- numeric(nrep)
+  cond <- colnames(P) <- c("T1", "T2", "T3")
+  for (r in seq_len(nrep)) {
+    Z <- balanced_ra(prob_unit_each = P, conditions = cond, check_inputs = FALSE)
+    Y <- y0 + tau * as.integer(Z == "T2")
+    w <- P[cbind(seq_len(nrow(P)), match(as.character(Z), cond))]
+    fit <- lm_robust(Y ~ Z, weights = 1 / w, se_type = "HC2")
+    est[r] <- fit$coefficients[["ZT2"]]
+    se[r]  <- fit$std.error[["ZT2"]]
+    cover[r] <- fit$conf.low[["ZT2"]] <= tau && tau <= fit$conf.high[["ZT2"]]
+  }
+  data.frame(
+    coverage = mean(cover),
+    mean_est = mean(est),
+    mean_se  = mean(se),
+    nrep = nrep,
+    stringsAsFactors = FALSE
+  )
+}
+
+N3 <- 90L
+u <- seq(0, 1, length.out = N3)
+P3 <- cbind(T1 = 0.20 + 0.20 * u,
+            T2 = 0.45 - 0.10 * u,
+            T3 = 0.35 - 0.10 * u)
+P3 <- P3 / rowSums(P3)
+y0_3 <- 2 * P3[, "T2"] + rnorm(N3)
+
+multi <- cbind(design = "balanced, three-arm",
+               cover_multi(P3, y0_3, tau, nrep_main))
+multi
+```
+
+```{r}
+results <- rbind(two_arm, blocked, multi)
+results
+```
+
+## Coverage against $N$ and against the spread of $p$
+
+The same two-arm DGP, four sample sizes, 1,000 draws each. Then $N=80$ with four spreads of $p_i$ around 0.5. Neither grid moves coverage far from 95 percent.
+
+```{r}
+nrep_grid <- 1000L
+Ns <- c(20L, 40L, 80L, 160L)
+by_N <- do.call(rbind, lapply(Ns, function(n) {
+  p <- seq(0.25, 0.75, length.out = n)
+  y0 <- 2 * p + rnorm(n)
+  cbind(N = n,
+        cover_ipw(function() balanced_ra(prob_unit = p, check_inputs = FALSE),
+                  p, y0, tau, nrep_grid))
+}))
+by_N
+
+spreads <- c(0, 0.15, 0.30, 0.40)
+by_spread <- do.call(rbind, lapply(spreads, function(a) {
+  p <- pmin(0.9, pmax(0.1, 0.5 + a * seq(-1, 1, length.out = 80L)))
+  y0 <- 2 * p + rnorm(80L)
+  cbind(spread = a, sd_p = sd(p),
+        cover_ipw(function() balanced_ra(prob_unit = p, check_inputs = FALSE),
+                  p, y0, tau, nrep_grid))
+}))
+by_spread
+```
+
+```{r, fig.cap = "HC2 coverage of the ATE against $N$ and against the spread of $p_i$. Dashed line: nominal 95 percent."}
+grid <- rbind(
+  data.frame(panel = "N", x = by_N$N, coverage = by_N$coverage),
+  data.frame(panel = "spread of p", x = by_spread$spread, coverage = by_spread$coverage)
+)
+ggplot(grid, aes(x, coverage)) +
+  geom_hline(yintercept = 0.95, linetype = 2) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~ panel, scales = "free_x") +
+  coord_cartesian(ylim = c(0.90, 1)) +
+  labs(x = NULL, y = "HC2 coverage")
+```
+
+# 3. What this does not say
+
+These are the designs that were drawn: two-arm unit-varying $p$, the same design assigned independently, blocked two-arm with $p$ varying inside blocks, and a three-arm cube design. HC2 intervals sat near 95 percent in each case. Two-arm rates were 0.94–0.95; the three-arm rate was 0.954. Assignment dependence is visible and does not wreck the intervals here.
+
+The note does not say that HC2 is valid for every cube design. It does not speak to cluster-robust standard errors, to randomization inference, or to designs that empty an arm. Use the simulation if a design sits far from these.
+
+The takeaway is narrow. Tight counts induce dependence. On the designs above, that is not a reason to drop HC2.

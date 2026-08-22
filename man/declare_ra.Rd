@@ -14,6 +14,7 @@ declare_ra(
   prob = NULL,
   prob_unit = NULL,
   prob_each = NULL,
+  prob_unit_each = NULL,
   block_m = NULL,
   block_m_each = NULL,
   block_prob = NULL,
@@ -21,6 +22,7 @@ declare_ra(
   num_arms = NULL,
   conditions = NULL,
   simple = FALSE,
+  ra_type = NULL,
   permutation_matrix = NULL,
   check_inputs = TRUE
 )
@@ -40,9 +42,11 @@ declare_ra(
 
 \item{prob}{Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units (or clusters) are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. Must be between 0 and 1. Under simple random assignment, may vary by unit. (optional)}
 
-\item{prob_unit}{Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. (optional)}
+\item{prob_unit}{Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. Under balanced assignment (\code{ra_type = "balanced"}), may differ by unit. (optional)}
 
-\item{prob_each}{Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count in each condition may differ slightly from draw to draw, but the overall probability is exactly \code{prob_each}. (optional)}
+\item{prob_each}{Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count in each condition may differ slightly from draw to draw, but the overall probability is exactly \code{prob_each}. Under balanced assignment the same vector is expanded to one row per unit. (optional)}
+
+\item{prob_unit_each}{Use for balanced assignment with two or more arms. A numeric matrix with one row per unit and one column per condition, giving each unit's probability of assignment to each condition. Rows must sum to 1. Supplying this argument selects \code{\link{balanced_ra}()}. (optional)}
 
 \item{block_m}{Use for a two-arm blocked design: a vector giving the number of units to assign to treatment within each block, in the order of \code{sort(unique(blocks))}. (optional)}
 
@@ -57,6 +61,8 @@ declare_ra(
 \item{conditions}{A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)}
 
 \item{simple}{Logical, defaults to \code{FALSE}. If \code{TRUE}, simple random assignment is used. Do not specify \code{m}, \code{m_each}, \code{block_m}, or \code{block_m_each} when \code{simple = TRUE}. (optional)}
+
+\item{ra_type}{Optional override. The only accepted value is \code{"balanced"}, which selects \code{\link{balanced_ra}()} and allows \code{prob_unit} to vary across units. Other designs are inferred from the arguments supplied; they cannot be forced with this argument. (optional)}
 
 \item{permutation_matrix}{For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)}
 
@@ -76,7 +82,7 @@ A list of class \code{"ra_declaration"} with entries:
 \code{declare_ra} creates a reusable declaration object that captures all the parameters of a random assignment procedure. The declaration separates the specification of the design from the act of conducting it: call \code{declare_ra} once to fix the design, then call \code{\link{conduct_ra}()} repeatedly (for example, across simulation iterations) to draw assignments from the declared procedure. The declaration also precomputes and caches the probability of assignment for each unit, which \code{\link{obtain_condition_probabilities}()} returns for use in inverse-probability-weighted estimators.
 }
 \details{
-\code{declare_ra} supports simple, complete, blocked, clustered, and blocked-and-clustered designs. It dispatches to the appropriate low-level function (\code{\link{simple_ra}()}, \code{\link{complete_ra}()}, \code{\link{block_ra}()}, \code{\link{cluster_ra}()}, or \code{\link{block_and_cluster_ra}()}) based on which arguments are supplied.
+\code{declare_ra} supports simple, complete, blocked, clustered, blocked-and-clustered, and balanced designs. It dispatches to the appropriate low-level function (\code{\link{simple_ra}()}, \code{\link{complete_ra}()}, \code{\link{block_ra}()}, \code{\link{cluster_ra}()}, \code{\link{block_and_cluster_ra}()}, or \code{\link{balanced_ra}()}) based on which arguments are supplied. Balanced assignment is opt-in: \code{declare_ra(N, prob = 0.5)} remains complete assignment. Use \code{ra_type = "balanced"} or supply \code{prob_unit_each}.
 }
 \examples{
 # A declaration is used in three ways.
@@ -155,7 +161,17 @@ declare_ra(clusters = clusters, blocks = blocks)
 
 declare_ra(clusters = clusters, blocks = blocks, prob_each = c(0.2, 0.5, 0.3))
 
+
+# Balanced assignment (heterogeneous probabilities, tight counts).
+# Opt-in: without ra_type or prob_unit_each this remains complete assignment.
+
+p <- c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5)
+declare_ra(prob_unit = p, ra_type = "balanced")
+
+P <- cbind(c(0.15, 0.47), c(0.65, 0.48), c(0.20, 0.05))
+declare_ra(prob_unit_each = P)
+
 }
 \seealso{
-\code{\link{conduct_ra}()}, \code{\link{obtain_condition_probabilities}()}, \code{\link{declare_rs}()}
+\code{\link{conduct_ra}()}, \code{\link{obtain_condition_probabilities}()}, \code{\link{balanced_ra}()}, \code{\link{declare_rs}()}
 }

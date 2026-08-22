@@ -134,6 +134,10 @@ test_that("invalid probabilities are refused, which probra accepted", {
   expect_error(balanced_ra(prob_unit = 0.5, prob_unit_each = matrix(.5, 2, 2)),
                "only one of")
   expect_error(balanced_ra(prob_unit = c(.5, .5), blocks = c(1, 2, 3)), "`blocks` has length")
+  expect_error(balanced_ra(prob_unit = rep(0.5, 4), num_arms = 3),
+               "probabilities describe 2 conditions")
+  expect_error(balanced_ra(prob_unit = rep(0.5, 4), conditions = c("A", "B", "C")),
+               "one entry per condition")
 })
 
 test_that("conditions are named and typed like the rest of the package", {
@@ -154,6 +158,11 @@ test_that("balanced_ra_probabilities returns the supplied probabilities", {
   expect_equal(colnames(M), c("prob_0", "prob_1"))
   expect_equal(M[, "prob_1"], p)
   expect_equal(rowSums(M), rep(1, 3))
+
+  P <- cbind(c(0.15, 0.47), c(0.65, 0.48), c(0.20, 0.05))
+  M3 <- balanced_ra_probabilities(prob_unit_each = P)
+  expect_equal(unname(M3), unname(P))
+  expect_equal(colnames(M3), c("prob_T1", "prob_T2", "prob_T3"))
 })
 
 # ---- clusters ----
@@ -231,4 +240,32 @@ test_that("clusters that break the rules are refused", {
                "`clusters` has length")
   # a scalar probability can take its length from clusters
   expect_length(balanced_ra(prob_unit = 0.5, clusters = clusters), 6)
+})
+
+test_that("check_inputs = FALSE still assigns a valid design", {
+  set.seed(17)
+  z <- balanced_ra(prob_unit = c(0.2, 0.4, 0.6, 0.8), check_inputs = FALSE)
+  expect_length(z, 4)
+  expect_true(all(z %in% 0:1))
+  expect_equal(sum(z), 2)
+  z2 <- balanced_ra(N = 4, check_inputs = FALSE)
+  expect_length(z2, 4)
+})
+
+test_that("blocked multi-arm is tight within blocks; overall can wander", {
+  # Three blocks of two, three arms, p = 1/3. Each block gives each arm 0 or 1.
+  # Overall target is 2 per arm, but leftover pairing is two-arm only, so an
+  # arm can land at 0 or 3. Documented in vignette("balanced_ra").
+  set.seed(16)
+  P <- matrix(1 / 3, 6, 3)
+  blocks <- rep(1:3, each = 2)
+  Z <- draw_int(P, blocks = blocks, S = 80)
+  for (b in 1:3) {
+    for (j in 1:3) {
+      expect_true(all(colSums(Z[blocks == b, , drop = FALSE] == j) %in% 0:1))
+    }
+  }
+  overall <- colSums(Z == 1)
+  expect_true(any(overall %in% c(0L, 3L)))
+  expect_false(all(overall %in% 1:2))
 })

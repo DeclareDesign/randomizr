@@ -2,9 +2,9 @@
 #'
 #' \code{declare_ra} creates a reusable declaration object that captures all the parameters of a random assignment procedure. The declaration separates the specification of the design from the act of conducting it: call \code{declare_ra} once to fix the design, then call \code{\link{conduct_ra}()} repeatedly (for example, across simulation iterations) to draw assignments from the declared procedure. The declaration also precomputes and caches the probability of assignment for each unit, which \code{\link{obtain_condition_probabilities}()} returns for use in inverse-probability-weighted estimators.
 #'
-#' \code{declare_ra} supports simple, complete, blocked, clustered, and blocked-and-clustered designs. It dispatches to the appropriate low-level function (\code{\link{simple_ra}()}, \code{\link{complete_ra}()}, \code{\link{block_ra}()}, \code{\link{cluster_ra}()}, or \code{\link{block_and_cluster_ra}()}) based on which arguments are supplied.
+#' \code{declare_ra} supports simple, complete, blocked, clustered, blocked-and-clustered, and balanced designs. It dispatches to the appropriate low-level function (\code{\link{simple_ra}()}, \code{\link{complete_ra}()}, \code{\link{block_ra}()}, \code{\link{cluster_ra}()}, \code{\link{block_and_cluster_ra}()}, or \code{\link{balanced_ra}()}) based on which arguments are supplied. Balanced assignment is opt-in: \code{declare_ra(N, prob = 0.5)} remains complete assignment. Use \code{ra_type = "balanced"} or supply \code{prob_unit_each}.
 #'
-#' @seealso \code{\link{conduct_ra}()}, \code{\link{obtain_condition_probabilities}()}, \code{\link{declare_rs}()}
+#' @seealso \code{\link{conduct_ra}()}, \code{\link{obtain_condition_probabilities}()}, \code{\link{balanced_ra}()}, \code{\link{declare_rs}()}
 #'
 #' @param N The number of units. Must be a positive integer. (required)
 #' @param blocks A vector of length N indicating which block each unit belongs to. Supply to use blocked random assignment. (optional)
@@ -13,8 +13,9 @@
 #' @param m_unit Use for a two-arm trial. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. (optional)
 #' @param m_each Use for a multi-arm design. A numeric vector giving the number of units (or clusters) assigned to each condition; must sum to N. (optional)
 #' @param prob Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units (or clusters) are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. Must be between 0 and 1. Under simple random assignment, may vary by unit. (optional)
-#' @param prob_unit Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. (optional)
-#' @param prob_each Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count in each condition may differ slightly from draw to draw, but the overall probability is exactly \code{prob_each}. (optional)
+#' @param prob_unit Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. Under balanced assignment (\code{ra_type = "balanced"}), may differ by unit. (optional)
+#' @param prob_each Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count in each condition may differ slightly from draw to draw, but the overall probability is exactly \code{prob_each}. Under balanced assignment the same vector is expanded to one row per unit. (optional)
+#' @param prob_unit_each Use for balanced assignment with two or more arms. A numeric matrix with one row per unit and one column per condition, giving each unit's probability of assignment to each condition. Rows must sum to 1. Supplying this argument selects \code{\link{balanced_ra}()}. (optional)
 #' @param block_m Use for a two-arm blocked design: a vector giving the number of units to assign to treatment within each block, in the order of \code{sort(unique(blocks))}. (optional)
 #' @param block_m_each Use for a multi-arm blocked design. A matrix with one row per block and one column per treatment arm giving the number of units assigned to each condition within each block. Rows respect the ordering of \code{sort(unique(blocks))}. (optional)
 #' @param block_prob Use for a two-arm blocked design in which the treatment probability varies across blocks. In the order of \code{sort(unique(blocks))}. (optional)
@@ -22,6 +23,7 @@
 #' @param num_arms The number of treatment arms. If unspecified, determined from the other arguments. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)
 #' @param simple Logical, defaults to \code{FALSE}. If \code{TRUE}, simple random assignment is used. Do not specify \code{m}, \code{m_each}, \code{block_m}, or \code{block_m_each} when \code{simple = TRUE}. (optional)
+#' @param ra_type Optional override. The only accepted value is \code{"balanced"}, which selects \code{\link{balanced_ra}()} and allows \code{prob_unit} to vary across units. Other designs are inferred from the arguments supplied; they cannot be forced with this argument. (optional)
 #' @param permutation_matrix For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)
 #' @param check_inputs Logical. Whether to verify before declaring that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that block-level arguments have one entry per block, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the design needs must be supplied explicitly. It is skipped entirely when \code{permutation_matrix} is supplied. (optional)
 #'
@@ -111,6 +113,16 @@
 #'
 #' declare_ra(clusters = clusters, blocks = blocks, prob_each = c(0.2, 0.5, 0.3))
 #'
+#'
+#' # Balanced assignment (heterogeneous probabilities, tight counts).
+#' # Opt-in: without ra_type or prob_unit_each this remains complete assignment.
+#'
+#' p <- c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5)
+#' declare_ra(prob_unit = p, ra_type = "balanced")
+#'
+#' P <- cbind(c(0.15, 0.47), c(0.65, 0.48), c(0.20, 0.05))
+#' declare_ra(prob_unit_each = P)
+#'
 #' @export
 declare_ra <- function(N = NULL,
                        blocks = NULL,
@@ -121,6 +133,7 @@ declare_ra <- function(N = NULL,
                        prob = NULL,
                        prob_unit = NULL,
                        prob_each = NULL,
+                       prob_unit_each = NULL,
                        block_m = NULL,
                        block_m_each = NULL,
                        block_prob = NULL,
@@ -128,35 +141,53 @@ declare_ra <- function(N = NULL,
                        num_arms = NULL,
                        conditions = NULL,
                        simple = FALSE,
+                       ra_type = NULL,
                        permutation_matrix = NULL,
                        check_inputs = TRUE) {
   input_check <- NULL
   all_args <-  mget(names(formals(sys.function())))
-  
-  if (check_inputs && is.null(permutation_matrix)) {
-    input_check <- check_randomizr_arguments_new(all_args)
-    for (i in names(input_check))
-      all_args[[i]] <- input_check[[i]]
-    all_args$check_inputs <-
-      FALSE # don't need to recheck when using declaration
+  ra_type_arg <- all_args$ra_type
+  all_args$ra_type <- NULL
+
+  if (!is.null(ra_type_arg) && !identical(ra_type_arg, "balanced")) {
+    stop("`ra_type` accepts only \"balanced\" as an explicit override. ",
+         "Other designs are inferred from the arguments supplied.",
+         call. = FALSE)
   }
-  
-  is_block <- !is.null(blocks) || is.factor(blocks)
-  is_clust <- !is.null(clusters) || is.factor(clusters)
-  
-  # Determine ra_type
-  if (is.matrix(permutation_matrix)) {
-    ra_type <- "custom"
-  } else  if (is_block && is_clust) {
-    ra_type <- "blocked_and_clustered"
-  } else  if (is_clust) {
-    ra_type <- "clustered"
-  } else  if (is_block) {
-    ra_type <- "blocked"
-  } else  if (simple == FALSE) {
-    ra_type <- "complete"
+
+  # Balanced is opt-in. Existing declare_ra(N, prob = 0.5) stays complete.
+  # prob_unit_each exists only on balanced_ra, so supplying it selects this path.
+  is_balanced <- identical(ra_type_arg, "balanced") ||
+    !is.null(all_args$prob_unit_each)
+
+  if (is_balanced) {
+    all_args <- prepare_balanced_ra_args(all_args, check_inputs)
+    ra_type <- "balanced"
   } else {
-    ra_type <- "simple"
+    if (check_inputs && is.null(permutation_matrix)) {
+      input_check <- check_randomizr_arguments_new(all_args)
+      for (i in names(input_check))
+        all_args[[i]] <- input_check[[i]]
+      all_args$check_inputs <-
+        FALSE # don't need to recheck when using declaration
+    }
+
+    is_block <- !is.null(blocks) || is.factor(blocks)
+    is_clust <- !is.null(clusters) || is.factor(clusters)
+
+    if (is.matrix(permutation_matrix)) {
+      ra_type <- "custom"
+    } else  if (is_block && is_clust) {
+      ra_type <- "blocked_and_clustered"
+    } else  if (is_clust) {
+      ra_type <- "clustered"
+    } else  if (is_block) {
+      ra_type <- "blocked"
+    } else  if (simple == FALSE) {
+      ra_type <- "complete"
+    } else {
+      ra_type <- "simple"
+    }
   }
   
   return_object <- list2env(all_args, parent = emptyenv())
@@ -340,7 +371,8 @@ print.ra_declaration <- function(x, ...) {
         "ra_clustered" = "Cluster",
         "ra_simple" = "Simple",
         "ra_blocked_and_clustered" = "Blocked and clustered",
-        "ra_complete" = "Complete"
+        "ra_complete" = "Complete",
+        "ra_balanced" = "Balanced"
       ),
       "random assignment",
       "\n")
@@ -385,4 +417,124 @@ print.ra_declaration <- function(x, ...) {
     )
   }
   invisible(x)
+}
+
+#' Map declare_ra arguments onto balanced_ra and validate
+#'
+#' @keywords internal
+#' @noRd
+prepare_balanced_ra_args <- function(all_args, check_inputs) {
+  if (isTRUE(all_args$simple)) {
+    stop("Cannot combine balanced assignment with `simple = TRUE`.",
+         call. = FALSE)
+  }
+  if (!is.null(all_args$permutation_matrix)) {
+    stop("Cannot combine balanced assignment with `permutation_matrix`.",
+         call. = FALSE)
+  }
+
+  count_args <- c("m", "m_unit", "m_each",
+                  "block_m", "block_m_each", "block_prob", "block_prob_each")
+  specified_count <- count_args[!vapply(all_args[count_args], is.null, logical(1))]
+  if (length(specified_count)) {
+    stop("Balanced assignment is specified with probabilities ",
+         "(`prob_unit`, `prob_unit_each`, `prob`, or `prob_each`), not with `",
+         paste(specified_count, collapse = "`, `"), "`.",
+         call. = FALSE)
+  }
+
+  n_prob <- sum(!vapply(
+    all_args[c("prob", "prob_unit", "prob_each", "prob_unit_each")],
+    is.null,
+    logical(1)
+  ))
+  if (n_prob > 1L) {
+    stop("Supply only one of `prob`, `prob_unit`, `prob_each`, and `prob_unit_each`.",
+         call. = FALSE)
+  }
+
+  if (!is.null(all_args$prob)) {
+    all_args$prob_unit <- all_args$prob
+    all_args$prob <- NULL
+  }
+
+  n <- all_args$N
+  if (is.null(n)) {
+    if (!is.null(all_args$prob_unit_each)) {
+      n <- nrow(as.matrix(all_args$prob_unit_each))
+    } else if (!is.null(all_args$prob_unit) && length(all_args$prob_unit) > 1L) {
+      n <- length(all_args$prob_unit)
+    } else if (!is.null(all_args$blocks)) {
+      n <- length(all_args$blocks)
+    } else if (!is.null(all_args$clusters)) {
+      n <- length(all_args$clusters)
+    }
+  }
+
+  if (!is.null(all_args$prob_each)) {
+    if (is.null(n)) {
+      stop("With `prob_each`, supply `N`, `blocks`, or `clusters` ",
+           "so the number of units is known.",
+           call. = FALSE)
+    }
+    pe <- all_args$prob_each
+    if (!is.numeric(pe) || anyNA(pe) || any(pe < 0) || abs(sum(pe) - 1) > 1e-8) {
+      stop("`prob_each` must be a numeric vector of nonnegative values that sum to 1.",
+           call. = FALSE)
+    }
+    all_args$prob_unit_each <- matrix(pe, n, length(pe), byrow = TRUE)
+    all_args$prob_each <- NULL
+  }
+
+  if (is.null(all_args$prob_unit) && is.null(all_args$prob_unit_each)) {
+    if (is.null(n)) {
+      stop("N, blocks, clusters, or a probability vector/matrix must be specified.",
+           call. = FALSE)
+    }
+    # Same default as complete_ra: two-arm p = 0.5 unless num_arms or
+    # conditions imply k arms, in which case each gets probability 1/k.
+    k_default <- all_args$num_arms
+    if (is.null(k_default) && !is.null(all_args$conditions)) {
+      k_default <- length(all_args$conditions)
+    }
+    if (!is.null(k_default) && k_default != 2L) {
+      all_args$prob_unit_each <- matrix(1 / k_default, n, k_default)
+    } else {
+      all_args$prob_unit <- 0.5
+    }
+  }
+
+  all_args$N <- n
+
+  P <- balanced_ra_matrix(
+    if (is.null(all_args$prob_unit_each)) all_args$prob_unit else NULL,
+    all_args$prob_unit_each,
+    all_args$blocks,
+    all_args$clusters,
+    all_args$N,
+    all_args$num_arms,
+    check_inputs = check_inputs
+  )
+  k <- ncol(P)
+  if (is.null(all_args$N)) {
+    all_args$N <- nrow(P)
+  }
+  if (is.null(all_args$num_arms)) {
+    all_args$num_arms <- k
+  }
+  if (is.null(all_args$conditions)) {
+    all_args$conditions <- if (k == 2L && is.null(all_args$prob_unit_each)) {
+      c(0, 1)
+    } else {
+      paste0("T", seq_len(k))
+    }
+  }
+  if (length(all_args$conditions) != k) {
+    stop("`conditions` must have one entry per condition. You supplied ",
+         length(all_args$conditions), " for ", k, " conditions.",
+         call. = FALSE)
+  }
+
+  all_args$check_inputs <- FALSE
+  all_args
 }

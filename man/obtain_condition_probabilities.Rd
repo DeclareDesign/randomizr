@@ -16,6 +16,7 @@ obtain_condition_probabilities(
   prob = NULL,
   prob_unit = NULL,
   prob_each = NULL,
+  prob_unit_each = NULL,
   block_m = NULL,
   block_m_each = NULL,
   block_prob = NULL,
@@ -23,6 +24,7 @@ obtain_condition_probabilities(
   num_arms = NULL,
   conditions = NULL,
   simple = FALSE,
+  ra_type = NULL,
   permutation_matrix = NULL,
   check_inputs = TRUE
 )
@@ -46,9 +48,11 @@ obtain_condition_probabilities(
 
 \item{prob}{Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units (or clusters) are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. Must be between 0 and 1. Under simple random assignment, may vary by unit. (optional)}
 
-\item{prob_unit}{Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. (optional)}
+\item{prob_unit}{Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. Under balanced assignment (\code{ra_type = "balanced"}), may differ by unit. (optional)}
 
-\item{prob_each}{Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count in each condition may differ slightly from draw to draw, but the overall probability is exactly \code{prob_each}. (optional)}
+\item{prob_each}{Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count in each condition may differ slightly from draw to draw, but the overall probability is exactly \code{prob_each}. Under balanced assignment the same vector is expanded to one row per unit. (optional)}
+
+\item{prob_unit_each}{Use for balanced assignment with two or more arms. A numeric matrix with one row per unit and one column per condition, giving each unit's probability of assignment to each condition. Rows must sum to 1. Supplying this argument selects \code{\link{balanced_ra}()}. (optional)}
 
 \item{block_m}{Use for a two-arm blocked design: a vector giving the number of units to assign to treatment within each block, in the order of \code{sort(unique(blocks))}. (optional)}
 
@@ -63,6 +67,8 @@ obtain_condition_probabilities(
 \item{conditions}{A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)}
 
 \item{simple}{Logical, defaults to \code{FALSE}. If \code{TRUE}, simple random assignment is used. Do not specify \code{m}, \code{m_each}, \code{block_m}, or \code{block_m_each} when \code{simple = TRUE}. (optional)}
+
+\item{ra_type}{Optional override. The only accepted value is \code{"balanced"}, which selects \code{\link{balanced_ra}()} and allows \code{prob_unit} to vary across units. Other designs are inferred from the arguments supplied; they cannot be forced with this argument. (optional)}
 
 \item{permutation_matrix}{For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)}
 

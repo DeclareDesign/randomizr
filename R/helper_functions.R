@@ -4,6 +4,10 @@
 
 
 
+# `%||%` entered base R in 4.4.0. randomizr Depends on R >= 3.5.0, so define
+# the same one-liner here and use it internally (no rlang dependency).
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
 # Call check() with all formal arguments of the invoking function
 # reinsert results into that environment
 .invoke_check <- function(check) {

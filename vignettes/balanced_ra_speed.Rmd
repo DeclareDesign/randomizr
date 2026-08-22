@@ -1,0 +1,179 @@
+---
+title: "Speed of balanced_ra relative to complete and blocked assignment"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Speed of balanced_ra relative to complete and blocked assignment}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE}
+set.seed(20260822)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 3.2
+)
+```
+
+```{r}
+library(randomizr)
+library(ggplot2)
+```
+
+`balanced_ra()` is the general assignment function when probabilities may vary by unit. When every unit has the same probability, `complete_ra()`, `block_ra()`, and `block_and_cluster_ra()` already implement the same designs. This note times the general function against those specialized functions on the equal-probability cases.
+
+Three results from the grid below. First, on two-arm complete assignment `complete_ra()` is faster once $N$ is a few thousand; at $N = 200$ the two are close and the ranking can flip from run to run. Second, blocked assignment is close to even: `block_ra()` uses a specialized Knuth-shuffle path, and the cube walk in `balanced_ra()` does not pull away. Third, blocked-and-clustered assignment is much slower in `block_and_cluster_ra()`, which rebuilds the cluster-to-block map on every draw.
+
+`balanced_ra()` is the general tool. The specialized functions exist to be faster on the equal-$p$ cases. Use them when they apply.
+
+# What is timed
+
+Each cell draws the same two-arm design twice, once with the specialized function and once with `balanced_ra()`, and records elapsed seconds for a fixed number of draws. The ratio is balanced time divided by specialized time. A ratio above 1 means `balanced_ra()` is slower.
+
+The timed loop sets `check_inputs = FALSE` on `balanced_ra()` so the comparison is assignment cost, not validation. The specialized functions are called as they usually are. Probability is the default $0.5$ everywhere. Blocks are equal in size. Cluster designs nest clusters of size 10 inside those blocks.
+
+```{r}
+Ns <- c(200L, 2000L, 10000L)
+n_blocks_grid <- c(1L, 10L, 50L, 200L)
+cluster_size <- 10L
+
+# Enough draws that elapsed times sit above a typical Windows clock tick.
+# A longer run with more draws produced the same ranking.
+nrep_for <- function(N) {
+  if (N <= 200L) 800L else if (N <= 2000L) 250L else 80L
+}
+
+time_n <- function(n, f) {
+  system.time(for (i in seq_len(n)) f())[["elapsed"]]
+}
+
+row_out <- function(family, N, n_blocks, cluster_size, nrep, specialized, balanced) {
+  data.frame(
+    family = family,
+    N = N,
+    n_blocks = n_blocks,
+    cluster_size = cluster_size,
+    nrep = nrep,
+    specialized = specialized,
+    balanced = balanced,
+    ratio = balanced / specialized,
+    stringsAsFactors = FALSE
+  )
+}
+
+# Warm-up so compilation and first-call costs sit outside the timed loops.
+invisible(complete_ra(20))
+invisible(block_ra(blocks = rep(1:2, each = 10)))
+invisible(block_and_cluster_ra(blocks = rep(1:2, each = 20),
+                              clusters = rep(1:8, each = 5)))
+invisible(balanced_ra(20, check_inputs = FALSE))
+
+rows <- list()
+
+for (N in Ns) {
+  n <- nrep_for(N)
+  rows[[length(rows) + 1L]] <- row_out(
+    "complete", N, NA_integer_, NA_integer_, n,
+    time_n(n, function() complete_ra(N)),
+    time_n(n, function() balanced_ra(N, check_inputs = FALSE))
+  )
+}
+
+for (N in Ns) {
+  for (nb in n_blocks_grid) {
+    if (N %% nb != 0L) next
+    blocks <- rep(seq_len(nb), each = N / nb)
+    n <- nrep_for(N)
+    rows[[length(rows) + 1L]] <- row_out(
+      "blocked", N, nb, NA_integer_, n,
+      time_n(n, function() block_ra(blocks = blocks)),
+      time_n(n, function() balanced_ra(blocks = blocks, check_inputs = FALSE))
+    )
+  }
+}
+
+for (N in Ns) {
+  if (N %% cluster_size != 0L) next
+  n_cl <- N / cluster_size
+  clusters <- rep(seq_len(n_cl), each = cluster_size)
+  for (nb in n_blocks_grid) {
+    if (n_cl %% nb != 0L) next
+    blocks <- rep(seq_len(nb), each = N / nb)
+    n <- nrep_for(N)
+    rows[[length(rows) + 1L]] <- row_out(
+      "block_cluster", N, nb, cluster_size, n,
+      time_n(n, function() block_and_cluster_ra(blocks = blocks, clusters = clusters)),
+      time_n(n, function() balanced_ra(blocks = blocks, clusters = clusters,
+                                      check_inputs = FALSE))
+    )
+  }
+}
+
+times <- do.call(rbind, rows)
+times$ms_specialized <- 1000 * times$specialized / times$nrep
+times$ms_balanced <- 1000 * times$balanced / times$nrep
+```
+
+The complete grid is $N \in \{200, 2000, 10000\}$. The blocked grid crosses those $N$ with $1$, $10$, $50$, and $200$ blocks, all of which divide $N$. The cluster grid uses the same $N$ and block counts whenever the number of clusters is divisible by the number of blocks, so $N = 200$ drops the $50$- and $200$-block cells.
+
+# Times
+
+Elapsed seconds are totals over `nrep` draws. The ratio is balanced / specialized. Absolute times vary by machine; the ranking is the object of interest.
+
+```{r}
+show_times <- function(d) {
+  out <- d[, c("N", "n_blocks", "nrep", "specialized", "balanced", "ratio")]
+  out$specialized <- round(out$specialized, 3)
+  out$balanced <- round(out$balanced, 3)
+  out$ratio <- round(out$ratio, 2)
+  rownames(out) <- NULL
+  out
+}
+
+show_times(times[times$family == "complete", ])
+show_times(times[times$family == "blocked", ])
+show_times(times[times$family == "block_cluster", ])
+```
+
+Figure 1 plots milliseconds per draw against $N$. Each panel is one design family. For blocked and clustered designs the series average over the block counts in the table.
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "Milliseconds per draw against N. Each panel is one design family. Blocked and clustered series average over the block counts in the table. A ratio above 1 in the table means balanced_ra is slower."}
+agg <- aggregate(
+  cbind(ms_specialized, ms_balanced) ~ family + N,
+  data = times,
+  FUN = mean
+)
+plot_df <- rbind(
+  data.frame(family = agg$family, N = agg$N,
+             method = "specialized", ms = agg$ms_specialized),
+  data.frame(family = agg$family, N = agg$N,
+             method = "balanced_ra", ms = agg$ms_balanced)
+)
+plot_df$family <- factor(
+  plot_df$family,
+  levels = c("complete", "blocked", "block_cluster"),
+  labels = c("complete_ra", "block_ra", "block_and_cluster_ra")
+)
+ggplot(plot_df, aes(N, ms, color = method, shape = method)) +
+  geom_line() +
+  geom_point() +
+  scale_x_log10(breaks = Ns) +
+  facet_wrap(~ family, scales = "free_y") +
+  labs(x = "N", y = "ms per draw", color = NULL, shape = NULL) +
+  theme_bw(base_size = 9) +
+  theme(legend.position = "bottom")
+```
+
+# Reading the ratios
+
+On complete assignment the specialized function is the faster path at large $N$. `complete_ra()` shuffles a length-$N$ vector. `balanced_ra()` walks the cube on an $N \times 2$ probability matrix. That walk is linear in $N$, but the constant is larger than a shuffle of $N$ labels. At $N = 200$ the difference is small relative to function-call noise.
+
+On blocked assignment the two stay near a ratio of 1. `block_ra()` already has a C++ Knuth-shuffle fast path for the two-arm equal-$p$ case. Replacing it with the cube does not buy time, and usually does not cost much either.
+
+On blocked-and-clustered assignment `balanced_ra()` is faster, often by a factor of five or more. `block_and_cluster_ra()` calls `tapply()` on every draw to collapse units to clusters. `balanced_ra()` assigns at the cluster level from a collapsed probability matrix. The gap is setup, not the cube.
+
+None of these comparisons is a reason to call `balanced_ra()` when probabilities are constant. They say only what the general function costs on the cases the specialized functions already cover. When probabilities vary by unit, those specialized functions do not apply.
+
+The takeaway is the division of labor. Use `complete_ra()`, `block_ra()`, or `block_and_cluster_ra()` when every unit (or cluster) shares a probability. Use `balanced_ra()` when they do not.

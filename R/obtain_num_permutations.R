@@ -192,6 +192,12 @@ obtain_num_permutations.ra_custom <- function(declaration) {
   ncol(declaration$permutation_matrix)
 }
 
+# Cube assignment does not enumerate its support. The print method treats Inf
+# as "approximately infinite" and obtain_permutation_matrix() then samples.
+obtain_num_permutations.ra_balanced <- function(declaration) {
+  Inf
+}
+
 
 
 obtain_num_permutations.rs_simple <- function(declaration) {

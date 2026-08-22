@@ -29,6 +29,13 @@ ra_function.ra_custom <- function(this)
 ra_function.ra_simple <- function(this)
   do.call(simple_ra, .mget_formals(simple_ra, this))
 
+ra_function.ra_balanced <- function(this) {
+  args <- .mget_formals(balanced_ra, this)
+  # balanced_ra uses missing(prob_unit) to allow a matrix; do not pass NULL.
+  if (!is.null(args$prob_unit_each)) args$prob_unit <- NULL
+  do.call(balanced_ra, Filter(Negate(is.null), args))
+}
+
 ra_probabilities.ra_blocked <- function(this)
   do.call(block_ra_probabilities, .mget_formals(block_ra_probabilities, this))
 
@@ -47,6 +54,12 @@ ra_probabilities.ra_custom <- function(this)
 
 ra_probabilities.ra_simple <- function(this)
   do.call(simple_ra_probabilities, .mget_formals(simple_ra_probabilities, this))
+
+ra_probabilities.ra_balanced <- function(this) {
+  args <- .mget_formals(balanced_ra_probabilities, this)
+  if (!is.null(args$prob_unit_each)) args$prob_unit <- NULL
+  do.call(balanced_ra_probabilities, Filter(Negate(is.null), args))
+}
 
 rs_function.rs_clustered <- function(this)
   do.call(cluster_rs, .mget_formals(cluster_rs, this))

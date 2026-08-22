@@ -12,111 +12,29 @@
 #' targets. It does not refer to covariate balance, which is a different idea
 #' and not what this function does.
 #'
-#' Two situations motivate it, both due to Macartan Humphreys, whose \code{probra}
-#' package is the origin of this function.
-#'
-#' Imagine a race between contestants with unequal chances of winning, and you
-#' want to simulate outcomes that respect those chances while exactly one
-#' contestant wins each time. The design is neither simple nor complete: simple
-#' random assignment gets the probabilities right and the winner count wrong,
-#' complete random assignment does the reverse.
-#'
-#' Or imagine two districts of three villages each, three villages to be
-#' treated, assignment probabilities equal, and blocking by district. Three does
-#' not divide evenly into two districts, so the per-district target is 1.5 and
-#' no design can hit it every time. What one wants is for each district to
-#' receive one or two villages, never zero and never three.
-#'
-#' @section How the counts are held tight:
-#' The assignment is drawn by the cube method of Deville and Tillé (2004),
-#' specialised to this problem. Starting from the matrix of probabilities, the
-#' algorithm repeatedly finds a cycle among the cells that are still fractional
-#' and moves along it at random, in a way that leaves every unit's total and
-#' every condition's total unchanged and drives at least one cell to 0 or 1.
-#' When no cycle remains it moves along a path instead, which disturbs only the
-#' two conditions at the ends. Each move is a fair bet, so the probability of
-#' any unit landing in any condition is exactly what was asked for, and the
-#' process stops at a genuine assignment rather than a rounded one.
-#'
-#' Each number of conditions takes the route suited to it. With two, the state
-#' is a single vector, and the move reduces to picking two units in the same
-#' block and shifting mass from one to the other, which is the pivotal method of
-#' Deville and Tillé (1998). With three or more, the algorithm carries a working
-#' set of as many units as there are conditions, which is always enough to
-#' contain a cycle, and refills it as units settle; that is the fast cube
-#' algorithm of Chauvet and Tillé (2006) in the form this problem takes.
+#' Two motivating cases, both from the original \code{probra} package: a race in
+#' which contestants have unequal chances and exactly one must win; and two
+#' districts of three villages, three to treat, blocked by district, so that
+#' each district should receive one or two and the total should be three.
 #'
 #' @section What is guaranteed:
-#' Every unit receives exactly one condition. Each unit's probability of
-#' receiving each condition is exactly the probability supplied. The number of
-#' units in each condition is either the floor or the ceiling of that
-#' condition's expected count, never further away.
-#'
-#' With \code{blocks} and two conditions, counts are held tight both within each
-#' block and overall: each block is at the floor or ceiling of its target, and
-#' so is the total. With three or more conditions the tight counts are the
-#' within-block ones; the overall count is their sum. Without \code{blocks}, the
-#' tight counts are the overall ones.
-#'
-#' With \code{clusters}, the assignment happens at the cluster level and the counts
-#' held tight are counts of clusters. Clusters of unequal size therefore give a
-#' fixed number of treated clusters and a varying number of treated units, which
-#' is how [cluster_ra()] behaves. \code{blocks} and \code{clusters} combine, giving a tight
-#' number of treated clusters within each block.
-#'
-#' @section Inference:
-#' Holding counts fixed makes assignments dependent across units. So does
-#' [complete_ra()], and to much the same degree: the covariance between two
-#' units' assignments is negative and of the same order under both, where under
-#' [simple_ra()] it is zero. The dependence is the price of fixing the count
-#' rather than anything new, and it is benign for the usual variance estimators.
-#' With equal probabilities, where this function amounts to complete random
-#' assignment, HC2 recovers the sampling distribution as well as it does there,
-#' and stays conservative when treatment effects vary.
-#'
-#' With unequal probabilities and an inverse-probability-weighted estimator, HC2
-#' runs one to two percent small, so a nominal 95 percent interval covers about
-#' 94.5. Most of that comes from the weighting rather than from the design,
-#' since simple random assignment with the same probabilities behaves the same
-#' way, and it shrinks as N grows.
-#'
-#' \strong{Estimate blocked designs with block fixed effects.} Blocking on
-#' something that predicts the outcome buys a great deal of precision. With
-#' blocks cut from a covariate explaining 80 percent of the variance in the
-#' untreated outcome, the estimator is four times as precise as under simple
-#' random assignment analysed the same way, and the gain grows with how well the
-#' covariate predicts. Adjusting for those same strata in the estimator buys
-#' most of the same thing, so blocking the design and adjusting the estimator
-#' are close substitutes rather than additive; doing both is only slightly
-#' better than either alone.
-#'
-#' What is not optional is the reporting. An estimator that ignores the blocks
-#' keeps every bit of that precision and cannot see any of it, reporting
-#' standard errors twice as wide as they should be, for 100 percent coverage of
-#' a nominal 95 percent interval. That holds for any blocked design, including
-#' [block_ra()], and block fixed effects repair it.
-#'
-#' \strong{Where [block_ra()] applies, the two agree.} With probabilities
-#' constant within block, this function and [block_ra()] are indistinguishable
-#' on the same blocks under the same estimator. \code{balanced_ra} is the
-#' generalisation rather than a competitor: [block_ra()] requires one
-#' probability per block and refuses unit-varying ones, which is the case this
-#' function exists to serve.
-#'
-#' @section Cost:
-#' Both paths are linear in the number of units and written in C++, so a draw is
-#' cheap enough to sit inside a simulation loop. With two conditions, 2,000
-#' units in 50 blocks take about a quarter of a millisecond and 10,000 units
-#' about 1.2 milliseconds. With three or more, 2,000 units in four conditions
-#' take about 9 milliseconds and 10,000 units about 46. Cost grows with roughly
-#' the square of the number of conditions, so ten conditions on 2,000 units run
-#' to about 58 milliseconds.
+#' Every unit receives exactly one condition. Each unit's probability of each
+#' condition is the probability supplied. Counts are tight within each block
+#' always, and tight overall as well when there are two arms. With three or
+#' more arms and \code{blocks}, the overall count can wander; see
+#' \code{vignette("balanced_ra", package = "randomizr")}. With \code{clusters},
+#' the tight counts are counts of clusters.
 #'
 #' @section Experimental:
-#' This function is new in randomizr 2.0.0 and its interface may change. It does
-#' not yet participate in [declare_ra()], so [conduct_ra()] and
-#' [obtain_condition_probabilities()] do not accept a \code{balanced_ra} design. Use
-#' \code{balanced_ra_probabilities()} to recover assignment probabilities.
+#' This function is new in randomizr 2.0.0 and its interface may change. Declare
+#' a design with [declare_ra()] by setting \code{ra_type = "balanced"} or by
+#' supplying \code{prob_unit_each}; \code{\link{conduct_ra}()} and
+#' \code{\link{obtain_condition_probabilities}()} then dispatch here. The vignette
+#' \code{vignette("balanced_ra", package = "randomizr")} has the algorithm, the
+#' distinction between the published cube-method guarantees and what this
+#' implementation adds, worked examples, a validation report, and caveats.
+#' HC2 coverage under these designs is in
+#' \code{vignette("balanced_ra_hc2", package = "randomizr")}.
 #'
 #' @param N The number of units. Inferred from \code{prob_unit}, \code{blocks}, or
 #'   \code{clusters} when omitted. A single positive integer. (optional)
@@ -161,7 +79,8 @@
 #' 569-591. \doi{10.1016/j.jspi.2003.11.011}
 #'
 #' @seealso \code{\link{balanced_ra_probabilities}()}, \code{\link{complete_ra}()},
-#'   \code{\link{block_ra}()}, \code{\link{simple_ra}()}
+#'   \code{\link{block_ra}()}, \code{\link{simple_ra}()},
+#'   the vignette \emph{Assignment with heterogeneous probabilities}
 #'
 #' @examples
 #' # Four units, default probability 0.5: complete assignment of two treated.
@@ -398,10 +317,7 @@ cube_assign_clusters <- function(P, clusters, blocks = NULL, tol = 1e-12) {
 #' With \code{blocks}, flight stays inside each block. Landing pairs the leftover
 #' units across blocks so the overall counts stay tight as well.
 #'
-#' @keywords internal
-#' @noRd
-
-#' Two-arm fast path: the pivotal method
+#' Two-arm fast path: the pivotal method.
 #'
 #' With two conditions the state is a single vector, since the second column is
 #' one minus the first, and the balancing constraints are the per-block sums. In

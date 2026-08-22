@@ -201,6 +201,14 @@ obtain_permutation_probabilities.ra_blocked_and_clustered <-
     permutation_probabilities
   }
 
+obtain_permutation_probabilities.ra_balanced <- function(declaration) {
+  stop("obtain_permutation_probabilities() does not enumerate cube assignments. ",
+       "The support is not listed and the assignments are not equally likely. ",
+       "Use obtain_permutation_matrix() to draw a sample, or conduct_ra() ",
+       "inside a simulation.",
+       call. = FALSE)
+}
+
 
 
 # Helper functions --------------------------------------------------------

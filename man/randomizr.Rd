@@ -23,9 +23,13 @@ what inverse-probability weights are built from.
   \item [cluster_ra()] assigns whole groups together, for interventions that
     cannot be delivered to individuals.
   \item [block_and_cluster_ra()] does both at once.
+  \item [balanced_ra()] honors unit-varying probabilities and holds
+    condition counts at the floor or ceiling of their targets.
   \item [declare_ra()] describes a design once so it can be reused by
     [conduct_ra()] to draw assignments and by
     [obtain_condition_probabilities()] to recover the probabilities.
+    Balanced assignment is opt-in: \code{ra_type = "balanced"} or
+    \code{prob_unit_each}.
 }
 }
 
