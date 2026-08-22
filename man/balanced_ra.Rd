@@ -13,8 +13,8 @@ balanced_ra(
   num_arms = NULL,
   conditions = NULL,
   formula = NULL,
-  data = NULL,
-  check_inputs = TRUE
+  check_inputs = TRUE,
+  .X = NULL
 )
 }
 \arguments{
@@ -48,17 +48,19 @@ case every cluster must sit entirely inside one block. (optional)}
 \item{conditions}{A vector giving the names of the conditions. (optional)}
 
 \item{formula}{A model formula whose model matrix is the balancing matrix
-\(X\) in the cube method, e.g. \code{~ x + B}. The intercept column is the
+\eqn{X} in the cube method, e.g. \code{~ x + B}. The intercept column is the
 count constraint; \code{~ 0 + x} drops it and the treated count may wander.
-Names are looked up in \code{data} if supplied, otherwise in the calling
-environment (as in \code{\link[stats]{lm}}). Two-arm only. Cannot be
-combined with \code{blocks} or \code{prob_unit_each}. (optional)}
-
-\item{data}{An optional data frame (or object accepted by
-\code{\link[stats]{model.matrix}()}) for \code{formula}. If omitted,
-formula variables are looked up in the calling environment. (optional)}
+Names are looked up where the formula was written, then in the calling
+frame, so the usual \code{dat |> mutate(Z = balanced_ra(formula = ~ x))}
+finds the column \code{x}. Two-arm only. Cannot be combined with
+\code{blocks} or \code{prob_unit_each}. (optional)}
 
 \item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1, that rows of a probability matrix sum to 1, that probabilities are constant within a cluster, and that clusters nest within blocks. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many assignments from probabilities that have already been verified. (optional)}
+
+\item{.X}{Internal. A balancing matrix already built from \code{formula},
+supplied by \code{\link{declare_ra}()} so that the formula's variables are
+looked up once, when the design is declared, rather than on every draw. Not
+for direct use. (optional)}
 }
 \value{
 A vector of length N giving the condition of each unit, numeric in a
@@ -76,8 +78,8 @@ number treated but requires every unit to share the same probability.
 The "balanced" in the name is balanced sampling in the sense of Deville and
 Tillé (2004). With the default arguments the realised counts are held
 against their targets. Pass \code{formula} to add linear balancing
-constraints on covariates (cube-on-X): the flight keeps \(X'Z\) near
-\(X'\pi\). Landing may drop a constraint, so exact tightness on every
+constraints on covariates (cube-on-X): the flight keeps \eqn{X'Z} near
+\eqn{X'\pi}. Landing may drop a constraint, so exact tightness on every
 column is not always possible. \code{blocks} is a different device: it
 tightens counts inside discrete groups. The two cannot be combined.
 
@@ -97,6 +99,83 @@ the tight counts are counts of clusters. With \code{formula}, first-order
 inclusion probabilities remain exact; covariate totals are as close as
 the landing phase allows. See
 \code{vignette("balanced_ra_covariates", package = "randomizr")}.
+}
+
+\section{Balance when probabilities vary}{
+
+The cube holds \eqn{X'Z} near \eqn{X'\pi}, which is the treated total of each
+balancing column against the total its assignment probabilities imply. When
+every unit shares a probability, that target amounts to splitting the column
+evenly between the arms, and \code{formula} does what its name suggests. When
+probabilities vary from unit to unit, the two targets come apart.
+
+Suppose \eqn{p_i} rises with \eqn{x_i}. High-\eqn{x} units are meant to be
+treated more often, so the treated group ought to have the higher mean of
+\eqn{x}, and it does. On 200 units with a correlation of 0.98 between
+\eqn{p} and \eqn{x}, the treated-minus-control difference in \eqn{x} averages
+0.91 standard deviations under \code{formula = ~ x}, which is what
+\code{\link{simple_ra}()} gives on the same probabilities. What the cube
+tightens is the spread of that difference around its target, from 0.099 to
+0.020, and the Horvitz-Thompson residual for the \eqn{x} total, from 4.91 to
+1.01.
+
+In short, \code{formula} does not equalise the arms when \eqn{p_i} varies, and
+it is not meant to. Weight by the reciprocal of the assignment probability, as
+for any unequal-probability design;
+\code{\link{balanced_ra_probabilities}()} returns the probabilities to weight
+by. With a constant \eqn{p} the question does not arise.
+}
+
+\section{Order of the covariates}{
+
+The flight phase sorts units by the first non-intercept column of \eqn{X} and
+works through them in a sliding window, so each step pairs units with nearby
+values of that column. The design therefore balances smooth functions of the
+first covariate and not only its linear total. On 200 units with a constant
+\eqn{p}, the standard deviation of the treated-minus-control difference runs
+0.023 in \eqn{x}, 0.045 in \eqn{x^2} and 0.042 in \eqn{x^3}, against 0.145,
+0.140 and 0.142 under \code{\link{complete_ra}()}. The gain is real and it is
+free.
+
+The gain is also uneven. Only the first non-intercept column drives the sort,
+so under \code{~ x1 + x2} the standard deviation in \eqn{x_1^2} is 0.037 while
+the standard deviation in \eqn{x_2^2} is 0.125, about what complete assignment
+leaves. Both linear totals are held tight. A covariate you name but
+do not put first is balanced in its own right and in nothing else, and a
+covariate you do not name at all is not balanced.
+
+Sorting is a choice made here rather than a feature of the cube method, which
+constrains only the linear span of \eqn{X}. Put the covariate whose
+relationship with the outcome you least trust yourself to model first in the
+formula.
+}
+
+\section{Intervals are conservative}{
+
+\code{formula} removes assignment variance that the usual variance estimators
+do not know about, so they report intervals wider than the true sampling
+variability warrants. HC2 on an unadjusted regression covered the true effect
+on 1.000 of 3,000 draws at \eqn{N = 200} with a strongly prognostic \eqn{x},
+its average standard error about twice the true sampling standard deviation.
+Horvitz-Thompson through \code{estimatr::horvitz_thompson()} runs from correct
+to twice too wide, depending on how well \eqn{X} predicts the outcome; that
+function warns when it is handed a declaration with a formula. Coverage
+stayed at or above the
+nominal rate in everything measured, so the intervals are valid. They are
+merely wasteful.
+
+Covariate adjustment recovers the precision the design bought. Fitting Lin's
+estimator on the same columns returned intervals near their nominal width and
+0.95 coverage. Adjustment does not always suffice: when the outcome was
+quadratic in \eqn{x} and the adjustment was linear in \eqn{x}, coverage
+returned to 1.000 while the sampling variance fell to 0.202 of what complete
+assignment plus the same adjustment delivered. Insurance against a
+misspecified adjustment model is the clearest case for this design, and it is
+the case in which the reported interval understates what was gained.
+
+An exact variance for cube assignment is not a missing feature. Joint
+inclusion probabilities have no closed form, which is what Deville and
+Tille (2005) approximate; randomizr does not implement that approximation.
 }
 
 \section{Experimental}{

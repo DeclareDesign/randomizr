@@ -71,9 +71,9 @@ test_that("N is inferred from formula when omitted", {
   )
 })
 
-test_that("formula still accepts an explicit data frame", {
-  x <- rnorm(20)
-  z <- balanced_ra(N = 20, formula = ~ x, data = data.frame(x = x))
+test_that("formula resolves columns inside a data mask, with no data argument", {
+  dat <- data.frame(x = rnorm(20))
+  z <- with(dat, balanced_ra(N = 20, formula = ~ x))
   expect_length(z, 20)
   expect_true(all(z %in% 0:1))
 })
@@ -105,12 +105,12 @@ test_that("DeclareDesignZero finds formula vars without data=", {
   expect_true(all(dat$Z %in% 0:1))
 })
 
-test_that("formula works with data and heterogeneous p", {
+test_that("formula works with a factor and heterogeneous p", {
   set.seed(43)
   dat <- data.frame(x = c(0, 1, 5, 6, 8, 9),
                     B = factor(rep(c("a", "b"), each = 3)))
   p <- c(0.2, 0.3, 0.4, 0.6, 0.7, 0.8)
-  r <- replicate(1500, balanced_ra(prob_unit = p, formula = ~ x + B, data = dat))
+  r <- replicate(1500, with(dat, balanced_ra(prob_unit = p, formula = ~ x + B)))
   r_sim <- replicate(1500, simple_ra(N = 6, prob_unit = p))
   expect_equal(rowMeans(r), p, tolerance = 0.05)
   rmse <- function(Z) sqrt(mean((colSums(dat$x * (Z - p)))^2))
@@ -132,4 +132,60 @@ test_that("~ 1 matches count-tight unblocked assignment on totals", {
   r <- replicate(400, balanced_ra(prob_unit = p, formula = ~ 1))
   expect_true(all(colSums(r) == 3))
   expect_equal(rowMeans(r), p, tolerance = 0.08)
+})
+
+# A declaration resolves the balancing matrix when it is declared. These tests
+# pin that down: the formula's variables are read once, in the environment the
+# formula was written in, and never again at conduct time.
+
+test_that("a declared formula is not shadowed by a same-named object at conduct time", {
+  set.seed(46)
+  x_declared <- c(0, 0, 0, 10, 10, 10)
+  make_decl <- function() {
+    x <- x_declared
+    declare_ra(formula = ~ x)
+  }
+  d <- make_decl()
+
+  # A decoy of the same name, visible from where conduct_ra() is called.
+  x <- c(10, 0, 10, 0, 10, 0)
+  r <- replicate(600, conduct_ra(d))
+
+  # The design balances what it was declared on, so the declared covariate has
+  # the tighter total. Reading the decoy instead would reverse the comparison.
+  spread <- function(v) sd(colSums(v * r))
+  expect_lt(spread(x_declared), spread(x))
+  expect_equal(rowMeans(r), rep(0.5, 6), tolerance = 0.08)
+})
+
+test_that("the declaration carries the balancing matrix, not a promise", {
+  x <- c(0, 1, 5, 6, 8, 9)
+  d <- declare_ra(formula = ~ x)
+  expect_equal(d[[".X"]], stats::model.matrix(~ x))
+
+  # Changing x afterwards cannot change the declared design.
+  x <- rep(0, 6)
+  expect_equal(unname(d[[".X"]][, "x"]), c(0, 1, 5, 6, 8, 9))
+})
+
+test_that("environment(formula) beats an unrelated frame on the call stack", {
+  set.seed(47)
+  make_formula <- function() {
+    x <- c(0, 0, 0, 10, 10, 10)
+    ~ x
+  }
+  f <- make_formula()
+  x <- c(10, 0, 10, 0, 10, 0)          # decoy in the calling frame's parent
+  r <- replicate(600, balanced_ra(N = 6, formula = f))
+  expect_lt(sd(colSums(c(0, 0, 0, 10, 10, 10) * r)), sd(colSums(x * r)))
+})
+
+test_that("the flight handles a large N, where the queue rebuild used to be quadratic", {
+  set.seed(48)
+  n <- 4000L
+  x <- rnorm(n)
+  z <- balanced_ra(N = n, formula = ~ x)
+  expect_true(all(z %in% 0:1))
+  expect_equal(sum(z), n / 2)
+  expect_lt(abs(sum(x * z) - sum(x) / 2), 1)
 })

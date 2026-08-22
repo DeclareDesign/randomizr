@@ -26,7 +26,6 @@ obtain_condition_probabilities(
   simple = FALSE,
   ra_type = NULL,
   formula = NULL,
-  data = NULL,
   permutation_matrix = NULL,
   check_inputs = TRUE
 )
@@ -38,7 +37,7 @@ obtain_condition_probabilities(
 
 \item{N}{The number of units. A positive integer. Optional when
 \code{formula} or the length of \code{prob_unit} (or \code{blocks},
-\code{clusters}, or \code{data}) identifies N.}
+or \code{clusters}) identifies N.}
 
 \item{blocks}{A vector of length N indicating which block each unit belongs to. Supply to use blocked random assignment. (optional)}
 
@@ -74,11 +73,7 @@ obtain_condition_probabilities(
 
 \item{ra_type}{Optional override. The only accepted value is \code{"balanced"}, which selects \code{\link{balanced_ra}()} and allows \code{prob_unit} to vary across units. Other designs are inferred from the arguments supplied; they cannot be forced with this argument. (optional)}
 
-\item{formula}{For balanced assignment. A model formula whose model matrix is the balancing matrix \(X\) in the cube method, e.g. \code{~ x + B}. The intercept is the count constraint. Do not also pass \code{blocks}. Supplying \code{formula} selects \code{\link{balanced_ra}()}. Two-arm only. (optional)}
-
-\item{data}{An optional data frame for \code{formula}. If omitted, formula
-variables are looked up in the calling environment (as in
-\code{\link[stats]{lm}}). (optional)}
+\item{formula}{For balanced assignment. A model formula whose model matrix is the balancing matrix \eqn{X} in the cube method, e.g. \code{~ x + B}. The intercept is the count constraint. Do not also pass \code{blocks}. Supplying \code{formula} selects \code{\link{balanced_ra}()}. Two-arm only. The formula's variables are looked up once, when the design is declared; \code{\link{conduct_ra}()} reuses the matrix built then, so a later change to those variables does not change the declared design. (optional)}
 
 \item{permutation_matrix}{For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)}
 

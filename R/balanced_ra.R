@@ -10,8 +10,8 @@
 #' The "balanced" in the name is balanced sampling in the sense of Deville and
 #' Tillé (2004). With the default arguments the realised counts are held
 #' against their targets. Pass \code{formula} to add linear balancing
-#' constraints on covariates (cube-on-X): the flight keeps \(X'Z\) near
-#' \(X'\pi\). Landing may drop a constraint, so exact tightness on every
+#' constraints on covariates (cube-on-X): the flight keeps \eqn{X'Z} near
+#' \eqn{X'\pi}. Landing may drop a constraint, so exact tightness on every
 #' column is not always possible. \code{blocks} is a different device: it
 #' tightens counts inside discrete groups. The two cannot be combined.
 #'
@@ -30,6 +30,77 @@
 #' inclusion probabilities remain exact; covariate totals are as close as
 #' the landing phase allows. See
 #' \code{vignette("balanced_ra_covariates", package = "randomizr")}.
+#'
+#' @section Balance when probabilities vary:
+#' The cube holds \eqn{X'Z} near \eqn{X'\pi}, which is the treated total of each
+#' balancing column against the total its assignment probabilities imply. When
+#' every unit shares a probability, that target amounts to splitting the column
+#' evenly between the arms, and \code{formula} does what its name suggests. When
+#' probabilities vary from unit to unit, the two targets come apart.
+#'
+#' Suppose \eqn{p_i} rises with \eqn{x_i}. High-\eqn{x} units are meant to be
+#' treated more often, so the treated group ought to have the higher mean of
+#' \eqn{x}, and it does. On 200 units with a correlation of 0.98 between
+#' \eqn{p} and \eqn{x}, the treated-minus-control difference in \eqn{x} averages
+#' 0.91 standard deviations under \code{formula = ~ x}, which is what
+#' \code{\link{simple_ra}()} gives on the same probabilities. What the cube
+#' tightens is the spread of that difference around its target, from 0.099 to
+#' 0.020, and the Horvitz-Thompson residual for the \eqn{x} total, from 4.91 to
+#' 1.01.
+#'
+#' In short, \code{formula} does not equalise the arms when \eqn{p_i} varies, and
+#' it is not meant to. Weight by the reciprocal of the assignment probability, as
+#' for any unequal-probability design;
+#' \code{\link{balanced_ra_probabilities}()} returns the probabilities to weight
+#' by. With a constant \eqn{p} the question does not arise.
+#'
+#' @section Order of the covariates:
+#' The flight phase sorts units by the first non-intercept column of \eqn{X} and
+#' works through them in a sliding window, so each step pairs units with nearby
+#' values of that column. The design therefore balances smooth functions of the
+#' first covariate and not only its linear total. On 200 units with a constant
+#' \eqn{p}, the standard deviation of the treated-minus-control difference runs
+#' 0.023 in \eqn{x}, 0.045 in \eqn{x^2} and 0.042 in \eqn{x^3}, against 0.145,
+#' 0.140 and 0.142 under \code{\link{complete_ra}()}. The gain is real and it is
+#' free.
+#'
+#' The gain is also uneven. Only the first non-intercept column drives the sort,
+#' so under \code{~ x1 + x2} the standard deviation in \eqn{x_1^2} is 0.037 while
+#' the standard deviation in \eqn{x_2^2} is 0.125, about what complete assignment
+#' leaves. Both linear totals are held tight. A covariate you name but
+#' do not put first is balanced in its own right and in nothing else, and a
+#' covariate you do not name at all is not balanced.
+#'
+#' Sorting is a choice made here rather than a feature of the cube method, which
+#' constrains only the linear span of \eqn{X}. Put the covariate whose
+#' relationship with the outcome you least trust yourself to model first in the
+#' formula.
+#'
+#' @section Intervals are conservative:
+#' \code{formula} removes assignment variance that the usual variance estimators
+#' do not know about, so they report intervals wider than the true sampling
+#' variability warrants. HC2 on an unadjusted regression covered the true effect
+#' on 1.000 of 3,000 draws at \eqn{N = 200} with a strongly prognostic \eqn{x},
+#' its average standard error about twice the true sampling standard deviation.
+#' Horvitz-Thompson through \code{estimatr::horvitz_thompson()} runs from correct
+#' to twice too wide, depending on how well \eqn{X} predicts the outcome; that
+#' function warns when it is handed a declaration with a formula. Coverage
+#' stayed at or above the
+#' nominal rate in everything measured, so the intervals are valid. They are
+#' merely wasteful.
+#'
+#' Covariate adjustment recovers the precision the design bought. Fitting Lin's
+#' estimator on the same columns returned intervals near their nominal width and
+#' 0.95 coverage. Adjustment does not always suffice: when the outcome was
+#' quadratic in \eqn{x} and the adjustment was linear in \eqn{x}, coverage
+#' returned to 1.000 while the sampling variance fell to 0.202 of what complete
+#' assignment plus the same adjustment delivered. Insurance against a
+#' misspecified adjustment model is the clearest case for this design, and it is
+#' the case in which the reported interval understates what was gained.
+#'
+#' An exact variance for cube assignment is not a missing feature. Joint
+#' inclusion probabilities have no closed form, which is what Deville and
+#' Tille (2005) approximate; randomizr does not implement that approximation.
 #'
 #' @section Experimental:
 #' This function is new in randomizr 2.0.0 and its interface may change. Declare
@@ -65,15 +136,17 @@
 #' @param num_arms The number of treatment arms. Inferred when omitted. (optional)
 #' @param conditions A vector giving the names of the conditions. (optional)
 #' @param formula A model formula whose model matrix is the balancing matrix
-#'   \(X\) in the cube method, e.g. \code{~ x + B}. The intercept column is the
+#'   \eqn{X} in the cube method, e.g. \code{~ x + B}. The intercept column is the
 #'   count constraint; \code{~ 0 + x} drops it and the treated count may wander.
-#'   Names are looked up in \code{data} if supplied, otherwise in the calling
-#'   environment (as in \code{\link[stats]{lm}}). Two-arm only. Cannot be
-#'   combined with \code{blocks} or \code{prob_unit_each}. (optional)
-#' @param data An optional data frame (or object accepted by
-#'   \code{\link[stats]{model.matrix}()}) for \code{formula}. If omitted,
-#'   formula variables are looked up in the calling environment. (optional)
+#'   Names are looked up where the formula was written, then in the calling
+#'   frame, so the usual \code{dat |> mutate(Z = balanced_ra(formula = ~ x))}
+#'   finds the column \code{x}. Two-arm only. Cannot be combined with
+#'   \code{blocks} or \code{prob_unit_each}. (optional)
 #' @param check_inputs Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1, that rows of a probability matrix sum to 1, that probabilities are constant within a cluster, and that clusters nest within blocks. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many assignments from probabilities that have already been verified. (optional)
+#' @param .X Internal. A balancing matrix already built from \code{formula},
+#'   supplied by \code{\link{declare_ra}()} so that the formula's variables are
+#'   looked up once, when the design is declared, rather than on every draw. Not
+#'   for direct use. (optional)
 #'
 #' @return A vector of length N giving the condition of each unit, numeric in a
 #'   two-arm design and a factor (ordered by \code{conditions}) in a multi-arm design.
@@ -162,8 +235,8 @@ balanced_ra <- function(N = NULL,
                     num_arms = NULL,
                     conditions = NULL,
                     formula = NULL,
-                    data = NULL,
-                    check_inputs = TRUE) {
+                    check_inputs = TRUE,
+                    .X = NULL) {
 
   if (!missing(prob_unit) && !is.null(prob_unit_each)) {
     stop("Supply only one of `prob_unit` and `prob_unit_each`.")
@@ -177,13 +250,20 @@ balanced_ra <- function(N = NULL,
   if (!is.null(formula) && is.null(N) &&
       (is.null(prob_unit) || length(prob_unit) == 1L) &&
       is.null(prob_unit_each)) {
-    N <- n_from_formula(formula, data, envir = parent.frame())
+    N <- n_from_formula(formula, envir = parent.frame())
   }
   P <- balanced_ra_matrix(if (is.null(prob_unit_each)) prob_unit else NULL,
                       prob_unit_each, blocks, clusters, N, num_arms,
                       check_inputs)
   Z <- if (!is.null(formula)) {
-    X <- balanced_formula_matrix(formula, data, nrow(P), envir = parent.frame())
+    # A declaration resolves the model matrix once, at declare time, and passes
+    # it in. Resolving it again here would look up the formula's variables in
+    # whatever environment happens to be live at conduct time.
+    X <- if (is.null(.X)) {
+      balanced_formula_matrix(formula, nrow(P), envir = parent.frame())
+    } else {
+      balanced_check_matrix(.X, nrow(P))
+    }
     z <- if (is.null(clusters)) cube_on_x_cpp(P[, 2L], X, 1e-12) else
       cube_on_x_clusters(P[, 2L], X, clusters)
     cbind(1 - z, z)
@@ -231,7 +311,6 @@ balanced_ra_probabilities <- function(N = NULL,
                                   num_arms = NULL,
                                   conditions = NULL,
                                   formula = NULL,
-                                  data = NULL,
                                   check_inputs = TRUE) {
   if (!missing(prob_unit) && !is.null(prob_unit_each)) {
     stop("Supply only one of `prob_unit` and `prob_unit_each`.")
@@ -239,7 +318,7 @@ balanced_ra_probabilities <- function(N = NULL,
   if (!is.null(formula) && is.null(N) &&
       (is.null(prob_unit) || length(prob_unit) == 1L) &&
       is.null(prob_unit_each)) {
-    N <- n_from_formula(formula, data, envir = parent.frame())
+    N <- n_from_formula(formula, envir = parent.frame())
   }
   P <- balanced_ra_matrix(if (is.null(prob_unit_each)) prob_unit else NULL,
                       prob_unit_each, blocks, clusters, N, num_arms,
@@ -350,8 +429,7 @@ cube_assign_clusters <- function(P, clusters, blocks = NULL, tol = 1e-12) {
   Zc[as.integer(cl), , drop = FALSE]
 }
 
-n_from_formula <- function(formula, data, envir = parent.frame()) {
-  if (!is.null(data)) return(NROW(data))
+n_from_formula <- function(formula, envir = parent.frame()) {
   if (length(all.vars(formula)) == 0L) return(NULL)
   tryCatch(
     nrow(stats::model.matrix(formula, data = formula_lookup_data(formula, envir))),
@@ -361,10 +439,10 @@ n_from_formula <- function(formula, data, envir = parent.frame()) {
 
 #' Resolve formula data from `data` or the calling environment
 #'
-#' When \code{data} is omitted, look in \code{envir} (typically
-#' \code{parent.frame()} of [balanced_ra()]), then walk the call stack, then
-#' the formula environment. Matches \code{\link[stats]{lm}}:
-#' \code{model.frame(formula, data = parent.frame())}.
+#' When \code{data} is omitted, look in \code{environment(formula)} first, as
+#' \code{\link[stats]{lm}} does, then in \code{envir} (typically
+#' \code{parent.frame()} of [balanced_ra()]) so that a data mask still works,
+#' then walk the call stack.
 #'
 #' @keywords internal
 #' @noRd
@@ -379,6 +457,13 @@ formula_lookup_data <- function(formula, envir) {
     if (ok) env else NULL
   }
 
+  # The environment the formula was written in comes first, as in stats::lm().
+  # Searching the caller or the stack ahead of it lets a same-named object
+  # elsewhere, and globalenv() is always on the stack, shadow the covariate the
+  # design was written against, with no error to say so.
+  found <- try_env(environment(formula))
+  if (!is.null(found)) return(found)
+
   found <- try_env(envir)
   if (!is.null(found)) return(found)
 
@@ -390,13 +475,10 @@ formula_lookup_data <- function(formula, envir) {
     }
   }
 
-  found <- try_env(environment(formula))
-  if (!is.null(found)) return(found)
-
   stop("Could not find formula variable",
        if (length(vars) == 1L) " " else "s ",
        paste0("`", vars, "`", collapse = ", "),
-       " in `data` or the calling environment.",
+       " in the calling environment.",
        call. = FALSE)
 }
 
@@ -404,16 +486,14 @@ formula_lookup_data <- function(formula, envir) {
 #'
 #' @keywords internal
 #' @noRd
-balanced_formula_matrix <- function(formula, data, n, envir = parent.frame()) {
+balanced_formula_matrix <- function(formula, n, envir = parent.frame()) {
   if (!inherits(formula, "formula")) {
     stop("`formula` must be a formula, e.g. ~ x + B.")
   }
-  if (is.null(data)) {
-    data <- if (length(all.vars(formula)) == 0L) {
-      data.frame(row.names = seq_len(n))
-    } else {
-      formula_lookup_data(formula, envir)
-    }
+  data <- if (length(all.vars(formula)) == 0L) {
+    data.frame(row.names = seq_len(n))
+  } else {
+    formula_lookup_data(formula, envir)
   }
   X <- tryCatch(
     stats::model.matrix(formula, data = data),
@@ -424,12 +504,27 @@ balanced_formula_matrix <- function(formula, data, n, envir = parent.frame()) {
         stop("Could not find formula variable",
              if (length(vars) == 1L) " " else "s ",
              paste0("`", vars, "`", collapse = ", "),
-             " in `data` or the calling environment.",
+             " in the calling environment.",
              call. = FALSE)
       }
       stop(msg, call. = FALSE)
     }
   )
+  balanced_check_matrix(X, n)
+}
+
+#' Validate a balancing matrix
+#'
+#' Shared by the formula path, which builds \code{X} here, and the declaration
+#' path, which built it when the design was declared.
+#'
+#' @keywords internal
+#' @noRd
+balanced_check_matrix <- function(X, n) {
+  X <- as.matrix(X)
+  if (!is.numeric(X)) {
+    stop("The balancing matrix must be numeric.")
+  }
   if (nrow(X) != n) {
     stop("`formula` produces ", nrow(X), " rows but the probabilities describe ",
          n, " units.")

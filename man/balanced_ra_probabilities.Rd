@@ -13,7 +13,6 @@ balanced_ra_probabilities(
   num_arms = NULL,
   conditions = NULL,
   formula = NULL,
-  data = NULL,
   check_inputs = TRUE
 )
 }
@@ -48,15 +47,12 @@ case every cluster must sit entirely inside one block. (optional)}
 \item{conditions}{A vector giving the names of the conditions. (optional)}
 
 \item{formula}{A model formula whose model matrix is the balancing matrix
-\(X\) in the cube method, e.g. \code{~ x + B}. The intercept column is the
+\eqn{X} in the cube method, e.g. \code{~ x + B}. The intercept column is the
 count constraint; \code{~ 0 + x} drops it and the treated count may wander.
-Names are looked up in \code{data} if supplied, otherwise in the calling
-environment (as in \code{\link[stats]{lm}}). Two-arm only. Cannot be
-combined with \code{blocks} or \code{prob_unit_each}. (optional)}
-
-\item{data}{An optional data frame (or object accepted by
-\code{\link[stats]{model.matrix}()}) for \code{formula}. If omitted,
-formula variables are looked up in the calling environment. (optional)}
+Names are looked up where the formula was written, then in the calling
+frame, so the usual \code{dat |> mutate(Z = balanced_ra(formula = ~ x))}
+finds the column \code{x}. Two-arm only. Cannot be combined with
+\code{blocks} or \code{prob_unit_each}. (optional)}
 
 \item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1, that rows of a probability matrix sum to 1, that probabilities are constant within a cluster, and that clusters nest within blocks. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many assignments from probabilities that have already been verified. (optional)}
 }

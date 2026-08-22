@@ -223,7 +223,7 @@ for (N in Ns_cube) {
   cube_rows[[length(cube_rows) + 1L]] <- data.frame(
     N = N, method = "balanced_ra(formula = ~ x)",
     ms = median_ms(n_batch_cube, nrep, function() {
-      balanced_ra(N = N, formula = ~ x, data = dat, check_inputs = FALSE)
+      balanced_ra(N = N, formula = ~ x, check_inputs = FALSE)
     }),
     stringsAsFactors = FALSE
   )

@@ -231,17 +231,13 @@ NumericVector cube_on_x_cpp(NumericVector p, NumericMatrix X, double tol) {
       continue;
     }
 
-    std::vector<int> next;
-    next.reserve(nf);
-    for (int t = w; t < nf; t++) {
-      int i = queue[t];
-      if (z[i] > tol && z[i] < 1.0 - tol) next.push_back(i);
-    }
+    // Only the window's units moved, so the tail is still all-fractional and
+    // needs no rescan. Rebuilding it each step made the flight quadratic in n.
+    queue.erase(queue.begin(), queue.begin() + w);
     for (int t = 0; t < w; t++) {
       int i = W[t];
-      if (z[i] > tol && z[i] < 1.0 - tol) next.push_back(i);
+      if (z[i] > tol && z[i] < 1.0 - tol) queue.push_back(i);
     }
-    queue.swap(next);
   }
 
   for (int i = 0; i < n; i++) {

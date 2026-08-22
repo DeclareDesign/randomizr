@@ -8,7 +8,7 @@
 #'
 #' @param N The number of units. A positive integer. Optional when
 #'   \code{formula} or the length of \code{prob_unit} (or \code{blocks},
-#'   \code{clusters}, or \code{data}) identifies N.
+#'   or \code{clusters}) identifies N.
 #' @param blocks A vector of length N indicating which block each unit belongs to. Supply to use blocked random assignment. (optional)
 #' @param clusters A vector of length N indicating which cluster each unit belongs to. Supply to use cluster random assignment. (optional)
 #' @param m Use for a two-arm design: exactly \code{m} units (or clusters) are assigned to treatment. In a blocked design, exactly \code{m} units in each block are treated. (optional)
@@ -26,10 +26,7 @@
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)
 #' @param simple Logical, defaults to \code{FALSE}. If \code{TRUE}, simple random assignment is used. Do not specify \code{m}, \code{m_each}, \code{block_m}, or \code{block_m_each} when \code{simple = TRUE}. (optional)
 #' @param ra_type Optional override. The only accepted value is \code{"balanced"}, which selects \code{\link{balanced_ra}()} and allows \code{prob_unit} to vary across units. Other designs are inferred from the arguments supplied; they cannot be forced with this argument. (optional)
-#' @param formula For balanced assignment. A model formula whose model matrix is the balancing matrix \(X\) in the cube method, e.g. \code{~ x + B}. The intercept is the count constraint. Do not also pass \code{blocks}. Supplying \code{formula} selects \code{\link{balanced_ra}()}. Two-arm only. (optional)
-#' @param data An optional data frame for \code{formula}. If omitted, formula
-#'   variables are looked up in the calling environment (as in
-#'   \code{\link[stats]{lm}}). (optional)
+#' @param formula For balanced assignment. A model formula whose model matrix is the balancing matrix \eqn{X} in the cube method, e.g. \code{~ x + B}. The intercept is the count constraint. Do not also pass \code{blocks}. Supplying \code{formula} selects \code{\link{balanced_ra}()}. Two-arm only. The formula's variables are looked up once, when the design is declared; \code{\link{conduct_ra}()} reuses the matrix built then, so a later change to those variables does not change the declared design. (optional)
 #' @param permutation_matrix For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)
 #' @param check_inputs Logical. Whether to verify before declaring that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that block-level arguments have one entry per block, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the design needs must be supplied explicitly. It is skipped entirely when \code{permutation_matrix} is supplied. (optional)
 #'
@@ -152,7 +149,6 @@ declare_ra <- function(N = NULL,
                        simple = FALSE,
                        ra_type = NULL,
                        formula = NULL,
-                       data = NULL,
                        permutation_matrix = NULL,
                        check_inputs = TRUE) {
   input_check <- NULL
@@ -483,10 +479,8 @@ prepare_balanced_ra_args <- function(all_args, check_inputs,
       n <- length(all_args$blocks)
     } else if (!is.null(all_args$clusters)) {
       n <- length(all_args$clusters)
-    } else if (!is.null(all_args$data)) {
-      n <- NROW(all_args$data)
     } else if (!is.null(all_args$formula)) {
-      n <- n_from_formula(all_args$formula, all_args$data, envir = envir)
+      n <- n_from_formula(all_args$formula, envir = envir)
     }
   }
 
@@ -533,8 +527,11 @@ prepare_balanced_ra_args <- function(all_args, check_inputs,
       stop("`formula` is not yet supported with `prob_unit_each`.",
            call. = FALSE)
     }
-    if (check_inputs && !is.null(n)) {
-      balanced_formula_matrix(all_args$formula, all_args$data, n, envir = envir)
+    # Resolve the balancing matrix now, while the environment the formula was
+    # written in is still live, and carry it in the declaration. conduct_ra()
+    # then never looks the formula's variables up again.
+    if (!is.null(n)) {
+      all_args$.X <- balanced_formula_matrix(all_args$formula, n, envir = envir)
     }
   }
 
