@@ -8,12 +8,6 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-# pak::pak("DeclareDesign/fabricatr@rewrite")
-# pak::pak("DeclareDesign/DeclareDesign@rewrite")
-# pak::pak("macartan/ResearchDesigns@coppock/param-plumbing")
-```
-
-```{r, include = FALSE}
 set.seed(20260822)
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -25,12 +19,10 @@ options(digits = 3)
 ```
 
 ```{r}
-library(fabricatrZero)
-library(DeclareDesignZero)
+library(DeclareDesign)
 library(randomizr)
 library(ggplot2)
 library(estimatr)
-library(rlang)
 ```
 
 Rather than using blocks we can assign against a continuous covariate.

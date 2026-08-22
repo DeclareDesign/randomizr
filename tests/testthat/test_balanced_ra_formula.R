@@ -93,14 +93,14 @@ test_that("length of the model matrix must match N", {
   )
 })
 
-test_that("DeclareDesignZero finds formula vars without data=", {
-  skip_if_not_installed("fabricatrZero")
-  skip_if_not_installed("DeclareDesignZero")
-  pop <- DeclareDesignZero::declare_model(N = 10, x = 1:N)
-  des <- pop + DeclareDesignZero::declare_assignment(
+test_that("DeclareDesign finds formula vars without data=", {
+  skip_if_not_installed("fabricatr")
+  skip_if_not_installed("DeclareDesign")
+  pop <- DeclareDesign::declare_model(N = 10, x = 1:N)
+  des <- pop + DeclareDesign::declare_assignment(
     Z = balanced_ra(formula = ~ x)
   )
-  dat <- DeclareDesignZero::draw_data(des)
+  dat <- DeclareDesign::draw_data(des)
   expect_equal(nrow(dat), 10)
   expect_true(all(dat$Z %in% 0:1))
 })
