@@ -23,6 +23,8 @@ declare_ra(
   conditions = NULL,
   simple = FALSE,
   ra_type = NULL,
+  formula = NULL,
+  data = NULL,
   permutation_matrix = NULL,
   check_inputs = TRUE
 )
@@ -64,6 +66,10 @@ declare_ra(
 
 \item{ra_type}{Optional override. The only accepted value is \code{"balanced"}, which selects \code{\link{balanced_ra}()} and allows \code{prob_unit} to vary across units. Other designs are inferred from the arguments supplied; they cannot be forced with this argument. (optional)}
 
+\item{formula}{For balanced assignment. A model formula whose model matrix is the balancing matrix \(X\) in the cube method, e.g. \code{~ x + B}. The intercept is the count constraint. Do not also pass \code{blocks}. Supplying \code{formula} selects \code{\link{balanced_ra}()}. Two-arm only. (optional)}
+
+\item{data}{An optional data frame for \code{formula}. Names not found here are looked up in the environment of the formula. (optional)}
+
 \item{permutation_matrix}{For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)}
 
 \item{check_inputs}{Logical. Whether to verify before declaring that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that block-level arguments have one entry per block, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the design needs must be supplied explicitly. It is skipped entirely when \code{permutation_matrix} is supplied. (optional)}
@@ -82,7 +88,7 @@ A list of class \code{"ra_declaration"} with entries:
 \code{declare_ra} creates a reusable declaration object that captures all the parameters of a random assignment procedure. The declaration separates the specification of the design from the act of conducting it: call \code{declare_ra} once to fix the design, then call \code{\link{conduct_ra}()} repeatedly (for example, across simulation iterations) to draw assignments from the declared procedure. The declaration also precomputes and caches the probability of assignment for each unit, which \code{\link{obtain_condition_probabilities}()} returns for use in inverse-probability-weighted estimators.
 }
 \details{
-\code{declare_ra} supports simple, complete, blocked, clustered, blocked-and-clustered, and balanced designs. It dispatches to the appropriate low-level function (\code{\link{simple_ra}()}, \code{\link{complete_ra}()}, \code{\link{block_ra}()}, \code{\link{cluster_ra}()}, \code{\link{block_and_cluster_ra}()}, or \code{\link{balanced_ra}()}) based on which arguments are supplied. Balanced assignment is opt-in: \code{declare_ra(N, prob = 0.5)} remains complete assignment. Use \code{ra_type = "balanced"} or supply \code{prob_unit_each}.
+\code{declare_ra} supports simple, complete, blocked, clustered, blocked-and-clustered, and balanced designs. It dispatches to the appropriate low-level function (\code{\link{simple_ra}()}, \code{\link{complete_ra}()}, \code{\link{block_ra}()}, \code{\link{cluster_ra}()}, \code{\link{block_and_cluster_ra}()}, or \code{\link{balanced_ra}()}) based on which arguments are supplied. Balanced assignment is opt-in: \code{declare_ra(N, prob = 0.5)} remains complete assignment. Use \code{ra_type = "balanced"} or supply \code{prob_unit_each} or \code{formula}.
 }
 \examples{
 # A declaration is used in three ways.
@@ -170,6 +176,9 @@ declare_ra(prob_unit = p, ra_type = "balanced")
 
 P <- cbind(c(0.15, 0.47), c(0.65, 0.48), c(0.20, 0.05))
 declare_ra(prob_unit_each = P)
+
+x <- c(0, 1, 5, 6, 8, 9)
+declare_ra(prob_unit = 0.5, formula = ~ x)
 
 }
 \seealso{

@@ -8,9 +8,12 @@
 #' number treated but requires every unit to share the same probability.
 #'
 #' The "balanced" in the name is balanced sampling in the sense of Deville and
-#' Tillé (2004), meaning that the realised counts are held against their
-#' targets. It does not refer to covariate balance, which is a different idea
-#' and not what this function does.
+#' Tillé (2004). With the default arguments the realised counts are held
+#' against their targets. Pass \code{formula} to add linear balancing
+#' constraints on covariates (cube-on-X): the flight keeps \(X'Z\) near
+#' \(X'\pi\). Landing may drop a constraint, so exact tightness on every
+#' column is not always possible. \code{blocks} is a different device: it
+#' tightens counts inside discrete groups. The two cannot be combined.
 #'
 #' Two motivating cases: a race in which contestants have unequal chances and
 #' exactly one must win; and two districts of three villages, three to treat,
@@ -23,21 +26,24 @@
 #' always, and tight overall as well when there are two arms. With three or
 #' more arms and \code{blocks}, the overall count can wander; see
 #' \code{vignette("balanced_ra", package = "randomizr")}. With \code{clusters},
-#' the tight counts are counts of clusters.
+#' the tight counts are counts of clusters. With \code{formula}, first-order
+#' inclusion probabilities remain exact; covariate totals are as close as
+#' the landing phase allows. See
+#' \code{vignette("balanced_ra_covariates", package = "randomizr")}.
 #'
 #' @section Experimental:
 #' This function is new in randomizr 2.0.0 and its interface may change. Declare
 #' a design with [declare_ra()] by setting \code{ra_type = "balanced"} or by
-#' supplying \code{prob_unit_each}; \code{\link{conduct_ra}()} and
-#' \code{\link{obtain_condition_probabilities}()} then dispatch here. The vignette
-#' \code{vignette("balanced_ra", package = "randomizr")} has the algorithm, the
-#' distinction between the published cube-method guarantees and what this
-#' implementation adds, worked examples, a validation report, and caveats.
+#' supplying \code{prob_unit_each} or \code{formula}; \code{\link{conduct_ra}()}
+#' and \code{\link{obtain_condition_probabilities}()} then dispatch here. The
+#' vignette \code{vignette("balanced_ra", package = "randomizr")} has the
+#' count-tight algorithm. Cube-on-X is in
+#' \code{vignette("balanced_ra_covariates", package = "randomizr")}.
 #' HC2 coverage under these designs is in
 #' \code{vignette("balanced_ra_hc2", package = "randomizr")}.
 #'
-#' @param N The number of units. Inferred from \code{prob_unit}, \code{blocks}, or
-#'   \code{clusters} when omitted. A single positive integer. (optional)
+#' @param N The number of units. Inferred from \code{prob_unit}, \code{blocks},
+#'   \code{clusters}, or \code{data} when omitted. A single positive integer. (optional)
 #' @param prob_unit A scalar or a numeric vector of length N giving each unit's
 #'   probability of assignment to treatment, for a two-arm design. Unlike
 #'   elsewhere in randomizr these need not be equal across units; varying them
@@ -57,6 +63,14 @@
 #'   case every cluster must sit entirely inside one block. (optional)
 #' @param num_arms The number of treatment arms. Inferred when omitted. (optional)
 #' @param conditions A vector giving the names of the conditions. (optional)
+#' @param formula A model formula whose model matrix is the balancing matrix
+#'   \(X\) in the cube method, e.g. \code{~ x + B}. The intercept column is the
+#'   count constraint; \code{~ 0 + x} drops it and the treated count may wander.
+#'   Names are looked up in \code{data} or in the environment of the formula.
+#'   Two-arm only. Cannot be combined with \code{blocks} or
+#'   \code{prob_unit_each}. (optional)
+#' @param data An optional data frame (or object accepted by
+#'   \code{\link[stats]{model.matrix}()}) for \code{formula}. (optional)
 #' @param check_inputs Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1, that rows of a probability matrix sum to 1, that probabilities are constant within a cluster, and that clusters nest within blocks. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many assignments from probabilities that have already been verified. (optional)
 #'
 #' @return A vector of length N giving the condition of each unit, numeric in a
@@ -80,7 +94,8 @@
 #'
 #' @seealso \code{\link{balanced_ra_probabilities}()}, \code{\link{complete_ra}()},
 #'   \code{\link{block_ra}()}, \code{\link{simple_ra}()},
-#'   the vignette \emph{Assignment with heterogeneous probabilities}
+#'   the vignettes \emph{Assignment with heterogeneous probabilities} and
+#'   \emph{Covariate totals versus blocks}
 #'
 #' @examples
 #' # Four units, default probability 0.5: complete assignment of two treated.
@@ -129,6 +144,12 @@
 #'              clusters = clusters, blocks = blocks)
 #' table(blocks, Z)
 #'
+#' # Cube-on-X: keep the treated total of a continuous covariate near its
+#' # target. The intercept in ~ x is the count constraint.
+#' x <- c(0, 1, 5, 6, 8, 9)
+#' Z <- balanced_ra(prob_unit = 0.5, formula = ~ x)
+#' sum(x * Z)   # near 14.5
+#'
 #' @export
 balanced_ra <- function(N = NULL,
                     prob_unit = 0.5,
@@ -137,16 +158,37 @@ balanced_ra <- function(N = NULL,
                     clusters = NULL,
                     num_arms = NULL,
                     conditions = NULL,
+                    formula = NULL,
+                    data = NULL,
                     check_inputs = TRUE) {
 
   if (!missing(prob_unit) && !is.null(prob_unit_each)) {
     stop("Supply only one of `prob_unit` and `prob_unit_each`.")
   }
+  if (!is.null(formula) && !is.null(blocks)) {
+    stop("Use B in the formula, or use blocks=, not both.")
+  }
+  if (!is.null(formula) && !is.null(prob_unit_each)) {
+    stop("`formula` is not yet supported with `prob_unit_each`.")
+  }
+  if (!is.null(formula) && is.null(N) &&
+      (is.null(prob_unit) || length(prob_unit) == 1L) &&
+      is.null(prob_unit_each)) {
+    N <- n_from_formula(formula, data)
+  }
   P <- balanced_ra_matrix(if (is.null(prob_unit_each)) prob_unit else NULL,
                       prob_unit_each, blocks, clusters, N, num_arms,
                       check_inputs)
-  Z <- if (is.null(clusters)) cube_assign(P, blocks) else
+  Z <- if (!is.null(formula)) {
+    X <- balanced_formula_matrix(formula, data, nrow(P))
+    z <- if (is.null(clusters)) cube_on_x_cpp(P[, 2L], X, 1e-12) else
+      cube_on_x_clusters(P[, 2L], X, clusters)
+    cbind(1 - z, z)
+  } else if (is.null(clusters)) {
+    cube_assign(P, blocks)
+  } else {
     cube_assign_clusters(P, clusters, blocks)
+  }
   k <- ncol(P)
 
   if (is.null(conditions)) {
@@ -185,9 +227,16 @@ balanced_ra_probabilities <- function(N = NULL,
                                   clusters = NULL,
                                   num_arms = NULL,
                                   conditions = NULL,
+                                  formula = NULL,
+                                  data = NULL,
                                   check_inputs = TRUE) {
   if (!missing(prob_unit) && !is.null(prob_unit_each)) {
     stop("Supply only one of `prob_unit` and `prob_unit_each`.")
+  }
+  if (!is.null(formula) && is.null(N) &&
+      (is.null(prob_unit) || length(prob_unit) == 1L) &&
+      is.null(prob_unit_each)) {
+    N <- n_from_formula(formula, data)
   }
   P <- balanced_ra_matrix(if (is.null(prob_unit_each)) prob_unit else NULL,
                       prob_unit_each, blocks, clusters, N, num_arms,
@@ -296,6 +345,57 @@ cube_assign_clusters <- function(P, clusters, blocks = NULL, tol = 1e-12) {
   bc <- if (is.null(blocks)) NULL else blocks[first]
   Zc <- cube_assign(Pc, bc, tol)
   Zc[as.integer(cl), , drop = FALSE]
+}
+
+n_from_formula <- function(formula, data) {
+  if (!is.null(data)) return(NROW(data))
+  tryCatch(nrow(stats::model.matrix(formula, data = data)),
+           error = function(e) NULL)
+}
+
+#' Model matrix for cube-on-X
+#'
+#' @keywords internal
+#' @noRd
+balanced_formula_matrix <- function(formula, data, n) {
+  if (!inherits(formula, "formula")) {
+    stop("`formula` must be a formula, e.g. ~ x + B.")
+  }
+  if (is.null(data)) {
+    data <- data.frame(row.names = seq_len(n))
+  }
+  X <- tryCatch(
+    stats::model.matrix(formula, data = data),
+    error = function(e) stop(conditionMessage(e), call. = FALSE)
+  )
+  if (nrow(X) != n) {
+    stop("`formula` produces ", nrow(X), " rows but the probabilities describe ",
+         n, " units.")
+  }
+  if (anyNA(X) || any(!is.finite(X))) {
+    stop("The model matrix from `formula` must be finite and non-missing.")
+  }
+  if (ncol(X) < 1L) {
+    stop("`formula` produced no columns. Include at least an intercept or a covariate.")
+  }
+  storage.mode(X) <- "double"
+  X
+}
+
+#' Cube-on-X at the cluster-collapsed level
+#'
+#' Whole clusters move together, so unit-level \(X'Z\) equals the cluster-sum
+#' of X times the cluster assignment. Collapse, assign, expand.
+#'
+#' @keywords internal
+#' @noRd
+cube_on_x_clusters <- function(p, X, clusters, tol = 1e-12) {
+  cl <- factor(clusters)
+  first <- match(levels(cl), as.character(cl))
+  pc <- p[first]
+  Xc <- rowsum(X, cl, reorder = TRUE)
+  zc <- cube_on_x_cpp(pc, Xc, tol)
+  zc[as.integer(cl)]
 }
 
 #' Cube-method flight and landing on the transportation polytope

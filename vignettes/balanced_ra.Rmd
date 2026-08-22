@@ -207,7 +207,7 @@ sort(table(apply(zn, 2, pat)))
 
 With blocks, $(1,1,0,0)$ does not appear. Without blocks the overall total is still 2, and $(1,1,0,0)$ does appear. The first two units are never both treated once the block constraint is on.
 
-One shuffle and one sequence of uniforms produce a 0-1 assignment. The wrapper shuffles the units. This path uses the order $1,2,3,4$. The uniforms are $0.20$, $0.50$, $0.40$. The four panels are that path. A filled cell is the chosen assignment. A grey cell with an X is settled at 0. A number is still fractional. A heavier border marks the cells that moved in that step.
+One shuffle and one sequence of uniforms produce a 0-1 assignment. The wrapper shuffles the units. This path uses the order $1,2,3,4$. The uniforms are $0.20$, $0.50$, $0.40$. The four panels are that path. A filled cell is the chosen assignment. A grey cell with an X is settled at 0. A number is still fractional. A heavier border marks the cells that moved in that step. Panel titles name the procedure. The numbered paragraphs immediately below the figure walk through each step: which units are still open, which sampling rule is used, what the uniform selected, and which cell was filled or deleted and why.
 
 ```{r}
 pivot <- function(z, i, j, u) {
@@ -272,8 +272,8 @@ cube_tile_plot <- function(states, panel_labs, arm_labels, unit_labels,
     theme_minimal(base_size = 11) +
     theme(
       panel.grid = element_blank(),
-      strip.text = element_text(face = "bold", hjust = 0, size = 8.5,
-                                lineheight = 1.05),
+      strip.text = element_text(face = "bold", hjust = 0, size = 9.5,
+                                lineheight = 1.1),
       axis.text = element_text(colour = "grey20"),
       plot.caption = element_text(hjust = 0, size = 8, colour = "grey30"),
       panel.spacing = unit(0.8, "lines")
@@ -286,13 +286,13 @@ cube_tile_plot <- function(states, panel_labs, arm_labels, unit_labels,
 }
 ```
 
-```{r, echo = FALSE, fig.width = 6.8, fig.height = 8.4, fig.cap = "Four states of the probability matrix on the path to (1, 0, 0, 1). Each panel title states why that move happened. Filled = assigned (1). Grey cell with an X = settled at 0. Number = still fractional. Heavier border = cells that moved in that step."}
+```{r, echo = FALSE, fig.width = 6.8, fig.height = 7.6, fig.cap = "Four states of the probability matrix on the path to (1, 0, 0, 1). Panel titles name the procedure. Numbered paragraphs below walk through each step. Filled = assigned (1). Grey cell with an X = settled at 0. Number = still fractional. Heavier border = cells that moved in that step."}
 as_P <- function(z) cbind(Control = 1 - as.numeric(z), Treat = as.numeric(z))
 panel_labs <- c(
-  "1. Start\nAll cells fractional. Block 1 opens on unit 1.",
-  "2. Why unit 2 treat is out\nPaired with the open unit in block 1.\nPlus 0.4 drives that treatment cell to 0.",
-  "3. Why unit 4 treat is filled\nBlock 2 pair. Minus 0.2 sends unit 4 to 1.",
-  "4. Why the leftovers land here\nUnits 1 and 3 paired so the total stays 2.\nThe step sends unit 1 to 1 and unit 3 to 0."
+  "Step 1 — start",
+  "Step 2 — pivotal pair, block 1",
+  "Step 3 — pivotal pair, block 2",
+  "Step 4 — leftover pair\nacross blocks"
 )
 cube_tile_plot(
   states = lapply(seq_len(nrow(S)), function(i) as_P(S[i, ])),
@@ -303,13 +303,13 @@ cube_tile_plot(
 )
 ```
 
-Start: every cell is fractional. Unit 1 opens block 1.
+1. **Step 1 — start.** All four units are still open (fractional). Treatment probabilities are $0.2$, $0.4$, $0.6$, and $0.8$. No pairing has been drawn yet. The pass stores unit 1 as block 1's open unit and waits for a second fractional unit in that block.
 
-Block 1 pair. Unit 2 trades with unit 1. The plus step is $\delta_+=\min(1-z_1,z_2)=0.4$. The minus step is $\delta_-=\min(z_1,1-z_2)=0.2$. The chance of $+\delta_+$ is $0.2/0.6=1/3$. The uniform $0.20$ is below that, so $0.4$ moves from unit 2 to unit 1. Unit 2's treatment cell hits 0 and is crossed out; its control cell is filled. Unit 1 stays open at $0.6$. Already only one of the first two units can still be treated.
+2. **Step 2 — pivotal pair, block 1.** Units 1 and 2 are both still open and sit in the same block, so we sample with a *pivotal pair*: two open units in the same block, one step that preserves the block's expected treated count. The mechanical rule is: compute the largest step that can move treated mass from unit 2 onto unit 1 without leaving $[0,1]$, $\delta_+=\min(1-z_1,z_2)=0.4$, and the largest step the other way, $\delta_-=\min(z_1,1-z_2)=0.2$; take the plus direction with probability $\delta_-/(\delta_++\delta_-)=1/3$; draw a uniform and step until a coordinate hits 0 or 1. The two candidate landings are plus (unit 1 to $0.6$, unit 2 to $0$) and minus (unit 1 to $0$, unit 2 to $0.6$). The uniform is $0.20$, which is below $1/3$, so we select plus: $0.4$ moves from unit 2 to unit 1. Unit 2's treatment cell is deleted because $0.4$ was exactly that cell's mass — the binding constraint in the plus direction — and its control cell is filled so the row still sums to 1. Unit 1 is raised to $0.6$ so the block total stays $0.6$. Unit 1 remains open; unit 2 is settled. Already only one of the first two units can still be treated.
 
-Block 2 pair. Unit 3 opens the block. Unit 4 pairs with it. The plus step is $0.4$. The minus step is $0.2$. The chance of plus is $1/3$. The uniform $0.50$ is above that, so $0.2$ moves from unit 3 to unit 4. Unit 4's treatment cell hits 1 and is filled; its control cell is crossed out. Unit 3 stays open at $0.4$.
+3. **Step 3 — pivotal pair, block 2.** Still open: unit 1 at $0.6$ (the leftover from block 1) and both units in block 2. We again sample with a pivotal pair, now inside block 2. Unit 3 opened the block; unit 4 is the second fractional unit and pairs with it. Same rule: $\delta_+=0.4$, $\delta_-=0.2$, chance of plus $1/3$. The two candidate landings are plus (unit 3 to $1$, unit 4 to $0.4$) and minus (unit 3 to $0.4$, unit 4 to $1$). The uniform is $0.50$, which is above $1/3$, so we select minus: $0.2$ moves from unit 3 to unit 4. Unit 4's treatment cell is filled because the minus step of $0.2$ was exactly the gap from $0.8$ to $1$ — the binding remainder — and its control cell is deleted. Unit 3 is lowered to $0.4$ so the block total stays $1.4$. Unit 3 remains open.
 
-Leftover pair. Units 1 and 3, at $0.6$ and $0.4$, are paired as one group. The plus step is $0.4$. The minus step is $0.6$. The chance of plus is $0.6$. The uniform $0.40$ is below that, so $0.4$ moves from unit 3 to unit 1. Unit 1's treatment cell is filled. Unit 3's treatment cell is crossed out. No unit remains for a Bernoulli. If one leftover had remained, it would be rounded by a fair coin at its current $z$.
+4. **Step 4 — leftover pair across blocks.** Still open: unit 1 at $0.6$ and unit 3 at $0.4$. Units 2 and 4 are already settled. We now sample with *leftover pairing*: the two leftovers are treated as if they shared a single block, so the same pivotal step preserves their combined total of $1$ and the overall treated count stays at $2$. Here $\delta_+=0.4$, $\delta_-=0.6$, and the chance of plus is $0.6$. The two candidate landings are plus (unit 1 to $1$, unit 3 to $0$) and minus (unit 1 to $0$, unit 3 to $1$). The uniform is $0.40$, which is below $0.6$, so we select plus: $0.4$ moves from unit 3 to unit 1. Unit 1's treatment cell is filled because $0.4$ was exactly the gap from $0.6$ to $1$. Unit 3's treatment cell is deleted because that same $0.4$ was exactly its remaining mass. No unit remains for a Bernoulli draw. If one leftover had remained, it would be rounded by a fair coin at its current $z$.
 
 The treatment column of those four matrices is the state table.
 
@@ -431,7 +431,7 @@ P3
 colSums(P3)
 ```
 
-The window holds three units, so the first move is a cycle. The walk below is the unused-edge walk from `cube_step`, then the fair bet from `cube_move`. Order is $1,2,3,4$. The uniforms are $0.20$, $0.20$, $0.50$, $0.40$, $0.10$. The walk ends at arms $(1,2,3,1)$. The counts are $(2,1,1)$.
+The window holds three units, so the first move is a cycle. The walk below is the unused-edge walk from `cube_step`, then the fair bet from `cube_move`. An unused-edge cycle is a closed walk on the 2-core of the bipartite graph of still-open units and arms: from a starting vertex, take the first unused allowed edge, and continue until a vertex is revisited. Because every remaining vertex has degree at least 2, that walk cannot dead-end and must close. A cycle has no ends, so every row total and every column total is unchanged. A *path* would appear only if the 2-core were empty; then the walk would run from one leftover arm to another and only those two column totals would move. Order is $1,2,3,4$. The uniforms are $0.20$, $0.20$, $0.50$, $0.40$, $0.10$. The walk ends at arms $(1,2,3,1)$. The counts are $(2,1,1)$. Panel titles name the procedure. The numbered paragraphs immediately below the figure walk through each step.
 
 ```{r}
 cube_move <- function(Z, cu, ca, u) {
@@ -471,14 +471,14 @@ Z3 <- cube_move(Z3, c(2, 3, 3, 2), c(2, 2, 3, 3), 0.10)
 S3$cycle5 <- Z3
 ```
 
-```{r, echo = FALSE, fig.width = 7.0, fig.height = 10.6, fig.cap = "Six states of a four-by-three cube walk to arms (1, 2, 3, 1). Each panel title states why that cycle was used and why a cell hit 0 or 1. Filled = assigned (1). Grey cell with an X = settled at 0. Number = still fractional. Heavier border = cells that moved in that step."}
+```{r, echo = FALSE, fig.width = 7.0, fig.height = 10.2, fig.cap = "Six states of a four-by-three cube walk to arms (1, 2, 3, 1). Panel titles name the procedure. Numbered paragraphs below walk through each step. Filled = assigned (1). Grey cell with an X = settled at 0. Number = still fractional. Heavier border = cells that moved in that step."}
 panel_labs3 <- c(
-  "1. Start\nAll cells fractional. Three units in the window force a cycle.",
-  "2. Why this cycle zeros two cells\nUnused-edge walk on units 1–2, arms 1–2.\nPlus 0.4 equals the odd-cell mass, so those cells hit 0.",
-  "3. Why unit 1 fills\nUnit 1 still has two fractional cells, so it stays.\nPlus 0.4 drives its arm-1 cell to 1.",
-  "4. Why unit 4's arm-2 cell hits 0\nUnit 4 has entered the window.\nPlus 0.1 is exactly that cell.",
-  "5. Why unit 4 fills\nMinus 0.1: the binding remainders are 0.1.\nArm 1 reaches its integer target of 2.",
-  "6. Why the last move is a cycle\nTwo leftovers on two arms still form a 4-cycle.\nPlus 0.8 fills the even cells. Counts are (2, 1, 1)."
+  "Step 1 — start",
+  "Step 2 — unused-edge cycle\nunits 1–2",
+  "Step 3 — unused-edge cycle\nunit 1 fills",
+  "Step 4 — unused-edge cycle\nunit 4 enters",
+  "Step 5 — unused-edge cycle\nunit 4 fills",
+  "Step 6 — leftover 4-cycle\nnot a path"
 )
 cube_tile_plot(
   states = S3,
@@ -490,15 +490,17 @@ cube_tile_plot(
 )
 ```
 
-The first cycle is units 1--2 and arms 1--2. Even cells are $(1,1)$ and $(2,2)$. Odd cells are $(2,1)$ and $(1,2)$. Then $\delta_+=0.4$ and $\delta_-=0.2$, so the chance of plus is $1/3$. The uniform $0.20$ takes plus. The odd cells hit 0. Every row total and every column total is unchanged.
+1. **Step 1 — start.** All twelve cells are still open. Column targets are $2$, $1$, and $1$. The working window fills with units 1, 2, and 3 — the first three units that still have at least two fractional cells. Three such units on three arms force a cycle: at least six edges on at most six nodes is not a forest. No move has been drawn yet.
 
-The next cycle still includes unit 1, which has two fractional cells left. Plus $0.4$ fills arm 1 for that unit. Unit 1 drops from the window. Unit 4 enters.
+2. **Step 2 — unused-edge cycle on units 1–2, arms 1–2.** Still open: all four units. We sample with an unused-edge cycle: the first unused allowed edges on the 2-core close on units 1 and 2 and arms 1 and 2. The mechanical rule is the same fair bet as the pivotal pair, now along a cycle: even cells go up by $\delta_+$ and odd cells go down by $\delta_+$ (or the reverse); $\delta_+$ and $\delta_-$ are the largest steps that keep every cell in $[0,1]$; take plus with probability $\delta_-/(\delta_++\delta_-)$; draw a uniform and step until a coordinate hits 0 or 1. Even cells are $(1,1)$ and $(2,2)$; odd cells are $(2,1)$ and $(1,2)$. Then $\delta_+=0.4$, $\delta_-=0.2$, and the chance of plus is $1/3$. The two candidate landings are plus (odd cells to $0$, even cells raised by $0.4$) and minus (even cells down, odd cells up). The uniform is $0.20$, which is below $1/3$, so we select plus. The odd cells are deleted because $0.4$ was exactly each of those cells' mass — the binding odd-cell remainder. Every row total and every column total is unchanged.
 
-The third cycle is units 3--4 and arms 1--2. Plus $0.1$ equals unit 4's arm-2 mass, so that cell hits 0.
+3. **Step 3 — unused-edge cycle; unit 1 fills.** Still open: unit 1 (two fractional cells left: arm 1 at $0.6$ and arm 3 at $0.4$) and units 2–4. Unit 1 stays in the window. We again sample with an unused-edge cycle. The walk now closes on units 1, 3, and 2 and all three arms. Here $\delta_+=0.4$, $\delta_-=0.2$, and the chance of plus is $1/3$. The two candidate landings differ by $\pm 0.4$ along that cycle. The uniform is $0.20$, which is below $1/3$, so we select plus. Unit 1's arm-1 cell is filled because $0.4$ was exactly the gap from $0.6$ to $1$ — the binding even-cell remainder — and its arm-3 cell is deleted because that same $0.4$ was exactly its remaining mass. Unit 1 drops from the window. Unit 4 enters.
 
-The fourth cycle takes minus: the chance of plus is $0.1/0.8=0.125$, and the uniform $0.40$ is above that. Unit 4 fills on arm 1. Arm 1's column is now the integer 2.
+4. **Step 4 — unused-edge cycle; unit 4's arm-2 cell hits 0.** Still open: units 2, 3, and 4. We sample with an unused-edge cycle on units 3 and 4 and arms 1 and 2. Here $\delta_+=0.1$, $\delta_-=0.6$, and the chance of plus is $0.6/0.7\approx 0.86$. The two candidate landings are plus (step $0.1$) and minus (step $0.6$). The uniform is $0.50$, which is below $0.86$, so we select plus. Unit 4's arm-2 cell is deleted because $0.1$ was exactly that cell's mass — the binding odd-cell remainder. Column totals are still untouched.
 
-The last leftover is units 2 and 3 on arms 2 and 3. That graph is still a 4-cycle, not a forest, so the move is still a cycle. Plus $0.8$ fills the even cells. A path would appear only if the 2-core were empty and a column were still fractional. That is the two-unit design with rows $(0.5,0.3,0.2)$ and targets $1$, $0.6$, and $0.4$: two cycles, then a path on the leftover unit between the two arms that are still fractional. Here every target is an integer, so flight finishes.
+5. **Step 5 — unused-edge cycle; unit 4 fills.** Still open: units 2, 3, and 4 (unit 4 still has two fractional cells: arm 1 at $0.9$ and arm 3 at $0.1$). We sample with an unused-edge cycle on units 2, 3, and 4 and all three arms. Here $\delta_+=0.7$, $\delta_-=0.1$, and the chance of plus is $0.1/0.8=0.125$. The two candidate landings are plus (step $0.7$) and minus (step $0.1$). The uniform is $0.40$, which is above $0.125$, so we select minus. Unit 4's arm-1 cell is filled because $0.1$ was exactly the gap from $0.9$ to $1$, and its arm-3 cell is deleted because $0.1$ was exactly that cell's mass. Unit 4 is assigned to arm 1. Arm 1's column is now the integer $2$.
+
+6. **Step 6 — leftover 4-cycle, not a path.** Still open: units 2 and 3 on arms 2 and 3. That graph is a 4-cycle — every vertex has degree 2 — so the 2-core is nonempty and we still sample with a cycle, not a landing path. Here $\delta_+=0.8$, $\delta_-=0.2$, and the chance of plus is $0.2$. The two candidate landings are plus (even cells to $1$, odd cells to $0$) and minus (the reverse). The uniform is $0.10$, which is below $0.2$, so we select plus. The even cells $(2,2)$ and $(3,3)$ are filled because $0.8$ was exactly the gap from $0.2$ to $1$; the odd cells are deleted. Arms are $(1,2,3,1)$. Counts are $(2,1,1)$. A path would appear only if the 2-core were empty and a column were still fractional. That is the two-unit design with rows $(0.5,0.3,0.2)$ and targets $1$, $0.6$, and $0.4$: two cycles, then a path on the leftover unit between the two arms that are still fractional. Here every target is an integer, so flight finishes.
 
 The six matrices are the state list.
 
@@ -780,7 +782,7 @@ There is no residual condition if the rows of `prob_unit_each` do not sum to 1. 
 
 HC2 coverage under these designs is in `vignette("balanced_ra_hc2", package = "randomizr")`.
 
-The function holds assignment *counts* against their targets. It does not balance covariates. For covariate balance, see other tools; this one does not do that job.
+The default path holds assignment *counts* against their targets. That is not the same as balancing a continuous covariate. Pass `formula` to run cube-on-X on a model matrix; `blocks` tightens counts within discrete groups. The two are different constraints. The function refuses both at once. See `vignette("balanced_ra_covariates", package = "randomizr")`.
 
 The takeaway is practical. Use `balanced_ra()` when probabilities vary across units and the assigned counts should stay as close to their targets as arithmetic allows. Trust overall tightness without blocks, and both overall and within-block tightness with two arms. Do not trust overall tightness with three or more arms and `blocks`.
 

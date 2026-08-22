@@ -12,12 +12,14 @@ balanced_ra(
   clusters = NULL,
   num_arms = NULL,
   conditions = NULL,
+  formula = NULL,
+  data = NULL,
   check_inputs = TRUE
 )
 }
 \arguments{
-\item{N}{The number of units. Inferred from \code{prob_unit}, \code{blocks}, or
-\code{clusters} when omitted. A single positive integer. (optional)}
+\item{N}{The number of units. Inferred from \code{prob_unit}, \code{blocks},
+\code{clusters}, or \code{data} when omitted. A single positive integer. (optional)}
 
 \item{prob_unit}{A scalar or a numeric vector of length N giving each unit's
 probability of assignment to treatment, for a two-arm design. Unlike
@@ -44,6 +46,16 @@ case every cluster must sit entirely inside one block. (optional)}
 
 \item{conditions}{A vector giving the names of the conditions. (optional)}
 
+\item{formula}{A model formula whose model matrix is the balancing matrix
+\(X\) in the cube method, e.g. \code{~ x + B}. The intercept column is the
+count constraint; \code{~ 0 + x} drops it and the treated count may wander.
+Names are looked up in \code{data} or in the environment of the formula.
+Two-arm only. Cannot be combined with \code{blocks} or
+\code{prob_unit_each}. (optional)}
+
+\item{data}{An optional data frame (or object accepted by
+\code{\link[stats]{model.matrix}()}) for \code{formula}. (optional)}
+
 \item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1, that rows of a probability matrix sum to 1, that probabilities are constant within a cluster, and that clusters nest within blocks. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many assignments from probabilities that have already been verified. (optional)}
 }
 \value{
@@ -60,9 +72,12 @@ number treated but requires every unit to share the same probability.
 }
 \details{
 The "balanced" in the name is balanced sampling in the sense of Deville and
-Tillé (2004), meaning that the realised counts are held against their
-targets. It does not refer to covariate balance, which is a different idea
-and not what this function does.
+Tillé (2004). With the default arguments the realised counts are held
+against their targets. Pass \code{formula} to add linear balancing
+constraints on covariates (cube-on-X): the flight keeps \(X'Z\) near
+\(X'\pi\). Landing may drop a constraint, so exact tightness on every
+column is not always possible. \code{blocks} is a different device: it
+tightens counts inside discrete groups. The two cannot be combined.
 
 Two motivating cases: a race in which contestants have unequal chances and
 exactly one must win; and two districts of three villages, three to treat,
@@ -76,18 +91,21 @@ condition is the probability supplied. Counts are tight within each block
 always, and tight overall as well when there are two arms. With three or
 more arms and \code{blocks}, the overall count can wander; see
 \code{vignette("balanced_ra", package = "randomizr")}. With \code{clusters},
-the tight counts are counts of clusters.
+the tight counts are counts of clusters. With \code{formula}, first-order
+inclusion probabilities remain exact; covariate totals are as close as
+the landing phase allows. See
+\code{vignette("balanced_ra_covariates", package = "randomizr")}.
 }
 
 \section{Experimental}{
 
 This function is new in randomizr 2.0.0 and its interface may change. Declare
 a design with [declare_ra()] by setting \code{ra_type = "balanced"} or by
-supplying \code{prob_unit_each}; \code{\link{conduct_ra}()} and
-\code{\link{obtain_condition_probabilities}()} then dispatch here. The vignette
-\code{vignette("balanced_ra", package = "randomizr")} has the algorithm, the
-distinction between the published cube-method guarantees and what this
-implementation adds, worked examples, a validation report, and caveats.
+supplying \code{prob_unit_each} or \code{formula}; \code{\link{conduct_ra}()}
+and \code{\link{obtain_condition_probabilities}()} then dispatch here. The
+vignette \code{vignette("balanced_ra", package = "randomizr")} has the
+count-tight algorithm. Cube-on-X is in
+\code{vignette("balanced_ra_covariates", package = "randomizr")}.
 HC2 coverage under these designs is in
 \code{vignette("balanced_ra_hc2", package = "randomizr")}.
 }
@@ -139,6 +157,12 @@ Z <- balanced_ra(prob_unit = rep(0.5, length(clusters)),
              clusters = clusters, blocks = blocks)
 table(blocks, Z)
 
+# Cube-on-X: keep the treated total of a continuous covariate near its
+# target. The intercept in ~ x is the count constraint.
+x <- c(0, 1, 5, 6, 8, 9)
+Z <- balanced_ra(prob_unit = 0.5, formula = ~ x)
+sum(x * Z)   # near 14.5
+
 }
 \references{
 Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube
@@ -159,5 +183,6 @@ sampling. \emph{Journal of Statistical Planning and Inference} 128(2),
 \seealso{
 \code{\link{balanced_ra_probabilities}()}, \code{\link{complete_ra}()},
   \code{\link{block_ra}()}, \code{\link{simple_ra}()},
-  the vignette \emph{Assignment with heterogeneous probabilities}
+  the vignettes \emph{Assignment with heterogeneous probabilities} and
+  \emph{Covariate totals versus blocks}
 }

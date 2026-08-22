@@ -17,3 +17,7 @@ cube_multi_cpp <- function(P, b, ord, tol) {
     .Call('_randomizr_cube_multi_cpp', PACKAGE = 'randomizr', P, b, ord, tol)
 }
 
+cube_on_x_cpp <- function(p, X, tol) {
+    .Call('_randomizr_cube_on_x_cpp', PACKAGE = 'randomizr', p, X, tol)
+}
+

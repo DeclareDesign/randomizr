@@ -2,7 +2,7 @@
 #'
 #' \code{declare_ra} creates a reusable declaration object that captures all the parameters of a random assignment procedure. The declaration separates the specification of the design from the act of conducting it: call \code{declare_ra} once to fix the design, then call \code{\link{conduct_ra}()} repeatedly (for example, across simulation iterations) to draw assignments from the declared procedure. The declaration also precomputes and caches the probability of assignment for each unit, which \code{\link{obtain_condition_probabilities}()} returns for use in inverse-probability-weighted estimators.
 #'
-#' \code{declare_ra} supports simple, complete, blocked, clustered, blocked-and-clustered, and balanced designs. It dispatches to the appropriate low-level function (\code{\link{simple_ra}()}, \code{\link{complete_ra}()}, \code{\link{block_ra}()}, \code{\link{cluster_ra}()}, \code{\link{block_and_cluster_ra}()}, or \code{\link{balanced_ra}()}) based on which arguments are supplied. Balanced assignment is opt-in: \code{declare_ra(N, prob = 0.5)} remains complete assignment. Use \code{ra_type = "balanced"} or supply \code{prob_unit_each}.
+#' \code{declare_ra} supports simple, complete, blocked, clustered, blocked-and-clustered, and balanced designs. It dispatches to the appropriate low-level function (\code{\link{simple_ra}()}, \code{\link{complete_ra}()}, \code{\link{block_ra}()}, \code{\link{cluster_ra}()}, \code{\link{block_and_cluster_ra}()}, or \code{\link{balanced_ra}()}) based on which arguments are supplied. Balanced assignment is opt-in: \code{declare_ra(N, prob = 0.5)} remains complete assignment. Use \code{ra_type = "balanced"} or supply \code{prob_unit_each} or \code{formula}.
 #'
 #' @seealso \code{\link{conduct_ra}()}, \code{\link{obtain_condition_probabilities}()}, \code{\link{balanced_ra}()}, \code{\link{declare_rs}()}
 #'
@@ -24,6 +24,8 @@
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)
 #' @param simple Logical, defaults to \code{FALSE}. If \code{TRUE}, simple random assignment is used. Do not specify \code{m}, \code{m_each}, \code{block_m}, or \code{block_m_each} when \code{simple = TRUE}. (optional)
 #' @param ra_type Optional override. The only accepted value is \code{"balanced"}, which selects \code{\link{balanced_ra}()} and allows \code{prob_unit} to vary across units. Other designs are inferred from the arguments supplied; they cannot be forced with this argument. (optional)
+#' @param formula For balanced assignment. A model formula whose model matrix is the balancing matrix \(X\) in the cube method, e.g. \code{~ x + B}. The intercept is the count constraint. Do not also pass \code{blocks}. Supplying \code{formula} selects \code{\link{balanced_ra}()}. Two-arm only. (optional)
+#' @param data An optional data frame for \code{formula}. Names not found here are looked up in the environment of the formula. (optional)
 #' @param permutation_matrix For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)
 #' @param check_inputs Logical. Whether to verify before declaring that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that block-level arguments have one entry per block, and so on. Defaults to \code{TRUE}. The check also fills in arguments that were left implicit, notably \code{conditions}, so with \code{FALSE} every argument the design needs must be supplied explicitly. It is skipped entirely when \code{permutation_matrix} is supplied. (optional)
 #'
@@ -123,6 +125,9 @@
 #' P <- cbind(c(0.15, 0.47), c(0.65, 0.48), c(0.20, 0.05))
 #' declare_ra(prob_unit_each = P)
 #'
+#' x <- c(0, 1, 5, 6, 8, 9)
+#' declare_ra(prob_unit = 0.5, formula = ~ x)
+#'
 #' @export
 declare_ra <- function(N = NULL,
                        blocks = NULL,
@@ -142,6 +147,8 @@ declare_ra <- function(N = NULL,
                        conditions = NULL,
                        simple = FALSE,
                        ra_type = NULL,
+                       formula = NULL,
+                       data = NULL,
                        permutation_matrix = NULL,
                        check_inputs = TRUE) {
   input_check <- NULL
@@ -156,9 +163,11 @@ declare_ra <- function(N = NULL,
   }
 
   # Balanced is opt-in. Existing declare_ra(N, prob = 0.5) stays complete.
-  # prob_unit_each exists only on balanced_ra, so supplying it selects this path.
+  # prob_unit_each and formula exist only on balanced_ra, so supplying either
+  # selects this path.
   is_balanced <- identical(ra_type_arg, "balanced") ||
-    !is.null(all_args$prob_unit_each)
+    !is.null(all_args$prob_unit_each) ||
+    !is.null(all_args$formula)
 
   if (is_balanced) {
     all_args <- prepare_balanced_ra_args(all_args, check_inputs)
@@ -468,6 +477,10 @@ prepare_balanced_ra_args <- function(all_args, check_inputs) {
       n <- length(all_args$blocks)
     } else if (!is.null(all_args$clusters)) {
       n <- length(all_args$clusters)
+    } else if (!is.null(all_args$data)) {
+      n <- NROW(all_args$data)
+    } else if (!is.null(all_args$formula)) {
+      n <- n_from_formula(all_args$formula, all_args$data)
     }
   }
 
@@ -505,6 +518,19 @@ prepare_balanced_ra_args <- function(all_args, check_inputs) {
   }
 
   all_args$N <- n
+
+  if (!is.null(all_args$formula)) {
+    if (!is.null(all_args$blocks)) {
+      stop("Use B in the formula, or use blocks=, not both.", call. = FALSE)
+    }
+    if (!is.null(all_args$prob_unit_each)) {
+      stop("`formula` is not yet supported with `prob_unit_each`.",
+           call. = FALSE)
+    }
+    if (check_inputs && !is.null(n)) {
+      balanced_formula_matrix(all_args$formula, all_args$data, n)
+    }
+  }
 
   P <- balanced_ra_matrix(
     if (is.null(all_args$prob_unit_each)) all_args$prob_unit else NULL,

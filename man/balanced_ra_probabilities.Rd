@@ -12,12 +12,14 @@ balanced_ra_probabilities(
   clusters = NULL,
   num_arms = NULL,
   conditions = NULL,
+  formula = NULL,
+  data = NULL,
   check_inputs = TRUE
 )
 }
 \arguments{
-\item{N}{The number of units. Inferred from \code{prob_unit}, \code{blocks}, or
-\code{clusters} when omitted. A single positive integer. (optional)}
+\item{N}{The number of units. Inferred from \code{prob_unit}, \code{blocks},
+\code{clusters}, or \code{data} when omitted. A single positive integer. (optional)}
 
 \item{prob_unit}{A scalar or a numeric vector of length N giving each unit's
 probability of assignment to treatment, for a two-arm design. Unlike
@@ -43,6 +45,16 @@ case every cluster must sit entirely inside one block. (optional)}
 \item{num_arms}{The number of treatment arms. Inferred when omitted. (optional)}
 
 \item{conditions}{A vector giving the names of the conditions. (optional)}
+
+\item{formula}{A model formula whose model matrix is the balancing matrix
+\(X\) in the cube method, e.g. \code{~ x + B}. The intercept column is the
+count constraint; \code{~ 0 + x} drops it and the treated count may wander.
+Names are looked up in \code{data} or in the environment of the formula.
+Two-arm only. Cannot be combined with \code{blocks} or
+\code{prob_unit_each}. (optional)}
+
+\item{data}{An optional data frame (or object accepted by
+\code{\link[stats]{model.matrix}()}) for \code{formula}. (optional)}
 
 \item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1, that rows of a probability matrix sum to 1, that probabilities are constant within a cluster, and that clusters nest within blocks. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many assignments from probabilities that have already been verified. (optional)}
 }

@@ -25,6 +25,8 @@ obtain_condition_probabilities(
   conditions = NULL,
   simple = FALSE,
   ra_type = NULL,
+  formula = NULL,
+  data = NULL,
   permutation_matrix = NULL,
   check_inputs = TRUE
 )
@@ -69,6 +71,10 @@ obtain_condition_probabilities(
 \item{simple}{Logical, defaults to \code{FALSE}. If \code{TRUE}, simple random assignment is used. Do not specify \code{m}, \code{m_each}, \code{block_m}, or \code{block_m_each} when \code{simple = TRUE}. (optional)}
 
 \item{ra_type}{Optional override. The only accepted value is \code{"balanced"}, which selects \code{\link{balanced_ra}()} and allows \code{prob_unit} to vary across units. Other designs are inferred from the arguments supplied; they cannot be forced with this argument. (optional)}
+
+\item{formula}{For balanced assignment. A model formula whose model matrix is the balancing matrix \(X\) in the cube method, e.g. \code{~ x + B}. The intercept is the count constraint. Do not also pass \code{blocks}. Supplying \code{formula} selects \code{\link{balanced_ra}()}. Two-arm only. (optional)}
+
+\item{data}{An optional data frame for \code{formula}. Names not found here are looked up in the environment of the formula. (optional)}
 
 \item{permutation_matrix}{For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)}
 

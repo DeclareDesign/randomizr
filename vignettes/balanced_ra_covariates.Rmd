@@ -1,0 +1,297 @@
+---
+title: "Covariate totals versus blocks"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Covariate totals versus blocks}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo=FALSE}
+set.seed(20260822)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6.5,
+  fig.height = 3.8
+)
+options(digits = 3)
+```
+
+```{r}
+library(randomizr)
+library(ggplot2)
+```
+
+With `balance_ra` you can balance against a continuous covariate without dividing it into blocks. Cube-on-X with `formula = ~ x` can keeps the covariate imbalance
+$T = \sum_i x_i (Z_i - p_i)$ closer to zero than cutting the same $x$ into two,
+three, or four blocks. 
+
+We illustrate here with a simple six-unit vector with values
+$x = (0, 1, 5, 6, 8, 9)$ and again at $N = 200$ with a continuous covariate.
+Blocking keeps the treated count tight inside each bin. The two procedures
+impose different linear constraints. Neither dominates for every estimand.
+
+The primary metric is the RMSE of $T$. With heterogeneous $p$ that is the
+Horvitz--Thompson residual for the $x$-total; it is also the right comparison
+when $p$ is constant. I also report the treated-count residual
+$\sum_i Z_i - \sum_i p_i$. `simple_ra()` is a floor: independent assignment,
+no balance constraint.
+
+`blocks` remains the partitioned count path in `balanced_ra()`. `formula`
+builds a balancing matrix $X$ and flies in $\ker(X')$. Passing both errors.
+The count-tight C++ used when `formula` is `NULL` is unchanged.
+
+Section 1 states the two constraints. Section 2 works the six-unit design,
+uniform and heterogeneous. Section 3 reports Monte Carlo. The last section
+draws the implication.
+
+# 1. Two constraints
+
+The cube method of [Deville and Tillé (2004)](https://doi.org/10.1093/biomet/91.4.893)
+holds $X'Z$ near $X'\pi$. The flight phase moves in the kernel of $X'$ until a
+coordinate of $Z$ hits 0 or 1. Each step is a martingale, so
+$E[Z_i] = p_i$. The landing phase begins when no nonzero kernel move remains
+and may drop a constraint. Exact tightness on every column is not always
+possible.
+
+`model.matrix(formula, data)` is $X$. `~ x` is an intercept plus $x$. The
+intercept *is* the count constraint: $\sum_i Z_i$ stays near $\sum_i p_i$.
+The $x$ column asks $\sum_i x_i Z_i$ to stay near $\sum_i x_i p_i$.
+`~ 0 + x` drops the intercept; the count may wander.
+
+`blocks` does something else. It tightens treated *counts* inside discrete
+groups. Those count constraints only indirectly discipline the mean of $x$.
+A factor $B$ belongs in the formula, as `~ x + B`, if the object of interest
+is the column space of that model matrix. It does not belong in both
+`formula` and `blocks`.
+
+# 2. Six units
+
+```{r}
+x <- c(0, 1, 5, 6, 8, 9)
+```
+
+Three groupings follow the gaps in $x$. The three-block cut keeps the natural
+pairs. The two-block cut has to split the middle pair. The four-block cut
+splits that pair into singletons.
+
+```{r}
+br2 <- c(-Inf, 5.5, Inf)
+br3 <- c(-Inf, 3, 7, Inf)
+br4 <- c(-Inf, 3, 5.5, 7, Inf)
+b2 <- cut(x, br2, labels = c("(0,1,5)", "(6,8,9)"))
+b3 <- cut(x, br3, labels = c("(0,1)", "(5,6)", "(8,9)"))
+b4 <- cut(x, br4, labels = c("(0,1)", "(5)", "(6)", "(8,9)"))
+data.frame(x, b2, b3, b4)
+```
+
+## Uniform probabilities
+
+With $p_i = 0.5$ the target treated count is 3. The target $x$-total is
+$0.5 \times \sum x = 14.5$. That value is not an integer, so no 0-1 assignment
+hits it. Landing must sit on a nearby vertex.
+
+Three-block complete assignment treats exactly one unit in each pair. The
+eight assignments and their $x$-totals:
+
+```{r}
+pairs <- list(c(0, 1), c(5, 6), c(8, 9))
+grid <- expand.grid(pairs)
+grid$sum_x <- rowSums(grid)
+grid
+```
+
+So three-block RA produces $\sum x Z \in \{13, 14, 15, 16\}$. Cube-on-X
+targets 14.5 and, after landing, concentrates on 14 and 15.
+
+```{r}
+p_u <- rep(0.5, 6)
+S <- 2000
+draw_form <- function(p) balanced_ra(prob_unit = p, formula = ~ x)
+draw_b <- function(p, b) balanced_ra(prob_unit = p, blocks = b)
+z_form_u <- replicate(S, draw_form(p_u))
+z_b2_u   <- replicate(S, draw_b(p_u, b2))
+z_b3_u   <- replicate(S, draw_b(p_u, b3))
+z_b4_u   <- replicate(S, draw_b(p_u, b4))
+z_cnt_u  <- replicate(S, balanced_ra(prob_unit = p_u))
+z_sim_u  <- replicate(S, simple_ra(N = 6, prob_unit = p_u))
+
+T_of <- function(Z, x, p) colSums(x * (Z - p))
+C_of <- function(Z, p) colSums(Z) - sum(p)
+
+rmse <- function(v) sqrt(mean(v^2))
+mae  <- function(v) mean(abs(v))
+
+metrics <- function(Z, x, p) {
+  T <- T_of(Z, x, p)
+  C <- C_of(Z, p)
+  c(rmse_T = rmse(T), mae_T = mae(T), rmse_C = rmse(C), mae_C = mae(C))
+}
+
+round(rbind(
+  formula   = metrics(z_form_u, x, p_u),
+  blocks_2  = metrics(z_b2_u, x, p_u),
+  blocks_3  = metrics(z_b3_u, x, p_u),
+  blocks_4  = metrics(z_b4_u, x, p_u),
+  counts    = metrics(z_cnt_u, x, p_u),
+  simple    = metrics(z_sim_u, x, p_u)
+), 3)
+```
+
+Cube-on-X has the smallest RMSE of $T$. Unblocked `balanced_ra()` matches it
+on the count residual (the intercept) and loses on $T$. Three-block RA is
+tighter on within-pair counts and worse on $T$, because it admits 13 and 16.
+
+```{r}
+support <- function(Z, x) {
+  s <- apply(Z, 2, function(z) paste(z, collapse = ""))
+  tot <- colSums(x * Z)
+  tab <- sort(tapply(tot, s, function(v) v[1]))
+  data.frame(assignment = names(tab), sum_xZ = as.numeric(tab),
+             n = as.integer(table(s)[names(tab)]), row.names = NULL)
+}
+cat("formula = ~ x\n")
+support(z_form_u, x)
+cat("3-block\n")
+support(z_b3_u, x)
+```
+
+The three-block support is the eight pair-wise assignments. Cube-on-X puts
+almost all mass on count-3 assignments whose $x$-total is 14 or 15. Those
+two sets overlap; they are not the same.
+
+## Heterogeneous probabilities
+
+```{r}
+p_h <- c(0.2, 0.3, 0.4, 0.6, 0.7, 0.8)
+sum(p_h)
+sum(x * p_h)
+```
+
+The target count is still 3. The target $x$-total is 18.7, not 14.5. Blocks
+with heterogeneous $p$ inside a bin are a different object from putting $x$
+in $X$. In the middle pair the unit probabilities are 0.4 and 0.6, so
+three-block RA treats exactly one of $\{5, 6\}$ and ignores that 6 is larger
+and more likely.
+
+```{r}
+z_form_h <- replicate(S, draw_form(p_h))
+z_b2_h   <- replicate(S, draw_b(p_h, b2))
+z_b3_h   <- replicate(S, draw_b(p_h, b3))
+z_b4_h   <- replicate(S, draw_b(p_h, b4))
+z_cnt_h  <- replicate(S, balanced_ra(prob_unit = p_h))
+z_sim_h  <- replicate(S, simple_ra(N = 6, prob_unit = p_h))
+
+round(rbind(
+  formula   = metrics(z_form_h, x, p_h),
+  blocks_2  = metrics(z_b2_h, x, p_h),
+  blocks_3  = metrics(z_b3_h, x, p_h),
+  blocks_4  = metrics(z_b4_h, x, p_h),
+  counts    = metrics(z_cnt_h, x, p_h),
+  simple    = metrics(z_sim_h, x, p_h)
+), 3)
+```
+
+The ranking on $T$ is the same. Cube-on-X tracks 18.7. Three-block RA still
+forces one treated unit in $(5, 6)$, which is the wrong linear constraint
+for that target.
+
+```{r, fig.cap="Imbalance T under uniform p = 0.5 (left) and heterogeneous p (right). Cube-on-X sits closer to zero than the blocked designs."}
+plot_T <- function(designs, title) {
+  d <- do.call(rbind, lapply(names(designs), function(nm) {
+    data.frame(design = nm, T = designs[[nm]])
+  }))
+  d$design <- factor(d$design, names(designs))
+  ggplot(d, aes(T, fill = design)) +
+    geom_histogram(binwidth = 1, position = "identity", alpha = 0.45,
+                   color = "white") +
+    geom_vline(xintercept = 0, linetype = 2, linewidth = 0.3) +
+    scale_fill_brewer(palette = "Dark2") +
+    labs(x = "T = sum x (Z - p)", y = "Draws", title = title) +
+    theme_bw(base_size = 11) +
+    theme(legend.position = "bottom", legend.title = element_blank())
+}
+p_left <- plot_T(list(
+  "formula ~ x" = T_of(z_form_u, x, p_u),
+  "3 blocks"    = T_of(z_b3_u, x, p_u),
+  "counts only" = T_of(z_cnt_u, x, p_u)
+), "Uniform p = 0.5")
+p_right <- plot_T(list(
+  "formula ~ x" = T_of(z_form_h, x, p_h),
+  "3 blocks"    = T_of(z_b3_h, x, p_h),
+  "counts only" = T_of(z_cnt_h, x, p_h)
+), "Heterogeneous p")
+p_left
+p_right
+```
+
+# 3. A larger design
+
+The same comparison at $N = 200$, with $x$ continuous. Quantile bins play the
+role that `ntile(x, 2/3/4)` plays in a blocked design. $S = 500$ draws.
+
+```{r}
+N <- 200
+S2 <- 500
+x200 <- rnorm(N)
+p200 <- plogis(-0.3 + 0.4 * x200)
+ntile <- function(v, n) {
+  rnk <- rank(v, ties.method = "first")
+  as.integer(floor((rnk - 1) / length(v) * n) + 1L)
+}
+
+z_f  <- replicate(S2, balanced_ra(prob_unit = p200, formula = ~ x200))
+z_2  <- replicate(S2, balanced_ra(prob_unit = p200, blocks = ntile(x200, 2)))
+z_3  <- replicate(S2, balanced_ra(prob_unit = p200, blocks = ntile(x200, 3)))
+z_4  <- replicate(S2, balanced_ra(prob_unit = p200, blocks = ntile(x200, 4)))
+z_c  <- replicate(S2, balanced_ra(prob_unit = p200))
+z_s  <- replicate(S2, simple_ra(N = N, prob_unit = p200))
+
+lab <- c("formula ~ x", "2 blocks", "3 blocks", "4 blocks",
+         "counts only", "simple")
+M <- rbind(
+  metrics(z_f, x200, p200),
+  metrics(z_2, x200, p200),
+  metrics(z_3, x200, p200),
+  metrics(z_4, x200, p200),
+  metrics(z_c, x200, p200),
+  metrics(z_s, x200, p200)
+)
+rownames(M) <- lab
+round(M, 3)
+```
+
+```{r, fig.cap="RMSE of T at N = 200. Formula wins on the linear-in-x total. Blocking wins on within-bin counts (not shown); more bins helps T only insofar as the bins approximate x."}
+bar <- data.frame(design = factor(lab, lab), rmse_T = M[, "rmse_T"])
+ggplot(bar, aes(design, rmse_T)) +
+  geom_col(width = 0.65, fill = "#0054AD") +
+  labs(x = NULL, y = "RMSE of T") +
+  theme_bw(base_size = 11)
+```
+
+More bins shrink $T$ relative to two blocks, because the piecewise-constant
+count constraints become a coarser stand-in for $x$. They do not catch the
+formula, which puts $x$ in $X$ directly. Count-only `balanced_ra()` and
+`simple_ra()` remain the worst on $T$; they were not asked to balance $x$.
+
+Within-bin counts go the other way. On the three-block design every draw
+keeps each tercile at the floor or ceiling of its target. Cube-on-X does not
+promise that. The lesson is the constraint, not a ranking that holds for
+every estimand.
+
+# 4. What to take away
+
+Use `formula = ~ x` when the object you care about is a linear-in-$x$ total.
+Use `blocks` when you care about treated counts inside discrete groups.
+Do not pass both. Multi-arm `prob_unit_each` with `formula` is not
+implemented.
+
+# References
+
+Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube
+method. *Biometrika* 91(4), 893–912. <https://doi.org/10.1093/biomet/91.4.893>
+
+Chauvet, G. and Tillé, Y. (2006). A fast algorithm for balanced sampling.
+*Computational Statistics* 21(1), 53–62.
+<https://doi.org/10.1007/s00180-006-0250-2>

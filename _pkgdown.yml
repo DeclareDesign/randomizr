@@ -45,6 +45,8 @@ navbar:
        href: articles/randomizr_vignette.html
      - text: Assignment with heterogeneous probabilities
        href: articles/balanced_ra.html
+     - text: Covariate totals versus blocks
+       href: articles/balanced_ra_covariates.html
      - text: Speed of balanced_ra relative to complete and blocked assignment
        href: articles/balanced_ra_speed.html
      - text: HC2 coverage under balanced assignment

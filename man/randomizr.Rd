@@ -24,12 +24,13 @@ what inverse-probability weights are built from.
     cannot be delivered to individuals.
   \item [block_and_cluster_ra()] does both at once.
   \item [balanced_ra()] honors unit-varying probabilities and holds
-    condition counts at the floor or ceiling of their targets.
+    condition counts at the floor or ceiling of their targets. Pass
+    \code{formula} to add cube-on-X covariate totals.
   \item [declare_ra()] describes a design once so it can be reused by
     [conduct_ra()] to draw assignments and by
     [obtain_condition_probabilities()] to recover the probabilities.
-    Balanced assignment is opt-in: \code{ra_type = "balanced"} or
-    \code{prob_unit_each}.
+    Balanced assignment is opt-in: \code{ra_type = "balanced"},
+    \code{prob_unit_each}, or \code{formula}.
 }
 }
 
@@ -85,11 +86,6 @@ Useful links:
 }
 \author{
 \strong{Maintainer}: Alexander Coppock \email{acoppock@gmail.com} (\href{https://orcid.org/0000-0002-5733-2386}{ORCID})
-
-Authors:
-\itemize{
-  \item Alexander Coppock \email{acoppock@gmail.com} (\href{https://orcid.org/0000-0002-5733-2386}{ORCID})
-}
 
 Other contributors:
 \itemize{

@@ -65,3 +65,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cube_on_x_cpp
+NumericVector cube_on_x_cpp(NumericVector p, NumericMatrix X, double tol);
+RcppExport SEXP _randomizr_cube_on_x_cpp(SEXP pSEXP, SEXP XSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type p(pSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(cube_on_x_cpp(p, X, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
