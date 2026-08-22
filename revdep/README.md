@@ -10,7 +10,7 @@
 |collate  |en_US.UTF-8                                         |
 |ctype    |en_US.UTF-8                                         |
 |tz       |America/Chicago                                     |
-|date     |2026-08-04                                          |
+|date     |2026-08-21                                          |
 |pandoc   |3.9.0.2 @ /opt/homebrew/bin/pandoc                  |
 |quarto   |1.10.18 @ /Users/alexandercoppock/.local/bin/quarto |
 
@@ -22,10 +22,4 @@
 |Rcpp      |NA    |1.1.2 |*  |
 
 # Revdeps
-
-## Failed to check (1)
-
-|package  |version |error |warning |note |
-|:--------|:-------|:-----|:-------|:----|
-|estimatr |1.0.6   |1     |        |     |
 

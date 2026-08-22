@@ -39,19 +39,12 @@ plain C only.
 
 ## Reverse dependencies
 
-We checked 13 reverse dependencies (10 strong, 3 from Suggests), comparing
+We checked all 13 reverse dependencies (10 strong, 3 from Suggests), comparing
 R CMD check results across the CRAN and development versions of this package.
-The check predates `balanced_ra()` and the C++ assignment kernels. Neither
-changed an export, a signature or a return type, and the kernels' output was
-verified identical to randomizr 1.0.1's across 918 configurations of block
-size, block count, probability, arm count and argument form, so a reverse
-dependency sees the values 1.0.1 produced.
 
  * We saw 0 new problems
- * We failed to check 1 package
+ * We failed to check 0 packages
 
-`estimatr` could not be checked locally because it links a Fortran runtime that
-is not installed on the check machine; it fails to install identically under
-the CRAN and development versions of randomizr, so the failure is unrelated to
-this submission. Its test files that call randomizr were run separately against
-this version, with 166 passing assertions and no failures.
+Two packages report the same result under both versions: PUMP fails to run one
+vignette's code, identically under randomizr 1.0.1 and under this submission,
+and rdss carries one note under both. Neither is affected by this release.
