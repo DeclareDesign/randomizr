@@ -47,9 +47,12 @@ The primary metric is the RMSE of $T$. With heterogeneous $p$ that is the Horvit
 
 `blocks` remains the partitioned count path in `balanced_ra()`. `formula` builds a balancing matrix $X$ and flies in $\ker(X')$. Passing both errors. The count-tight C++ used when `formula` is `NULL` is unchanged.
 
-When $Y = x^2$, so that $x$ is strongly prognostic, most of the RMSE gain is from controlling for $x$, or for bins of $x$, rather than from the assignment. Cube-on-X plus Lin still has the smallest RMSE, and the assignment is what separates it from the same estimator after complete assignment. Unadjusted DiM after cube-on-X does not share that gain.
+When $Y = x^2$ and $x$ is this prognostic, Section 4 holds the estimator
+fixed at linear control for $x$ and varies only the assignment. Cube-on-X
+then has the smallest RMSE. Power does not follow RMSE: HC2 after the
+cube is conservative.
 
-Section 1 states the two constraints and situates cube-on-X among related designs. Section 2 works the six-unit design, uniform and heterogeneous. Section 3 reports Monte Carlo. Section 4 diagnoses six assignment--estimator pairs when $Y$ is quadratic in $x$. The last section draws the implication.
+Section 1 states the two constraints and situates cube-on-X among related designs. Section 2 works the six-unit design, uniform and heterogeneous. Section 3 reports Monte Carlo. Section 4 diagnoses three assignments, each with $Y \sim Z + x$, when $Y$ is quadratic in $x$. The last section draws the implication.
 
 # 1. Two constraints
 
@@ -301,38 +304,20 @@ Within-bin counts go the other way. On the three-block design every draw keeps e
 
 # 4. Estimator efficiency when $Y$ is quadratic in $x$
 
-The comparisons above are about $T = \sum_i x_i (Z_i - p_i)$. They do not say which assignment--estimator pair is most efficient for the ATE.
+The comparisons above are about $T = \sum_i x_i (Z_i - p_i)$. They do not say which assignment is most efficient for the ATE once we control for $x$.
 
-$x$ is strongly prognostic: $Y(0) = x^2$. Most of the RMSE gain in this section comes from controlling for $x$, or for bins of $x$, rather than from the assignment. What the design adds sits on top of that. Cube-on-X plus Lin has the smallest RMSE. Complete assignment plus unadjusted DiM has the largest.
+This section diagnoses a two-arm trial with $N = 10$, $x = 1, \ldots, 10$, $Y(0) = x^2$, $Y(1) = x^2 + 10$. The ATE is 10. Three assignments; every estimator includes linear control for $x$ (HC2, coefficient on $Z$). Blocked assignment also includes the block factor. The control is additive OLS, not [Lin (2013)](https://doi.org/10.1214/12-AOAS583): no interaction, and $x$ is not centered. It is misspecified for the CEF ($Y$ is $x^2$). It is still the design-paired regression for cube-on-X.
 
-*Analyze as you randomize* remains the default pairing: block dummies with blocked assignment, $x$ in the formula with Lin. Because $x$ is so strongly prognostic, the section also reports misspecified and extra controls: block dummies after complete assignment, linear $x$ after blocking, and unadjusted DiM after cube-on-X.
+1. **Simple + control** --- `complete_ra` and $Y \sim Z + x$.
+2. **blocked + x** --- `block_ra` and $Y \sim Z + \mathrm{factor}(\mathrm{blocks}) + x$.
+3. **Formula + control** --- `balanced_ra(formula = ~ x)` and $Y \sim Z + x$.
 
-This section diagnoses a two-arm trial with $N = 10$, $x = 1, \ldots, 10$, $Y(0) = x^2$, $Y(1) = x^2 + 10$. The ATE is 10. Six assignment--estimator pairs:
-
-1. **complete**: `complete_ra` and the difference in means.
-2. **complete with control for block**: `complete_ra` and OLS on $Y \sim Z + \mathrm{factor}(\mathrm{blocks})$, the same two bins as the blocked designs. That is regression adjustment on bins, not analyze-as-you-randomize. Complete assignment can empty a block; then $Z$ is aliased with the block dummy and the fit falls back to DiM.
-3. **block with blocks**: `block_ra` and a blocked difference in means on those same blocks.
-4. **block with blocks and linear control**: `block_ra` and `lm_robust(Y ~ Z + factor(blocks) + x, se_type = "HC2")`. Additive linear $x$ on top of the block factor.
-5. **formula**: `balanced_ra(formula = ~ x)` and unadjusted DiM.
-6. **formula with linear control**: the same assignment and Lin's (2013) adjustment on $x$: `lm_lin(Y ~ Z, covariates = ~ x)`. Cube-on-X flies on an intercept plus $x$. Lin uses those same columns.
-
-Difference-in-means is still unbiased under constant $p$ for cube-on-X. It is not the paired estimator. Standard errors are HC2 (`lm_robust` / `lm_lin`).
-
-$Y$ is $x^2$. Lin on linear $x$ is misspecified for the conditional expectation. It is still the design-paired estimator.
+Analyze as you randomize has two parts. The point estimator should use the same covariates as the design: $x$ in the formula with $Y \sim Z + x$. The *variance* should be the randomization variance of that estimator. HC2 is not that variance after cube-on-X.
 
 ```{r}
 set.seed(20260822)
 
-# Complete RA can empty a block; then Z is aliased and the fit falls back to DiM.
-ols_blocks <- function(data) {
-  fit <- lm_robust(Y ~ Z + factor(blocks), data = data, se_type = "HC2")
-  if (is.na(coef(fit)[["Z"]])) {
-    fit <- lm_robust(Y ~ Z, data = data, se_type = "HC2")
-  }
-  tidy(fit)[tidy(fit)$term == "Z", ]
-}
-
-pop <-
+design_base <-
   declare_model(
     N = 10,
     x = 1:N,
@@ -345,28 +330,25 @@ pop <-
 
 reveal <- declare_measurement(Y = reveal_outcomes(Y ~ Z))
 
-design_complete <- pop +
+design_complete <- design_base +
   declare_assignment(Z = complete_ra(10)) +
   reveal +
-  declare_estimator(Y ~ Z, se_type = "HC2", inquiry = "ATE", label = "Simple") +
-  declare_estimator(Y ~ Z + x, se_type = "HC2", inquiry = "ATE", label = "Simple + control", term = "Z")
+  declare_estimator(Y ~ Z + x, se_type = "HC2", inquiry = "ATE",
+                    label = "Complete", term = "Z")
 
-design_blocks <- pop +
+design_blocks <- design_base +
   declare_assignment(Z = block_ra(blocks = blocks)) +
   reveal +
-  declare_estimator(Y ~ Z  + factor(blocks), se_type = "HC2",  term = "Z",
-                    inquiry = "ATE", label = "blocked DiM") +
-  declare_estimator(Y ~ Z + factor(blocks) + x, .method = lm_robust, term = "Z",
-                    se_type = "HC2", inquiry = "ATE", label = "blocked + x")
+  declare_estimator(Y ~ Z + factor(blocks) + x, .method = lm_robust,
+                    term = "Z", se_type = "HC2", inquiry = "ATE",
+                    label = "Blocked")
 
-design_formula <- pop +
+design_formula <- design_base +
   declare_assignment(Z = balanced_ra(formula = ~ x)) +
   reveal +
-  declare_estimator(Y ~ Z, inquiry = "ATE", label = "Formula", se_type = "HC2",) +
-  declare_estimator(Y ~ Z + x, term = "Z",
-                    inquiry = "ATE", label = "Formula + control", se_type = "HC2")
+  declare_estimator(Y ~ Z + x, term = "Z", inquiry = "ATE",
+                    label = "Formula", se_type = "HC2")
 ```
-
 
 ```{r}
 diagnose_designs(
@@ -374,21 +356,21 @@ diagnose_designs(
     complete = design_complete,
     block = design_blocks,
     formula = design_formula
-  ), sims = 1000
-) |> reshape_diagnosis() |> dplyr::select(Estimator, Bias, Power) |>
-knitr::kable(digits = 2)
-
+  ), sims = 5000
+) |> reshape_diagnosis() |>
+  dplyr::select(Estimator, Bias, `SD Estimate`, RMSE, Power, Coverage) |>
+  knitr::kable(digits = 2)
 ```
 
-Controlling for the two bins after complete assignment cuts RMSE from 22.5 to 14.5. Blocked assignment plus blocked DiM is near 12. Cube-on-X without Lin is near 14. Those three sit together. The extra is linear control for $x$: blocks plus $x$ is near 5.8; cube-on-X plus Lin is near 3.8. With $x$ this prognostic, most of the drop from 22.5 to 3.8 is from controlling, not from the assignment. The design pairing is the last step.
+See the table. Formula + control has the smallest RMSE. Simple + control has the highest power. Those are different rankings. Every row is the ATE (term $Z$).
 
-The complete-plus-block-dummies estimator is not the blocked DiM. OLS with a block factor precision-weights toward the quieter half of $x$ (the low values, where $x^2$ varies less). That is regression adjustment on bins, not analyze-as-you-randomize.
+Formula + control *is* the paired point estimator ($x$ in $X$, $x$ in the regression). It is not a design-based variance. HC2 coverage on that row is too high: the sandwich treats units as independent given $Z$. Complete assignment is close to that working model, so coverage sits near 95 percent. Cube-on-X forbids the $Z$ configurations that would have made the contrast noisy (wild $\sum x Z$). The sampling SD of the ATE falls; the HC2 standard error does not, so power can lag Simple + control even though RMSE is smaller. Analyze as you randomize after the cube would need the randomization distribution (or another variance that credits that dependence), not HC2. RMSE, not HC2 power, is the efficiency comparison in this table.
 
-The outcome is $x^2$. Cube-on-X holds the linear total $\sum x Z$ near its target. It does not hold $\sum x^2 Z$. Lin still adjusts for linear $x$, so the CEF is misspecified. On this monotone $x$, $x$ and $x^2$ move together, and the paired estimator still has the smallest RMSE. Unadjusted DiM after cube-on-X is not a free lunch when $Y$ is nonlinear in $x$.
+The outcome is $x^2$. Cube-on-X holds the linear total $\sum x Z$ near its target. It does not hold $\sum x^2 Z$. On this monotone $x$, $x$ and $x^2$ move together, and the paired estimator still has the smallest RMSE.
 
 # 5. What to take away
 
-Use `formula = ~ x` when the object you care about is a linear-in-$x$ total. Use `blocks` when you care about treated counts inside discrete groups. Do not pass both. Pair the estimator with the design as the default: block dummies with blocked DiM, $x$ in the formula with Lin (or OLS on those same columns of $X$). Section 4 also reports misspecified and extra controls because $x$ is so strong. With constant $p$, `complete_ra` is the count-only baseline. With unit-varying $p$, that baseline is `balanced_ra()` with no formula; `complete_ra` is a different design. Multi-arm `prob_unit_each` with `formula` is not implemented.
+Use `formula = ~ x` when the object you care about is a linear-in-$x$ total. Use `blocks` when you care about treated counts inside discrete groups. Do not pass both. Pair the estimator with the design as the default: $x$ in the formula with $Y \sim Z + x$. That pairing is for the point estimate. HC2 after cube-on-X is not the randomization variance; coverage is too high. With constant $p$, `complete_ra` is the count-only baseline. With unit-varying $p$, that baseline is `balanced_ra()` with no formula; `complete_ra` is a different design. Multi-arm `prob_unit_each` with `formula` is not implemented. RMSE, not HC2 power, is the efficiency comparison after cube-on-X.
 
 # References
 
