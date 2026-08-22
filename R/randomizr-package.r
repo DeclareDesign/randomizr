@@ -79,6 +79,4 @@
 #'
 #' @importFrom Rcpp evalCpp
 #' @importFrom stats runif
-#' @name randomizr
-#' @docType package
-NULL
+"_PACKAGE"
