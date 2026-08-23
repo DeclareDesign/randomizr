@@ -22,6 +22,32 @@ using namespace Rcpp;
 // tight as well. Each leftover is still 0 or 1, so no block moves by more than
 // one from its target.
 
+// Bounds for both entry points, before anything indexes. An NA block reaches
+// here as NA_INTEGER (INT_MIN) after as.integer(factor(blocks)), and indexing
+// with it corrupts memory; check_inputs = FALSE can waive design checking but
+// not memory safety. block_assign_cpp() carries the same guards.
+static void cube_check_index(const IntegerVector& b, const IntegerVector& ord,
+                             int n) {
+  if (b.size() != n) {
+    stop("`blocks` indexes %d units but there are %d.", (int) b.size(), n);
+  }
+  if (ord.size() != n) {
+    stop("The unit order has length %d but there are %d units.",
+         (int) ord.size(), n);
+  }
+  for (int i = 0; i < n; i++) {
+    if (b[i] == NA_INTEGER) {
+      stop("`blocks` must not contain NA (unit %d).", i + 1);
+    }
+    if (b[i] < 1) {
+      stop("Block index %d at unit %d is below 1.", b[i], i + 1);
+    }
+    if (ord[i] == NA_INTEGER || ord[i] < 1 || ord[i] > n) {
+      stop("The unit order must be a permutation of 1:%d.", n);
+    }
+  }
+}
+
 // Pair fractional units that share a block id. Leaves at most one fractional
 // unit per id; does not round the leftovers.
 static void cube_pivot_pass(NumericVector& z, const std::vector<int>& seq,
@@ -49,6 +75,7 @@ NumericVector cube_two_arm_cpp(NumericVector p, IntegerVector b,
                                IntegerVector ord, double tol) {
   int n = p.size();
   NumericVector z = clone(p);
+  cube_check_index(b, ord, n);
   int nb = 0;
   for (int i = 0; i < n; i++) if (b[i] > nb) nb = b[i];
 
@@ -87,9 +114,10 @@ NumericVector cube_two_arm_cpp(NumericVector p, IntegerVector b,
 //
 // So each move only ever examines k units, and since every move settles at
 // least one of the n*k cells the whole draw is linear in the number of units.
-// Flight (cycles) stays inside each block. Landing is a second pass on the
-// leftover units only, treated as one group, so overall arm totals stay tight
-// as well as the within-block ones when each block has at most one leftover.
+// Flight (cycles) stays inside each block, and each block is then landed on
+// its own (see the comment at cube_multi_cpp), so the within-block arm counts
+// stay tight; overall totals may wander when several blocks' remainders land
+// the same way.
 
 // Move along the given walk, alternating the sign of the step. Consecutive
 // edges share a node, so alternating leaves every unit's row total and every
@@ -268,6 +296,7 @@ NumericMatrix cube_multi_cpp(NumericMatrix P, IntegerVector b,
                              IntegerVector ord, double tol) {
   int n = P.nrow(), k = P.ncol();
   std::vector<double> Z(P.begin(), P.end());
+  cube_check_index(b, ord, n);
   int nb = 0;
   for (int i = 0; i < n; i++) if (b[i] > nb) nb = b[i];
 

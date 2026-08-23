@@ -115,6 +115,15 @@ check_randomizr_arguments <-
            .N_per_block = NULL,  # optional pre-computed hint from caller
            ...) {
     # N, blocks, clusters, num_arms, conditions are used generally, check them first
+    if (!is.null(blocks) && anyNA(blocks)) {
+      stop("`blocks` must not contain NA.", call. = FALSE)
+    }
+    if (!is.null(clusters) && anyNA(clusters)) {
+      stop("`clusters` must not contain NA.", call. = FALSE)
+    }
+    if (is.factor(blocks)) blocks <- droplevels(blocks)
+    if (is.factor(clusters)) clusters <- droplevels(clusters)
+
     if (!is.null(clusters)) {
       N <- length(unique(clusters))
     }
@@ -156,7 +165,7 @@ check_randomizr_arguments <-
       stop("N, blocks or clusters must be specified.", call. = FALSE)
     }
     
-    if (length(N) != 1 || N != floor(N) || N <= 0) {
+    if (!is.numeric(N) || length(N) != 1 || N != floor(N) || N <= 0) {
       stop("N must be a positive integer scalar.", call. = FALSE)
     }
     
@@ -191,7 +200,7 @@ check_randomizr_arguments <-
       
       if (isTRUE(simple) &&
           !grepl("prob", arg))
-        stop("You can't specify `", arg, "`` when simple = TRUE.", call. = FALSE)
+        stop("You can't specify `", arg, "` when simple = TRUE.", call. = FALSE)
       
       # checking num_arms and conditions consistency
       .check_ra_arg_num_arms_conditions(arg,
@@ -594,6 +603,15 @@ check_samplr_arguments <-
            simple = NULL,
            ...) {
     
+    if (!is.null(strata) && anyNA(strata)) {
+      stop("`strata` must not contain NA.", call. = FALSE)
+    }
+    if (!is.null(clusters) && anyNA(clusters)) {
+      stop("`clusters` must not contain NA.", call. = FALSE)
+    }
+    if (is.factor(strata)) strata <- droplevels(strata)
+    if (is.factor(clusters)) clusters <- droplevels(clusters)
+
     if (!is.null(clusters)) {
       N <- length(unique(clusters))
     }
@@ -629,7 +647,7 @@ check_samplr_arguments <-
         list(N_strata = N_strata, N_per_stratum = N_per_stratum)
     }
     
-    if (length(N) != 1 || N != floor(N) || N <= 0) {
+    if (!is.numeric(N) || length(N) != 1 || N != floor(N) || N <= 0) {
       stop("N must be an integer greater than 0.", call. = FALSE)
     }
     
@@ -703,7 +721,7 @@ check_samplr_arguments <-
       # if it's strata
       if (!all(tapply(X = prob_unit, INDEX = strata, FUN = is_constant))) {
         stop(
-          "In a stratified random assignment design, `prob_unit` must be the same for all units within the same stratum.",
+          "In a stratified random sampling design, `prob_unit` must be the same for all units within the same stratum.",
           call. = FALSE
         )
       }
@@ -834,20 +852,6 @@ check_samplr_arguments <-
     }
   }
 
-
-# Compute integer m-per-block for the two-arm vectorized fast path.
-# Called only after validation has confirmed inputs are sane.
-.block_m_from_args <- function(n_per_b, m, block_m, prob, block_prob) {
-  if (!is.null(m))       return(rep(as.integer(m), length(n_per_b)))
-  if (!is.null(block_m)) return(as.integer(block_m))
-  p  <- if (!is.null(block_prob)) block_prob else rep(if (!is.null(prob)) prob else 0.5, length(n_per_b))
-  Np <- n_per_b * p
-  mf <- floor(Np)
-  # Stochastic rounding: round up with probability equal to the fractional part,
-  # but never when ceiling(Np) == n_per_b (would force m = N_b).
-  needs_up <- mf < ceiling(Np) & Np < n_per_b
-  as.integer(mf + (needs_up & runif(length(n_per_b)) < (Np - mf)))
-}
 
 clean_condition_names <- function(assignment, conditions) {
   if (is.factor(conditions)) {

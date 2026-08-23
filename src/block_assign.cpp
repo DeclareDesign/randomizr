@@ -47,6 +47,11 @@ IntegerVector block_assign_cpp(IntegerVector block_int,
   int N = block_int.size();
   int G = m_given.size();
 
+  if (mode != 0 && prob_b.size() < G) {
+    stop("%d block probabilities were supplied for %d blocks.",
+         (int) prob_b.size(), G);
+  }
+
   // Bounds, before anything writes. Each of the three modes below fills v by
   // counting down from n_b, so a block count or probability outside its range
   // makes the loop start at a negative index and write off the front of the
@@ -55,6 +60,9 @@ IntegerVector block_assign_cpp(IntegerVector block_int,
   // corrupt the heap and take R down with a bus error.
   for (int i = 0; i < N; ++i) {
     int b = block_int[i];
+    if (b == NA_INTEGER) {
+      stop("`blocks` must not contain NA (unit %d).", i + 1);
+    }
     if (b < 1 || b > G) {
       stop("Block index %d at unit %d is outside 1:%d.", b, i + 1, G);
     }
@@ -96,20 +104,33 @@ IntegerVector block_assign_cpp(IntegerVector block_int,
 
     if (mode == 0) {
       int m_b = m_given[g];
+      // 1.x's complete_ra() returns rep(1, N) before drawing anything when
+      // m == N, so a fully treated block must consume no RNG at all here or
+      // seeds set under 1.x stop reproducing. m == 0 has no such early
+      // return in 1.x: it still permutes, so it falls through below.
+      if (m_b == n_b) {
+        for (int i = 0; i < n_b; ++i) result[grp[i]] = 1;
+        continue;
+      }
       for (int i = n_b - m_b; i < n_b; ++i) v[i] = 1;
 
     } else if (mode == 1) {
       double p = prob_b[g];
-      // np0 and np1 are materialised and reused rather than written inline
-      // twice. Inline, the compiler contracts the multiply and the subtract
-      // below into a single FMA, the product never rounds to a double, and
-      // e.g. 5 * 0.9 - 4 comes out as 4.4e-16 where R, which rounds at every
-      // step, gets exactly 0. The difference is far below any probability
-      // anyone can observe and it still decides the draw, because draw_two()
-      // resolves an exact tie the opposite way from a near-tie. That silently
-      // ended 1.x seed reproducibility for four of the designs tested.
-      double np0 = n_b * (1.0 - p);
-      double np1 = n_b * p;
+      // np0 and np1 are volatile so the product is forced to round to a
+      // double before the subtraction below. Written inline, the compiler
+      // contracts the multiply and the subtract into a single FMA, the
+      // product never rounds, and e.g. 5 * 0.9 - 4 comes out as 4.4e-16
+      // where R, which rounds at every step, gets exactly 0. The difference
+      // is far below any probability anyone can observe and it still decides
+      // the draw, because draw_two() resolves an exact tie the opposite way
+      // from a near-tie. That silently ended 1.x seed reproducibility for
+      // four of the designs tested. A plain local is not enough: under
+      // -ffp-contract=fast the compiler contracts straight through it, so
+      // volatile is what pins the rounding on every compiler.
+      volatile double np0_v = n_b * (1.0 - p);
+      volatile double np1_v = n_b * p;
+      double np0 = np0_v;
+      double np1 = np1_v;
       int mf0 = (int) std::floor(np0);
       int mf1 = (int) std::floor(np1);
       int rem = n_b - mf0 - mf1;
@@ -122,7 +143,8 @@ IntegerVector block_assign_cpp(IntegerVector block_int,
       }
 
     } else {
-      double Np = n_b * prob_b[g];
+      volatile double Np_v = n_b * prob_b[g];  // volatile: see np0_v above
+      double Np = Np_v;
       int mf = (int) std::floor(Np);
       int mc = (int) std::ceil(Np);
       int m_b;

@@ -70,6 +70,30 @@ IntegerVector block_assign_multi_cpp(IntegerVector block_int,
   int G = param.nrow();
   int K = param.ncol();
 
+  // Bounds, before anything writes. check_inputs = FALSE waives the checking
+  // of a design; it cannot be allowed to waive memory safety, so the block
+  // index, the counts, and the probabilities are all range-checked here even
+  // though the validated path never trips them. block_assign_cpp() carries
+  // the same guards.
+  for (int i = 0; i < N; ++i) {
+    int b = block_int[i];
+    if (b == NA_INTEGER) {
+      stop("`blocks` must not contain NA (unit %d).", i + 1);
+    }
+    if (b < 1 || b > G) {
+      stop("Block index %d at unit %d is outside 1:%d.", b, i + 1, G);
+    }
+  }
+  for (int g = 0; g < G; ++g) {
+    for (int j = 0; j < K; ++j) {
+      double x = param(g, j);
+      if (!R_finite(x) || x < 0.0 || (mode == 0 && x > 2147483646.0)) {
+        stop("Block %d, condition %d: %f is not a valid %s.",
+             g + 1, j + 1, x, mode == 0 ? "count" : "probability");
+      }
+    }
+  }
+
   // Units grouped by block, in block order, matching the mapply() the R path
   // would have run.
   std::vector<int> count(G, 0);
@@ -96,6 +120,12 @@ IntegerVector block_assign_multi_cpp(IntegerVector block_int,
 
     if (mode == 0) {
       // rep(conditions, m_each)
+      int m_sum = 0;
+      for (int j = 0; j < K; ++j) m_sum += (int) param(g, j);
+      if (m_sum != n_b) {
+        stop("Block %d has %d units but its counts sum to %d.",
+             g + 1, n_b, m_sum);
+      }
       for (int j = 0; j < K; ++j) {
         int m_j = (int) param(g, j);
         for (int t = 0; t < m_j; ++t) v.push_back(j);
@@ -104,26 +134,37 @@ IntegerVector block_assign_multi_cpp(IntegerVector block_int,
     } else {
       // rep(conditions, floor(n * prob_each)), then the remainder drawn.
       //
-      // np is materialised deliberately and reused. Written as
-      // `n_b * param(g, j) - floor(n_b * param(g, j))` the compiler contracts
+      // np is volatile so the product is forced to round to a double before
+      // the floor and the subtraction. Written inline, the compiler contracts
       // the multiply and the subtract into a single FMA, so the product never
       // rounds to a double and 15 * 0.2 - 3 comes out as 1.67e-16 where R,
       // rounding at every step, gets exactly 0. That epsilon is invisible in
       // the probabilities and decisive in the draw: it breaks a tie in
       // revsort()'s descending sort, which hands the remainder unit to the
-      // wrong arm and silently ends 1.x seed reproducibility.
+      // wrong arm and silently ends 1.x seed reproducibility. A plain local
+      // is not enough: -ffp-contract=fast contracts straight through it.
       int assigned = 0;
       for (int j = 0; j < K; ++j) {
-        double np = n_b * param(g, j);
+        volatile double np_v = n_b * param(g, j);
+        double np = np_v;
         int f_j = (int) std::floor(np);
         assigned += f_j;
         for (int t = 0; t < f_j; ++t) v.push_back(j);
       }
       int rem = n_b - assigned;
+      if (rem < 0 || rem > K) {
+        // The floors can only leave 0 to K units over when the probabilities
+        // sum to 1. Anything else would hand prob_sample_no_replace() more
+        // draws than ansbuf holds, which is a buffer overflow, not a design
+        // choice check_inputs = FALSE can waive.
+        stop("Block %d's probabilities leave %d of %d units unassigned; "
+             "they must sum to 1.", g + 1, rem, n_b);
+      }
       if (rem > 0) {
         double s = 0.0;
         for (int j = 0; j < K; ++j) {
-          double np = n_b * param(g, j);
+          volatile double np_v = n_b * param(g, j);
+          double np = np_v;
           fix[j] = (np - std::floor(np)) / rem;
           s += fix[j];
         }

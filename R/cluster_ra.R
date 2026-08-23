@@ -65,7 +65,11 @@ cluster_ra <- function(clusters = NULL,
     .invoke_check(check_randomizr_arguments_new)
   else
     .invoke_derive()
-  
+
+  # tapply drops NA silently, so an NA cluster would shorten the assignment
+  # with no error; 1.x returned 5 values for 6 units here.
+  if (anyNA(clusters)) stop("`clusters` must not contain NA.", call. = FALSE)
+
   n_per_clust <- tapply(clusters, clusters, length)
   n_clust <- length(n_per_clust)
   

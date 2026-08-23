@@ -91,7 +91,14 @@ block_and_cluster_ra <-
            check_inputs = TRUE) {
     
     if (check_inputs) .invoke_check(check_randomizr_arguments_new) else .invoke_derive()
-    
+
+    # tapply drops NA silently, so an NA would shorten the assignment with no
+    # error. Unused factor levels are dropped so a subset of a factor behaves
+    # like the same subset of a character vector.
+    if (anyNA(blocks)) stop("`blocks` must not contain NA.", call. = FALSE)
+    if (anyNA(clusters)) stop("`clusters` must not contain NA.", call. = FALSE)
+    if (is.factor(blocks)) blocks <- droplevels(blocks)
+    if (is.factor(clusters)) clusters <- droplevels(clusters)
 
     # Setup: obtain unique clusters
     n_per_clust <- tapply(clusters, clusters, length)

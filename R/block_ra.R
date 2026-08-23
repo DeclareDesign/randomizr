@@ -107,15 +107,22 @@ block_ra <- function(blocks = NULL,
                      .N_per_block = NULL) {
   if (!is.null(.block_int)) {
     # Cached path: declaration pre-computed the factor encoding at declare_ra()
-    # time. No as.factor or tabulate needed — saves ~21 us per simulation draw.
+    # time, saving ~21 us of as.factor + tabulate per simulation draw. The
+    # count vector is rebuilt when absent: a declaration made with
+    # check_inputs = FALSE never computed it.
     block_int   <- .block_int
-    N_per_block <- .N_per_block
+    N_per_block <- if (is.null(.N_per_block)) tabulate(block_int) else .N_per_block
   } else {
     # Encode blocks as a factor once; reused by validation (via .N_per_block
-    # hint) and fast path, avoiding a duplicate as.factor call.
-    block_fac <- as.factor(blocks)
-    block_int <- as.integer(block_fac)
+    # hint) and fast path, avoiding a duplicate as.factor call. Unused levels
+    # are dropped, so a subset of a factor behaves like the same subset of a
+    # character vector; 1.x errored on unused levels, so no seed moves.
+    blocks <- droplevels(as.factor(blocks))
+    block_int <- as.integer(blocks)
     N_per_block <- tabulate(block_int)
+  }
+  if (anyNA(block_int)) {
+    stop("`blocks` must not contain NA.", call. = FALSE)
   }
 
   if (check_inputs) {
@@ -126,8 +133,10 @@ block_ra <- function(blocks = NULL,
     .invoke_derive()
   }
 
-  # Two-arm fast path: block_assign_cpp() sorts N units by (block, runif) in
-  # one C++ call and thresholds within each block — no per-block R overhead.
+  # Two-arm fast path: block_assign_cpp() reproduces 1.x's per-block
+  # complete_ra() draws (a full within-block permutation, plus the separate
+  # leftover draw where the design needs one) in one C++ call, with no
+  # per-block R overhead.
   if (!is.null(num_arms) && num_arms == 2L &&
       is.null(prob_each) && is.null(block_m_each) && is.null(block_prob_each)) {
     if (!is.null(prob_unit)) block_prob <- tapply(prob_unit, blocks, unique)
@@ -304,6 +313,8 @@ block_ra_probabilities <- function(blocks = NULL,
                                    num_arms = NULL,
                                    conditions = NULL,
                                    check_inputs = TRUE) {
+  if (anyNA(blocks)) stop("`blocks` must not contain NA.", call. = FALSE)
+  if (is.factor(blocks)) blocks <- droplevels(blocks)
   if (check_inputs) {
     .invoke_check(check_randomizr_arguments_new)
   } else {
