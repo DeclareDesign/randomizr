@@ -168,7 +168,8 @@ test_that("num_arms and conditions on a balanced declaration", {
   d <- declare_ra(N = 6, num_arms = 2, ra_type = "balanced")
   expect_equal(class(d)[2], "ra_balanced")
   expect_equal(d$num_arms, 2)
-  expect_equal(d$conditions, c(0, 1))
+  # complete_ra's convention: an explicit num_arms asks for named arms
+  expect_equal(d$conditions, c("T1", "T2"))
 
   d_named <- declare_ra(N = 6, conditions = c("ctrl", "trt"), ra_type = "balanced")
   expect_equal(class(d_named)[2], "ra_balanced")

@@ -86,7 +86,7 @@ test_that("prob_unit and n_unit", {
   
   expect_error(
     strata_rs(strata = strata, prob_unit = rep(c(.1, .2, .3), c(200, 100, 50))),
-    "In a stratified random assignment design, `prob_unit` must be the same for all units within the same stratum."
+    "In a stratified random sampling design, `prob_unit` must be the same for all units within the same stratum."
   )
   
   

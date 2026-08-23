@@ -2,7 +2,7 @@ context("Cleaner Function")
 
 
 test_that("checking randomizr argumnets", {
-  expect_error(expect_warning(check_randomizr_arguments(N = "a")))
+  expect_error(check_randomizr_arguments(N = "a"), "positive integer")
     
   expect_error(check_randomizr_arguments(N = -1))
   

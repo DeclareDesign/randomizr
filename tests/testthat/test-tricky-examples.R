@@ -173,21 +173,13 @@ test_that("balancing with block_prob_each", {
   
   
   draw <- block_ra(blocks, block_prob_each = block_prob_each)
-  
-  golden <-
-    structure(
-      c(15L, 21L, 20L, 31L, 72L, 165L, 5L, 10L, 22L),
-      dim = c(3L,
-               3L),
-      dimnames = structure(list(
-        blocks = c("A", "B", "C"),
-        draw = c("T1",
-                 "T2", "T3")
-      ), names = c("blocks", "draw")),
-      class = "table"
-    )
-  
-  expect_true(all (table(blocks, draw) - golden %in% -1:1))
+
+  # Each block's arm count must be the floor or the ceiling of its target.
+  # (An earlier version compared to a recorded "golden" table, but the
+  # comparison was defanged by operator precedence, and the recording itself
+  # held an impossible cell: 22 T3s in block C against a target of 20.7.)
+  target <- block_prob_each * c(51, 103, 207)
+  expect_true(all(abs(table(blocks, draw) - target) < 1))
 })
 
 

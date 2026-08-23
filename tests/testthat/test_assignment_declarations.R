@@ -409,7 +409,7 @@ test_that("check errors", {
 
 test_that("check deprecations", {
   # TODO remove when below are also removed, this is just for test coverage
-  d <- declare_ra(N = 10, n = 4)
+  d <- declare_ra(N = 10, m = 4)
   expect_warning(d$ra_function())
   expect_warning(d$ra_type)
   expect_warning(d$cleaned_arguments)
@@ -430,7 +430,7 @@ test_that("obtain_condition_probabilities auto-declare", {
 
 
 test_that("print and summary", {
-  d <- declare_ra(N = 10, n = 4)
+  d <- declare_ra(N = 10, m = 4)
   expect_output(print(d))
   expect_output(summary(d))
 })

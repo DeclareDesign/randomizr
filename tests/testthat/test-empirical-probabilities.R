@@ -1,96 +1,29 @@
-library(randomizr)
+context("Empirical probabilities")
 
-# Test against empiricial probabilities -----------------------------------
+# The remainder step of complete_ra() draws the leftover units with
+# probability proportional to the fractional parts, which is exactly what
+# keeps each unit's marginal probability equal to prob_each even when a block
+# is too small for the floors to allocate anything. This file asserts that
+# the reported probabilities are prob_each and that empirical frequencies
+# agree, on a design whose blocks are small enough (3, 2, 1) to make the
+# floors nearly empty.
 
-blocks <- c("A", "A", "A", "B", "B", "C")
-prob_each <- c(.1, .2, .7)
+test_that("reported and empirical probabilities agree on tiny blocks", {
+  blocks <- c("A", "A", "A", "B", "B", "C")
+  prob_each <- c(0.1, 0.2, 0.7)
 
-analytic_probs <-
-  rbind(
-    c(0 / 2 * 2 / 3 + 1 / 3 * 1 / 3,
-      0 / 2 * 2 / 3 + 1 / 3 * 1 / 3,
-      2 / 2 * 2 / 3 + 1 / 3 * 1 / 3),
-    c(0 / 1 * 1 / 2 + 1 / 3 * 1 / 2,
-      0 / 1 * 1 / 2 + 1 / 3 * 1 / 2,
-      1 / 1 * 1 / 2 + 1 / 3 * 1 / 2),
-    c(0 / 1 * 0 / 1 + 1 / 3 * 1 / 1,
-      0 / 1 * 0 / 1 + 1 / 3 * 1 / 1,
-      0 / 1 * 0 / 1 + 1 / 3 * 1 / 1)
-  )
+  pm <- block_ra_probabilities(blocks = blocks, prob_each = prob_each)
+  expect_equal(unname(pm), matrix(prob_each, 6, 3, byrow = TRUE),
+               ignore_attr = TRUE)
 
-
-# construct analytic probs from randomizr arguments
-num_arms <- length(prob_each)
-N_per_block <- table(blocks)
-
-for_sure_allocations <- floor(N_per_block %*% t(prob_each))
-possible_allocations <-
-  matrix(1 / num_arms, nrow = length(N_per_block), ncol = num_arms)
-
-for_sure_probs <- sweep(for_sure_allocations, 1, N_per_block, `/`)
-possible_probs <-
-  sweep(possible_allocations,
-        1,
-        (N_per_block - rowSums(for_sure_allocations)) / N_per_block,
-        `*`)
-final_probs <- for_sure_probs + possible_probs
-
-#
-# # Conduct Simulation
-# perm_mat <- replicate(1000, block_ra(blocks = blocks, prob_each = prob_each))
-#
-# prop.table(table(perm_mat))
-# prob_T1 <- apply(perm_mat, 1, function(x)mean(x=="T1"))
-# prob_T2 <- apply(perm_mat, 1, function(x)mean(x=="T2"))
-# prob_T3 <- apply(perm_mat, 1, function(x)mean(x=="T3"))
-#
-# simulated_probs <-
-# cbind(
-#   tapply(prob_T1, blocks, mean),
-#   tapply(prob_T2, blocks, mean),
-#   tapply(prob_T3, blocks, mean)
-# )
-#
-#
-# simulated_probs
-
-
-dec <- declare_ra(blocks = blocks, prob_each = prob_each)
-block_ra_probabilities(blocks = blocks, prob_each = prob_each)
-
-dec$probabilities_matrix
-
-analytic_probs
-final_probs
-
-
-
-# figure out prob_each ----------------------------------------------------
-
-
-
-prob <- 0.1
-N <- 11
-m_floor <- floor(N * prob)
-m_ceiling <- ceiling(N * prob)
-
-m_floor * (1 - prob) + m_ceiling * (prob)
-(prob * N)
-
-prob_each <- c(.1, .2, .7)
-m_each <- floor(N * prob_each)
-
-m_each / (sum(m_each))
-
-
-
-# complete_ra -------------------------------------------------------------
-
-complete_ra(5, prob = .1)
-complete_ra_probabilities(5, prob = .1)
-
-Z_mat <- replicate(n = 100, complete_ra(5, prob = .1))
-mean(Z_mat)
-
-ceiling(5 * .1)
-floor(5 * .1)
+  set.seed(42)
+  sims <- 4000
+  counts <- matrix(0, 6, 3)
+  for (i in seq_len(sims)) {
+    z <- block_ra(blocks = blocks, prob_each = prob_each)
+    for (j in 1:3) counts[, j] <- counts[, j] + (z == paste0("T", j))
+  }
+  emp <- counts / sims
+  z_stat <- (emp - pm) / sqrt(pm * (1 - pm) / sims)
+  expect_true(all(abs(z_stat) < 4.5))
+})
