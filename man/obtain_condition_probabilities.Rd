@@ -46,13 +46,13 @@ obtain_condition_probabilities(
 
 \item{m}{Use for a two-arm design: exactly \code{m} units (or clusters) are assigned to treatment. In a blocked design, exactly \code{m} units in each block are treated. (optional)}
 
-\item{m_unit}{Use for a two-arm trial. A vector of length N. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. When \code{data} is supplied, names a column of it. (optional)}
+\item{m_unit}{Use for a two-arm trial. A vector of length N; a single number is refused, since that is what \code{m} is for. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. When \code{data} is supplied, names a column of it. (optional)}
 
 \item{m_each}{Use for a multi-arm design. A numeric vector giving the number of units (or clusters) assigned to each condition; must sum to N. (optional)}
 
 \item{prob}{Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units (or clusters) are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. A single number between 0 and 1; use \code{prob_unit} to let it vary across units. (optional)}
 
-\item{prob_unit}{Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. Under balanced assignment (\code{ra_type = "balanced"}), may differ by unit, and a single number is recycled. When \code{data} is supplied, names a column of it. (optional)}
+\item{prob_unit}{Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. Under balanced assignment (\code{ra_type = "balanced"}), may differ by unit. A single number is refused on every path, including the balanced one: use \code{prob}. When \code{data} is supplied, names a column of it. (optional)}
 
 \item{prob_each}{Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count in each condition may differ slightly from draw to draw, but the overall probability is exactly \code{prob_each}. Under balanced assignment the same vector is expanded to one row per unit. (optional)}
 

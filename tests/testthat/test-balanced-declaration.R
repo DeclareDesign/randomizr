@@ -276,7 +276,7 @@ test_that("declare_ra passes formula through to balanced_ra", {
   expect_true(all(z_decl %in% 0:1))
 
   expect_error(
-    declare_ra(prob_unit = 0.5, formula = ~ x, blocks = rep(1:3, each = 2)),
+    declare_ra(prob = 0.5, formula = ~ x, blocks = rep(1:3, each = 2)),
     "Use B in the formula, or use blocks=, not both"
   )
 })

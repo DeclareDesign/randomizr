@@ -159,14 +159,31 @@ test_that("data wins over a same-named per-unit object in the caller", {
                dat$p)
 })
 
-test_that("whether a scalar is legal stays the design's question", {
+test_that("a scalar in a per-unit slot is redirected to the scalar slot", {
   dat <- make_dat()
 
-  # balanced_ra recycles a single prob_unit, so this is a legal design.
-  expect_equal(class(declare_ra(prob_unit = 0.5, ra_type = "balanced", data = dat))[2],
+  # Not conditional on data: prob and m are the scalar slots on every path.
+  expect_error(declare_ra(prob_unit = 0.5, ra_type = "balanced", data = dat),
+               "use `prob`")
+  expect_error(declare_ra(N = 20, prob_unit = 0.5, ra_type = "balanced"),
+               "use `prob`")
+  expect_error(declare_ra(m_unit = 3, data = dat), "use `m`")
+  expect_error(declare_ra(N = 20, m_unit = 3), "use `m`")
+
+  # And the argument it points at works, on the balanced path too.
+  expect_equal(class(declare_ra(prob = 0.5, ra_type = "balanced", data = dat))[2],
                "ra_balanced")
-  # complete_ra requires m_unit of length N, and says so itself.
-  expect_error(declare_ra(m_unit = 3, data = dat), "length N")
+  expect_equal(class(declare_ra(m = 10, data = dat))[2], "ra_complete")
+
+  # N = 1 is the one case where one value is one value per unit.
+  expect_equal(class(declare_ra(N = 1, prob_unit = 0.5, ra_type = "balanced"))[2],
+               "ra_balanced")
+})
+
+test_that("balanced_ra() itself still recycles, having no prob argument", {
+  expect_length(balanced_ra(4), 4)
+  expect_length(balanced_ra(prob_unit = 0.5, N = 10), 10)
+  expect_false("prob" %in% names(formals(balanced_ra)))
 })
 
 test_that("a per-unit argument of the wrong length is refused", {

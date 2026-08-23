@@ -12,10 +12,10 @@
 #' @param blocks A vector of length N indicating which block each unit belongs to, or, when \code{data} is supplied, the name of the column holding it. Supply to use blocked random assignment. (optional)
 #' @param clusters A vector of length N indicating which cluster each unit belongs to, or, when \code{data} is supplied, the name of the column holding it. Supply to use cluster random assignment. (optional)
 #' @param m Use for a two-arm design: exactly \code{m} units (or clusters) are assigned to treatment. In a blocked design, exactly \code{m} units in each block are treated. (optional)
-#' @param m_unit Use for a two-arm trial. A vector of length N. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. When \code{data} is supplied, names a column of it. (optional)
+#' @param m_unit Use for a two-arm trial. A vector of length N; a single number is refused, since that is what \code{m} is for. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. When \code{data} is supplied, names a column of it. (optional)
 #' @param m_each Use for a multi-arm design. A numeric vector giving the number of units (or clusters) assigned to each condition; must sum to N. (optional)
 #' @param prob Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units (or clusters) are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. A single number between 0 and 1; use \code{prob_unit} to let it vary across units. (optional)
-#' @param prob_unit Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. Under balanced assignment (\code{ra_type = "balanced"}), may differ by unit, and a single number is recycled. When \code{data} is supplied, names a column of it. (optional)
+#' @param prob_unit Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. Under balanced assignment (\code{ra_type = "balanced"}), may differ by unit. A single number is refused on every path, including the balanced one: use \code{prob}. When \code{data} is supplied, names a column of it. (optional)
 #' @param prob_each Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count in each condition may differ slightly from draw to draw, but the overall probability is exactly \code{prob_each}. Under balanced assignment the same vector is expanded to one row per unit. (optional)
 #' @param prob_unit_each Use for balanced assignment with two or more arms. A numeric matrix with one row per unit and one column per condition, giving each unit's probability of assignment to each condition. Rows must sum to 1. Supplying this argument selects \code{\link{balanced_ra}()}. When \code{data} is supplied, build it from columns, as in \code{cbind(p_a, p_b)}. (optional)
 #' @param block_m Use for a two-arm blocked design: a vector giving the number of units to assign to treatment within each block, in the order of \code{sort(unique(blocks))}. (optional)
@@ -165,15 +165,27 @@ declare_ra <- function(N = NULL,
   # Resolved from the call before the mget below forces the promises: with
   # `data`, every argument carrying one value per unit names columns rather
   # than evaluating in the caller.
+  supplied <- as.list(match.call())[-1L]
   if (!is.null(data)) {
     data <- as.data.frame(data)
-    supplied <- as.list(match.call())[-1L]
     for (nm in .unit_length_args) {
       if (!is.null(supplied[[nm]])) {
         assign(nm, resolve_from_data(supplied[[nm]], data, nm, parent.frame()))
       }
     }
     if (is.null(N)) N <- nrow(data)
+  }
+
+  # `prob` and `m` are the scalar slots; `prob_unit` and `m_unit` are the
+  # per-unit ones. Every path but the balanced one already refused a scalar
+  # here, and the balanced one recycled it, which let one argument mean two
+  # things depending on the design.
+  for (nm in names(.scalar_slot_for)) {
+    if (!is.null(supplied[[nm]]) && NROW(get(nm)) == 1L &&
+        !identical(as.integer(N), 1L)) {
+      stop("`", nm, "` gives one value per unit. For a single value shared by ",
+           "every unit, use `", .scalar_slot_for[[nm]], "`.", call. = FALSE)
+    }
   }
 
   input_check <- NULL

@@ -474,6 +474,17 @@ check_vars_in_data <- function(vars, data, what) {
 .unit_length_args <- c("blocks", "clusters", "m_unit", "prob_unit",
                        "prob_unit_each")
 
+#' The scalar counterpart of each per-unit argument of [declare_ra()]
+#'
+#' \code{balanced_ra()} has no \code{prob} formal, so a scalar \code{prob_unit}
+#' is how a shared probability is written there and is recycled.
+#' \code{declare_ra()} has both, so a scalar in the per-unit slot is a
+#' redirection rather than a shorthand.
+#'
+#' @keywords internal
+#' @noRd
+.scalar_slot_for <- c(prob_unit = "prob", m_unit = "m")
+
 #' Resolve one per-unit argument against `data`
 #'
 #' \code{expr} is the argument as written. A bare column name is the ordinary
