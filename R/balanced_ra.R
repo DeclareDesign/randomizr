@@ -117,17 +117,23 @@
 #' blocked assignment".
 #'
 #' @param N The number of units. Optional when \code{formula} or the length of
-#'   \code{prob_unit} (or \code{blocks}, \code{clusters}, or \code{data})
+#'   \code{prob_unit} (or \code{blocks} or \code{clusters})
 #'   identifies N. A single positive integer. If supplied it must match. (optional)
-#' @param prob_unit A scalar or a numeric vector of length N giving each unit's
-#'   probability of assignment to treatment, for a two-arm design. Unlike
-#'   elsewhere in randomizr these need not be equal across units; varying them
-#'   is the point of this function. A scalar is recycled to length N. Defaults
-#'   to 0.5. Supply either \code{prob_unit} or \code{prob_unit_each}. (optional)
+#' @param prob A single number between 0 and 1: the probability of assignment
+#'   to treatment, shared by every unit, for a two-arm design. Defaults to 0.5
+#'   when no probability argument is supplied, so \code{balanced_ra(4)} is
+#'   complete assignment of four units. Supply exactly one of \code{prob},
+#'   \code{prob_unit} and \code{prob_unit_each}. (optional)
+#' @param prob_unit A numeric vector of length N giving each unit's probability
+#'   of assignment to treatment, for a two-arm design. Unlike elsewhere in
+#'   randomizr these need not be equal across units; varying them is the point
+#'   of this function. A single number is refused, since that is what
+#'   \code{prob} is for. Supply exactly one of \code{prob}, \code{prob_unit}
+#'   and \code{prob_unit_each}. (optional)
 #' @param prob_unit_each A numeric matrix with one row per unit and one column
 #'   per condition, giving each unit's probability of assignment to each
-#'   condition, for a multi-arm design. Rows must sum to 1. Supply either
-#'   \code{prob_unit} or \code{prob_unit_each}. (optional)
+#'   condition, for a multi-arm design. Rows must sum to 1. Supply exactly one
+#'   of \code{prob}, \code{prob_unit} and \code{prob_unit_each}. (optional)
 #' @param blocks A vector of length N indicating which block each unit belongs
 #'   to. When supplied, two-arm counts are held tight within each block and
 #'   overall; with three or more arms the tight counts are the within-block ones. (optional)
@@ -218,8 +224,7 @@
 #' # Blocks and clusters together: a tight number of treated clusters in each
 #' # block.
 #' blocks <- ifelse(clusters <= 3, "east", "west")
-#' Z <- balanced_ra(prob_unit = rep(0.5, length(clusters)),
-#'              clusters = clusters, blocks = blocks)
+#' Z <- balanced_ra(prob = 0.5, clusters = clusters, blocks = blocks)
 #' table(blocks, Z)
 #'
 #' # Cube-on-X: keep the treated total of a continuous covariate near its
@@ -231,7 +236,8 @@
 #'
 #' @export
 balanced_ra <- function(N = NULL,
-                    prob_unit = 0.5,
+                    prob = NULL,
+                    prob_unit = NULL,
                     prob_unit_each = NULL,
                     blocks = NULL,
                     clusters = NULL,
@@ -241,9 +247,7 @@ balanced_ra <- function(N = NULL,
                     check_inputs = TRUE,
                     .X = NULL) {
 
-  if (!missing(prob_unit) && !is.null(prob_unit_each)) {
-    stop("Supply only one of `prob_unit` and `prob_unit_each`.")
-  }
+  prob_unit <- balanced_prob_args(prob, prob_unit, prob_unit_each, N)
   if (!is.null(formula) && !is.null(blocks)) {
     stop("Use B in the formula, or use blocks=, not both.")
   }
@@ -307,7 +311,8 @@ balanced_ra <- function(N = NULL,
 #' balanced_ra_probabilities(prob_unit = c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5))
 #' @export
 balanced_ra_probabilities <- function(N = NULL,
-                                  prob_unit = 0.5,
+                                  prob = NULL,
+                                  prob_unit = NULL,
                                   prob_unit_each = NULL,
                                   blocks = NULL,
                                   clusters = NULL,
@@ -315,9 +320,7 @@ balanced_ra_probabilities <- function(N = NULL,
                                   conditions = NULL,
                                   formula = NULL,
                                   check_inputs = TRUE) {
-  if (!missing(prob_unit) && !is.null(prob_unit_each)) {
-    stop("Supply only one of `prob_unit` and `prob_unit_each`.")
-  }
+  prob_unit <- balanced_prob_args(prob, prob_unit, prob_unit_each, N)
   if (!is.null(formula) && is.null(N) &&
       (is.null(prob_unit) || length(prob_unit) == 1L) &&
       is.null(prob_unit_each)) {
@@ -484,6 +487,39 @@ check_vars_in_data <- function(vars, data, what) {
 #' @keywords internal
 #' @noRd
 .scalar_slot_for <- c(prob_unit = "prob", m_unit = "m")
+
+#' Resolve `prob`, `prob_unit` and `prob_unit_each` to one probability argument
+#'
+#' \code{prob} is the scalar slot and \code{prob_unit} the per-unit one, as in
+#' every other assignment function. Returns \code{NULL} when
+#' \code{prob_unit_each} is the one in use, and otherwise the value to hand
+#' \code{balanced_ra_matrix()} as its \code{prob_unit}, which recycles a
+#' scalar itself. \code{n} is the unit count if it is already known, and is
+#' used only to let a one-unit design supply a length-one \code{prob_unit}.
+#'
+#' @keywords internal
+#' @noRd
+balanced_prob_args <- function(prob, prob_unit, prob_unit_each, n = NULL) {
+  n_given <- sum(!is.null(prob), !is.null(prob_unit), !is.null(prob_unit_each))
+  if (n_given > 1L) {
+    stop("Supply only one of `prob`, `prob_unit` and `prob_unit_each`.",
+         call. = FALSE)
+  }
+  if (!is.null(prob_unit_each)) return(NULL)
+  if (!is.null(prob_unit)) {
+    if (length(prob_unit) == 1L && !identical(as.integer(n), 1L)) {
+      stop("`prob_unit` gives one value per unit. For a single value shared ",
+           "by every unit, use `prob`.", call. = FALSE)
+    }
+    return(prob_unit)
+  }
+  if (is.null(prob)) prob <- 0.5
+  if (length(prob) != 1L) {
+    stop("`prob` must be a single number. To let it vary across units, use ",
+         "`prob_unit`.", call. = FALSE)
+  }
+  prob
+}
 
 #' Resolve one per-unit argument against `data`
 #'

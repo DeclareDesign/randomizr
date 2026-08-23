@@ -180,10 +180,12 @@ test_that("a scalar in a per-unit slot is redirected to the scalar slot", {
                "ra_balanced")
 })
 
-test_that("balanced_ra() itself still recycles, having no prob argument", {
+test_that("balanced_ra() follows the same convention as declare_ra()", {
+  expect_true("prob" %in% names(formals(balanced_ra)))
   expect_length(balanced_ra(4), 4)
-  expect_length(balanced_ra(prob_unit = 0.5, N = 10), 10)
-  expect_false("prob" %in% names(formals(balanced_ra)))
+  expect_length(balanced_ra(prob = 0.5, N = 10), 10)
+  expect_error(balanced_ra(prob_unit = 0.5, N = 10), "use `prob`")
+  expect_error(balanced_ra_probabilities(prob_unit = 0.5, N = 10), "use `prob`")
 })
 
 test_that("a per-unit argument of the wrong length is refused", {

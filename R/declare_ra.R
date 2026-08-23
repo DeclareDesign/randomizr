@@ -507,11 +507,6 @@ prepare_balanced_ra_args <- function(all_args, check_inputs,
          call. = FALSE)
   }
 
-  if (!is.null(all_args$prob)) {
-    all_args$prob_unit <- all_args$prob
-    all_args$prob <- NULL
-  }
-
   n <- all_args$N
   if (is.null(n)) {
     if (!is.null(all_args$prob_unit_each)) {
@@ -542,7 +537,8 @@ prepare_balanced_ra_args <- function(all_args, check_inputs,
     all_args$prob_each <- NULL
   }
 
-  if (is.null(all_args$prob_unit) && is.null(all_args$prob_unit_each)) {
+  if (is.null(all_args$prob) && is.null(all_args$prob_unit) &&
+      is.null(all_args$prob_unit_each)) {
     if (is.null(n)) {
       stop("N, blocks, clusters, or a probability vector/matrix must be specified.",
            call. = FALSE)
@@ -556,7 +552,7 @@ prepare_balanced_ra_args <- function(all_args, check_inputs,
     if (!is.null(k_default) && k_default != 2L) {
       all_args$prob_unit_each <- matrix(1 / k_default, n, k_default)
     } else {
-      all_args$prob_unit <- 0.5
+      all_args$prob <- 0.5
     }
   }
 
@@ -580,7 +576,8 @@ prepare_balanced_ra_args <- function(all_args, check_inputs,
   }
 
   P <- balanced_ra_matrix(
-    if (is.null(all_args$prob_unit_each)) all_args$prob_unit else NULL,
+    balanced_prob_args(all_args$prob, all_args$prob_unit,
+                       all_args$prob_unit_each, all_args$N),
     all_args$prob_unit_each,
     all_args$blocks,
     all_args$clusters,

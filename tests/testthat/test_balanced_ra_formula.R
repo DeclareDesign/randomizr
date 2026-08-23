@@ -22,7 +22,7 @@ test_that("formula = ~ x on the toy vector tracks the x total and the marginals"
 test_that("~ 0 + x lets the treated count wander", {
   set.seed(42)
   x <- c(0, 1, 5, 6, 8, 9)
-  r <- replicate(800, balanced_ra(prob_unit = 0.5, N = 6, formula = ~ 0 + x))
+  r <- replicate(800, balanced_ra(prob = 0.5, N = 6, formula = ~ 0 + x))
   expect_equal(rowMeans(r), rep(0.5, 6), tolerance = 0.06)
   # No intercept: the count need not stay at 3.
   expect_true(any(colSums(r) != 3))
@@ -31,7 +31,7 @@ test_that("~ 0 + x lets the treated count wander", {
 test_that("formula and blocks together error", {
   x <- c(0, 1, 5, 6, 8, 9)
   expect_error(
-    balanced_ra(prob_unit = 0.5, formula = ~ x, blocks = rep(1:3, each = 2)),
+    balanced_ra(prob = 0.5, formula = ~ x, blocks = rep(1:3, each = 2)),
     "Use B in the formula, or use blocks=, not both"
   )
 })
@@ -121,7 +121,7 @@ test_that("formula at the cluster-collapsed level keeps clusters together", {
   set.seed(44)
   clusters <- rep(1:6, each = 2)
   x <- rep(c(0, 1, 5, 6, 8, 9), each = 2)
-  z <- balanced_ra(prob_unit = 0.5, formula = ~ x, clusters = clusters)
+  z <- balanced_ra(prob = 0.5, formula = ~ x, clusters = clusters)
   expect_true(all(tapply(z, clusters, function(v) length(unique(v)) == 1)))
   expect_length(z, 12)
 })

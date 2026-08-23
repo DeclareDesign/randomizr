@@ -773,7 +773,7 @@ Blocks and clusters combine. Every cluster must sit inside one block. The tight 
 ```{r}
 set.seed(9)
 blocks <- ifelse(clusters <= 3, "east", "west")
-z <- balanced_ra(prob_unit = 0.5, clusters = clusters, blocks = blocks)
+z <- balanced_ra(prob = 0.5, clusters = clusters, blocks = blocks)
 table(blocks, z)
 ```
 
@@ -805,10 +805,10 @@ Probabilities outside $[0,1]$ are refused. Values such as $1.2$ are not treated 
 balanced_ra(prob_unit = c(1.2, 0.8, 2.1, 0.9))
 ```
 
-A scalar probability does not imply $N$. Supply `N`, `blocks`, or `clusters`.
+A single shared probability does not imply $N$. Supply `N`, `blocks`, or `clusters`. (`prob` is the shared-probability argument; `prob_unit` is the per-unit one and refuses a single number.)
 
 ```{r, error=TRUE}
-balanced_ra(prob_unit = 0.5)
+balanced_ra(prob = 0.5)
 ```
 
 # 5. Validation

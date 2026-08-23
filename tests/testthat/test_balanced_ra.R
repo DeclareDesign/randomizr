@@ -44,10 +44,10 @@ test_that("a scalar prob_unit takes its length from N, blocks or clusters", {
   set.seed(1)
   expect_length(balanced_ra(N = 10), 10)
   expect_length(balanced_ra(4), 4)
-  expect_length(balanced_ra(prob_unit = 0.5, N = 10), 10)
-  expect_length(balanced_ra(prob_unit = 0.5, blocks = rep(1:2, each = 5)), 10)
-  expect_length(balanced_ra(prob_unit = 0.5, clusters = rep(1:5, each = 2)), 10)
-  expect_error(balanced_ra(prob_unit = 0.5), "supply `N`, `blocks` or `clusters`")
+  expect_length(balanced_ra(prob = 0.5, N = 10), 10)
+  expect_length(balanced_ra(prob = 0.5, blocks = rep(1:2, each = 5)), 10)
+  expect_length(balanced_ra(prob = 0.5, clusters = rep(1:5, each = 2)), 10)
+  expect_error(balanced_ra(prob = 0.5), "supply `N`, `blocks` or `clusters`")
   expect_error(balanced_ra(), "supply `N`, `blocks` or `clusters`")
   expect_error(balanced_ra(c(0.2, 0.4, 0.6)), "single positive integer")
 })
@@ -131,7 +131,7 @@ test_that("invalid probabilities are refused, which probra accepted", {
   expect_error(balanced_ra(prob_unit = c(0.5, NA, 0.5)), "must not be missing")
   expect_error(balanced_ra(prob_unit_each = cbind(c(.5, .5), c(.2, .2))), "sum to 1")
   expect_error(balanced_ra(), "supply `N`, `blocks` or `clusters`")
-  expect_error(balanced_ra(prob_unit = 0.5, prob_unit_each = matrix(.5, 2, 2)),
+  expect_error(balanced_ra(prob = 0.5, prob_unit_each = matrix(.5, 2, 2)),
                "only one of")
   expect_error(balanced_ra(prob_unit = c(.5, .5), blocks = c(1, 2, 3)), "`blocks` has length")
   expect_error(balanced_ra(prob_unit = rep(0.5, 4), num_arms = 3),
@@ -185,7 +185,7 @@ test_that("blocks and clusters with a fractional per-block target stay tight ove
   set.seed(14)
   clusters <- rep(1:6, times = c(3, 1, 4, 2, 5, 3))
   blocks <- ifelse(clusters <= 3, "east", "west")
-  r <- replicate(1500, balanced_ra(prob_unit = 0.5, clusters = clusters,
+  r <- replicate(1500, balanced_ra(prob = 0.5, clusters = clusters,
                                blocks = blocks))
   east <- apply(r, 2, function(z) cl_counts(z[blocks == "east"], clusters[blocks == "east"]))
   west <- apply(r, 2, function(z) cl_counts(z[blocks == "west"], clusters[blocks == "west"]))
@@ -239,7 +239,7 @@ test_that("clusters that break the rules are refused", {
   expect_error(balanced_ra(prob_unit = rep(0.5, 6), clusters = rep(1:2, each = 2)),
                "`clusters` has length")
   # a scalar probability can take its length from clusters
-  expect_length(balanced_ra(prob_unit = 0.5, clusters = clusters), 6)
+  expect_length(balanced_ra(prob = 0.5, clusters = clusters), 6)
 })
 
 test_that("check_inputs = FALSE still assigns a valid design", {
@@ -268,4 +268,39 @@ test_that("blocked multi-arm is tight within blocks; overall can wander", {
   overall <- colSums(Z == 1)
   expect_true(any(overall %in% c(0L, 3L)))
   expect_false(all(overall %in% 1:2))
+})
+
+test_that("prob is the shared-probability slot and prob_unit the per-unit one", {
+  p <- seq(0.3, 0.7, length.out = 10)
+
+  # prob takes one number, prob_unit takes N of them, and neither takes the
+  # other's shape.
+  expect_length(balanced_ra(N = 10, prob = 0.5), 10)
+  expect_length(balanced_ra(prob_unit = p), 10)
+  expect_error(balanced_ra(N = 10, prob_unit = 0.5), "use `prob`")
+  expect_error(balanced_ra(N = 10, prob = c(0.2, 0.4)), "use `prob_unit`")
+
+  # Exactly one of the three.
+  expect_error(balanced_ra(N = 10, prob = 0.5, prob_unit = p), "only one of")
+  expect_error(balanced_ra(prob = 0.5, prob_unit_each = matrix(0.5, 2, 2)),
+               "only one of")
+
+  # The default is unchanged, so balanced_ra(N) is still complete assignment.
+  expect_length(balanced_ra(4), 4)
+  expect_equal(sum(balanced_ra(4) == 1), 2)
+
+  # One unit is the case where one value really is one value per unit.
+  expect_length(balanced_ra(N = 1, prob_unit = 0.5), 1)
+
+  # The probabilities twin answers the same way.
+  expect_equal(dim(balanced_ra_probabilities(N = 10, prob = 0.5)), c(10L, 2L))
+  expect_error(balanced_ra_probabilities(N = 10, prob_unit = 0.5), "use `prob`")
+})
+
+test_that("a declaration carries prob through to balanced_ra", {
+  d <- declare_ra(N = 10, prob = 0.5, ra_type = "balanced")
+  expect_equal(class(d)[2], "ra_balanced")
+  expect_equal(d$prob, 0.5)
+  expect_length(conduct_ra(d), 10)
+  expect_equal(unique(obtain_condition_probabilities(d, conduct_ra(d))), 0.5)
 })

@@ -38,8 +38,6 @@ ra_function.ra_simple <- function(this)
 #' @export
 ra_function.ra_balanced <- function(this) {
   args <- .mget_formals(balanced_ra, this)
-  # balanced_ra uses missing(prob_unit) to allow a matrix; do not pass NULL.
-  if (!is.null(args$prob_unit_each)) args$prob_unit <- NULL
   do.call(balanced_ra, Filter(Negate(is.null), args))
 }
 

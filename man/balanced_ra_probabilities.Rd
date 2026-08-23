@@ -6,7 +6,8 @@
 \usage{
 balanced_ra_probabilities(
   N = NULL,
-  prob_unit = 0.5,
+  prob = NULL,
+  prob_unit = NULL,
   prob_unit_each = NULL,
   blocks = NULL,
   clusters = NULL,
@@ -18,19 +19,26 @@ balanced_ra_probabilities(
 }
 \arguments{
 \item{N}{The number of units. Optional when \code{formula} or the length of
-\code{prob_unit} (or \code{blocks}, \code{clusters}, or \code{data})
+\code{prob_unit} (or \code{blocks} or \code{clusters})
 identifies N. A single positive integer. If supplied it must match. (optional)}
 
-\item{prob_unit}{A scalar or a numeric vector of length N giving each unit's
-probability of assignment to treatment, for a two-arm design. Unlike
-elsewhere in randomizr these need not be equal across units; varying them
-is the point of this function. A scalar is recycled to length N. Defaults
-to 0.5. Supply either \code{prob_unit} or \code{prob_unit_each}. (optional)}
+\item{prob}{A single number between 0 and 1: the probability of assignment
+to treatment, shared by every unit, for a two-arm design. Defaults to 0.5
+when no probability argument is supplied, so \code{balanced_ra(4)} is
+complete assignment of four units. Supply exactly one of \code{prob},
+\code{prob_unit} and \code{prob_unit_each}. (optional)}
+
+\item{prob_unit}{A numeric vector of length N giving each unit's probability
+of assignment to treatment, for a two-arm design. Unlike elsewhere in
+randomizr these need not be equal across units; varying them is the point
+of this function. A single number is refused, since that is what
+\code{prob} is for. Supply exactly one of \code{prob}, \code{prob_unit}
+and \code{prob_unit_each}. (optional)}
 
 \item{prob_unit_each}{A numeric matrix with one row per unit and one column
 per condition, giving each unit's probability of assignment to each
-condition, for a multi-arm design. Rows must sum to 1. Supply either
-\code{prob_unit} or \code{prob_unit_each}. (optional)}
+condition, for a multi-arm design. Rows must sum to 1. Supply exactly one
+of \code{prob}, \code{prob_unit} and \code{prob_unit_each}. (optional)}
 
 \item{blocks}{A vector of length N indicating which block each unit belongs
 to. When supplied, two-arm counts are held tight within each block and
