@@ -25,17 +25,18 @@ declare_ra(
   ra_type = NULL,
   formula = NULL,
   permutation_matrix = NULL,
-  check_inputs = TRUE
+  check_inputs = TRUE,
+  data = NULL
 )
 }
 \arguments{
 \item{N}{The number of units. A positive integer. Optional when
-\code{formula} or the length of \code{prob_unit} (or \code{blocks},
-or \code{clusters}) identifies N.}
+\code{data}, \code{formula}, or the length of \code{prob_unit} (or
+\code{blocks}, or \code{clusters}) identifies N.}
 
-\item{blocks}{A vector of length N indicating which block each unit belongs to. Supply to use blocked random assignment. (optional)}
+\item{blocks}{A vector of length N indicating which block each unit belongs to, or, when \code{data} is supplied, the name of the column holding it. Supply to use blocked random assignment. (optional)}
 
-\item{clusters}{A vector of length N indicating which cluster each unit belongs to. Supply to use cluster random assignment. (optional)}
+\item{clusters}{A vector of length N indicating which cluster each unit belongs to, or, when \code{data} is supplied, the name of the column holding it. Supply to use cluster random assignment. (optional)}
 
 \item{m}{Use for a two-arm design: exactly \code{m} units (or clusters) are assigned to treatment. In a blocked design, exactly \code{m} units in each block are treated. (optional)}
 
@@ -67,11 +68,13 @@ or \code{clusters}) identifies N.}
 
 \item{ra_type}{Optional override. The only accepted value is \code{"balanced"}, which selects \code{\link{balanced_ra}()} and allows \code{prob_unit} to vary across units. Other designs are inferred from the arguments supplied; they cannot be forced with this argument. (optional)}
 
-\item{formula}{For balanced assignment. A model formula whose model matrix is the balancing matrix \eqn{X} in the cube method, e.g. \code{~ x + B}. The intercept is the count constraint. Do not also pass \code{blocks}. Supplying \code{formula} selects \code{\link{balanced_ra}()}. Two-arm only. The formula's variables are looked up once, when the design is declared; \code{\link{conduct_ra}()} reuses the matrix built then, so a later change to those variables does not change the declared design. (optional)}
+\item{formula}{For balanced assignment. A model formula whose model matrix is the balancing matrix \eqn{X} in the cube method, e.g. \code{~ x + B}. The intercept is the count constraint. Do not also pass \code{blocks}. Supplying \code{formula} selects \code{\link{balanced_ra}()}. Two-arm only. The formula's variables are taken from \code{data} when it is supplied. They are looked up once, when the design is declared; \code{\link{conduct_ra}()} reuses the matrix built then, so a later change to those variables does not change the declared design. (optional)}
 
 \item{permutation_matrix}{For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)}
 
 \item{check_inputs}{Logical. Whether to verify before declaring that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that block-level arguments have one entry per block, and so on. Defaults to \code{TRUE}. \code{FALSE} skips the checking only: \code{num_arms} and \code{conditions} are still derived from the other arguments. It is skipped entirely when \code{permutation_matrix} is supplied. (optional)}
+
+\item{data}{A data frame holding the design's variables. When supplied, \code{blocks}, \code{clusters} and the variables in \code{formula} name columns of it and are looked up there and nowhere else: anything they name that is not a column is an error rather than a fall-through to the calling environment. \code{N} defaults to \code{nrow(data)}. A declaration outlives the frame it was written in, so this is how to make it say exactly which variables it is built from. When \code{data} is omitted, all three resolve in the calling environment as before. \code{data} itself is not stored in the declaration; the variables it supplies are. (optional)}
 }
 \value{
 A list of class \code{"ra_declaration"} with entries:
@@ -178,6 +181,13 @@ declare_ra(prob_unit_each = P)
 
 x <- c(0, 1, 5, 6, 8, 9)
 declare_ra(formula = ~ x)
+
+# Name the table the design is built from, and blocks, clusters and the
+# formula's variables are its columns rather than whatever the calling
+# environment happens to hold.
+dat <- data.frame(bl = rep(c("a", "b"), each = 3), x = c(0, 1, 5, 6, 8, 9))
+declare_ra(blocks = bl, data = dat)
+declare_ra(formula = ~ x, data = dat)
 
 }
 \seealso{

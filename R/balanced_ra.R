@@ -429,12 +429,58 @@ cube_assign_clusters <- function(P, clusters, blocks = NULL, tol = 1e-12) {
   Zc[as.integer(cl), , drop = FALSE]
 }
 
-n_from_formula <- function(formula, envir = parent.frame()) {
+n_from_formula <- function(formula, envir = parent.frame(), data = NULL) {
+  if (!is.null(data)) return(nrow(data))
   if (length(all.vars(formula)) == 0L) return(NULL)
   tryCatch(
     nrow(stats::model.matrix(formula, data = formula_lookup_data(formula, envir))),
     error = function(e) stop(conditionMessage(e), call. = FALSE)
   )
+}
+
+#' Require that every variable an argument names is a column of `data`
+#'
+#' The point of \code{data} is that the design is written against that table
+#' and nothing else, so an expression naming anything absent from it is an
+#' error rather than a silent fall-through to the calling environment.
+#'
+#' @keywords internal
+#' @noRd
+check_vars_in_data <- function(vars, data, what) {
+  absent <- setdiff(vars, names(data))
+  if (length(absent) == 0L) return(invisible(NULL))
+  stop(what, " names ",
+       paste0("`", absent, "`", collapse = ", "),
+       ", which `data` does not have. When `data` is supplied every variable ",
+       "must be a column of it. Columns: ",
+       paste0("`", names(data), "`", collapse = ", "), ".",
+       call. = FALSE)
+}
+
+#' Resolve `blocks` or `clusters` against `data`
+#'
+#' \code{expr} is the unevaluated argument. A bare column name is the ordinary
+#' case; any expression is allowed so long as every variable in it is a column
+#' of \code{data}, so \code{interaction(region, year)} works and \code{df$bl}
+#' does not. A length-one character string naming a column is taken as that
+#' column, which is what programmatic callers need.
+#'
+#' @keywords internal
+#' @noRd
+resolve_from_data <- function(expr, data, arg_name, envir) {
+  if (is.null(expr)) return(NULL)
+  vars <- all.vars(expr)
+  check_vars_in_data(vars, data, paste0("`", arg_name, "`"))
+  out <- eval(expr, data, envir)
+  if (length(vars) == 0L && is.character(out) && length(out) == 1L) {
+    check_vars_in_data(out, data, paste0("`", arg_name, "`"))
+    out <- data[[out]]
+  }
+  if (!is.null(out) && length(out) != nrow(data)) {
+    stop("`", arg_name, "` has length ", length(out),
+         " but `data` has ", nrow(data), " rows.", call. = FALSE)
+  }
+  out
 }
 
 #' Resolve formula data from `data` or the calling environment
@@ -486,14 +532,17 @@ formula_lookup_data <- function(formula, envir) {
 #'
 #' @keywords internal
 #' @noRd
-balanced_formula_matrix <- function(formula, n, envir = parent.frame()) {
+balanced_formula_matrix <- function(formula, n, envir = parent.frame(),
+                                    data = NULL) {
   if (!inherits(formula, "formula")) {
     stop("`formula` must be a formula, e.g. ~ x + B.")
   }
-  data <- if (length(all.vars(formula)) == 0L) {
-    data.frame(row.names = seq_len(n))
+  if (!is.null(data)) {
+    check_vars_in_data(all.vars(formula), data, "`formula`")
+  } else if (length(all.vars(formula)) == 0L) {
+    data <- data.frame(row.names = seq_len(n))
   } else {
-    formula_lookup_data(formula, envir)
+    data <- formula_lookup_data(formula, envir)
   }
   X <- tryCatch(
     stats::model.matrix(formula, data = data),
