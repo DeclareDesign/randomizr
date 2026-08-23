@@ -38,7 +38,7 @@ set.seed(2); table(simple_ra(N = 100))
 
 ## Complete random assignment
 
-`complete_ra` assigns exactly a fixed number of units to each condition. In the two-arm case with m treated units, every subset of size m is equally likely. The algorithm uses a partial Knuth shuffle (also called the Fisher-Yates shuffle): starting from a sequence of unit indices, swap index 1 with a randomly chosen index in positions 1 through N, then swap index 2 with a randomly chosen index in positions 2 through N, and so on for m steps. The first m positions after the partial shuffle identify the treated units. Drawing only m uniforms (rather than N) is both faster and sufficient.
+`complete_ra` assigns exactly a fixed number of units to each condition. In the two-arm case with m treated units, every subset of size m is equally likely. The algorithm draws a full random permutation of the 0/1 assignment vector, exactly as `sample(rep(conditions, c(N - m, m)))` does, consuming N uniform draws via `R_unif_index`. Drawing the full permutation is deliberate: it reproduces the RNG stream of randomizr 1.x, so the same seed yields the same assignment across versions. The speed comes not from drawing fewer random numbers but from doing the work in C++ without per-block R calls.
 
 ```{r}
 # Counts are fixed: exactly 50 treated, 50 control on every draw
@@ -56,21 +56,21 @@ counts <- replicate(10000, sum(complete_ra(N = 100, prob = 1/3) == 1))
 mean(counts)   # very close to 33.33
 ```
 
-Multi-arm designs use the same principle: first assign `floor(N * prob_each)` units to each condition, then use a single round of simple random assignment among the remaining units, with probabilities calibrated so that the overall probability of assignment equals `prob_each` exactly.
+Multi-arm designs use the same principle: first assign `floor(N * prob_each)` units to each condition, then allocate the remaining units by weighted sampling without replacement, as in `sample(conditions, N_remainder, prob = fix_up, replace = FALSE)`, reproducing R's `ProbSampleNoReplace` (including its `revsort` ordering), with the weights calibrated so that the overall probability of assignment equals `prob_each` exactly.
 
 ## Block random assignment
 
 `block_ra` applies complete random assignment separately within each block. The statistical motivation is precision: if the blocking variable is correlated with potential outcomes, then guaranteeing that each block contributes both treated and control observations rules out the unlucky assignments that would otherwise generate estimates far from the true average treatment effect. The precision gain scales with the correlation between the block variable and potential outcomes.
 
-### The two-arm fast path: counting sort plus per-block Knuth shuffle in C++
+### The two-arm fast path: counting sort plus per-block permutation in C++
 
 For two-arm designs, `block_ra` calls `block_assign_cpp`, a C++ routine compiled via Rcpp. The algorithm has two phases.
 
-**Phase 1: counting sort.** Group unit indices into contiguous runs by block. First count the number of units in each block (one pass over N). Compute prefix sums to find where each block's run starts in the output array. Then fill in the output array: one more pass over N places each unit's index into the correct position. Total work: O(N) with no comparisons and no memory allocation beyond the output array.
+**Phase 1: counting sort.** Group unit indices into contiguous runs by block. First count the number of units in each block (one pass over N). Compute prefix sums to find where each block's run starts in the output array. Then fill in the output array: one more pass over N places each unit's index into the correct position. Total work: O(N) with no comparisons; beyond the output array the kernel allocates only small per-block index vectors.
 
-**Phase 2: partial Knuth shuffle within each block.** For block $b$ with $n_b$ units and $m_b$ to treat, shuffle the first $m_b$ positions of that block's run in the output array using the partial Fisher-Yates shuffle described above. Mark those positions as treated. Total RNG draws across all blocks: $\sum_b m_b \leq N/2$ on average for balanced designs.
+**Phase 2: full permutation within each block.** For block $b$ with $n_b$ units and $m_b$ to treat, draw a full random permutation of a 0/1 vector with $m_b$ ones, exactly as `sample(rep(0:1, c(n_b - m_b, m_b)))` does, consuming $n_b$ uniform draws via `R_unif_index`. Drawing the full permutation rather than a shorter partial shuffle is deliberate: it reproduces the RNG stream of randomizr 1.x, so the same seed yields the same assignment across versions. The one exception is a fully treated block ($m_b = n_b$), which consumes no random numbers at all, matching 1.x's early return.
 
-The total cost is O(N) for the sort plus O(sum of m_b) for the shuffles. The counting sort is several times faster than the alternatives: calling R's `order()` on a sort key, which uses a comparison sort at O(N log N), or calling a separate `complete_ra` for each block, which pays per-block R dispatch overhead.
+The total cost is O(N) for the sort plus O(N) for the permutations. The counting sort is several times faster than the alternatives: calling R's `order()` on a sort key, which uses a comparison sort at O(N log N), or calling a separate `complete_ra` for each block, which pays per-block R dispatch overhead.
 
 ```{r}
 blocks <- rep(c("A", "B", "C"), times = c(50, 100, 200))
@@ -144,7 +144,7 @@ Two arms are a special case worth naming, because it is the one most designs are
 
 ### What the papers guarantee, and what this implementation guarantees
 
-The distinction matters, because the two are not the same. Deville and Tillé (2004) supply the martingale and the flight/landing split for balanced sampling in general, where the balancing constraints are linear equalities: in survey sampling, that the Horvitz–Thompson totals of auxiliary variables match known population totals. Landing may violate a constraint that was dropped to reach a vertex, and the paper does not claim that every balancing constraint survives all the way to the sample. `balanced_ra` applies that method to one particular constraint system, the transportation polytope of nonnegative $N \times k$ matrices with row sums 1 and column sums $t$. Cycle moves are the kernel directions; path moves are landing. Nothing in the papers, by itself, says that a blocked assignment problem will come out tight both within each block and overall.
+The distinction matters, because the two are not the same. Deville and Tillé (2004) supply the martingale and the flight/landing split for balanced sampling in general, where the balancing constraints are linear equalities: in survey sampling, that the Horvitz-Thompson totals of auxiliary variables match known population totals. Landing may violate a constraint that was dropped to reach a vertex, and the paper does not claim that every balancing constraint survives all the way to the sample. `balanced_ra` applies that method to one particular constraint system, the transportation polytope of nonnegative $N \times k$ matrices with row sums 1 and column sums $t$. Cycle moves are the kernel directions; path moves are landing. Nothing in the papers, by itself, says that a blocked assignment problem will come out tight both within each block and overall.
 
 What this implementation guarantees is that every unit receives exactly one condition, that each unit's probability of each condition equals the supplied $\pi_{ij}$, and that condition counts are the floor or the ceiling of the target at a stated level:
 
@@ -182,7 +182,7 @@ The practical summary is short. Use `balanced_ra` when probabilities vary across
 
 For every design type, a companion `*_probabilities` function returns the matrix of assignment probabilities, one row per unit and one column per arm. Inverse-probability-weighted estimators use these probabilities, and `declare_ra` stores them in the declaration object.
 
-For complete random assignment, the probability of assignment to treatment is simply `m / N`. For block random assignment, it is `m_b / n_b` within each block $b$, where `m_b` is the number treated and `n_b` is the block size. For cluster designs, every unit in a cluster inherits the cluster's assignment probability. `declare_ra` precomputes these probabilities once at declaration time, so `obtain_condition_probabilities` is fast regardless of design complexity.
+For complete random assignment, the probability of assignment to treatment is simply `m / N`. For block random assignment, it is `m_b / n_b` within each block $b$, where `m_b` is the number treated and `n_b` is the block size. For cluster designs, every unit in a cluster inherits the cluster's assignment probability. `declare_ra` computes the probabilities matrix lazily via `delayedAssign`: it is built on first access and cached thereafter, so declaration stays cheap and `obtain_condition_probabilities` is fast on every call after the first.
 
 ```{r}
 # Assignment probabilities for a blocked design with varying block probabilities
@@ -195,10 +195,10 @@ head(prob_mat)
 
 ## References
 
-Chauvet, G. and Tillé, Y. (2006). A fast algorithm for balanced sampling. *Computational Statistics* 21(1), 53–62. <https://doi.org/10.1007/s00180-006-0250-2>
+Chauvet, G. and Tillé, Y. (2006). A fast algorithm for balanced sampling. *Computational Statistics* 21(1), 53-62. <https://doi.org/10.1007/s00180-006-0250-2>
 
-Deville, J.-C. and Tillé, Y. (1998). Unequal probability sampling without replacement through a splitting method. *Biometrika* 85(1), 89–101. <https://doi.org/10.1093/biomet/85.1.89>
+Deville, J.-C. and Tillé, Y. (1998). Unequal probability sampling without replacement through a splitting method. *Biometrika* 85(1), 89-101. <https://doi.org/10.1093/biomet/85.1.89>
 
-Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube method. *Biometrika* 91(4), 893–912. <https://doi.org/10.1093/biomet/91.4.893>
+Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube method. *Biometrika* 91(4), 893-912. <https://doi.org/10.1093/biomet/91.4.893>
 
-Deville, J.-C. and Tillé, Y. (2005). Variance approximation under balanced sampling. *Journal of Statistical Planning and Inference* 128(2), 569–591. <https://doi.org/10.1016/j.jspi.2003.11.011>. `balanced_ra` does not implement these estimators.
+Deville, J.-C. and Tillé, Y. (2005). Variance approximation under balanced sampling. *Journal of Statistical Planning and Inference* 128(2), 569-591. <https://doi.org/10.1016/j.jspi.2003.11.011>. `balanced_ra` does not implement these estimators.

@@ -35,14 +35,11 @@ When every unit has the same $p$, `complete_ra` and `balanced_ra()` with no form
 
 For a larger case with $N = 200$ and a continuous covariate, `balanced_ra(formula = ~ x)` keeps the imbalance $T = \sum_i x_i (Z_i - p_i)$ smaller than cutting $x$ into two, three, or four quantile blocks. Blocking, however, keeps the treated count tight inside each bin. Those are different constraints. Neither dominates for every estimand.
 
-The primary metric is the RMSE of $T$. With heterogeneous $p$ that is the Horvitz--Thompson residual for the $x$-total; it is also the right comparison when $p$ is constant. We also report the treated-count residual $\sum_i Z_i - \sum_i p_i$.
+The primary metric is the RMSE of $T$. With heterogeneous $p$ that is the Horvitz-Thompson residual for the $x$-total; it is also the right comparison when $p$ is constant. We also report the treated-count residual $\sum_i Z_i - \sum_i p_i$.
 
 `blocks` remains the partitioned count path in `balanced_ra()`. `formula` builds a balancing matrix $X$ and flies in $\ker(X')$. Passing both errors. The count-tight C++ used when `formula` is `NULL` is unchanged.
 
-When $Y = x^2$ and $x$ is this prognostic, Section 4 holds the estimator
-fixed at linear control for $x$ and varies only the assignment. Cube-on-X
-then has the smallest RMSE. Power does not follow RMSE: HC2 after the
-cube is conservative.
+When $Y = x^2$ and $x$ is this prognostic, Section 4 holds the estimator fixed at linear control for $x$ and varies only the assignment. Cube-on-X then has the smallest RMSE. Power does not follow RMSE: HC2 after the cube is conservative.
 
 Section 1 states the two constraints and situates cube-on-X among related designs. Section 2 works the six-unit design, uniform and heterogeneous. Section 3 reports Monte Carlo. Section 4 diagnoses three assignments, each with $Y \sim Z + x$, when $Y$ is quadratic in $x$. The last section draws the implication.
 
@@ -60,7 +57,7 @@ Cube-on-X is one way to balance a continuous covariate without cutting it into b
 
 [Deville and Tillé (2004)](https://doi.org/10.1093/biomet/91.4.893) is implemented for sampling as `sampling::samplecube` and `BalancedSampling::cube`. [Davezies, Hollard, and Vergara Merino (2024)](https://arxiv.org/abs/2407.13613) use `BalancedSampling` for RCTs; they do not ship a separate package.
 
-[Harshaw, Sävje, Spielman, and Zhang (2024)](https://doi.org/10.1080/01621459.2023.2285474) give a different two-arm design, the Gram--Schmidt walk. It balances continuous $X$ and trades robustness against covariate balance through a parameter $\phi$. It is not the cube, and unit-varying $\pi$ is not a first-class input. Software is the Julia package `GSWDesign.jl` and the R wrapper `gswdesign` (not on CRAN).
+[Harshaw, Sävje, Spielman, and Zhang (2024)](https://doi.org/10.1080/01621459.2023.2285474) give a different two-arm design, the Gram-Schmidt walk. It balances continuous $X$ and trades robustness against covariate balance through a parameter $\phi$. It is not the cube, and unit-varying $\pi$ is not a first-class input. Software is the Julia package `GSWDesign.jl` and the R wrapper `gswdesign` (not on CRAN).
 
 Rerandomization ([Morgan and Rubin 2012](https://doi.org/10.1214/12-AOS1008)) rejects complete RA until $X$ is balanced; see, for example, `fastrerandomize`. Match-then-randomize and threshold blocking (`blockTools`, `quickblock`; [Higgins, Sävje, and Sekhon 2016](https://doi.org/10.1073/pnas.1510504113)) form bins or pairs and then complete RA inside. `minMSE` ([Schneider and Schlather 2017](https://www.econstor.eu/handle/10419/161931)) optimizes the assignment; that is a different algorithm.
 
@@ -209,7 +206,7 @@ knitr::kable(metrics_df(designs_h, x, p_h), digits = 3, align = "lrrrr",
              caption = cap_T)
 ```
 
-Cube-on-X tracks 18.7. Three-block RA still forces one treated unit in $(5, 6)$, which is the wrong linear constraint for that target. The RMSE gap is smaller than at $N = 200$; the toy is small enough that landing noise is a large share of $T$. `complete_ra` and count-tight `balanced_ra` both hold $\sum Z$ near 3. They differ on $T$ because only the latter respects $p_i$.
+Cube-on-X tracks 18.7. Three-block RA still forces one treated unit in $(5, 6)$, which is the wrong linear constraint for that target. On a toy this small, landing noise is a large share of $T$, and neither device dominates the other row by row: a close cut of $x$ can sit beside or ahead of the formula. The point is what each constraint buys, not a ranking. `complete_ra` and count-tight `balanced_ra` both hold $\sum Z$ near 3. They differ on $T$ because only the latter respects $p_i$.
 
 ```{r}
 metric_long <- function(designs, x, p) {
@@ -300,9 +297,9 @@ The comparisons above are about $T = \sum_i x_i (Z_i - p_i)$. They do not say wh
 
 This section diagnoses a two-arm trial with $N = 10$, $x = 1, \ldots, 10$, $Y(0) = x^2$, $Y(1) = x^2 + 10$. The ATE is 10. Three assignments; every estimator includes linear control for $x$ (HC2, coefficient on $Z$). Blocked assignment also includes the block factor. The control is additive OLS, not [Lin (2013)](https://doi.org/10.1214/12-AOAS583): no interaction, and $x$ is not centered. It is misspecified for the CEF ($Y$ is $x^2$). It is still the design-paired regression for cube-on-X.
 
-1. **Simple + control** --- `complete_ra` and $Y \sim Z + x$.
-2. **blocked + x** --- `block_ra` and $Y \sim Z + \mathrm{factor}(\mathrm{blocks}) + x$.
-3. **Formula + control** --- `balanced_ra(formula = ~ x)` and $Y \sim Z + x$.
+1. **Complete + control**: `complete_ra` and $Y \sim Z + x$.
+2. **Blocked + x**: `block_ra` and $Y \sim Z + \mathrm{factor}(\mathrm{blocks}) + x$.
+3. **Formula + control**: `balanced_ra(formula = ~ x)` and $Y \sim Z + x$.
 
 Analyze as you randomize has two parts. The point estimator should use the same covariates as the design: $x$ in the formula with $Y \sim Z + x$. The *variance* should be the randomization variance of that estimator. HC2 is not that variance after cube-on-X.
 
@@ -354,9 +351,9 @@ diagnose_designs(
   knitr::kable(digits = 2)
 ```
 
-See the table. Formula + control has the smallest RMSE. Simple + control has the highest power. Those are different rankings. Every row is the ATE (term $Z$).
+See the table. Formula + control has the smallest RMSE. Complete + control has the highest power. Those are different rankings. Every row is the ATE (term $Z$).
 
-Formula + control *is* the paired point estimator ($x$ in $X$, $x$ in the regression). It is not a design-based variance. HC2 coverage on that row is too high: the sandwich treats units as independent given $Z$. Complete assignment is close to that working model, so coverage sits near 95 percent. Cube-on-X forbids the $Z$ configurations that would have made the contrast noisy (wild $\sum x Z$). The sampling SD of the ATE falls; the HC2 standard error does not, so power can lag Simple + control even though RMSE is smaller. Analyze as you randomize after the cube would need the randomization distribution (or another variance that credits that dependence), not HC2. RMSE, not HC2 power, is the efficiency comparison in this table.
+Formula + control *is* the paired point estimator ($x$ in $X$, $x$ in the regression). It is not a design-based variance. HC2 coverage on that row is too high: the sandwich treats units as independent given $Z$. Complete assignment is close to that working model, so coverage sits near 95 percent. Cube-on-X forbids the $Z$ configurations that would have made the contrast noisy (wild $\sum x Z$). The sampling SD of the ATE falls; the HC2 standard error does not, so power can lag Complete + control even though RMSE is smaller. Analyze as you randomize after the cube would need the randomization distribution (or another variance that credits that dependence), not HC2. RMSE, not HC2 power, is the efficiency comparison in this table.
 
 The outcome is $x^2$. Cube-on-X holds the linear total $\sum x Z$ near its target. It does not hold $\sum x^2 Z$. On this monotone $x$, $x$ and $x^2$ move together, and the paired estimator still has the smallest RMSE.
 
@@ -366,18 +363,18 @@ Use `formula = ~ x` when the object you care about is a linear-in-$x$ total. Use
 
 # References
 
-Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube method. *Biometrika* 91(4), 893–912. <https://doi.org/10.1093/biomet/91.4.893>
+Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube method. *Biometrika* 91(4), 893-912. <https://doi.org/10.1093/biomet/91.4.893>
 
-Chauvet, G. and Tillé, Y. (2006). A fast algorithm for balanced sampling. *Computational Statistics* 21(1), 53–62. <https://doi.org/10.1007/s00180-006-0250-2>
+Chauvet, G. and Tillé, Y. (2006). A fast algorithm for balanced sampling. *Computational Statistics* 21(1), 53-62. <https://doi.org/10.1007/s00180-006-0250-2>
 
 Davezies, L., Hollard, G. and Vergara Merino, P. (2024). Revisiting randomization with the cube method. <https://arxiv.org/abs/2407.13613>
 
-Harshaw, C., Sävje, F., Spielman, D. A. and Zhang, P. (2024). Balancing covariates in randomized experiments with the Gram--Schmidt walk design. *Journal of the American Statistical Association* 119(548), 2934–2946. <https://doi.org/10.1080/01621459.2023.2285474>
+Harshaw, C., Sävje, F., Spielman, D. A. and Zhang, P. (2024). Balancing covariates in randomized experiments with the Gram-Schmidt walk design. *Journal of the American Statistical Association* 119(548), 2934-2946. <https://doi.org/10.1080/01621459.2023.2285474>
 
-Higgins, M. J., Sävje, F. and Sekhon, J. S. (2016). Improving massive experiments with threshold blocking. *Proceedings of the National Academy of Sciences* 113(27), 7369–7376. <https://doi.org/10.1073/pnas.1510504113>
+Higgins, M. J., Sävje, F. and Sekhon, J. S. (2016). Improving massive experiments with threshold blocking. *Proceedings of the National Academy of Sciences* 113(27), 7369-7376. <https://doi.org/10.1073/pnas.1510504113>
 
-Lin, W. (2013). Agnostic notes on regression adjustments to experimental data: Reexamining Freedman's critique. *Annals of Applied Statistics* 7(1), 295–318. <https://doi.org/10.1214/12-AOAS583>
+Lin, W. (2013). Agnostic notes on regression adjustments to experimental data: Reexamining Freedman's critique. *Annals of Applied Statistics* 7(1), 295-318. <https://doi.org/10.1214/12-AOAS583>
 
-Morgan, K. L. and Rubin, D. B. (2012). Rerandomization to improve covariate balance in experiments. *Annals of Statistics* 40(2), 1263–1282. <https://doi.org/10.1214/12-AOS1008>
+Morgan, K. L. and Rubin, D. B. (2012). Rerandomization to improve covariate balance in experiments. *Annals of Statistics* 40(2), 1263-1282. <https://doi.org/10.1214/12-AOS1008>
 
 Schneider, S. O. and Schlather, M. (2017). Rerandomization to improve covariate balance by minimizing the MSE of a treatment effect estimator. Max Planck Institute for Research on Collective Goods. <https://www.econstor.eu/handle/10419/161931>

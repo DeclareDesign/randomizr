@@ -35,7 +35,7 @@ library(estimatr)
 A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage. First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a **cluster**. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of average causal effects and the uncertainty attending them may be incorrect.
 
 # A hypothetical experiment
-Throughout this vignette, we'll pretend we're conducting an experiment among the 592 individuals in the built-in `HairEyeColor` dataset. As we'll see, there are many ways to randomly assign subjects to treatments. We'll step through five common designs, each associated with one of the five `randomizr` functions: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`.
+Throughout this vignette, we'll pretend we're conducting an experiment among the 592 individuals in the built-in `HairEyeColor` dataset. As we'll see, there are many ways to randomly assign subjects to treatments. We'll step through five common designs, each associated with one of five `randomizr` functions: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`. A sixth function, `balanced_ra()`, handles assignment with unit-varying probabilities and has its own vignette: `vignette("balanced_ra", package = "randomizr")`.
 
 The dataset ships with R as a three-way contingency table (see `?HairEyeColor`); converting it to a data frame gives one row per **type** of subject, with a count of how many subjects are of that type.
 
@@ -72,7 +72,7 @@ We now need to create simulated *potential outcomes*. We'll call the untreated o
 If we were really running an experiment, we would only observe either `Y0` or `Y1` for each subject, but since we are simulating, we generate both. Our inferential target is the average treatment effect (ATE), which is defined as the average difference between `Y0` and `Y1`.
 
 ```{r}
-# Set a seed for reproducability
+# Set a seed for reproducibility
 set.seed(343)
 
 # Create untreated and treated outcomes for all subjects
@@ -354,7 +354,7 @@ At `N = 10` the gap is large enough to see. That is the practical case for `comp
 
 Block random assignment (sometimes known as stratified random assignment) is a powerful tool when used well. In this design, subjects are sorted into blocks (strata) according to their pre-treatment covariates, and then complete random assignment is conducted within each block. For example, a researcher might block on gender, assigning exactly half of the men and exactly half of the women to treatment. 
 
-Why block?  The first reason is to signal to future readers that treatment effect heterogeneity may be of interest: is the treatment effect different for men versus women? Of course, such heterogeneity could be explored if complete random assignment had been used, but blocking on a covariate defends a researcher (somewhat) against claims of data dredging. The second reason is to increase precision. If the blocking variables are predictive of the outcome (i.e., they are correlated with the outcome), then blocking may help to decrease sampling variability. It's important, however, not to overstate these advantages. The gains from a blocked design can often be realized through covariate adjustment alone.
+There are two main reasons to block. The first is to signal to future readers that treatment effect heterogeneity may be of interest: is the treatment effect different for men versus women? Of course, such heterogeneity could be explored if complete random assignment had been used, but blocking on a covariate defends a researcher (somewhat) against claims of data dredging. The second reason is to increase precision. If the blocking variables are predictive of the outcome (i.e., they are correlated with the outcome), then blocking may help to decrease sampling variability. It's important, however, not to overstate these advantages. The gains from a blocked design can often be realized through covariate adjustment alone.
 
 Blocking can also produce complications for estimation, because it can give different subjects different probabilities of assignment. This complication is typically addressed in one of two ways: "controlling for blocks" in a regression context, or inverse probability weights (IPW), in which units are weighted by the inverse of the probability that the unit is in the condition that it is in.  
 
@@ -688,7 +688,7 @@ tibble(block_id = hec$block_id, Z) |>
 
 ## Calculating probabilities of assignment
 
-All five random assignment functions in `randomizr` assign units to treatment with known (if sometimes complicated) probabilities. The `declare_ra()` and `obtain_condition_probabilities()` functions calculate these probabilities according to the parameters of your experimental design.
+All of the random assignment functions in `randomizr` assign units to treatment with known (if sometimes complicated) probabilities. The `declare_ra()` and `obtain_condition_probabilities()` functions calculate these probabilities according to the parameters of your experimental design.
 
 Let's take a look at the block random assignment we used before.
 
@@ -816,13 +816,13 @@ Whenever you conduct a random assignment for use in an experiment, save it! At a
 hec <-
   hec |>
   mutate(
-    Z_blocked = complete_ra(N = N,
-                            m_each = c(100, 200, 292),
-                            conditions = c("control", "placebo", "treatment")),
+    Z_complete = complete_ra(N = N,
+                             m_each = c(100, 200, 292),
+                             conditions = c("control", "placebo", "treatment")),
     id_var = row_number()
   )
 
 hec |>
-  select(id_var, Z_blocked) |>
+  select(id_var, Z_complete) |>
   readr::write_csv("MyRandomAssignment.csv")
 ```

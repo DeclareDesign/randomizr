@@ -24,7 +24,7 @@ library(ggplot2)
 
 `balanced_ra()` is the general assignment function when probabilities may vary by unit. When every unit has the same probability, `complete_ra()`, `block_ra()`, and `block_and_cluster_ra()` already implement the same designs. This note times the general function against those specialized functions on the equal-probability cases.
 
-Three results from the grid below. First, on two-arm complete assignment `complete_ra()` is faster once $N$ is a few thousand; at $N = 200$ the two are close and the ranking can flip from run to run. Second, blocked assignment is close to even: `block_ra()` uses a specialized Knuth-shuffle path, and the cube walk in `balanced_ra()` does not pull away. Third, on blocked-and-clustered assignment `balanced_ra()` is the faster of the two once validation is switched off on both sides, by a factor of roughly three to four, because `block_and_cluster_ra()` rebuilds the cluster-to-block map on every draw. At the settings a user actually gets, with validation on, that result reverses: see [Reading the ratios](#reading-the-ratios).
+Three results from the grid below. First, on two-arm complete assignment `complete_ra()` is faster once $N$ is a few thousand; at $N = 200$ the two are close and the ranking can flip from run to run. Second, blocked assignment is close to even: `block_ra()` uses a specialized Knuth-shuffle path, and the cube walk in `balanced_ra()` does not pull away. Third, on blocked-and-clustered assignment `balanced_ra()` is the faster of the two once validation is switched off on both sides, by a factor of roughly three to five, because `block_and_cluster_ra()` rebuilds the cluster-to-block map on every draw. At the settings a user actually gets, with validation on, that result reverses: see [Reading the ratios](#reading-the-ratios).
 
 `balanced_ra()` is the general tool. The specialized functions exist to be faster on the equal-$p$ cases. Use them when they apply.
 
@@ -159,14 +159,19 @@ plot_df$family <- factor(
   levels = c("complete", "blocked", "block_cluster"),
   labels = c("complete_ra", "block_ra", "block_and_cluster_ra")
 )
+label_df <- plot_df[plot_df$N == max(plot_df$N), ]
+label_df$vjust <- ifelse(label_df$method == "specialized", -0.9, 1.9)
 ggplot(plot_df, aes(N, ms, color = method, shape = method)) +
   geom_line() +
   geom_point() +
+  geom_text(data = label_df, aes(label = method, vjust = vjust),
+            hjust = 1, size = 2.7, show.legend = FALSE) +
   scale_x_log10(breaks = Ns) +
+  scale_y_continuous(expand = expansion(mult = c(0.15, 0.15))) +
   facet_wrap(~ family, scales = "free_y") +
-  labs(x = "N", y = "ms per draw", color = NULL, shape = NULL) +
+  labs(x = "N", y = "ms per draw") +
   theme_bw(base_size = 9) +
-  theme(legend.position = "bottom")
+  theme(legend.position = "none")
 ```
 
 # Reading the ratios
@@ -175,7 +180,7 @@ On complete assignment the specialized function is the faster path at large $N$.
 
 On blocked assignment the two stay near a ratio of 1. `block_ra()` already has a C++ Knuth-shuffle fast path for the two-arm equal-$p$ case. Replacing it with the cube does not buy time, and usually does not cost much either.
 
-On blocked-and-clustered assignment `balanced_ra()` is faster, by a factor of roughly three to four across this grid. `block_and_cluster_ra()` calls `tapply()` on every draw to collapse units to clusters, and `order(unlist(split()))` to put them back; on a $N = 10{,}000$ draw that setup is most of the elapsed time. `balanced_ra()` assigns at the cluster level from a collapsed probability matrix. The gap is setup, not the cube.
+On blocked-and-clustered assignment `balanced_ra()` is faster, by a factor of roughly three to five across this grid. `block_and_cluster_ra()` calls `tapply()` on every draw to collapse units to clusters, and `order(unlist(split()))` to put them back; on a $N = 10{,}000$ draw that setup is most of the elapsed time. `balanced_ra()` assigns at the cluster level from a collapsed probability matrix. The gap is setup, not the cube.
 
 That result holds only because both sides have validation switched off. At default settings it reverses, and `balanced_ra()` is the slower of the two by a factor of about 1.1 at $N = 200$ rising to about 3.1 at $N = 10{,}000$. The reason is symmetric to the one above: `balanced_ra_matrix()` validates clusters with a per-draw `tapply()` over every column of the probability matrix, which is the same kind of per-draw setup cost, paid on the other side. Neither function's validation is free, and a comparison that switches one off and leaves the other on measures the switch rather than the algorithm. Cheapening that cluster validation is an open item; until it lands, a simulation loop that draws the same blocked-and-clustered design many times should set `check_inputs = FALSE` on whichever function it uses, having checked the design once outside the loop.
 
@@ -283,14 +288,18 @@ knitr::kable(
 ```
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "Median milliseconds per draw against N for two-arm cube-on-X. Absolute times vary by machine; the ranking is the object of interest."}
+cube_lab <- cube_times[cube_times$N == max(cube_times$N), ]
+cube_lab$vjust <- ifelse(cube_lab$method == "sampling::samplecube", 1.9, -0.9)
 ggplot(cube_times, aes(N, ms, color = method, shape = method)) +
   geom_line() +
   geom_point() +
+  geom_text(data = cube_lab, aes(label = method, vjust = vjust),
+            hjust = 1, size = 2.7, show.legend = FALSE) +
   scale_x_log10(breaks = Ns_cube) +
-  scale_y_log10() +
-  labs(x = "N", y = "ms per draw (median)", color = NULL, shape = NULL) +
+  scale_y_log10(expand = expansion(mult = c(0.1, 0.15))) +
+  labs(x = "N", y = "ms per draw (median)") +
   theme_bw(base_size = 9) +
-  theme(legend.position = "bottom")
+  theme(legend.position = "none")
 ```
 
 On this grid `BalancedSampling::cube` has the smallest median time. `sampling::samplecube` has the largest. `balanced_ra(formula = ~ x)` sits between them. `fastflightcube` is close to `samplecube`: the R flight, not landing, is what costs. Absolute times vary by machine; the ranking is the finding.
