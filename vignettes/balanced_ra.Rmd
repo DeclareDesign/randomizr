@@ -914,7 +914,7 @@ There is no residual condition if the rows of `prob_unit_each` do not sum to 1. 
 
 `check_inputs = FALSE` skips those checks. It is for simulation loops whose probabilities have already been verified. It is not a way to pass illegal designs.
 
-HC2 coverage under these designs is in `vignette("balanced_ra_hc2", package = "randomizr")`.
+HC2 coverage under these designs, and timings against the specialized assignment functions, are covered by two articles on the package site rather than by vignettes in the package, because they are simulation studies rather than documentation of the interface: "HC2 coverage under balanced assignment" and "Speed of balanced_ra relative to complete and blocked assignment", both listed at <https://declaredesign.org/r/randomizr/articles/>.
 
 The default path holds assignment *counts* against their targets. That is not the same as balancing a continuous covariate. Pass `formula` to run cube-on-X on a model matrix; `blocks` tightens counts within discrete groups. The two are different constraints. The function refuses both at once. See `vignette("balanced_ra_covariates", package = "randomizr")`.
 

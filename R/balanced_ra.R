@@ -110,8 +110,11 @@
 #' vignette \code{vignette("balanced_ra", package = "randomizr")} has the
 #' count-tight algorithm. Cube-on-X is in
 #' \code{vignette("balanced_ra_covariates", package = "randomizr")}.
-#' HC2 coverage under these designs is in
-#' \code{vignette("balanced_ra_hc2", package = "randomizr")}.
+#' Two further studies are articles on the package site rather than vignettes
+#' in the package, listed at
+#' \url{https://declaredesign.org/r/randomizr/articles/}: "HC2 coverage under
+#' balanced assignment", and "Speed of balanced_ra relative to complete and
+#' blocked assignment".
 #'
 #' @param N The number of units. Optional when \code{formula} or the length of
 #'   \code{prob_unit} (or \code{blocks}, \code{clusters}, or \code{data})

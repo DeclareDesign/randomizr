@@ -122,6 +122,62 @@ with(data.frame(Z, blocks, clusters),
      tapply(Z, list(blocks, clusters), unique))
 ```
 
+## Balanced random assignment
+
+`balanced_ra` assigns units when the probability of assignment varies from unit to unit, and it holds the number assigned to each condition at the floor or the ceiling of that condition's expected count. Neither of the algorithms above will do that job. Complete random assignment fixes the counts but requires one probability shared by every unit; simple random assignment allows the probabilities to vary but fixes no counts at all. `balanced_ra` is the design that does both, and it is cube/pivotal assignment on the same interface as `complete_ra` and `block_ra`.
+
+The input is an $N \times k$ matrix $\pi$ of assignment probabilities. Row $i$ sums to 1, so each unit receives exactly one condition. Column $j$ sums to a target $t_j = \sum_i \pi_{ij}$. The output is a 0-1 matrix $Z$ with the same row sums and with $E[Z] = \pi$, whose column sums are required to be as close to $t$ as integer arithmetic allows: each realized count $n_j$ satisfies $n_j \in \{\lfloor t_j \rfloor, \lceil t_j \rceil\}$.
+
+### Cycles, then paths
+
+Picture the algorithm as a flow on the bipartite graph of units and conditions, with an edge wherever a cell is still fractional. A cycle in that graph is a closed walk that alternates between units and conditions. Pushing a constant $\delta$ forward along the even edges and backward along the odd edges leaves every row total and every column total unchanged, and a large enough $\delta$ drives at least one cell to 0 or 1. Repeat until no cycle remains. That is the *flight* phase, in the terminology of the cube method.
+
+What remains is a forest. Every unit still has either no fractional cells or at least two of them: a unit with a single fractional cell would need that cell to be an integer, because its other cells are already 0 or 1 and the row sums to 1. Every leaf of the forest is therefore a condition, and a maximal path runs from one condition to another. Pushing along such a path preserves every row total and every interior column total; only the two conditions at the ends move. That is the *landing* phase.
+
+Each push is a fair bet. If the largest feasible up-step is $d^{+}$ and the largest feasible down-step is $d^{-}$, the algorithm takes the up-step with probability $d^{-}/(d^{+}+d^{-})$, which makes the current matrix a martingale:
+
+$$E[Z^{(t+1)} \mid Z^{(t)}] = Z^{(t)}.$$
+
+Unrolling the martingale gives $E[Z] = \pi$. The inclusion probabilities are exactly the probabilities supplied, not an approximation to them. The same degree bound that appears in dependent rounding explains the floor-or-ceiling counts: when the walk finishes, each vertex of the bipartite graph has integer degree equal to the floor or the ceiling of the fractional degree it started with. For a condition that degree is the number of units assigned to it; for a unit it is 1.
+
+Two arms are a special case worth naming, because it is the one most designs are in. The transportation graph is then a forest of stars, one edge per unit, so every maximal path runs from one unit through its block to another unit, and the general walk collapses to the pivotal method of Deville and Tillé (1998): transfer mass between two units until one of them hits 0 or 1, with the direction chosen so that the step is a martingale and the total stays exact. Three or more arms take the windowed flight of Chauvet and Tillé (2006), whose cost is linear in $N$ because only as many units as there are constraints need to be examined at once. A window of $k$ fractional units induces at least $2k$ edges on at most $2k$ nodes, and a graph with at least as many edges as nodes is not a forest, so the window always holds a cycle until too few fractional units remain.
+
+### What the papers guarantee, and what this implementation guarantees
+
+The distinction matters, because the two are not the same. Deville and Tillé (2004) supply the martingale and the flight/landing split for balanced sampling in general, where the balancing constraints are linear equalities: in survey sampling, that the Horvitz–Thompson totals of auxiliary variables match known population totals. Landing may violate a constraint that was dropped to reach a vertex, and the paper does not claim that every balancing constraint survives all the way to the sample. `balanced_ra` applies that method to one particular constraint system, the transportation polytope of nonnegative $N \times k$ matrices with row sums 1 and column sums $t$. Cycle moves are the kernel directions; path moves are landing. Nothing in the papers, by itself, says that a blocked assignment problem will come out tight both within each block and overall.
+
+What this implementation guarantees is that every unit receives exactly one condition, that each unit's probability of each condition equals the supplied $\pi_{ij}$, and that condition counts are the floor or the ceiling of the target at a stated level:
+
+- without `blocks`, the overall counts are tight;
+- with `blocks`, the within-block counts are always tight;
+- with `blocks` and two arms, the overall counts are tight as well;
+- with `clusters`, the tight counts are counts of clusters, not of units.
+
+The two-arm overall-and-block result is an implementation choice rather than a named theorem that the cube always does both. After a first pivotal pass inside each block, at most one unit per block is still fractional. A second pass pairs those leftovers as a single group. Pairing preserves their total, so the overall count stays tight, and each leftover is still sent to 0 or 1, so no block moves by more than one from its target. Independent Bernoulli rounding of each leftover would have kept each block tight and let the overall count drift by up to the number of blocks.
+
+### Caveats
+
+`balanced_ra` is experimental and its interface may change.
+
+The leftover pairing does not extend to three or more arms. A block can keep several leftover units, and landing those leftovers as one global group could push a within-block arm count more than one away from its target, so the implementation lands each block on its own instead. Within-block counts stay at the floor or the ceiling, and the overall count is the sum of independent block landings, which can move by more than one when several remainders fall the same way. Three blocks of two units, three arms, every probability $1/3$: each tight block gives each arm 0 or 1, the overall target is 2, and the three blocks can put an arm at 0 or at 3.
+
+```{r}
+set.seed(16)
+P <- matrix(1/3, 6, 3)
+bl <- rep(1:3, each = 2)
+Z <- replicate(2000, as.integer(as.character(
+  balanced_ra(prob_unit_each = P, blocks = bl, conditions = 1:3))))
+table(colSums(Z == 1))
+```
+
+Arm 1's overall count is not confined to $\{1, 2\}$. The coupling that would confine it is feasible, since Hamilton's method of apportionment would give each arm to exactly two of the three blocks, and this implementation does not do it when $k > 2$.
+
+There is no residual condition if the rows of `prob_unit_each` do not sum to 1, and no interpretation of a probability greater than 1 as an expected count. Both are refused. `check_inputs = FALSE` skips those checks, and it is meant for simulation loops whose probabilities have already been verified rather than as a way to pass illegal designs.
+
+Holding assignment *counts* against their targets is not the same thing as balancing a continuous covariate. Passing `formula` runs cube-on-X on a model matrix, and `blocks` tightens counts within discrete groups; the two are different constraints, and the function refuses both at once. See `vignette("balanced_ra_covariates", package = "randomizr")`.
+
+The practical summary is short. Use `balanced_ra` when probabilities vary across units and the assigned counts should stay as close to their targets as arithmetic allows. Trust overall tightness without `blocks`, and both overall and within-block tightness with two arms. Do not trust overall tightness with three or more arms and `blocks`. The full walk-through, with one two-arm draw and one four-by-three draw shown cell by cell, is in `vignette("balanced_ra", package = "randomizr")`. HC2 coverage under these designs is in the article "HC2 coverage under balanced assignment", on the package site at <https://declaredesign.org/r/randomizr/articles/>.
+
 ## Probability calculations
 
 For every design type, a companion `*_probabilities` function returns the matrix of assignment probabilities, one row per unit and one column per arm. Inverse-probability-weighted estimators use these probabilities, and `declare_ra` stores them in the declaration object.
@@ -136,3 +192,13 @@ prob_mat <- block_ra_probabilities(
 )
 head(prob_mat)
 ```
+
+## References
+
+Chauvet, G. and Tillé, Y. (2006). A fast algorithm for balanced sampling. *Computational Statistics* 21(1), 53–62. <https://doi.org/10.1007/s00180-006-0250-2>
+
+Deville, J.-C. and Tillé, Y. (1998). Unequal probability sampling without replacement through a splitting method. *Biometrika* 85(1), 89–101. <https://doi.org/10.1093/biomet/85.1.89>
+
+Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube method. *Biometrika* 91(4), 893–912. <https://doi.org/10.1093/biomet/91.4.893>
+
+Deville, J.-C. and Tillé, Y. (2005). Variance approximation under balanced sampling. *Journal of Statistical Planning and Inference* 128(2), 569–591. <https://doi.org/10.1016/j.jspi.2003.11.011>. `balanced_ra` does not implement these estimators.

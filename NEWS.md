@@ -16,9 +16,9 @@ Two-arm cube-on-X is linear in the number of units again. The flight phase rebui
 
 `vignette("balanced_ra")` walks through one two-arm draw as a four-panel figure whose titles state why a cell is driven to 0, not only the result, and one four-unit, three-arm draw from `prob_unit_each` rows (0.2, 0.4, 0.4), (0.4, 0.3, 0.3), (0.6, 0.2, 0.2), (0.8, 0.1, 0.1).
 
-`vignette("balanced_ra_hc2")` re-simulates inverse-probability-weighted HC2 coverage under the current `balanced_ra()` implementation. Assignment is dependent; on the two-arm, blocked, and three-arm designs in that vignette, 95 percent intervals sit near 95 percent.
+The article "HC2 coverage under balanced assignment", now on the [package site](https://declaredesign.org/r/randomizr/articles/) rather than in the package, re-simulates inverse-probability-weighted HC2 coverage under the current `balanced_ra()` implementation. Assignment is dependent; on the two-arm, blocked, and three-arm designs there, 95 percent intervals sit near 95 percent. Under the `formula` design they are conservative, and the article says so.
 
-`vignette("balanced_ra_speed")` times `balanced_ra()` against `complete_ra()`, `block_ra()`, and `block_and_cluster_ra()` on the equal-probability cases those specialized functions already handle.
+The article "Speed of balanced_ra relative to complete and blocked assignment", now on the [package site](https://declaredesign.org/r/randomizr/articles/) rather than in the package, times `balanced_ra()` against `complete_ra()`, `block_ra()`, and `block_and_cluster_ra()` on the equal-probability cases those specialized functions already handle.
 
 `%||%` is used internally when a scalar `prob_unit` needs `N` inferred from `blocks` or `clusters`. The operator is defined in the package so the call works on R < 4.4, where it is not yet in base.
 

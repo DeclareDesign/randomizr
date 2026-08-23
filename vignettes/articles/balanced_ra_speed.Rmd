@@ -24,7 +24,7 @@ library(ggplot2)
 
 `balanced_ra()` is the general assignment function when probabilities may vary by unit. When every unit has the same probability, `complete_ra()`, `block_ra()`, and `block_and_cluster_ra()` already implement the same designs. This note times the general function against those specialized functions on the equal-probability cases.
 
-Three results from the grid below. First, on two-arm complete assignment `complete_ra()` is faster once $N$ is a few thousand; at $N = 200$ the two are close and the ranking can flip from run to run. Second, blocked assignment is close to even: `block_ra()` uses a specialized Knuth-shuffle path, and the cube walk in `balanced_ra()` does not pull away. Third, blocked-and-clustered assignment is much slower in `block_and_cluster_ra()`, which rebuilds the cluster-to-block map on every draw.
+Three results from the grid below. First, on two-arm complete assignment `complete_ra()` is faster once $N$ is a few thousand; at $N = 200$ the two are close and the ranking can flip from run to run. Second, blocked assignment is close to even: `block_ra()` uses a specialized Knuth-shuffle path, and the cube walk in `balanced_ra()` does not pull away. Third, on blocked-and-clustered assignment `balanced_ra()` is the faster of the two once validation is switched off on both sides, by a factor of roughly three to four, because `block_and_cluster_ra()` rebuilds the cluster-to-block map on every draw. At the settings a user actually gets, with validation on, that result reverses: see [Reading the ratios](#reading-the-ratios).
 
 `balanced_ra()` is the general tool. The specialized functions exist to be faster on the equal-$p$ cases. Use them when they apply.
 
@@ -34,7 +34,7 @@ A later section times two-arm cube-on-X against `BalancedSampling::cube` and `sa
 
 Each cell draws the same two-arm design twice, once with the specialized function and once with `balanced_ra()`, and records elapsed seconds for a fixed number of draws. The ratio is balanced time divided by specialized time. A ratio above 1 means `balanced_ra()` is slower.
 
-The timed loop sets `check_inputs = FALSE` on `balanced_ra()` so the comparison is assignment cost, not validation. The specialized functions are called as they usually are. Probability is the default $0.5$ everywhere. Blocks are equal in size. Cluster designs nest clusters of size 10 inside those blocks.
+The timed loop sets `check_inputs = FALSE` on **both** sides, so the comparison is assignment cost rather than validation cost. Symmetry here is not cosmetic. Every version of this note before randomizr 2.0.1 switched validation off on `balanced_ra()` only, because `check_inputs = FALSE` did not work at all for `block_ra()`, `cluster_ra()`, or `block_and_cluster_ra()`: the same code path that validated the arguments also derived `num_arms` and `conditions`, so skipping the validation skipped the derivation and the call failed. The two sides could not be timed on equal terms until that was fixed, and the conclusion it produced for blocked-and-clustered designs was the wrong way round. Probability is the default $0.5$ everywhere. Blocks are equal in size. Cluster designs nest clusters of size 10 inside those blocks.
 
 ```{r}
 Ns <- c(200L, 2000L, 10000L)
@@ -78,7 +78,7 @@ for (N in Ns) {
   n <- nrep_for(N)
   rows[[length(rows) + 1L]] <- row_out(
     "complete", N, NA_integer_, NA_integer_, n,
-    time_n(n, function() complete_ra(N)),
+    time_n(n, function() complete_ra(N, check_inputs = FALSE)),
     time_n(n, function() balanced_ra(N, check_inputs = FALSE))
   )
 }
@@ -90,7 +90,7 @@ for (N in Ns) {
     n <- nrep_for(N)
     rows[[length(rows) + 1L]] <- row_out(
       "blocked", N, nb, NA_integer_, n,
-      time_n(n, function() block_ra(blocks = blocks)),
+      time_n(n, function() block_ra(blocks = blocks, check_inputs = FALSE)),
       time_n(n, function() balanced_ra(blocks = blocks, check_inputs = FALSE))
     )
   }
@@ -106,7 +106,8 @@ for (N in Ns) {
     n <- nrep_for(N)
     rows[[length(rows) + 1L]] <- row_out(
       "block_cluster", N, nb, cluster_size, n,
-      time_n(n, function() block_and_cluster_ra(blocks = blocks, clusters = clusters)),
+      time_n(n, function() block_and_cluster_ra(blocks = blocks, clusters = clusters,
+                                               check_inputs = FALSE)),
       time_n(n, function() balanced_ra(blocks = blocks, clusters = clusters,
                                       check_inputs = FALSE))
     )
@@ -174,7 +175,9 @@ On complete assignment the specialized function is the faster path at large $N$.
 
 On blocked assignment the two stay near a ratio of 1. `block_ra()` already has a C++ Knuth-shuffle fast path for the two-arm equal-$p$ case. Replacing it with the cube does not buy time, and usually does not cost much either.
 
-On blocked-and-clustered assignment `balanced_ra()` is faster, often by a factor of five or more. `block_and_cluster_ra()` calls `tapply()` on every draw to collapse units to clusters. `balanced_ra()` assigns at the cluster level from a collapsed probability matrix. The gap is setup, not the cube.
+On blocked-and-clustered assignment `balanced_ra()` is faster, by a factor of roughly three to four across this grid. `block_and_cluster_ra()` calls `tapply()` on every draw to collapse units to clusters, and `order(unlist(split()))` to put them back; on a $N = 10{,}000$ draw that setup is most of the elapsed time. `balanced_ra()` assigns at the cluster level from a collapsed probability matrix. The gap is setup, not the cube.
+
+That result holds only because both sides have validation switched off. At default settings it reverses, and `balanced_ra()` is the slower of the two by a factor of about 1.1 at $N = 200$ rising to about 3.1 at $N = 10{,}000$. The reason is symmetric to the one above: `balanced_ra_matrix()` validates clusters with a per-draw `tapply()` over every column of the probability matrix, which is the same kind of per-draw setup cost, paid on the other side. Neither function's validation is free, and a comparison that switches one off and leaves the other on measures the switch rather than the algorithm. Cheapening that cluster validation is an open item; until it lands, a simulation loop that draws the same blocked-and-clustered design many times should set `check_inputs = FALSE` on whichever function it uses, having checked the design once outside the loop.
 
 None of these comparisons is a reason to call `balanced_ra()` when probabilities are constant. They say only what the general function costs on the cases the specialized functions already cover. When probabilities vary by unit, those specialized functions do not apply.
 

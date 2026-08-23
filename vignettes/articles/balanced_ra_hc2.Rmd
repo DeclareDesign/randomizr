@@ -24,7 +24,11 @@ library(estimatr)
 library(ggplot2)
 ```
 
-Under the designs simulated here, HC2 95 percent intervals cover the ATE at 0.945 (two-arm), 0.941 (blocked two-arm), and 0.954 (three-arm), each from 2,000 draws. Independent Bernoulli assignment on the same two-arm DGP covers at 0.935. Assignment dependence is real: the mean pairwise correlation is $-0.20$ under balanced assignment and $0.00$ under simple assignment, and the treated count does not wander. That dependence does not throw HC2 off on these designs. Two-arm coverage sits a shade below 95 percent; three-arm coverage sits a shade above. Section 1 states why one might have worried. Section 2 reports the simulations. The claim is limited to the designs below. It is not a theorem about every cube design.
+The answer depends on which `balanced_ra()` design is meant, and the two halves of it point in opposite directions. On the count-tight designs, where the function holds the number of treated units at the floor or the ceiling of its target, HC2 95 percent intervals cover the ATE at 0.945 (two-arm), 0.941 (blocked two-arm), and 0.954 (three-arm), each from 2,000 draws. Independent Bernoulli assignment on the same two-arm DGP covers at 0.935. Assignment dependence is real: the mean pairwise correlation is $-0.20$ under balanced assignment and $0.00$ under simple assignment, and the treated count does not wander. That dependence does not throw HC2 off on those designs.
+
+On the `formula` design, where the function also holds a linear covariate total near its target, it does. Coverage there is 1.000 with a standard error about two and a half times the estimator's true sampling standard deviation. HC2 is conservative under covariate-balanced assignment, which is the price of the design rather than a defect in the estimator, and Lin adjustment repairs it only while the adjustment model is right.
+
+Section 1 states why one might have worried. Section 2 reports the simulations, the count-tight designs first and the `formula` design last. The claims are limited to the designs below. Neither is a theorem about every cube design.
 
 # 1. Why one might have worried
 
@@ -61,14 +65,21 @@ c(balanced_pair_cor = mean_offdiag(Z_bal),
 Potential outcomes are fixed. Treatment effects are constant. $Y_i(0)$ is correlated with $p_i$, so inverse-probability weights are needed. Each cell redraws assignment from the current `balanced_ra()` implementation, estimates the ATE by IPW least squares, and records whether the HC2 interval covers the true ATE. Tight loops set `check_inputs = FALSE`. Two thousand draws for the three main designs; one thousand for the grids. Monte Carlo error on a 95 percent coverage rate at 2,000 draws is about half a percentage point.
 
 ```{r}
-cover_ipw <- function(assign, p, y0, tau, nrep) {
+# x is the covariate to adjust for, or NULL for no adjustment. sd_est is the
+# true sampling standard deviation of the estimator; mean_se is what the
+# estimator thinks it is. The two agreeing is the thing being tested.
+cover_ipw <- function(assign, p, y0, tau, nrep, x = NULL) {
   cover <- logical(nrep)
   se <- est <- numeric(nrep)
   for (r in seq_len(nrep)) {
-    Z <- assign()
+    Z <- as.numeric(as.character(assign()))
     Y <- y0 + tau * Z
     w <- Z / p + (1 - Z) / (1 - p)
-    fit <- lm_robust(Y ~ Z, weights = w, se_type = "HC2")
+    fit <- if (is.null(x)) {
+      lm_robust(Y ~ Z, weights = w, se_type = "HC2")
+    } else {
+      lm_lin(Y ~ Z, covariates = ~ x, weights = w, se_type = "HC2")
+    }
     est[r] <- fit$coefficients[["Z"]]
     se[r]  <- fit$std.error[["Z"]]
     cover[r] <- fit$conf.low[["Z"]] <= tau && tau <= fit$conf.high[["Z"]]
@@ -76,6 +87,7 @@ cover_ipw <- function(assign, p, y0, tau, nrep) {
   data.frame(
     coverage = mean(cover),
     mean_est = mean(est),
+    sd_est   = sd(est),
     mean_se  = mean(se),
     nrep = nrep,
     stringsAsFactors = FALSE
@@ -145,6 +157,7 @@ cover_multi <- function(P, y0, tau, nrep) {
   data.frame(
     coverage = mean(cover),
     mean_est = mean(est),
+    sd_est   = sd(est),
     mean_se  = mean(se),
     nrep = nrep,
     stringsAsFactors = FALSE
@@ -210,10 +223,58 @@ ggplot(grid, aes(x, coverage)) +
   labs(x = NULL, y = "HC2 coverage")
 ```
 
+## The `formula` design, where HC2 is no longer neutral
+
+Everything above is the count-tight design: `balanced_ra()` holds the number of treated units at the floor or the ceiling of its target, and nothing else. Passing `formula` asks for something stronger. The design then holds a linear covariate total near its target too, which is the cube method run on a model matrix, and it is the case in which HC2 stops being roughly right.
+
+$N = 200$, $p_i = 0.5$ throughout, $x$ standard normal, and $Y_i(0) = 3x_i + \varepsilon_i$, so $x$ is strongly prognostic. `balanced_ra(formula = ~ x)` balances the treated total of $x$; `complete_ra()` is the same design without that constraint. Each is estimated twice, once unadjusted and once with Lin adjustment on $x$.
+
+```{r}
+N_f <- 200L
+x_f <- rnorm(N_f)
+p_f <- rep(0.5, N_f)
+y0_f <- 3 * x_f + rnorm(N_f)
+
+bal_f <- function() balanced_ra(N = N_f, formula = ~ x_f, check_inputs = FALSE)
+com_f <- function() complete_ra(N = N_f, check_inputs = FALSE)
+
+formula_design <- rbind(
+  cbind(design = "balanced ~ x", adjustment = "none",
+        cover_ipw(bal_f, p_f, y0_f, tau, nrep_main)),
+  cbind(design = "balanced ~ x", adjustment = "Lin",
+        cover_ipw(bal_f, p_f, y0_f, tau, nrep_main, x = x_f)),
+  cbind(design = "complete", adjustment = "none",
+        cover_ipw(com_f, p_f, y0_f, tau, nrep_main)),
+  cbind(design = "complete", adjustment = "Lin",
+        cover_ipw(com_f, p_f, y0_f, tau, nrep_main, x = x_f))
+)
+formula_design
+```
+
+Read the `sd_est` and `mean_se` columns together. Under complete assignment they agree and coverage is nominal, adjusted or not. Under `~ x` the unadjusted estimator is far more precise, because the design has removed the imbalance in $x$ that was most of its sampling variance, and HC2 does not know that: the reported standard error is close to two and a half times the estimator's true standard deviation, and coverage is **1.000**. The interval is not wrong in the direction that matters for a false positive. It is wrong in the direction that throws away the precision the design was chosen to buy.
+
+Lin adjustment recovers the nominal rate here, at 0.93 to 0.95 depending on the potential outcomes drawn, because regressing on $x$ removes from the residual the same variation the design removed from the assignment. That repair holds only while the adjustment model is right. Replace $Y_i(0) = 3x_i + \varepsilon_i$ with $Y_i(0) = 3x_i^2 + \varepsilon_i$ and adjust linearly, and coverage under `~ x` goes back to 1.000 with the standard error again more than twice too large. Adjustment cannot recover what the design removed unless it is told the right functional form.
+
+```{r}
+y0_q <- 3 * x_f^2 + rnorm(N_f)
+
+quadratic <- rbind(
+  cbind(adjustment = "none",
+        cover_ipw(bal_f, p_f, y0_q, tau, nrep_main)),
+  cbind(adjustment = "Lin",
+        cover_ipw(bal_f, p_f, y0_q, tau, nrep_main, x = x_f))
+)
+quadratic
+```
+
+`estimatr::horvitz_thompson()` does not rescue this either. It is correct on this design in the sense that it does not mislead about the point estimate, and its interval is conservative for the same reason: the joint inclusion probabilities of a cube design have no closed form, so it falls back on complete randomization. Since randomizr 2.0.1 it warns when a declaration carrying a `formula` reaches it.
+
+The honest headline for the `formula` design is therefore not that HC2 is unaffected. It is that HC2 is **conservative**, and that the conservatism is the price of the design rather than a defect in the estimator. Three variance estimators (HC2, Lin-adjusted HC2 under a misspecified adjustment, and Horvitz-Thompson) are all blind to the constraint the design imposes. A better interval for cube-on-X is a research question, not a patch.
+
 # 3. What this does not say
 
-These are the designs that were drawn: two-arm unit-varying $p$, the same design assigned independently, blocked two-arm with $p$ varying inside blocks, and a three-arm cube design. HC2 intervals sat near 95 percent in each case. Two-arm rates were 0.94–0.95; the three-arm rate was 0.954. Assignment dependence is visible and does not wreck the intervals here.
+These are the designs that were drawn: two-arm unit-varying $p$, the same design assigned independently, blocked two-arm with $p$ varying inside blocks, a three-arm cube design, and two-arm cube-on-X through `formula`. On the first four, HC2 intervals sat near 95 percent: two-arm rates of 0.94–0.95 and a three-arm rate of 0.954. Assignment dependence is visible there and does not wreck the intervals. On the fifth, it does, in the conservative direction.
 
-The note does not say that HC2 is valid for every cube design. It does not speak to cluster-robust standard errors, to randomization inference, or to designs that empty an arm. Use the simulation if a design sits far from these.
+The note does not say that HC2 is valid for every cube design, and the `formula` result is the case that shows why the qualification is needed rather than polite. It does not speak to cluster-robust standard errors, to randomization inference, or to designs that empty an arm. Use the simulation if a design sits far from these.
 
-The takeaway is narrow. Tight counts induce dependence. On the designs above, that is not a reason to drop HC2.
+The takeaway is in two parts. Tight counts induce dependence, and on the count-tight designs above that is not a reason to drop HC2. Balancing a covariate induces dependence that HC2 cannot see, and there the interval is too wide by a factor the design chose to buy and the estimator cannot spend.
