@@ -26,7 +26,7 @@ complete_ra(
 
 \item{m_each}{Use for a multi-arm design. A numeric vector giving the exact number of units assigned to each condition; must sum to N. (optional)}
 
-\item{prob}{Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. Must be between 0 and 1. (optional)}
+\item{prob}{Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. Must be between 0 and 1. One edge is deliberate: when \code{ceiling(N*prob) == N} (for instance \code{N = 3, prob = 0.9}), exactly \code{floor(N*prob)} units are treated, never all \code{N}, so the marginal probability is \code{floor(N*prob)/N}; \code{\link{complete_ra_probabilities}()} reports the probability actually used. (optional)}
 
 \item{prob_unit}{Use for a two-arm design. \code{unique(prob_unit)} will be passed to the \code{prob} argument; must be the same for all units. (optional)}
 

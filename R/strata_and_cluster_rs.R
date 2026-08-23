@@ -88,11 +88,11 @@ strata_and_cluster_rs <-
     clust_strata <- tapply(strata, clusters, unique)
     
     if(!is.null(prob_unit)){
-      strata_prob <- tapply(prob_unit, strata, unique)
+      strata_prob <- as.vector(tapply(prob_unit, strata, unique))
     }
     
     if(!is.null(n_unit)){
-      strata_n <- tapply(n_unit, strata, unique)
+      strata_n <- as.vector(tapply(n_unit, strata, unique))
     }
     
     # Conduct random assignment at cluster level
@@ -193,11 +193,11 @@ strata_and_cluster_rs_probabilities <-
     clust_strata <- tapply(strata, clusters, unique)
     
     if(!is.null(prob_unit)){
-      strata_prob <- tapply(prob_unit, strata, unique)
+      strata_prob <- as.vector(tapply(prob_unit, strata, unique))
     }
     
     if(!is.null(n_unit)){
-      strata_n <- tapply(n_unit, strata, unique)
+      strata_n <- as.vector(tapply(n_unit, strata, unique))
     }
     
     probs_clust <- strata_rs_probabilities(

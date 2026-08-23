@@ -42,7 +42,7 @@ declare_rs(
 \item{check_inputs}{Logical. Whether to verify before declaring that the arguments are internally consistent: that counts do not exceed the frame, that probabilities lie between 0 and 1, that stratum-level arguments have one entry per stratum, and so on. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when declaring many designs from arguments that have already been verified. (optional)}
 }
 \value{
-A list of class \code{"rs_declaration"} with entries:
+An object of class \code{"rs_declaration"} (an environment, addressable like a list) with entries:
   \describe{
     \item{\code{rs_function}}{A function that draws a random sample from the declared procedure.}
     \item{\code{rs_type}}{A string indicating the type of random sampling used.}

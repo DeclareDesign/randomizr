@@ -51,7 +51,7 @@ be the same for every unit in a cluster, and the tight counts become counts
 of clusters rather than of units. May be combined with \code{blocks}, in which
 case every cluster must sit entirely inside one block. (optional)}
 
-\item{num_arms}{The number of treatment arms. Inferred when omitted. (optional)}
+\item{num_arms}{The number of treatment arms. Inferred when omitted. Supplied without any probability argument, \code{num_arms} (or \code{conditions}) of three or more expands to equal-probability assignment, as in \code{\link{complete_ra}()}. (optional)}
 
 \item{conditions}{A vector giving the names of the conditions. (optional)}
 
@@ -71,8 +71,10 @@ looked up once, when the design is declared, rather than on every draw. Not
 for direct use. (optional)}
 }
 \value{
-A vector of length N giving the condition of each unit, numeric in a
-  two-arm design and a factor (ordered by \code{conditions}) in a multi-arm design.
+A vector of length N giving the condition of each unit. As in
+  \code{\link{complete_ra}()}: integer 0/1 in a two-arm design, unless
+  \code{num_arms} or \code{conditions} is supplied explicitly, in which
+  case a factor ordered by \code{conditions}; a factor in a multi-arm design.
 }
 \description{
 \strong{Experimental.} \code{balanced_ra} assigns units to conditions when the
@@ -119,13 +121,13 @@ probabilities vary from unit to unit, the two targets come apart.
 
 Suppose \eqn{p_i} rises with \eqn{x_i}. High-\eqn{x} units are meant to be
 treated more often, so the treated group ought to have the higher mean of
-\eqn{x}, and it does. On 200 units with a correlation of 0.98 between
-\eqn{p} and \eqn{x}, the treated-minus-control difference in \eqn{x} averages
-0.91 standard deviations under \code{formula = ~ x}, which is what
+\eqn{x}, and it does: the average treated-minus-control difference in
+\eqn{x} under \code{formula = ~ x} is the same one
 \code{\link{simple_ra}()} gives on the same probabilities. What the cube
-tightens is the spread of that difference around its target, from 0.099 to
-0.020, and the Horvitz-Thompson residual for the \eqn{x} total, from 4.91 to
-1.01.
+tightens, several-fold in the simulations in
+\code{vignette("balanced_ra_covariates")}, is the spread of that
+difference around its target, and with it the Horvitz-Thompson residual
+for the \eqn{x} total.
 
 In short, \code{formula} does not equalize the arms when \eqn{p_i} varies, and
 it is not meant to. Weight by the reciprocal of the assignment probability, as
@@ -139,16 +141,16 @@ by. With a constant \eqn{p} the question does not arise.
 The flight phase sorts units by the first non-intercept column of \eqn{X} and
 works through them in a sliding window, so each step pairs units with nearby
 values of that column. The design therefore balances smooth functions of the
-first covariate and not only its linear total. On 200 units with a constant
-\eqn{p}, the standard deviation of the treated-minus-control difference runs
-0.023 in \eqn{x}, 0.045 in \eqn{x^2} and 0.042 in \eqn{x^3}, against 0.145,
-0.140 and 0.142 under \code{\link{complete_ra}()}. The gain is real and it is
-free.
+first covariate and not only its linear total: in simulations at
+\eqn{N = 200} with a constant \eqn{p}, the treated-minus-control spread in
+\eqn{x^2} and \eqn{x^3} runs several times tighter than under
+\code{\link{complete_ra}()}, though how much tighter varies with the
+covariate draw, and a heavy-tailed \eqn{x} narrows the gain.
 
-The gain is also uneven. Only the first non-intercept column drives the sort,
-so under \code{~ x1 + x2} the standard deviation in \eqn{x_1^2} is 0.037 while
-the standard deviation in \eqn{x_2^2} is 0.125, about what complete assignment
-leaves. Both linear totals are held tight. A covariate you name but
+The gain is also uneven. Only the first non-intercept column drives the
+sort, so under \code{~ x1 + x2} the spread in \eqn{x_1^2} tightens while
+the spread in \eqn{x_2^2} stays about where complete assignment leaves it.
+Both linear totals are held tight. A covariate you name but
 do not put first is balanced in its own right and in nothing else, and a
 covariate you do not name at all is not balanced.
 
@@ -163,32 +165,34 @@ formula.
 \code{formula} removes assignment variance that the usual variance estimators
 do not know about, so they report intervals wider than the true sampling
 variability warrants. HC2 on an unadjusted regression covered the true effect
-on 1.000 of 3,000 draws at \eqn{N = 200} with a strongly prognostic \eqn{x},
-its average standard error about twice the true sampling standard deviation.
-Horvitz-Thompson through \code{estimatr::horvitz_thompson()} runs from correct
-to twice too wide, depending on how well \eqn{X} predicts the outcome; that
-function warns when it is handed a declaration with a formula. Coverage
-stayed at or above the
+on every draw simulated at \eqn{N = 200} with a strongly prognostic \eqn{x},
+its average standard error more than twice the true sampling standard
+deviation; the article "HC2 coverage under balanced assignment" on the
+package site carries the simulation. Horvitz-Thompson through
+\code{estimatr::horvitz_thompson()} runs from correct to about twice too
+wide, depending on how well \eqn{X} predicts the outcome; estimatr's
+development version (2.0.0, not yet on CRAN) warns when it is handed a
+declaration with a formula. Coverage stayed at or above the
 nominal rate in everything measured, so the intervals are valid. They are
 merely wasteful.
 
 Covariate adjustment recovers the precision the design bought. Fitting Lin's
 estimator on the same columns returned intervals near their nominal width and
-0.95 coverage. Adjustment does not always suffice: when the outcome was
+coverage near 0.95. Adjustment does not always suffice: when the outcome was
 quadratic in \eqn{x} and the adjustment was linear in \eqn{x}, coverage
-returned to 1.000 while the sampling variance fell to 0.202 of what complete
-assignment plus the same adjustment delivered. Insurance against a
+returned to 1.000 while the sampling variance fell to about a fifth of what
+complete assignment plus the same adjustment delivered. Insurance against a
 misspecified adjustment model is the clearest case for this design, and it is
 the case in which the reported interval understates what was gained.
 
 An exact variance for cube assignment is not a missing feature. Joint
 inclusion probabilities have no closed form, which is what Deville and
-Tille (2005) approximate; randomizr does not implement that approximation.
+Tillé (2005) approximate; randomizr does not implement that approximation.
 }
 
 \section{Experimental}{
 
-This function is new in randomizr 2.0.0 and its interface may change. Declare
+This function is new in randomizr 2.0.1 and its interface may change. Declare
 a design with [declare_ra()] by setting \code{ra_type = "balanced"} or by
 supplying \code{prob_unit_each} or \code{formula}; \code{\link{conduct_ra}()}
 and \code{\link{obtain_condition_probabilities}()} then dispatch here. The

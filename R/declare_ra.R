@@ -31,7 +31,7 @@
 #' @param data A data frame holding the design's variables. When supplied, every argument that carries one value per unit names columns of it and is looked up there and nowhere else: \code{blocks}, \code{clusters}, \code{m_unit}, \code{prob_unit}, \code{prob_unit_each}, and the variables in \code{formula}. Anything they name that is not a column is an error rather than a fall-through to the calling environment. A bare column name is the ordinary case; any expression works so long as every variable in it is a column, so \code{blocks = interaction(region, year)} and \code{prob_unit_each = cbind(p_a, p_b)} are fine and \code{blocks = df$bl} is not, because it names \code{df}. A string naming a column is also accepted. \code{N} defaults to \code{nrow(data)}. A declaration outlives the frame it was written in, so this is how to make it say exactly which variables it is built from. \code{permutation_matrix} is not resolved this way: it has one row per unit but enumerates assignments rather than describing units. When \code{data} is omitted, everything resolves in the calling environment as before. \code{data} itself is not stored in the declaration; the variables it supplies are. (optional)
 #' @param check_inputs Logical. Whether to verify before declaring that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that block-level arguments have one entry per block, and so on. Defaults to \code{TRUE}. \code{FALSE} skips the checking only: \code{num_arms} and \code{conditions} are still derived from the other arguments. It is skipped entirely when \code{permutation_matrix} is supplied. (optional)
 #'
-#' @return A list of class \code{"ra_declaration"} with entries:
+#' @return An object of class \code{"ra_declaration"} (an environment, addressable like a list) with entries:
 #'   \describe{
 #'     \item{\code{ra_function}}{A function that draws a random assignment from the declared procedure.}
 #'     \item{\code{ra_type}}{A string indicating the type of random assignment used.}
@@ -238,12 +238,19 @@ declare_ra <- function(N = NULL,
     }
   }
   
+  # The closures and promises created below capture this frame, so anything
+  # still bound here lives as long as the declaration does. data in
+  # particular can be a large table; NEWS promises it is validated and
+  # discarded, so discard it.
+  data <- NULL
+  supplied <- NULL
+
   return_object <- list2env(all_args, parent = emptyenv())
 
   # Cache integer factor encoding for blocked designs so conduct_ra() can skip
   # the as.factor + tabulate on every simulation draw (~21 us saved per call).
   if (ra_type %in% c("blocked", "blocked_and_clustered") && !is.null(blocks)) {
-    return_object[[".block_int"]] <- as.integer(as.factor(blocks))
+    return_object[[".block_int"]] <- as.integer(droplevels(as.factor(blocks)))
   }
   
   return_object$ra_function <- function() {
@@ -309,7 +316,11 @@ conduct_ra <- function(declaration = NULL) {
     # columns of `data` rather than arriving here already looked up.
     cl <- match.call()
     cl$declaration <- NULL
-    cl[[1L]] <- quote(declare_ra)
+    # randomizr::, not the bare name: eval() in parent.frame() resolves the
+    # symbol in the caller's environment, so without the namespace prefix
+    # conduct_ra(N = 10) fails when the package is not attached, and any user
+    # object named declare_ra hijacks the call.
+    cl[[1L]] <- quote(randomizr::declare_ra)
     declaration <- eval(cl, parent.frame())
   } else if (!inherits(declaration, "ra_declaration")) {
     stop("You must provide a random assignment declaration created by declare_ra().")
@@ -382,7 +393,7 @@ obtain_condition_probabilities <-
       cl <- match.call()
       cl$declaration <- NULL
       cl$assignment <- NULL
-      cl[[1L]] <- quote(declare_ra)
+      cl[[1L]] <- quote(randomizr::declare_ra)  # namespace-proof, as in conduct_ra
       if (is.null(cl$N)) cl$N <- length(assignment)
       declaration <- eval(cl, parent.frame())
     } else if (!inherits(declaration, "ra_declaration")) {
@@ -589,12 +600,16 @@ prepare_balanced_ra_args <- function(all_args, check_inputs,
   if (is.null(all_args$N)) {
     all_args$N <- nrow(P)
   }
+  num_arms_supplied <- !is.null(all_args$num_arms)
   if (is.null(all_args$num_arms)) {
     all_args$num_arms <- k
   }
   if (is.null(all_args$conditions)) {
-    all_args$conditions <- if (k == 2L && is.null(all_args$prob_unit_each)) {
-      c(0, 1)
+    # complete_ra's convention: two arms are 0 and 1 however the probabilities
+    # were specified, unless num_arms was supplied explicitly, which asks for
+    # named arms.
+    all_args$conditions <- if (k == 2L && !num_arms_supplied) {
+      c(0L, 1L)
     } else {
       paste0("T", seq_len(k))
     }

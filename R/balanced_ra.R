@@ -40,13 +40,13 @@
 #'
 #' Suppose \eqn{p_i} rises with \eqn{x_i}. High-\eqn{x} units are meant to be
 #' treated more often, so the treated group ought to have the higher mean of
-#' \eqn{x}, and it does. On 200 units with a correlation of 0.98 between
-#' \eqn{p} and \eqn{x}, the treated-minus-control difference in \eqn{x} averages
-#' 0.91 standard deviations under \code{formula = ~ x}, which is what
+#' \eqn{x}, and it does: the average treated-minus-control difference in
+#' \eqn{x} under \code{formula = ~ x} is the same one
 #' \code{\link{simple_ra}()} gives on the same probabilities. What the cube
-#' tightens is the spread of that difference around its target, from 0.099 to
-#' 0.020, and the Horvitz-Thompson residual for the \eqn{x} total, from 4.91 to
-#' 1.01.
+#' tightens, several-fold in the simulations in
+#' \code{vignette("balanced_ra_covariates")}, is the spread of that
+#' difference around its target, and with it the Horvitz-Thompson residual
+#' for the \eqn{x} total.
 #'
 #' In short, \code{formula} does not equalize the arms when \eqn{p_i} varies, and
 #' it is not meant to. Weight by the reciprocal of the assignment probability, as
@@ -58,16 +58,16 @@
 #' The flight phase sorts units by the first non-intercept column of \eqn{X} and
 #' works through them in a sliding window, so each step pairs units with nearby
 #' values of that column. The design therefore balances smooth functions of the
-#' first covariate and not only its linear total. On 200 units with a constant
-#' \eqn{p}, the standard deviation of the treated-minus-control difference runs
-#' 0.023 in \eqn{x}, 0.045 in \eqn{x^2} and 0.042 in \eqn{x^3}, against 0.145,
-#' 0.140 and 0.142 under \code{\link{complete_ra}()}. The gain is real and it is
-#' free.
+#' first covariate and not only its linear total: in simulations at
+#' \eqn{N = 200} with a constant \eqn{p}, the treated-minus-control spread in
+#' \eqn{x^2} and \eqn{x^3} runs several times tighter than under
+#' \code{\link{complete_ra}()}, though how much tighter varies with the
+#' covariate draw, and a heavy-tailed \eqn{x} narrows the gain.
 #'
-#' The gain is also uneven. Only the first non-intercept column drives the sort,
-#' so under \code{~ x1 + x2} the standard deviation in \eqn{x_1^2} is 0.037 while
-#' the standard deviation in \eqn{x_2^2} is 0.125, about what complete assignment
-#' leaves. Both linear totals are held tight. A covariate you name but
+#' The gain is also uneven. Only the first non-intercept column drives the
+#' sort, so under \code{~ x1 + x2} the spread in \eqn{x_1^2} tightens while
+#' the spread in \eqn{x_2^2} stays about where complete assignment leaves it.
+#' Both linear totals are held tight. A covariate you name but
 #' do not put first is balanced in its own right and in nothing else, and a
 #' covariate you do not name at all is not balanced.
 #'
@@ -80,30 +80,32 @@
 #' \code{formula} removes assignment variance that the usual variance estimators
 #' do not know about, so they report intervals wider than the true sampling
 #' variability warrants. HC2 on an unadjusted regression covered the true effect
-#' on 1.000 of 3,000 draws at \eqn{N = 200} with a strongly prognostic \eqn{x},
-#' its average standard error about twice the true sampling standard deviation.
-#' Horvitz-Thompson through \code{estimatr::horvitz_thompson()} runs from correct
-#' to twice too wide, depending on how well \eqn{X} predicts the outcome; that
-#' function warns when it is handed a declaration with a formula. Coverage
-#' stayed at or above the
+#' on every draw simulated at \eqn{N = 200} with a strongly prognostic \eqn{x},
+#' its average standard error more than twice the true sampling standard
+#' deviation; the article "HC2 coverage under balanced assignment" on the
+#' package site carries the simulation. Horvitz-Thompson through
+#' \code{estimatr::horvitz_thompson()} runs from correct to about twice too
+#' wide, depending on how well \eqn{X} predicts the outcome; estimatr's
+#' development version (2.0.0, not yet on CRAN) warns when it is handed a
+#' declaration with a formula. Coverage stayed at or above the
 #' nominal rate in everything measured, so the intervals are valid. They are
 #' merely wasteful.
 #'
 #' Covariate adjustment recovers the precision the design bought. Fitting Lin's
 #' estimator on the same columns returned intervals near their nominal width and
-#' 0.95 coverage. Adjustment does not always suffice: when the outcome was
+#' coverage near 0.95. Adjustment does not always suffice: when the outcome was
 #' quadratic in \eqn{x} and the adjustment was linear in \eqn{x}, coverage
-#' returned to 1.000 while the sampling variance fell to 0.202 of what complete
-#' assignment plus the same adjustment delivered. Insurance against a
+#' returned to 1.000 while the sampling variance fell to about a fifth of what
+#' complete assignment plus the same adjustment delivered. Insurance against a
 #' misspecified adjustment model is the clearest case for this design, and it is
 #' the case in which the reported interval understates what was gained.
 #'
 #' An exact variance for cube assignment is not a missing feature. Joint
 #' inclusion probabilities have no closed form, which is what Deville and
-#' Tille (2005) approximate; randomizr does not implement that approximation.
+#' Tillé (2005) approximate; randomizr does not implement that approximation.
 #'
 #' @section Experimental:
-#' This function is new in randomizr 2.0.0 and its interface may change. Declare
+#' This function is new in randomizr 2.0.1 and its interface may change. Declare
 #' a design with [declare_ra()] by setting \code{ra_type = "balanced"} or by
 #' supplying \code{prob_unit_each} or \code{formula}; \code{\link{conduct_ra}()}
 #' and \code{\link{obtain_condition_probabilities}()} then dispatch here. The
@@ -142,7 +144,7 @@
 #'   be the same for every unit in a cluster, and the tight counts become counts
 #'   of clusters rather than of units. May be combined with \code{blocks}, in which
 #'   case every cluster must sit entirely inside one block. (optional)
-#' @param num_arms The number of treatment arms. Inferred when omitted. (optional)
+#' @param num_arms The number of treatment arms. Inferred when omitted. Supplied without any probability argument, \code{num_arms} (or \code{conditions}) of three or more expands to equal-probability assignment, as in \code{\link{complete_ra}()}. (optional)
 #' @param conditions A vector giving the names of the conditions. (optional)
 #' @param formula A model formula whose model matrix is the balancing matrix
 #'   \eqn{X} in the cube method, e.g. \code{~ x + B}. The intercept column is the
@@ -157,8 +159,10 @@
 #'   looked up once, when the design is declared, rather than on every draw. Not
 #'   for direct use. (optional)
 #'
-#' @return A vector of length N giving the condition of each unit, numeric in a
-#'   two-arm design and a factor (ordered by \code{conditions}) in a multi-arm design.
+#' @return A vector of length N giving the condition of each unit. As in
+#'   \code{\link{complete_ra}()}: integer 0/1 in a two-arm design, unless
+#'   \code{num_arms} or \code{conditions} is supplied explicitly, in which
+#'   case a factor ordered by \code{conditions}; a factor in a multi-arm design.
 #'
 #' @references
 #' Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube
@@ -247,6 +251,24 @@ balanced_ra <- function(N = NULL,
                     check_inputs = TRUE,
                     .X = NULL) {
 
+  # num_arms or conditions without probabilities expand to equal-probability
+  # balanced assignment, as they do in complete_ra() and on the declare_ra()
+  # path (prepare_balanced_ra_args does the same there).
+  if (is.null(prob) && is.null(prob_unit) && is.null(prob_unit_each)) {
+    k_default <- num_arms %||%
+      (if (!is.null(conditions)) length(conditions) else NULL)
+    if (!is.null(k_default) && k_default != 2L) {
+      n0 <- N %||% (if (!is.null(blocks)) length(blocks)
+                    else if (!is.null(clusters)) length(clusters) else NULL)
+      if (is.null(n0)) {
+        stop("With `num_arms` or `conditions` alone, supply `N`, `blocks` or ",
+             "`clusters` so the number of units is known.", call. = FALSE)
+      }
+      prob_unit_each <- matrix(1 / k_default, n0, k_default)
+    }
+  }
+  num_arms_supplied <- !is.null(num_arms)
+
   prob_unit <- balanced_prob_args(prob, prob_unit, prob_unit_each, N)
   if (!is.null(formula) && !is.null(blocks)) {
     stop("Use B in the formula, or use blocks=, not both.")
@@ -282,7 +304,10 @@ balanced_ra <- function(N = NULL,
   k <- ncol(P)
 
   if (is.null(conditions)) {
-    conditions <- if (k == 2 && is.null(prob_unit_each)) c(0, 1) else paste0("T", seq_len(k))
+    # complete_ra's convention: two arms are 0 and 1 however the probabilities
+    # were specified, unless num_arms was supplied explicitly, which asks for
+    # named arms.
+    conditions <- if (k == 2 && !num_arms_supplied) c(0L, 1L) else paste0("T", seq_len(k))
   }
   if (length(conditions) != k) {
     stop("`conditions` must have one entry per condition. You supplied ",
@@ -320,6 +345,20 @@ balanced_ra_probabilities <- function(N = NULL,
                                   conditions = NULL,
                                   formula = NULL,
                                   check_inputs = TRUE) {
+  if (is.null(prob) && is.null(prob_unit) && is.null(prob_unit_each)) {
+    k_default <- num_arms %||%
+      (if (!is.null(conditions)) length(conditions) else NULL)
+    if (!is.null(k_default) && k_default != 2L) {
+      n0 <- N %||% (if (!is.null(blocks)) length(blocks)
+                    else if (!is.null(clusters)) length(clusters) else NULL)
+      if (is.null(n0)) {
+        stop("With `num_arms` or `conditions` alone, supply `N`, `blocks` or ",
+             "`clusters` so the number of units is known.", call. = FALSE)
+      }
+      prob_unit_each <- matrix(1 / k_default, n0, k_default)
+    }
+  }
+  num_arms_supplied <- !is.null(num_arms)
   prob_unit <- balanced_prob_args(prob, prob_unit, prob_unit_each, N)
   if (!is.null(formula) && is.null(N) &&
       (is.null(prob_unit) || length(prob_unit) == 1L) &&
@@ -331,7 +370,7 @@ balanced_ra_probabilities <- function(N = NULL,
                       check_inputs)
   k <- ncol(P)
   if (is.null(conditions)) {
-    conditions <- if (k == 2 && is.null(prob_unit_each)) c(0, 1) else paste0("T", seq_len(k))
+    conditions <- if (k == 2 && !num_arms_supplied) c(0L, 1L) else paste0("T", seq_len(k))
   }
   colnames(P) <- paste0("prob_", conditions)
   P
@@ -346,7 +385,8 @@ balanced_ra_probabilities <- function(N = NULL,
 #' @noRd
 balanced_ra_matrix <- function(prob_unit, prob_unit_each, blocks, clusters, N,
                            num_arms, check_inputs = TRUE) {
-  if (!is.null(N) && (length(N) != 1L || is.na(N) || N < 1 || N != as.integer(N))) {
+  if (!is.null(N) && (!is.numeric(N) || length(N) != 1L || is.na(N) ||
+                      N < 1 || N != as.integer(N))) {
     stop("`N` must be a single positive integer. ",
          "To supply probabilities, use `prob_unit`.")
   }
@@ -366,7 +406,7 @@ balanced_ra_matrix <- function(prob_unit, prob_unit_each, blocks, clusters, N,
       n <- N %||% (if (!is.null(blocks)) length(blocks)
                    else if (!is.null(clusters)) length(clusters) else NULL)
       if (is.null(n)) {
-        stop("With a scalar `prob_unit`, supply `N`, `blocks` or `clusters` ",
+        stop("With `prob` alone, supply `N`, `blocks` or `clusters` ",
              "so the number of units is known.")
       }
       prob_unit <- rep(prob_unit, n)
@@ -375,6 +415,12 @@ balanced_ra_matrix <- function(prob_unit, prob_unit_each, blocks, clusters, N,
   }
 
   if (check_inputs) {
+    if (!is.null(blocks) && anyNA(blocks)) {
+      stop("`blocks` must not contain NA.")
+    }
+    if (!is.null(clusters) && anyNA(clusters)) {
+      stop("`clusters` must not contain NA.")
+    }
     if (anyNA(P)) stop("Assignment probabilities must not be missing.")
     if (any(P < 0) || any(P > 1)) {
       stop("Assignment probabilities must be between 0 and 1.")
@@ -427,6 +473,11 @@ balanced_ra_matrix <- function(prob_unit, prob_unit_each, blocks, clusters, N,
 #' @keywords internal
 #' @noRd
 cube_assign_clusters <- function(P, clusters, blocks = NULL, tol = 1e-12) {
+  if (anyNA(clusters)) stop("`clusters` must not contain NA.", call. = FALSE)
+  if (length(clusters) != nrow(P)) {
+    stop("`clusters` has length ", length(clusters), " but the probabilities ",
+         "describe ", nrow(P), " units.", call. = FALSE)
+  }
   cl <- factor(clusters)
   first <- match(levels(cl), as.character(cl))
   Pc <- P[first, , drop = FALSE]
@@ -438,8 +489,12 @@ cube_assign_clusters <- function(P, clusters, blocks = NULL, tol = 1e-12) {
 n_from_formula <- function(formula, envir = parent.frame(), data = NULL) {
   if (!is.null(data)) return(nrow(data))
   if (length(all.vars(formula)) == 0L) return(NULL)
+  # na.pass, or model.matrix drops NA rows and N is silently inferred too
+  # small; balanced_check_matrix() is where an NA becomes an error.
   tryCatch(
-    nrow(stats::model.matrix(formula, data = formula_lookup_data(formula, envir))),
+    nrow(stats::model.frame(formula,
+                            data = formula_lookup_data(formula, envir),
+                            na.action = stats::na.pass)),
     error = function(e) stop(conditionMessage(e), call. = FALSE)
   )
 }
@@ -479,10 +534,10 @@ check_vars_in_data <- function(vars, data, what) {
 
 #' The scalar counterpart of each per-unit argument of [declare_ra()]
 #'
-#' \code{balanced_ra()} has no \code{prob} formal, so a scalar \code{prob_unit}
-#' is how a shared probability is written there and is recycled.
-#' \code{declare_ra()} has both, so a scalar in the per-unit slot is a
-#' redirection rather than a shorthand.
+#' Every per-unit slot refuses a single number and points at its scalar
+#' counterpart, so one argument never means two things: \code{prob} is the
+#' shared-probability slot and \code{prob_unit} the per-unit one, in
+#' \code{balanced_ra()} as everywhere else.
 #'
 #' @keywords internal
 #' @noRd
@@ -532,15 +587,27 @@ balanced_prob_args <- function(prob, prob_unit, prob_unit_each, n = NULL) {
 #'
 #' The size check uses \code{NROW}, so a matrix argument such as
 #' \code{prob_unit_each} is measured by its rows. A length-one result is
-#' passed through rather than rejected: whether a scalar is legal depends on
-#' the design (\code{balanced_ra()} recycles \code{prob_unit}, the
-#' specialized functions require length N), and that is the validation's
-#' question, not this function's.
+#' passed through rather than rejected: whether a scalar is legal is the
+#' design's question (every per-unit slot refuses one and names its scalar
+#' counterpart; \code{N = 1} is the exemption), not this function's.
 #'
 #' @keywords internal
 #' @noRd
 resolve_from_data <- function(expr, data, arg_name, envir) {
   if (is.null(expr)) return(NULL)
+  # Through a wrapper's ..., match.call() renders the argument as ..1, ..2,
+  # and so on. substitute(...()) in the frame that owns the dots recovers the
+  # expressions the wrapper was handed, so `function(d, ...) conduct_ra(data =
+  # d, ...)` still resolves `blocks = bl` as the column bl. Nested wrappers
+  # unwrap one frame per pass, up to a small bound.
+  for (i in 1:5) {
+    if (!(is.symbol(expr) && grepl("^\\.\\.[0-9]+$", as.character(expr)))) break
+    idx <- as.integer(sub("^\\.\\.", "", as.character(expr)))
+    dots <- tryCatch(eval(quote(substitute(...())), envir),
+                     error = function(e) NULL)
+    if (is.null(dots) || idx > length(dots)) break
+    expr <- dots[[idx]]
+  }
   vars <- all.vars(expr)
   check_vars_in_data(vars, data, paste0("`", arg_name, "`"))
   out <- eval(expr, data, envir)
@@ -618,7 +685,12 @@ balanced_formula_matrix <- function(formula, n, envir = parent.frame(),
     data <- formula_lookup_data(formula, envir)
   }
   X <- tryCatch(
-    stats::model.matrix(formula, data = data),
+    # na.pass keeps NA rows in the frame, so an NA covariate reaches
+    # balanced_check_matrix() as an NA cell and a clear error, instead of
+    # model.matrix dropping the row and the row-count check misfiring.
+    stats::model.matrix(formula,
+                        data = stats::model.frame(formula, data = data,
+                                                  na.action = stats::na.pass)),
     error = function(e) {
       msg <- conditionMessage(e)
       if (grepl("not found", msg, ignore.case = TRUE)) {
@@ -717,6 +789,14 @@ cube_on_x_clusters <- function(p, X, clusters, tol = 1e-12) {
 cube_assign <- function(P, blocks = NULL, tol = 1e-12) {
   n <- nrow(P)
   b <- if (is.null(blocks)) rep(1L, n) else as.integer(factor(blocks))
+  # Memory safety is not check_inputs' to waive: an NA or short blocks vector
+  # would index outside the C++ kernels' buffers. The kernels guard too; this
+  # is the readable message.
+  if (length(b) != n) {
+    stop("`blocks` has length ", length(b), " but the probabilities describe ",
+         n, " units.", call. = FALSE)
+  }
+  if (anyNA(b)) stop("`blocks` must not contain NA.", call. = FALSE)
   ord <- sample.int(n)                    # the input order must not matter
   # Two conditions collapse to a single vector, where the walk has a linear-time
   # form. Both paths are in src/cube.cpp.

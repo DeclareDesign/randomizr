@@ -180,11 +180,27 @@ NumericVector cube_on_x_cpp(NumericVector p, NumericMatrix X, double tol) {
 
   // Order units by the first non-intercept column so the remainder that
   // landing sees is a nearby-x set. Flight steps stay martingales for any
-  // order; a random reverse avoids always leaving the same tail.
+  // order; a random reverse avoids always leaving the same tail. When the
+  // sort column is constant (~ 1, or a degenerate covariate) the sort would
+  // leave the identity order, and the window walk would then pair adjacent
+  // units deterministically: units 1 and 2 would receive opposite conditions
+  // on every draw. Marginals survive that, but the joint distribution becomes
+  // a systematic paired design nobody asked for, so a constant column gets a
+  // shuffle instead.
   std::vector<int> ord(n);
   for (int i = 0; i < n; i++) ord[i] = i;
   int sort_col = (q >= 2) ? 1 : 0;
+  bool sort_col_constant = true;
   if (q >= 1) {
+    double v0 = Xs[(size_t) 0 + (size_t) sort_col * n];
+    for (int i = 1; i < n; i++) {
+      if (Xs[(size_t) i + (size_t) sort_col * n] != v0) {
+        sort_col_constant = false;
+        break;
+      }
+    }
+  }
+  if (q >= 1 && !sort_col_constant) {
     std::sort(ord.begin(), ord.end(), [&](int a, int b) {
       return Xs[(size_t) a + (size_t) sort_col * n] <
              Xs[(size_t) b + (size_t) sort_col * n];
@@ -201,16 +217,21 @@ NumericVector cube_on_x_cpp(NumericVector p, NumericMatrix X, double tol) {
     if (z[i] > tol && z[i] < 1.0 - tol) queue.push_back(i);
   }
 
+  // The queue is consumed through a head index rather than by erasing its
+  // front: erase() shifts every remaining element, which is O(queue) per
+  // step and made the whole flight quadratic in n. The consumed prefix is
+  // compacted away once it dominates, so memory stays O(n).
+  size_t head = 0;
   int q_use = q;
   std::vector<double> A, u;
   long long guard = (long long) n * (q + 3) + 20;
   while (guard-- > 0) {
-    int nf = (int) queue.size();
+    int nf = (int) (queue.size() - head);
     if (nf == 0) break;
     if (q_use < 0) q_use = 0;
     if (q_use == 0) {
       for (int t = 0; t < nf; t++) {
-        int i = queue[t];
+        int i = queue[head + t];
         z[i] = (unif_rand() < z[i]) ? 1.0 : 0.0;
       }
       break;
@@ -220,11 +241,12 @@ NumericVector cube_on_x_cpp(NumericVector p, NumericMatrix X, double tol) {
     // a leftover from the low end is not carried across the range and
     // paired with the opposite extreme.
     int w = std::min(nf, q_use + 1);
-    std::vector<int> W(queue.begin(), queue.begin() + w);
+    std::vector<int> W(queue.begin() + head, queue.begin() + head + w);
     bool moved = try_window(z, W, Xs, n, q_use, A, u, tol);
     if (!moved && w < nf) {
-      moved = try_window(z, queue, Xs, n, q_use, A, u, tol);
-      if (moved) W = queue;
+      std::vector<int> Wall(queue.begin() + head, queue.end());
+      moved = try_window(z, Wall, Xs, n, q_use, A, u, tol);
+      if (moved) { W.swap(Wall); w = nf; }
     }
     if (!moved) {
       q_use--;
@@ -232,11 +254,15 @@ NumericVector cube_on_x_cpp(NumericVector p, NumericMatrix X, double tol) {
     }
 
     // Only the window's units moved, so the tail is still all-fractional and
-    // needs no rescan. Rebuilding it each step made the flight quadratic in n.
-    queue.erase(queue.begin(), queue.begin() + w);
+    // needs no rescan.
+    head += w;
     for (int t = 0; t < w; t++) {
       int i = W[t];
       if (z[i] > tol && z[i] < 1.0 - tol) queue.push_back(i);
+    }
+    if (head > 4096 && head * 2 > queue.size()) {
+      queue.erase(queue.begin(), queue.begin() + head);
+      head = 0;
     }
   }
 

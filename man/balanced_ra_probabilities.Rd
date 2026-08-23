@@ -50,7 +50,7 @@ be the same for every unit in a cluster, and the tight counts become counts
 of clusters rather than of units. May be combined with \code{blocks}, in which
 case every cluster must sit entirely inside one block. (optional)}
 
-\item{num_arms}{The number of treatment arms. Inferred when omitted. (optional)}
+\item{num_arms}{The number of treatment arms. Inferred when omitted. Supplied without any probability argument, \code{num_arms} (or \code{conditions}) of three or more expands to equal-probability assignment, as in \code{\link{complete_ra}()}. (optional)}
 
 \item{conditions}{A vector giving the names of the conditions. (optional)}
 

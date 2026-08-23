@@ -77,7 +77,7 @@ declare_ra(
 \item{data}{A data frame holding the design's variables. When supplied, every argument that carries one value per unit names columns of it and is looked up there and nowhere else: \code{blocks}, \code{clusters}, \code{m_unit}, \code{prob_unit}, \code{prob_unit_each}, and the variables in \code{formula}. Anything they name that is not a column is an error rather than a fall-through to the calling environment. A bare column name is the ordinary case; any expression works so long as every variable in it is a column, so \code{blocks = interaction(region, year)} and \code{prob_unit_each = cbind(p_a, p_b)} are fine and \code{blocks = df$bl} is not, because it names \code{df}. A string naming a column is also accepted. \code{N} defaults to \code{nrow(data)}. A declaration outlives the frame it was written in, so this is how to make it say exactly which variables it is built from. \code{permutation_matrix} is not resolved this way: it has one row per unit but enumerates assignments rather than describing units. When \code{data} is omitted, everything resolves in the calling environment as before. \code{data} itself is not stored in the declaration; the variables it supplies are. (optional)}
 }
 \value{
-A list of class \code{"ra_declaration"} with entries:
+An object of class \code{"ra_declaration"} (an environment, addressable like a list) with entries:
   \describe{
     \item{\code{ra_function}}{A function that draws a random assignment from the declared procedure.}
     \item{\code{ra_type}}{A string indicating the type of random assignment used.}

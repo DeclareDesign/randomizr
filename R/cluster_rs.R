@@ -41,16 +41,20 @@ cluster_rs <- function(clusters = NULL,
     .invoke_check(check_samplr_arguments_new)
   }
   
+  if (anyNA(clusters)) stop("`clusters` must not contain NA.", call. = FALSE)
+
   n_per_clust <- tapply(clusters, clusters, length)
   unique_clust <- names(n_per_clust)
   n_clust <- length(unique_clust)
-  
+
+  # as.vector: tapply returns a 1-D array, and handing an array to
+  # complete_rs() trips R's "recycling array" deprecation in its arithmetic.
   if (!is.null(prob_unit)) {
-    prob_unit <- tapply(prob_unit, INDEX = clusters, FUN = unique)
+    prob_unit <- as.vector(tapply(prob_unit, INDEX = clusters, FUN = unique))
   }
   
   if (!is.null(n_unit)) {
-    n_unit <- tapply(n_unit, INDEX = clusters, FUN = unique)
+    n_unit <- as.vector(tapply(n_unit, INDEX = clusters, FUN = unique))
   }
   
   if (simple) {
@@ -114,16 +118,21 @@ cluster_rs_probabilities <-
     if (check_inputs)
       .invoke_check(check_samplr_arguments_new)
     
+    if (anyNA(clusters)) stop("`clusters` must not contain NA.", call. = FALSE)
+
     n_per_clust <- tapply(clusters, clusters, length)
     unique_clust <- names(n_per_clust)
     n_clust <- length(unique_clust)
-    
-    
+
+    # as.vector, not simplify = FALSE: a list here reached is_constant() in
+    # complete_rs_probabilities() and died with "comparison of these types is
+    # not implemented", which made `prob_unit` and `n_unit` unusable end to
+    # end (probabilities, declarations, even print on the declaration).
     if (!is.null(prob_unit)) {
-      prob_unit <- tapply(prob_unit, INDEX = clusters, FUN = unique, simplify = FALSE)
+      prob_unit <- as.vector(tapply(prob_unit, INDEX = clusters, FUN = unique))
     }
     if (!is.null(n_unit)) {
-      n_unit <- tapply(n_unit, INDEX = clusters, FUN = unique, simplify = FALSE)
+      n_unit <- as.vector(tapply(n_unit, INDEX = clusters, FUN = unique))
     }
     
     if (simple) {
