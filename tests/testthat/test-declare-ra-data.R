@@ -78,7 +78,7 @@ test_that("a declaration written in one frame resolves against data, not the sta
 
 test_that("a column of the wrong length is refused", {
   dat <- make_dat()
-  expect_error(declare_ra(blocks = bl[1:5], data = dat), "length")
+  expect_error(declare_ra(blocks = bl[1:5], data = dat), "but `data` has")
 })
 
 test_that("data is not stored in the declaration", {
@@ -110,4 +110,75 @@ test_that("without data, lookup in the calling environment is unchanged", {
   expect_equal(class(declare_ra(blocks = bl))[2], "ra_blocked")
   expect_equal(declare_ra(blocks = bl)$blocks, dat$bl)
   expect_equal(unname(declare_ra(formula = ~ x)$.X[, 2]), dat$x)
+})
+
+test_that("every per-unit argument resolves against data", {
+  dat <- make_dat()
+  dat$p <- seq(0.3, 0.7, length.out = nrow(dat))
+  dat$mu <- rep(10, nrow(dat))
+  dat$pa <- dat$p
+  dat$pb <- 1 - dat$p
+
+  d <- declare_ra(prob_unit = p, ra_type = "balanced", data = dat)
+  expect_equal(class(d)[2], "ra_balanced")
+  expect_equal(d$prob_unit, dat$p)
+
+  d2 <- declare_ra(m_unit = mu, data = dat)
+  expect_equal(class(d2)[2], "ra_complete")
+  expect_equal(d2$m_unit, dat$mu)
+
+  d3 <- declare_ra(prob_unit_each = cbind(pa, pb), data = dat)
+  expect_equal(class(d3)[2], "ra_balanced")
+  expect_equal(dim(d3$prob_unit_each), c(nrow(dat), 2L))
+  expect_equal(unname(d3$prob_unit_each[, 1]), dat$pa)
+
+  expect_equal(declare_ra(prob_unit = "p", ra_type = "balanced", data = dat)$prob_unit,
+               dat$p)
+})
+
+test_that("a per-unit argument floating in the environment is refused", {
+  dat <- make_dat()
+  dat$p <- seq(0.3, 0.7, length.out = nrow(dat))
+  dat$pa <- dat$p
+  p_local <- rep(0.5, nrow(dat))
+  mu_local <- rep(10, nrow(dat))
+
+  expect_error(declare_ra(prob_unit = p_local, ra_type = "balanced", data = dat),
+               "does not have")
+  expect_error(declare_ra(m_unit = mu_local, data = dat), "does not have")
+  expect_error(declare_ra(prob_unit_each = cbind(pa, nope), data = dat),
+               "does not have")
+})
+
+test_that("data wins over a same-named per-unit object in the caller", {
+  dat <- make_dat()
+  dat$p <- seq(0.3, 0.7, length.out = nrow(dat))
+  p <- rep(0.99, nrow(dat))
+
+  expect_equal(declare_ra(prob_unit = p, ra_type = "balanced", data = dat)$prob_unit,
+               dat$p)
+})
+
+test_that("whether a scalar is legal stays the design's question", {
+  dat <- make_dat()
+
+  # balanced_ra recycles a single prob_unit, so this is a legal design.
+  expect_equal(class(declare_ra(prob_unit = 0.5, ra_type = "balanced", data = dat))[2],
+               "ra_balanced")
+  # complete_ra requires m_unit of length N, and says so itself.
+  expect_error(declare_ra(m_unit = 3, data = dat), "length N")
+})
+
+test_that("a per-unit argument of the wrong length is refused", {
+  dat <- make_dat()
+  dat$p <- seq(0.3, 0.7, length.out = nrow(dat))
+  expect_error(declare_ra(prob_unit = p[1:5], ra_type = "balanced", data = dat),
+               "but `data` has")
+})
+
+test_that("permutation_matrix is not resolved against data", {
+  dat <- make_dat()
+  perm <- replicate(4, sample(rep(0:1, each = nrow(dat) / 2)))
+  d <- declare_ra(permutation_matrix = perm, data = dat)
+  expect_equal(class(d)[2], "ra_custom")
 })

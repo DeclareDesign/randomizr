@@ -460,13 +460,35 @@ check_vars_in_data <- function(vars, data, what) {
        call. = FALSE)
 }
 
-#' Resolve `blocks` or `clusters` against `data`
+#' The arguments of [declare_ra()] that carry one value per unit
 #'
-#' \code{expr} is the unevaluated argument. A bare column name is the ordinary
+#' These are the ones \code{data} resolves. \code{permutation_matrix} also has
+#' one row per unit and is deliberately absent: it enumerates assignments
+#' rather than describing units, so its rows are never columns of \code{data}.
+#' \code{prob}, \code{m} and \code{m_each} are absent because they are not
+#' per-unit; \code{prob} in particular must be of length 1 whatever the design,
+#' though its documentation used to suggest otherwise.
+#'
+#' @keywords internal
+#' @noRd
+.unit_length_args <- c("blocks", "clusters", "m_unit", "prob_unit",
+                       "prob_unit_each")
+
+#' Resolve one per-unit argument against `data`
+#'
+#' \code{expr} is the argument as written. A bare column name is the ordinary
 #' case; any expression is allowed so long as every variable in it is a column
-#' of \code{data}, so \code{interaction(region, year)} works and \code{df$bl}
-#' does not. A length-one character string naming a column is taken as that
-#' column, which is what programmatic callers need.
+#' of \code{data}, so \code{interaction(region, year)} and
+#' \code{cbind(p_a, p_b)} work and \code{df$bl} does not. A length-one
+#' character string naming a column is taken as that column, which is what
+#' programmatic callers need.
+#'
+#' The size check uses \code{NROW}, so a matrix argument such as
+#' \code{prob_unit_each} is measured by its rows. A length-one result is
+#' passed through rather than rejected: whether a scalar is legal depends on
+#' the design (\code{balanced_ra()} recycles \code{prob_unit}, the
+#' specialized functions require length N), and that is the validation's
+#' question, not this function's.
 #'
 #' @keywords internal
 #' @noRd
@@ -479,8 +501,9 @@ resolve_from_data <- function(expr, data, arg_name, envir) {
     check_vars_in_data(out, data, paste0("`", arg_name, "`"))
     out <- data[[out]]
   }
-  if (!is.null(out) && length(out) != nrow(data)) {
-    stop("`", arg_name, "` has length ", length(out),
+  if (!is.null(out) && NROW(out) != nrow(data) && NROW(out) != 1L) {
+    stop("`", arg_name, "` has ", NROW(out),
+         if (is.matrix(out)) " rows" else " elements",
          " but `data` has ", nrow(data), " rows.", call. = FALSE)
   }
   out

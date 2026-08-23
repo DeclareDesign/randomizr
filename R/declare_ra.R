@@ -12,12 +12,12 @@
 #' @param blocks A vector of length N indicating which block each unit belongs to, or, when \code{data} is supplied, the name of the column holding it. Supply to use blocked random assignment. (optional)
 #' @param clusters A vector of length N indicating which cluster each unit belongs to, or, when \code{data} is supplied, the name of the column holding it. Supply to use cluster random assignment. (optional)
 #' @param m Use for a two-arm design: exactly \code{m} units (or clusters) are assigned to treatment. In a blocked design, exactly \code{m} units in each block are treated. (optional)
-#' @param m_unit Use for a two-arm trial. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. (optional)
+#' @param m_unit Use for a two-arm trial. A vector of length N. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. When \code{data} is supplied, names a column of it. (optional)
 #' @param m_each Use for a multi-arm design. A numeric vector giving the number of units (or clusters) assigned to each condition; must sum to N. (optional)
-#' @param prob Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units (or clusters) are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. Must be between 0 and 1. Under simple random assignment, may vary by unit. (optional)
-#' @param prob_unit Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. Under balanced assignment (\code{ra_type = "balanced"}), may differ by unit. (optional)
+#' @param prob Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units (or clusters) are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. A single number between 0 and 1; use \code{prob_unit} to let it vary across units. (optional)
+#' @param prob_unit Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. Under balanced assignment (\code{ra_type = "balanced"}), may differ by unit, and a single number is recycled. When \code{data} is supplied, names a column of it. (optional)
 #' @param prob_each Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count in each condition may differ slightly from draw to draw, but the overall probability is exactly \code{prob_each}. Under balanced assignment the same vector is expanded to one row per unit. (optional)
-#' @param prob_unit_each Use for balanced assignment with two or more arms. A numeric matrix with one row per unit and one column per condition, giving each unit's probability of assignment to each condition. Rows must sum to 1. Supplying this argument selects \code{\link{balanced_ra}()}. (optional)
+#' @param prob_unit_each Use for balanced assignment with two or more arms. A numeric matrix with one row per unit and one column per condition, giving each unit's probability of assignment to each condition. Rows must sum to 1. Supplying this argument selects \code{\link{balanced_ra}()}. When \code{data} is supplied, build it from columns, as in \code{cbind(p_a, p_b)}. (optional)
 #' @param block_m Use for a two-arm blocked design: a vector giving the number of units to assign to treatment within each block, in the order of \code{sort(unique(blocks))}. (optional)
 #' @param block_m_each Use for a multi-arm blocked design. A matrix with one row per block and one column per treatment arm giving the number of units assigned to each condition within each block. Rows respect the ordering of \code{sort(unique(blocks))}. (optional)
 #' @param block_prob Use for a two-arm blocked design in which the treatment probability varies across blocks. In the order of \code{sort(unique(blocks))}. (optional)
@@ -28,7 +28,7 @@
 #' @param ra_type Optional override. The only accepted value is \code{"balanced"}, which selects \code{\link{balanced_ra}()} and allows \code{prob_unit} to vary across units. Other designs are inferred from the arguments supplied; they cannot be forced with this argument. (optional)
 #' @param formula For balanced assignment. A model formula whose model matrix is the balancing matrix \eqn{X} in the cube method, e.g. \code{~ x + B}. The intercept is the count constraint. Do not also pass \code{blocks}. Supplying \code{formula} selects \code{\link{balanced_ra}()}. Two-arm only. The formula's variables are taken from \code{data} when it is supplied. They are looked up once, when the design is declared; \code{\link{conduct_ra}()} reuses the matrix built then, so a later change to those variables does not change the declared design. (optional)
 #' @param permutation_matrix For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)
-#' @param data A data frame holding the design's variables. When supplied, \code{blocks}, \code{clusters} and the variables in \code{formula} name columns of it and are looked up there and nowhere else: anything they name that is not a column is an error rather than a fall-through to the calling environment. \code{N} defaults to \code{nrow(data)}. A declaration outlives the frame it was written in, so this is how to make it say exactly which variables it is built from. When \code{data} is omitted, all three resolve in the calling environment as before. \code{data} itself is not stored in the declaration; the variables it supplies are. (optional)
+#' @param data A data frame holding the design's variables. When supplied, every argument that carries one value per unit names columns of it and is looked up there and nowhere else: \code{blocks}, \code{clusters}, \code{m_unit}, \code{prob_unit}, \code{prob_unit_each}, and the variables in \code{formula}. Anything they name that is not a column is an error rather than a fall-through to the calling environment. A bare column name is the ordinary case; any expression works so long as every variable in it is a column, so \code{blocks = interaction(region, year)} and \code{prob_unit_each = cbind(p_a, p_b)} are fine and \code{blocks = df$bl} is not, because it names \code{df}. A string naming a column is also accepted. \code{N} defaults to \code{nrow(data)}. A declaration outlives the frame it was written in, so this is how to make it say exactly which variables it is built from. \code{permutation_matrix} is not resolved this way: it has one row per unit but enumerates assignments rather than describing units. When \code{data} is omitted, everything resolves in the calling environment as before. \code{data} itself is not stored in the declaration; the variables it supplies are. (optional)
 #' @param check_inputs Logical. Whether to verify before declaring that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that block-level arguments have one entry per block, and so on. Defaults to \code{TRUE}. \code{FALSE} skips the checking only: \code{num_arms} and \code{conditions} are still derived from the other arguments. It is skipped entirely when \code{permutation_matrix} is supplied. (optional)
 #'
 #' @return A list of class \code{"ra_declaration"} with entries:
@@ -133,9 +133,11 @@
 #' # Name the table the design is built from, and blocks, clusters and the
 #' # formula's variables are its columns rather than whatever the calling
 #' # environment happens to hold.
-#' dat <- data.frame(bl = rep(c("a", "b"), each = 3), x = c(0, 1, 5, 6, 8, 9))
+#' dat <- data.frame(bl = rep(c("a", "b"), each = 3), x = c(0, 1, 5, 6, 8, 9),
+#'                   p = c(0.2, 0.4, 0.5, 0.5, 0.6, 0.8))
 #' declare_ra(blocks = bl, data = dat)
 #' declare_ra(formula = ~ x, data = dat)
+#' declare_ra(prob_unit = p, ra_type = "balanced", data = dat)
 #'
 #' @export
 declare_ra <- function(N = NULL,
@@ -160,14 +162,17 @@ declare_ra <- function(N = NULL,
                        permutation_matrix = NULL,
                        check_inputs = TRUE,
                        data = NULL) {
-  # Captured before the mget below forces them: with `data`, `blocks` and
-  # `clusters` name columns rather than evaluating in the caller.
-  blocks_expr <- substitute(blocks)
-  clusters_expr <- substitute(clusters)
+  # Resolved from the call before the mget below forces the promises: with
+  # `data`, every argument carrying one value per unit names columns rather
+  # than evaluating in the caller.
   if (!is.null(data)) {
     data <- as.data.frame(data)
-    blocks <- resolve_from_data(blocks_expr, data, "blocks", parent.frame())
-    clusters <- resolve_from_data(clusters_expr, data, "clusters", parent.frame())
+    supplied <- as.list(match.call())[-1L]
+    for (nm in .unit_length_args) {
+      if (!is.null(supplied[[nm]])) {
+        assign(nm, resolve_from_data(supplied[[nm]], data, nm, parent.frame()))
+      }
+    }
     if (is.null(N)) N <- nrow(data)
   }
 
