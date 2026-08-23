@@ -5,27 +5,6 @@ title: "randomizr: Tools for random assignment and random sampling"
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-> **You are on the `rewrite` branch.** This is the 2.0 rewrite of randomizr, not the CRAN package and not `main`. The released randomizr is unaffected by anything here.
->
-> Every interface the released package exports is unchanged, so existing code runs unchanged. It adds two exports, `balanced_ra()` and `balanced_ra_probabilities()`, for assignment with unit-varying probabilities; both are experimental. Internally it adds an Rcpp Knuth-shuffle fast path for two-arm block assignment, declaration caching, and `mget`-based S3 dispatch.
->
-> ```r
-> remotes::install_github("DeclareDesign/randomizr@rewrite")
-> ```
->
-> Sibling branches: `DeclareDesign/fabricatr@rewrite`, `DeclareDesign/estimatr@rewrite`, `DeclareDesign/DeclareDesign@rewrite`.
-
-```{r, echo = FALSE}
-set.seed(42)
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  message = FALSE,
-  comment = "#>",
-  fig.path = "README-"  
-)
-options(digits = 2)
-```
-
 [![CRAN status](https://www.r-pkg.org/badges/version/randomizr)](https://cran.r-project.org/package=randomizr)
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/grand-total/randomizr?color=green)](https://r-pkg.org/pkg/randomizr)
 [![Build status](https://github.com/DeclareDesign/randomizr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DeclareDesign/randomizr/actions/workflows/R-CMD-check.yaml)

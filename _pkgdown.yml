@@ -41,8 +41,10 @@ navbar:
     href: reference/index.html
   - text: Articles
     menu: 
-     - text: Getting started with randomizr
+     - text: Design and Analysis of Experiments with randomizr
        href: articles/randomizr_vignette.html
+     - text: How randomizr Generates Random Assignments
+       href: articles/randomizr_algorithms.html
      - text: Assignment with heterogeneous probabilities
        href: articles/balanced_ra.html
      - text: Covariate totals versus blocks

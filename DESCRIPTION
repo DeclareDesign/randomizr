@@ -12,13 +12,13 @@ URL: https://declaredesign.org/r/randomizr/, https://github.com/DeclareDesign/ra
 BugReports: https://github.com/DeclareDesign/randomizr/issues
 Imports:
     Rcpp,
-    stats
+    stats,
+    utils
 LinkingTo:
     Rcpp
 Depends:
-    R (>= 3.5.0)
+    R (>= 3.6.0)
 License: MIT + file LICENSE
-LazyData: true
 Encoding: UTF-8
 Suggests:
     knitr,
@@ -37,4 +37,3 @@ Suggests:
     rmarkdown
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.0.0
-RoxygenNote: 7.3.2

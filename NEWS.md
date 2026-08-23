@@ -1,124 +1,94 @@
 # randomizr 2.0.1
 
-`declare_ra()` gains `data`. A declaration is a design rather than an assignment, and it is used in a different frame than the one it was written in, so it needs a way to say which table its variables come from. When `data` is supplied, every argument that carries one value per unit names columns of it and is looked up there and nowhere else: `blocks`, `clusters`, `m_unit`, `prob_unit`, `prob_unit_each`, and the variables in `formula`. Anything they name that is not a column is an error rather than a fall-through to the calling environment, and `N` defaults to `nrow(data)`. A bare column name, a string naming a column, or any expression whose variables are all columns are all accepted, so `blocks = interaction(region, year)` and `prob_unit_each = cbind(p_a, p_b)` work and `blocks = df$bl` does not. `permutation_matrix` is left out on purpose: it has one row per unit but enumerates assignments rather than describing units. `data` is not stored in the declaration; the variables it supplies are. Omitting `data` keeps the old behavior, which is to resolve everything in the calling environment.
-
-`balanced_ra()` and `balanced_ra_probabilities()` gain `prob`, and `prob_unit` no longer accepts a single number. Everywhere else in randomizr, `prob` is the one-number slot and `prob_unit` the one-per-unit slot; `balanced_ra()` had only `prob_unit`, defaulting to 0.5, so the same argument meant a shared probability or a per-unit vector depending on its length. It now follows the convention: supply exactly one of `prob`, `prob_unit` and `prob_unit_each`, and `prob_unit = 0.5` says to use `prob` instead. The default is unchanged, so `balanced_ra(4)` is still complete assignment of four units, and `N = 1` is exempt, since there one value really is one value per unit. `prob` sits second in the argument list, as it does in `complete_ra()`; nothing in the package passed a probability positionally.
-
-`declare_ra()` refuses a single number in a per-unit slot and names the argument that takes one. Only the complete, blocked, clustered and simple paths enforced that before; the balanced path recycled a scalar `prob_unit`. `declare_ra(prob_unit = 0.5, ra_type = "balanced")` now says to use `prob`, and `m_unit` likewise points at `m`. A declaration made with `prob` now carries `prob` rather than rewriting it into `prob_unit`, since `balanced_ra()` takes it.
-
-`?declare_ra` no longer says that `prob` may vary by unit under simple random assignment. It may not, and never could: `prob` must be of length 1 in every design, which `check_randomizr_arguments()` has always enforced. Use `prob_unit`.
-
-`check_inputs = FALSE` works for blocked and clustered assignment. It never did: the validation also derived `num_arms` and `conditions` when the caller left them implicit, so skipping the validation skipped the derivation, and `block_ra()`, `cluster_ra()` and `block_and_cluster_ra()` all failed with "invalid first argument" or "invalid 'times' argument" whatever else was supplied. The derivation is separate now and runs on both paths. Draws are unaffected: across twenty-one designs, `check_inputs = FALSE` returns byte-identical assignments to `check_inputs = TRUE` on the same seed.
-
-`block_assign_cpp()` refuses a block count or probability outside its range instead of writing outside its buffer. Each of its three modes fills the assignment vector by counting down from the block size, so `block_m` larger than a block started the loop at a negative index. The first call returned a wrong answer, and a later one brought R down with a bus error. Only reachable with `check_inputs = FALSE`, and reachable there since 1.0.1.
-
-`declare_ra(formula = )` now resolves the balancing matrix when the design is declared, and carries it. Previously the declaration stored only the formula, and `conduct_ra()` looked its variables up on every draw by walking the call stack out to the global environment. An object of the same name anywhere on that stack, and the global environment is always on it, beat the environment the formula was written in, so a design declared inside a function could balance a covariate the analyst never named, without an error. `balanced_ra()` called directly now searches `environment(formula)` first, as `stats::lm()` does, before the caller's frame and the stack; a data mask still resolves, so `declare_assignment(Z = balanced_ra(formula = ~ x))` is unaffected.
-
-Two-arm cube-on-X is linear in the number of units again. The flight phase rebuilt its whole queue of fractional units after every step, though only the units in the current window can have moved, which made it quadratic. At 16,000 units a draw takes about 8 milliseconds rather than about 104. Assignments are unchanged: the same seed gives the same draw as before.
-
-`balanced_ra()` gains `formula` and `data` for two-arm cube-on-X (`~ x + B`). The intercept is the count constraint. `blocks` stays the partitioned count path; passing both errors. `formula` with `prob_unit_each` errors. `declare_ra(..., formula = )` selects the balanced path. When `formula` is `NULL` the count-tight C++ is unchanged. See `vignette("balanced_ra_covariates")`.
-
-`declare_ra()` now accepts balanced assignment. Set `ra_type = "balanced"` or supply `prob_unit_each`. `conduct_ra()` and `obtain_condition_probabilities()` then dispatch to `balanced_ra()` and `balanced_ra_probabilities()`. Existing calls such as `declare_ra(N, prob = 0.5)` remain complete assignment. A varying `prob_unit` without `ra_type` still errors as it did for complete assignment; it does not silently take the cube path. Count arguments (`m`, `block_m`, and the rest) are refused on the balanced path. `num_arms` or `conditions` without probabilities expand to equal-probability balanced assignment, as they do for complete assignment. `obtain_num_permutations()` reports `Inf` for these designs (the cube support is not enumerated). `obtain_permutation_probabilities()` errors: the support is not listed and the assignments are not equally likely.
-
-`vignette("balanced_ra")` walks through one two-arm draw as a four-panel figure whose titles state why a cell is driven to 0, not only the result, and one four-unit, three-arm draw from `prob_unit_each` rows (0.2, 0.4, 0.4), (0.4, 0.3, 0.3), (0.6, 0.2, 0.2), (0.8, 0.1, 0.1).
-
-The article "HC2 coverage under balanced assignment", now on the [package site](https://declaredesign.org/r/randomizr/articles/) rather than in the package, re-simulates inverse-probability-weighted HC2 coverage under the current `balanced_ra()` implementation. Assignment is dependent; on the two-arm, blocked, and three-arm designs there, 95 percent intervals sit near 95 percent. Under the `formula` design they are conservative, and the article says so.
-
-The article "Speed of balanced_ra relative to complete and blocked assignment", now on the [package site](https://declaredesign.org/r/randomizr/articles/) rather than in the package, times `balanced_ra()` against `complete_ra()`, `block_ra()`, and `block_and_cluster_ra()` on the equal-probability cases those specialized functions already handle.
-
-`%||%` is used internally when a scalar `prob_unit` needs `N` inferred from `blocks` or `clusters`. The operator is defined in the package so the call works on R < 4.4, where it is not yet in base.
-
-`balanced_ra()` pairs leftovers across blocks so that two-arm blocked designs are tight within each block and overall. Two districts of three villages with `prob_unit = 0.5` always treat exactly three villages, and each district gets one or two. Independently landing each block had let the total wander. With three or more arms and `blocks`, tightness remains within each block; overall counts need not be tight.
-
-`N` is the first argument and `prob_unit` defaults to 0.5, so `balanced_ra(4)` is complete assignment of four units. A vector passed as `N` is refused: use `prob_unit` for probabilities.
-
-# randomizr 2.0.0
-
-This release is a significant internal restructuring. Every public interface is unchanged: function names, parameter names, return types, S3 classes, and object field names. Existing code that works with randomizr 1.x continues to work without modification, and with one documented exception it returns the same assignments.
+This release is a major internal restructuring plus one new capability, described here relative to randomizr 1.0.1, the version it replaces on CRAN. No exported function, argument, return type, S3 class, or object field carried by 1.0.1 is removed, renamed, or reordered. New arguments were added to `declare_ra()`, `conduct_ra()` and `obtain_condition_probabilities()` (`prob_unit_each` after `prob_each`; `ra_type` and `formula` before `permutation_matrix`; `data` last), so a caller passing `block_m` or later arguments by position must name them; `block_ra()` gains two arguments documented as internal (`.block_int`, `.N_per_block`). The package exports 31 objects against 1.0.1's 29, the two additions being `balanced_ra()` and `balanced_ra_probabilities()`.
 
 ## New: assignment with heterogeneous probabilities (experimental)
 
 `balanced_ra()` and `balanced_ra_probabilities()` assign units when the probability of assignment varies from unit to unit, holding the number assigned to each condition as close to its target as arithmetic allows. They fill the gap between `simple_ra()`, which honors unit-varying probabilities but lets the number treated wander, and `complete_ra()`, which fixes the number treated but requires every unit to share the same probability.
 
-Three things hold at once, and all three are guaranteed rather than approached: every unit receives exactly one condition; each unit's probability of each condition is exactly the probability supplied; and each condition's count is the floor or the ceiling of its expected count. With `blocks`, the tight counts are the within-block ones. This closes issue #35, load balancing across blocks, which earlier releases listed as out of scope.
+Three things hold at once, and all three are guaranteed rather than approached: every unit receives exactly one condition; each unit's probability of each condition is exactly the probability supplied; and each condition's count is the floor or the ceiling of its expected count. With `blocks`, counts are tight within each block, and two-arm designs are tight overall as well, because leftovers are paired across blocks; with three or more arms the overall count can wander. `clusters` assigns whole groups together, in which case the tight counts are counts of clusters, and `blocks` and `clusters` may be used at the same time.
 
-`clusters` assigns whole groups together, in which case the tight counts are counts of clusters rather than of units, and `blocks` and `clusters` may be used at the same time.
+The assignment is drawn by the cube method of Deville and Tillé (2004), specialized to this problem, with three C++ kernels: a two-arm pivotal pass, a multi-arm flight-and-land, and cube-on-X. All three are linear in the number of units. Two thousand units take about a tenth of a millisecond with two conditions and about a millisecond with four, measured with a different probability drawn for every unit.
 
-The assignment is drawn by the cube method of Deville and Tillé (2004), specialized to this problem. The algorithm holds the counts tight for any number of arms.
+`balanced_ra(formula = ~ x + B)` adds linear balancing constraints on covariates (cube-on-X): the flight keeps the treated totals of the model matrix near their expectations, with the intercept as the count constraint. Two-arm only; `blocks` and `prob_unit_each` cannot be combined with it. See `vignette("balanced_ra_covariates")`.
 
-Both of `balanced_ra()`'s paths are linear in the number of units and written in C++: 2,000 units take about a tenth of a millisecond with two conditions and about a millisecond with four, measured with a different probability drawn for every unit.
+The probability arguments follow the package's convention: `prob` is the one-number slot, `prob_unit` the one-per-unit slot (a single number is refused, except at `N = 1`), and `prob_unit_each` the one-row-per-unit matrix; supply exactly one. `num_arms` or `conditions` without probabilities expand to equal-probability balanced assignment, and condition naming follows `complete_ra()`: two arms are 0 and 1 unless `num_arms` is supplied explicitly. The default is `prob = 0.5`, so `balanced_ra(4)` is complete assignment of four units.
 
-`balanced_ra()` is marked experimental: its interface may change, and it does not yet participate in `declare_ra()`, so `conduct_ra()` and `obtain_condition_probabilities()` do not accept a `balanced_ra` design.
+`declare_ra()` accepts balanced assignment: set `ra_type = "balanced"`, or supply `prob_unit_each` or `formula`. `conduct_ra()` and `obtain_condition_probabilities()` then dispatch to `balanced_ra()` and `balanced_ra_probabilities()`. Existing calls such as `declare_ra(N, prob = 0.5)` remain complete assignment. A declaration made with `formula` resolves the balancing matrix once, when the design is declared, and carries it, so a design declared inside a function cannot have its covariate shadowed by a same-named object elsewhere on the call stack; `balanced_ra()` called directly searches `environment(formula)` first, as `stats::lm()` does. `obtain_num_permutations()` reports `Inf` for balanced designs (the cube support is not enumerated) and `obtain_permutation_probabilities()` errors, since the support is not listed and the assignments are not equally likely. `balanced_ra()` is marked experimental: its interface may change.
+
+This capability closes issue #35, load balancing across blocks, which earlier releases listed as out of scope. It also bears on issue #99, which asked for fixed-size unequal-probability sampling: `balanced_ra()` is that sampler, with exact first-order inclusion probabilities. The issue's premise about `simple_ra()` does not apply to the current implementation, whose `vsample()` C routine performs correct inverse-CDF multinomial sampling, confirmed by simulation.
+
+## New: `declare_ra()` gains `data`
+
+A declaration is a design rather than an assignment, and it is used in a different frame than the one it was written in, so it needs a way to say which table its variables come from. When `data` is supplied, every argument that carries one value per unit names columns of it and is looked up there and nowhere else: `blocks`, `clusters`, `m_unit`, `prob_unit`, `prob_unit_each`, and the variables in `formula`. Anything they name that is not a column is an error rather than a fall-through to the calling environment, and `N` defaults to `nrow(data)`. A bare column name, a string naming a column, or any expression whose variables are all columns are all accepted, so `blocks = interaction(region, year)` and `prob_unit_each = cbind(p_a, p_b)` work and `blocks = df$bl` does not. Arguments forwarded through a wrapper's `...` resolve the same way. `permutation_matrix` is left out on purpose: it has one row per unit but enumerates assignments rather than describing units. `data` is validated and discarded rather than stored, so declarations do not grow. Omitting `data` keeps the old behavior, which is to resolve everything in the calling environment.
+
+Alongside it, every per-unit slot of `declare_ra()` refuses a single number and names the argument that takes one, so `declare_ra(prob_unit = 0.5)` says to use `prob` and `m_unit = 2` says to use `m` (`N = 1` is exempt, since there one value is one value per unit). `?declare_ra` no longer says that `prob` may vary by unit under simple random assignment: it may not, and never could, since `prob` must be of length 1 in every design.
 
 ## Reproducibility of randomizr 1.x seeds
 
 Assignments are reproducible across the 1.x boundary. `set.seed(s)` followed by any of the assignment or sampling functions returns what randomizr 1.0.1 returned for that seed, so pre-registrations, replication scripts, and archived analyses that pinned a seed are unaffected by upgrading.
 
-This is not automatic for a rewrite, because the random number stream depends on how many uniforms are drawn and in what order, not only on the sampling design. Two-arm blocked assignment now runs in C++ (see Performance), and the implementation deliberately reproduces the draw sequence of `sample(rep(conditions, c(n - m, m)))` per block, including the separate draw that decides the treated count when `n * prob` is not an integer, in the order 1.x performed them. `tests/testthat/test_stream_compat.R` records the output of randomizr 1.0.1 for a range of designs and fails if any of it moves.
+Reproducibility is not automatic for a rewrite, because the random number stream depends on how many uniforms are drawn and in what order, not only on the sampling design. Blocked assignment now runs in C++ (see Performance), and the implementation deliberately reproduces 1.x's draw sequence: the full within-block permutation of `sample(rep(conditions, c(n - m, m)))`, the separate draw that decides a treated count when `n * prob` is not an integer, R's own weighted sampling without replacement for multi-arm leftovers (`revsort()`'s descending sort included), and the early return that consumes no random numbers at all when a block is fully treated. The products `n * prob` are computed through `volatile` intermediates so that no compiler, under any floating-point contraction setting, fuses the multiply and the subtraction into an FMA; the fused form differs from R's in the sixteenth decimal place and that is enough to flip a tie and move a draw. `tests/testthat/test_stream_compat.R` pins output recorded from randomizr 1.0.1 across the complete, simple, blocked (every argument form), clustered, blocked-and-clustered, and sampling families, along with the stream position after a sequence of draws, and fails if any of it moves.
 
-**The one exception is `strata_rs()` and `strata_and_cluster_rs()`**, where the draw for a given seed can differ from 1.x. It follows from the RS/RA unification described below, and the rule is exact: **2.0's `strata_rs()` returns what randomizr 1.x's `block_ra()` returned**. In 1.x the sampling and assignment families were written separately and did not agree with each other, so the draw moves precisely where 1.x's own `strata_rs()` and `block_ra()` disagreed. That is strata of odd size, and any use of `strata_prob`, including strata of even size. Sampling probabilities are unchanged and correct, and the realized count distributions are unchanged; only the particular draw for a given seed differs.
+**The one exception is `strata_rs()` and `strata_and_cluster_rs()`**, where the draw for a given seed can differ from 1.x. It follows from the RS/RA unification described below, and the rule is exact: **2.0.1's `strata_rs()` returns what randomizr 1.x's `block_ra()` returned**, value for value. In 1.x the sampling and assignment families were written separately and did not agree with each other, so the draw moves precisely where 1.x's own `strata_rs()` and `block_ra()` disagreed: strata of odd size under the default probability, and any design where a per-stratum probability leaves a unit over, `strata_prob` and fractional `n_s * prob` included. Sampling probabilities are unchanged and correct, and the realized count distributions are unchanged; only the particular draw for a given seed differs. A test asserts the rule as an equality.
 
 ## Performance
 
-Two-arm blocked assignment is the hot path in simulation work, where the same design is redrawn thousands of times, and it now runs in a single C++ call rather than one R-level `complete_ra()` call per block. `randomizr` gains `Rcpp` in `Imports` and `LinkingTo`; `src/block_assign.cpp` is new.
+Blocked assignment is the hot path in simulation work, where the same design is redrawn thousands of times, and it now runs in a single C++ call rather than one R-level `complete_ra()` call per block. `randomizr` gains `Rcpp` in `Imports` and `LinkingTo`.
 
-Measured on an Apple M4 Pro under R 4.6.0, `block_ra()` on a two-arm design:
+Measured on an Apple M4 Pro under R 4.6.0, `block_ra()`:
 
-| design | 1.0.1 | 2.0.0 |
+| design | 1.0.1 | 2.0.1 |
 |---|---|---|
 | N = 20,000, 2,000 blocks | 8.9 ms | 1.1 ms |
 | N = 100,000, 10,000 blocks | 46.0 ms | 6.5 ms |
-
-The gain comes from removing an R-level function call per block rather than from drawing fewer random numbers. Drawing the same numbers as 1.x costs roughly a third of the achievable speedup and is what makes seeds reproduce, which is the better trade for a package whose output is cited in pre-registrations.
-
-Assignment to three or more arms, and to two arms whenever the call reaches `complete_ra()` through `prob_each` or `m_each`, runs in `src/block_assign_multi.cpp` on the same principle. It reproduces 1.x's draw as well, which for these branches means reproducing R's own weighted sampling without replacement, `revsort()`'s descending sort included, since that is what decides which arm receives a leftover unit when a block does not divide evenly.
-
-| design, N = 20,000 in 2,000 blocks | 1.0.1 | 2.0.0 |
-|---|---|---|
-| 3 arms | 21.8 ms | 1.2 ms |
+| 3 arms, N = 20,000, 2,000 blocks | 21.8 ms | 1.2 ms |
 | 4 arms | 22.4 ms | 1.3 ms |
 | 3 arms via `prob_each` | 16.9 ms | 1.2 ms |
 | 3 arms via `block_m_each` | 16.7 ms | 1.2 ms |
 | 2 arms via `prob_each` | 8.7 ms | 1.1 ms |
 
-`block_prob_each` gains less, because most of what it spends goes to validating that every row of the matrix sums to 1 rather than to assigning.
+The gain comes from removing an R-level function call per block rather than from drawing fewer random numbers. Drawing the same numbers as 1.x costs roughly a third of the achievable speedup and is what makes seeds reproduce, which is the better trade for a package whose output is cited in pre-registrations. `block_prob_each` gains less, because most of what it spends goes to validating that every row of the matrix sums to 1 rather than to assigning.
+
+## `check_inputs = FALSE` works, and cannot corrupt memory
+
+`check_inputs = FALSE` now works for blocked and clustered assignment. It failed on every path whenever `num_arms` or `conditions` was left implicit, because the validation also derived them, so skipping the validation skipped the derivation; the derivation is separate now and runs on both paths. Draws are unaffected: across the twenty designs in the parity test, `check_inputs = FALSE` returns byte-identical assignments to `check_inputs = TRUE` on the same seed. A blocked declaration made with `check_inputs = FALSE` can also be conducted, which never worked.
+
+Skipping the checks waives the checking of a design; it cannot be allowed to waive memory safety. Every C++ kernel now range-checks its indexes, counts, and probabilities before anything writes: a block count or probability outside its range, counts that do not sum to the block size, probabilities that leave more leftovers than conditions, or a too-short `block_prob` are errors rather than reads and writes outside the buffer.
+
+## Robustness
+
+An `NA` in `blocks`, `clusters`, or `strata` is an error on every path, with `check_inputs = FALSE` included. 1.0.1 silently dropped the NA units and returned an assignment shorter than the number of units.
+
+A `blocks` factor with unused levels has its unused levels dropped everywhere, so a subset of a factor behaves like the same subset of a character vector. 1.0.1 errored on unused levels.
+
+`randomizr::conduct_ra(N = 10)` and `randomizr::obtain_condition_probabilities(assignment =, N = 10)` work without attaching the package, and a user object named `declare_ra` no longer hijacks them; the forwarded call now names `randomizr::declare_ra` explicitly.
+
+`cluster_rs()` and `cluster_rs_probabilities()` accept `prob_unit` and `n_unit` end to end. The collapse to one value per cluster produced an array or a list that the complete-sampling internals could not digest, so the probabilities, declarations, and even `print()` on such a declaration all failed.
+
+An `NA` in a `formula` covariate is an error; previously `model.matrix()` dropped the row and the assignment silently came back shorter than the number of units. `balanced_ra(formula = ~ 1)` draws complete assignment; a sorting degeneracy had made it a deterministic pairing of adjacent units, with correct marginal probabilities but a joint distribution nobody asked for. `balanced_ra()` refuses a non-numeric `N`.
+
+Error message typo fixed: "The probabilties of assignment..." now reads "The probabilities of assignment...", and the strata `prob_unit` message says sampling rather than assignment.
 
 ## Internal restructuring
 
 ### RS functions unified with RA counterparts
 
-The random sampling (RS) family has always been a two-condition special case of the random assignment (RA) family: sample/not-sampled is equivalent to assignment with `conditions = c(0, 1)`. The RS implementations previously duplicated RA logic in parallel. They now delegate directly:
-
-- `strata_rs()` and `strata_rs_probabilities()` delegate to `block_ra()` and `block_ra_probabilities()` with `conditions = c(0, 1)`. The `strata`/`n`/`strata_n`/`strata_prob` parameters map to `blocks`/`m`/`block_m`/`block_prob` internally. This is the change responsible for the one reproducibility exception noted above: `complete_rs()` and `complete_ra()` selected different assignments for the same seed in 1.x, at odd sizes and wherever a per-stratum probability left a unit over, and `strata_rs()` now takes the `complete_ra()` result.
-- `simple_rs()` and `simple_rs_probabilities()` already delegated to `simple_ra()` in 1.x. No change.
-- `cluster_rs()` and `strata_and_cluster_rs()` already delegated internally. No change.
+The random sampling (RS) family has always been a two-condition special case of the random assignment (RA) family: sampled/not-sampled is equivalent to assignment with `conditions = c(0, 1)`. The RS implementations previously duplicated RA logic in parallel. They now delegate directly: `strata_rs()` and `strata_rs_probabilities()` delegate to `block_ra()` and `block_ra_probabilities()`, with `strata`/`n`/`strata_n`/`strata_prob` mapping to `blocks`/`m`/`block_m`/`block_prob` internally. The unification is the source of the one reproducibility exception noted above, and it also repaired a 1.x defect: `strata_rs()` on a stratum of three with `prob = 0.9` sampled each unit with probability 2/3 while its own probabilities function reported 0.9; the two now agree. `simple_rs()`, `cluster_rs()` and `strata_and_cluster_rs()` already delegated internally.
 
 ### S3 dispatch boilerplate replaced
 
-`generated_methods.R` previously contained 264 lines of hand-maintained S3 dispatch: each `ra_function.*`, `ra_probabilities.*`, `rs_function.*`, and `rs_probabilities.*` method explicitly unpacked every slot of the declaration object and re-passed them by name to the underlying function. These methods were originally auto-generated by a script in `zzz.R` (which was then commented out), meaning any parameter addition required manual updates in two places.
+`generated_methods.R` previously contained 264 lines of hand-maintained S3 dispatch: each `ra_function.*`, `ra_probabilities.*`, `rs_function.*`, and `rs_probabilities.*` method explicitly unpacked every slot of the declaration object and re-passed them by name to the underlying function, and any parameter addition required manual updates in two places. The 24 methods now extract only the formals the target function accepts, via `mget()` over the declaration environment, so the `delayedAssign()` slots on declaration objects (`probabilities_matrix` and the deprecated fields) are not triggered as a side effect of dispatch.
 
-The 22 methods are now each a single `do.call()` using `mget()` to extract only the formals the target function accepts from the declaration environment:
+## Dependencies and documentation
 
-```r
-ra_function.ra_complete <- function(this)
-  do.call(complete_ra, mget(names(formals(complete_ra)), this, ifnotfound = list(NULL)))
-```
+`Depends: R (>= 3.6.0)`, raised from 3.5.0 because the C++ kernels draw through `R_unif_index()`, which R provides from 3.6.0.
 
-`mget()` fetches only the named bindings, so the `delayedAssign()` slots on declaration objects (`probabilities_matrix`, `ra_type`, `cleaned_arguments`) are not triggered as a side effect of dispatch. The commented-out generation script in `zzz.R` has been removed.
+The package ships four vignettes: the introduction, an algorithms tour, and two on `balanced_ra()` (the count-tight walk-through and cube-on-X). Two further studies are articles on the package site rather than vignettes in the package: "HC2 coverage under balanced assignment" and "Speed of balanced_ra relative to complete and blocked assignment", at https://declaredesign.org/r/randomizr/articles/ once the site rebuilds from this release.
 
-### Typo corrected
+## Compatibility
 
-Error message "The probabilties of assignment..." → "The probabilities of assignment..." in `helper_functions.R`.
-
-## GitHub issues addressed
-
-**#99, correctness of unequal-probability `simple_ra`.** The issue claimed that `simple_ra()` uses `base::sample()` in a way that does not maintain correct selection probabilities for unequal-probability designs. This does not apply to the current implementation: `simple_ra()` uses `vsample()` (a C function added by Neal Fultz) which performs correct inverse-CDF multinomial sampling. Empirical simulation confirms that assignment probabilities match specified `prob_each` to within Monte Carlo error. The terminology concerns in #99 (the package's use of "complete random sampling" vs the probability-sampling-theory definition) are a documentation matter, not a code defect.
-
-**#35, load balancing across blocks.** Addressed by `balanced_ra()`, described above. Earlier releases listed it as out of scope.
-
-## ri2 compatibility
-
-The ri2 package (>= 0.4.1) depends on randomizr for `declare_ra()`, `conduct_ra()`, `obtain_condition_probabilities()`, `obtain_permutation_matrix()`, `obtain_num_permutations()`, the five `ra_*` S3 class names, and the `probabilities_matrix`, `blocks`, and `clusters` fields on declaration objects. All are unchanged. The ri2 test suite passes without modification against randomizr 2.0.0.
+ri2 (>= 0.4.1) depends on randomizr for `declare_ra()`, `conduct_ra()`, `obtain_condition_probabilities()`, `obtain_permutation_matrix()`, `obtain_num_permutations()`, the five `ra_*` S3 class names, and the `probabilities_matrix`, `blocks`, and `clusters` fields on declaration objects. All are unchanged, and the ri2 and DeclareDesign test suites pass without modification against this release.
 
 # randomizr 1.0.1
 
