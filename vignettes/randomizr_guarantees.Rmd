@@ -1,0 +1,166 @@
+---
+title: "What randomizr guarantees"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{What randomizr guarantees}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE)
+```
+
+## Written with AI, and checked accordingly
+
+randomizr 2.0.1 was written by Alexander Coppock working with Claude (Anthropic), across design, implementation, tests and documentation, with `balanced_ra()` and cube-on-X contributed by Macartan Humphreys.
+
+The guarantee offered here is not that every line of code has been vouched for. It is that the package can be shown to do what it says: the table below states each promise in words and then measures it, live, in this document. Every function reproduces randomizr 1.0.1's draws for a given seed as well, with one documented exception covering `strata_rs()` and `strata_and_cluster_rs()`. That is checked separately, in `tests/testthat/test_stream_compat.R`, against output recorded from an installed 1.0.1.
+
+## What a guarantee looks like here
+
+A random assignment function makes two kinds of promise, and they are checked in two different ways.
+
+**An exact promise holds on every draw or it is broken.** That exactly `m` units are treated, that no cluster is split across conditions, that every block gets its stated count. There is no tolerance to set: the check runs the design a few thousand times and counts the draws on which the property holds. Anything short of all of them is a failure.
+
+**A probability promise is about a long-run average, so it can only be checked against sampling error.** That each unit is treated with probability 0.25 does not mean any particular set of draws will show exactly 0.25. With `sims` draws, a single unit's estimated probability has a standard error of `sqrt(p(1-p)/sims)`, and the check asks whether every unit sits within five of those of its target. Five is chosen so that a correct package essentially never fails the check by chance, while a wrong marginal probability, which would be off by a systematic amount rather than a Monte Carlo one, fails it loudly.
+
+The distinction matters for reading the table. An exact row that says anything other than "every draw" is a bug. A probability row is reporting a measurement, and the gap it prints is expected to be non-zero.
+
+```{r}
+library(randomizr)
+
+set.seed(20260824)
+sims <- 2000
+
+# An exact promise: the property either held on every draw or it did not.
+exact <- function(draw, property) {
+  ok <- replicate(sims, isTRUE(property(draw())))
+  list(result = sprintf("holds on %d of %d draws", sum(ok), sims),
+       holds = all(ok))
+}
+
+# A probability promise: no unit's realized rate may sit more than five Monte
+# Carlo standard errors from the probability the package claims for it.
+probability <- function(draw, target, condition = 1) {
+  realized <- rowMeans(replicate(sims, draw()) == condition)
+  gap <- max(abs(realized - target))
+  tolerance <- 5 * sqrt(max(target * (1 - target)) / sims)
+  list(result = sprintf("largest gap %.3f, tolerance %.3f", gap, tolerance),
+       holds = gap < tolerance)
+}
+```
+
+## The designs being checked
+
+One hundred units throughout: five blocks of twenty for the blocked designs, twenty clusters of five for the clustered ones, and for `balanced_ra()` a probability that differs for every unit.
+
+```{r}
+N <- 100
+blocks <- rep(c("a", "b", "c", "d", "e"), each = 20)
+clusters <- rep(1:20, each = 5)
+regions <- rep(c("north", "south"), each = 50)
+p_unit <- seq(0.05, 0.95, length.out = N)
+
+# helpers the properties below are written in terms of
+by_group <- function(z, g) tapply(z, g, sum)
+uniform_within <- function(z, g) all(tapply(z, g, function(x) length(unique(x))) == 1)
+```
+
+## What randomizr promises
+
+```{r}
+checks <- list(
+  list("simple_ra()", "each unit is treated with probability 0.25",
+       probability(function() simple_ra(N, prob = 0.25), 0.25)),
+
+  list("simple_ra()", "the number treated is random, not fixed",
+       local({
+         m <- replicate(sims, sum(simple_ra(N, prob = 0.25)))
+         list(result = sprintf("sd %.2f against a binomial %.2f, %d distinct counts",
+                               sd(m), sqrt(N * 0.25 * 0.75), length(unique(m))),
+              holds = abs(sd(m) / sqrt(N * 0.25 * 0.75) - 1) < 0.1)
+       })),
+
+  list("complete_ra()", "each unit is treated with probability 25/100",
+       probability(function() complete_ra(N, m = 25), 0.25)),
+
+  list("complete_ra()", "exactly 25 units are treated",
+       exact(function() complete_ra(N, m = 25), function(z) sum(z) == 25)),
+
+  list("complete_ra(num_arms = 3)", "the three arms get 33, 33 and 34 units",
+       exact(function() complete_ra(N, num_arms = 3),
+             function(z) all(sort(as.vector(table(z))) == c(33, 33, 34)))),
+
+  list("complete_ra(num_arms = 3)", "each unit reaches arm T1 with probability 1/3",
+       probability(function() complete_ra(N, num_arms = 3), 1 / 3, condition = "T1")),
+
+  list("block_ra()", "exactly half of every block of 20 is treated",
+       exact(function() block_ra(blocks = blocks, prob = 0.5),
+             function(z) all(by_group(z, blocks) == 10))),
+
+  list("block_ra()", "each unit is treated with its block's probability, 0.5",
+       probability(function() block_ra(blocks = blocks, prob = 0.5), 0.5)),
+
+  list("cluster_ra()", "no cluster is ever split across conditions",
+       exact(function() cluster_ra(clusters = clusters),
+             function(z) uniform_within(z, clusters))),
+
+  list("cluster_ra()", "each of the 20 clusters is treated with probability 0.5",
+       probability(function() tapply(cluster_ra(clusters = clusters), clusters, `[`, 1), 0.5)),
+
+  list("block_and_cluster_ra()", "clusters stay intact and each region treats 25 units",
+       exact(function() block_and_cluster_ra(clusters = clusters, blocks = regions),
+             function(z) uniform_within(z, clusters) && all(by_group(z, regions) == 25))),
+
+  list("balanced_ra()", "each unit is treated with its own probability",
+       probability(function() balanced_ra(prob_unit = p_unit), p_unit)),
+
+  list("balanced_ra()", "the number treated is the floor or ceiling of its target",
+       exact(function() balanced_ra(prob_unit = p_unit),
+             function(z) sum(z) %in% c(floor(sum(p_unit)), ceiling(sum(p_unit))))),
+
+  list("declare_ra() + conduct_ra()", "realized rates match the declared probabilities",
+       local({
+         declaration <- declare_ra(
+           blocks = blocks,
+           block_m_each = rbind(c(15, 5), c(14, 6), c(13, 7), c(12, 8), c(11, 9)))
+         probability(function() conduct_ra(declaration),
+                     declaration$probabilities_matrix[, 2])
+       })),
+
+  list("complete_rs()", "exactly 25 units are sampled",
+       exact(function() complete_rs(N, n = 25), function(s) sum(s) == 25)),
+
+  list("strata_rs()", "exactly half of every stratum is sampled",
+       exact(function() strata_rs(strata = blocks, prob = 0.5),
+             function(s) all(by_group(s, blocks) == 10)))
+)
+
+guarantees <- data.frame(
+  Function = vapply(checks, function(x) x[[1]], character(1)),
+  Promise = vapply(checks, function(x) x[[2]], character(1)),
+  Measured = vapply(checks, function(x) x[[3]]$result, character(1)),
+  Holds = vapply(checks, function(x) x[[3]]$holds, logical(1))
+)
+```
+
+```{r echo=FALSE}
+knitr::kable(guarantees, row.names = FALSE)
+```
+
+```{r}
+all(guarantees$Holds)
+```
+
+Every promise in the table is met, on `r sims` draws of each design, at the seed set at the top of this document. The numbers are computed when the vignette is built, so they are the numbers your installed copy produces rather than numbers recorded from a run somewhere else.
+
+## What this does not cover
+
+The table is a demonstration, not a proof, and it is deliberately a small one.
+
+It checks one configuration per promise. The test suite checks many: it runs the same properties across argument forms, arm counts, block and cluster structures, and the edge cases that have caused bugs, which is where a guarantee is actually enforced. What this document adds is that the promises are stated in words a reader can disagree with, and measured where a reader can see them.
+
+It says nothing about designs it does not draw. `balanced_ra()` with three or more arms and `blocks` is the case worth naming, because there the within-block counts stay tight and the overall count does not: it is the sum of independent block landings and can move by more than one. That is a documented limit of the implementation rather than an oversight, and the "Assignment with heterogeneous probabilities" article gives the reason.
+
+It does not check the distribution of assignments beyond its first moment, and neither does the test suite. That each unit is treated with the right probability leaves open whether whole assignment vectors are drawn with the right joint distribution. What the package offers on that is enumeration rather than measurement: `obtain_permutation_matrix()` lists every assignment a declaration can produce and `obtain_permutation_probabilities()` gives each one its probability, and the suite confirms that the enumeration is complete, that no assignment is listed twice, and that the probabilities sum to one. It does not draw a design many times and compare the realized frequencies of those assignments against those probabilities. For randomization inference that gap does not bite, because `conduct_ra()` and the permutation machinery are the same code path. It is still the part of this document that is enumerated rather than shown.

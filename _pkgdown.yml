@@ -43,6 +43,8 @@ navbar:
     menu: 
      - text: Design and Analysis of Experiments with randomizr
        href: articles/randomizr_vignette.html
+     - text: What randomizr guarantees
+       href: articles/randomizr_guarantees.html
      - text: Assignment with heterogeneous probabilities
        href: articles/balanced_ra.html
      - text: Covariate totals versus blocks
