@@ -42,7 +42,7 @@ Repeating the draw, the unit means sit at 0.5, each district contributes 1 or 2,
 reps <- replicate(5000, balanced_ra(blocks = blocks))
 
 # individual assignment probabilities
-cbind(target = 0.5, average = rowMeans(reps))
+cbind(target = .5, average = rowMeans(reps))
 
 # block totals
 table(colSums(reps[blocks == 1, ]), colSums(reps[blocks == 2, ]))
@@ -58,7 +58,7 @@ The input is an $N \times k$ matrix $\pi$ of assignment probabilities. Row $i$ s
 
 One way to picture the algorithm is as a flow on the bipartite graph of units and conditions. An edge exists where a cell is still fractional. A cycle in that graph is a closed walk that alternates between units and conditions. Pushing a constant $\delta$ forward along the even edges and backward along the odd edges leaves every row total and every column total unchanged, and a large enough $\delta$ drives at least one cell to 0 or 1. Repeat until no cycle remains.
 
-What remains is a forest. Every unit still has either no fractional cells or at least two of them: a unit with a single fractional cell would need that cell to be an integer, because its other cells are already 0 or 1 and the row sums to 1. Every leaf of the forest is therefore a condition, and a maximal path runs from one condition to another. Pushing along that path preserves every row total and every interior column total; only the two conditions at the ends move. That is the landing step.
+What remains is a forest. Every unit still has either no fractional cells or at least two of them: a unit with a single fractional cell would need that cell to be an integer, because its other cells are already 0 or 1 and the row sums to 1. So every leaf of the forest is a condition. A maximal path therefore runs from one condition to another. Pushing along that path preserves every row total and every interior column total; only the two conditions at the ends move. That is the landing step.
 
 Each push is a fair bet. If the largest feasible up-step is $d^{+}$ and the largest feasible down-step is $d^{-}$, the algorithm takes the up-step with probability $d^{-}/(d^{+}+d^{-})$. The current matrix is then a martingale:
 
@@ -70,15 +70,15 @@ The same degree bound that appears in dependent rounding explains the floor-or-c
 
 ## What the papers establish
 
-[Deville and Tillé (2004)](https://doi.org/10.1093/biomet/91.4.893) give the cube method for balanced sampling. The state is a vector in the unit cube. Balancing constraints are linear equalities: in survey sampling, that the Horvitz-Thompson totals of auxiliary variables match the known population totals. The *flight* phase moves in a direction that lies in the kernel of those constraints until a coordinate hits 0 or 1. The *landing* phase begins when no such direction remains, and it drops constraints until the state is a vertex. Each flight step is constructed to be a martingale, so first-order inclusion probabilities equal the supplied $\pi$. Landing may violate a dropped constraint. The paper does not claim that every balancing constraint survives all the way to the assignment.
+[Deville and Tillé (2004)](https://doi.org/10.1093/biomet/91.4.893) give the cube method for balanced sampling. The state is a vector in the unit cube. Balancing constraints are linear equalities — in survey sampling, that the Horvitz–Thompson totals of auxiliary variables match the known population totals. The *flight* phase moves in a direction that lies in the kernel of those constraints until a coordinate hits 0 or 1. The *landing* phase begins when no such direction remains, and it drops constraints until the state is a vertex. Each flight step is constructed to be a martingale, so first-order inclusion probabilities equal the supplied $\pi$. Landing may violate a dropped constraint. The paper does not claim that every balancing constraint survives all the way to the assignment.
 
 This function applies that method to a particular constraint system: the transportation polytope of nonnegative $N \times k$ matrices with row sums 1 and column sums $t$. Cycle moves are the kernel directions that preserve every row and every column. Path moves are landing. Deville and Tillé (2004) supply the martingale and the flight/landing split. They do not, by themselves, say that a blocked assignment problem will be tight both within each block and overall.
 
-[Deville and Tillé (1998)](https://doi.org/10.1093/biomet/85.1.89) give the splitting method for unequal-probability sampling without replacement. The *pivotal* method is the two-unit case: transfer mass between two units until one hits 0 or 1, with the direction chosen so that the step is a martingale and the total remains exact. With two arms the transportation graph is a forest of stars (each unit has one edge, to its own block), so every maximal path is unit-block-unit. The general cube walk collapses to the pivotal method. That is the two-arm path in the C++.
+[Deville and Tillé (1998)](https://doi.org/10.1093/biomet/85.1.89) give the splitting method for unequal-probability sampling without replacement. The *pivotal* method is the two-unit case: transfer mass between two units until one hits 0 or 1, with the direction chosen so that the step is a martingale and the total remains exact. With two arms the transportation graph is a forest of stars — each unit has one edge, to its own block — so every maximal path is unit–block–unit. The general cube walk collapses to the pivotal method. That is the two-arm path in the C++.
 
 [Chauvet and Tillé (2006)](https://doi.org/10.1007/s00180-006-0250-2) give a fast flight phase whose cost is linear in the population size. The device is a working window: only as many units as there are balancing constraints need to be examined at once. In this problem the window is $k$ units. A unit that is still fractional has at least two fractional cells, so $k$ such units induce at least $2k$ edges on at most $2k$ nodes, and a graph with at least as many edges as nodes is not a forest. The window therefore always contains a cycle until too few fractional units remain. That is the three-or-more-arm path, in the form this problem takes it.
 
-[Deville and Tillé (2005)](https://doi.org/10.1016/j.jspi.2003.11.011) approximate the variance of Horvitz-Thompson totals under balanced sampling, when joint inclusion probabilities have no closed form. This function does not implement those estimators.
+[Deville and Tillé (2005)](https://doi.org/10.1016/j.jspi.2003.11.011) approximate the variance of Horvitz–Thompson totals under balanced sampling, when joint inclusion probabilities have no closed form. This function does not implement those estimators.
 
 ## What this implementation guarantees
 
@@ -91,7 +91,7 @@ Every unit receives exactly one condition. Each unit's probability of each condi
 
 The two-arm overall-and-block result is an implementation choice, not a named theorem that "the cube always does both." After a first pivotal pass inside each block, at most one unit per block is still fractional. A second pass pairs those leftovers as a single group. Pairing preserves their total, so the overall count stays tight, and each leftover is still sent to 0 or 1, so no block moves by more than one from its target. Independent Bernoulli rounding of each leftover would have kept each block tight and let the overall count drift by up to the number of blocks.
 
-That leftover pairing does not extend to three or more arms. A block can keep several leftover units, and landing those leftovers as one global group can push a within-block arm count more than one away from its target. The implementation therefore lands each block on its own. Within-block counts stay at the floor or the ceiling. Overall counts are the sum of those independent landings. When several block remainders fall the same way, the overall count can move by more than one. Joint floor-or-ceiling at both levels is feasible (that is Hamilton's method of apportionment, applied to the block remainders), and this implementation delivers it for two arms, not for $k>2$.
+That leftover pairing does not extend to three or more arms. A block can keep several leftover units, and landing those leftovers as one global group can push a within-block arm count more than one away from its target. The implementation therefore lands each block on its own. Within-block counts stay at the floor or the ceiling. Overall counts are the sum of those independent landings. When several block remainders fall the same way, the overall count can move by more than one. Joint floor-or-ceiling at both levels is feasible — that is Hamilton's method of apportionment, applied to the block remainders — and this implementation delivers it for two arms, not for $k>2$.
 
 # 3. Code walk-through
 
@@ -290,10 +290,10 @@ cube_tile_plot <- function(states, panel_labs, arm_labels, unit_labels,
 as_P <- function(z) cbind(Control = 1 - as.numeric(z), Treat = as.numeric(z))
 states2 <- lapply(seq_len(nrow(S)), function(i) as_P(S[i, ]))
 panel_labs <- c(
-  "Step 1: start",
-  "Step 2: pivotal pair, block 1",
-  "Step 3: pivotal pair, block 2",
-  "Step 4: leftover pair across blocks"
+  "Step 1 — start",
+  "Step 2 — pivotal pair, block 1",
+  "Step 3 — pivotal pair, block 2",
+  "Step 4 — leftover pair across blocks"
 )
 walk2_args <- list(
   states = states2,
@@ -316,7 +316,7 @@ table.cube-walk td.walk-fig { width: 42%; }
 <tr>
 <td class="walk-text">
 
-**Step 1: start.** All four units are still open (fractional). Treatment probabilities are $0.2$, $0.4$, $0.6$, and $0.8$. No pairing has been drawn yet. The pass stores unit 1 as block 1's open unit and waits for a second fractional unit in that block.
+**Step 1 — start.** All four units are still open (fractional). Treatment probabilities are $0.2$, $0.4$, $0.6$, and $0.8$. No pairing has been drawn yet. The pass stores unit 1 as block 1's open unit and waits for a second fractional unit in that block.
 
 </td>
 <td class="walk-fig">
@@ -330,7 +330,7 @@ do.call(cube_tile_plot, c(walk2_args, list(which = 1)))
 <tr>
 <td class="walk-text">
 
-**Step 2: pivotal pair, block 1.** Units 1 and 2 are both still open and sit in the same block, so we take a *pivotal pair*: one transfer of treated mass between them that leaves the block total at $0.6$. There are two directions. Plus moves as much as possible from unit 2 onto unit 1 (landing at $0.6$ and $0$). Minus moves as much as possible the other way (landing at $0$ and $0.6$). The largest plus step that stays in $[0,1]$ is $\delta_+=\min(1-z_1,z_2)=\min(0.8,0.4)=0.4$. The largest minus step is $\delta_-=\min(z_1,1-z_2)=\min(0.2,0.6)=0.2$. The fair bet takes plus with probability $\delta_-/(\delta_++\delta_-)=0.2/0.6=1/3$, so the current probabilities are a martingale. Imagine we happened to choose plus. Then $0.4$ moves from unit 2 to unit 1: unit 2's treatment cell is crossed out (that was all of its mass) and unit 1 is raised to $0.6$. Unit 2 is settled as control. The first two units cannot both still be treated: their combined mass is only $0.6$, so this pair always drives one of them to $0$ before either can hit $1$. Minus would have settled unit 1 instead. Either way, one of the two is already out.
+**Step 2 — pivotal pair, block 1.** Units 1 and 2 are both still open and sit in the same block, so we take a *pivotal pair*: one transfer of treated mass between them that leaves the block total at $0.6$. There are two directions. Plus moves as much as possible from unit 2 onto unit 1 (landing at $0.6$ and $0$). Minus moves as much as possible the other way (landing at $0$ and $0.6$). The largest plus step that stays in $[0,1]$ is $\delta_+=\min(1-z_1,z_2)=\min(0.8,0.4)=0.4$. The largest minus step is $\delta_-=\min(z_1,1-z_2)=\min(0.2,0.6)=0.2$. The fair bet takes plus with probability $\delta_-/(\delta_++\delta_-)=0.2/0.6=1/3$, so the current probabilities are a martingale. Imagine we happened to choose plus. Then $0.4$ moves from unit 2 to unit 1: unit 2's treatment cell is crossed out (that was all of its mass) and unit 1 is raised to $0.6$. Unit 2 is settled as control. The first two units cannot both still be treated: their combined mass is only $0.6$, so this pair always drives one of them to $0$ before either can hit $1$. Minus would have settled unit 1 instead. Either way, one of the two is already out.
 
 </td>
 <td class="walk-fig">
@@ -344,7 +344,7 @@ do.call(cube_tile_plot, c(walk2_args, list(which = 2)))
 <tr>
 <td class="walk-text">
 
-**Step 3: pivotal pair, block 2.** Still open: unit 1 at $0.6$ (the leftover from block 1) and both units in block 2. Unit 3 opened the block; unit 4 pairs with it. Same kind of pair: plus lands at (unit 3 to $1$, unit 4 to $0.4$); minus lands at (unit 3 to $0.4$, unit 4 to $1$). Again $\delta_+=0.4$, $\delta_-=0.2$, so plus has probability $0.2/0.6=1/3$. Imagine we happened to choose minus. Then $0.2$ moves from unit 3 to unit 4: unit 4's treatment cell fills (the gap from $0.8$ to $1$) and unit 3 is lowered to $0.4$ so the block total stays $1.4$. Unit 4 is settled as treated; unit 3 remains open.
+**Step 3 — pivotal pair, block 2.** Still open: unit 1 at $0.6$ (the leftover from block 1) and both units in block 2. Unit 3 opened the block; unit 4 pairs with it. Same kind of pair: plus lands at (unit 3 to $1$, unit 4 to $0.4$); minus lands at (unit 3 to $0.4$, unit 4 to $1$). Again $\delta_+=0.4$, $\delta_-=0.2$, so plus has probability $0.2/0.6=1/3$. Imagine we happened to choose minus. Then $0.2$ moves from unit 3 to unit 4: unit 4's treatment cell fills (the gap from $0.8$ to $1$) and unit 3 is lowered to $0.4$ so the block total stays $1.4$. Unit 4 is settled as treated; unit 3 remains open.
 
 </td>
 <td class="walk-fig">
@@ -358,7 +358,7 @@ do.call(cube_tile_plot, c(walk2_args, list(which = 3)))
 <tr>
 <td class="walk-text">
 
-**Step 4: leftover pair across blocks.** Still open: unit 1 at $0.6$ and unit 3 at $0.4$. Units 2 and 4 are already settled. We pair the leftovers as if they shared a block, so the same step preserves their combined total of $1$ and the overall treated count stays at $2$. Plus lands at (unit 1 to $1$, unit 3 to $0$); minus lands at (unit 1 to $0$, unit 3 to $1$). Here $\delta_+=\min(1-0.6,0.4)=0.4$ and $\delta_-=\min(0.6,1-0.4)=0.6$, so plus has probability $0.6/(0.4+0.6)=0.6$. Imagine we happened to choose plus. Then $0.4$ moves from unit 3 to unit 1: unit 1 fills and unit 3 is crossed out. Nothing remains for a Bernoulli draw. If one leftover had remained, it would be rounded by a fair coin at its current $z$.
+**Step 4 — leftover pair across blocks.** Still open: unit 1 at $0.6$ and unit 3 at $0.4$. Units 2 and 4 are already settled. We pair the leftovers as if they shared a block, so the same step preserves their combined total of $1$ and the overall treated count stays at $2$. Plus lands at (unit 1 to $1$, unit 3 to $0$); minus lands at (unit 1 to $0$, unit 3 to $1$). Here $\delta_+=\min(1-0.6,0.4)=0.4$ and $\delta_-=\min(0.6,1-0.4)=0.6$, so plus has probability $0.6/(0.4+0.6)=0.6$. Imagine we happened to choose plus. Then $0.4$ moves from unit 3 to unit 1: unit 1 fills and unit 3 is crossed out. Nothing remains for a Bernoulli draw. If one leftover had remained, it would be rounded by a fair coin at its current $z$.
 
 </td>
 <td class="walk-fig">
@@ -377,11 +377,11 @@ The treatment column of those four matrices is the state table.
 round(S, 2)
 ```
 
-Two treated. The block counts are $(1,1)$. After the within-block pass the already-settled units contribute 1 and the leftovers sum to 1, so the second pass keeps the total at 2. Independent Bernoulli on those leftovers would have allowed totals of 1, 2, or 3. The first two units cannot both be 1: block 1's pair always zeros one of them, because their combined mass $0.6$ is less than 1. This walk is one path. Averaging over shuffles and the plus/minus draws recovers $p$.
+Two treated. The block counts are $(1,1)$. After the within-block pass the already-settled units contribute 1 and the leftovers sum to 1, so the second pass keeps the total at 2. Independent Bernoulli on those leftovers would have allowed totals of 1, 2, or 3. The first two units cannot both be 1: block 1's pair always zeros one of them, because their combined mass $0.6$ is less than 1. This is one path. Averaging over shuffles and the plus/minus draws recovers $p$.
 
 ## Multi-arm move
 
-With three or more arms the state is the full matrix. `cube_move` takes a walk of cells (a cycle or a path) and applies the same fair bet.
+With three or more arms the state is the full matrix. `cube_move` takes a walk of cells — a cycle or a path — and applies the same fair bet.
 
 ```cpp
 static void cube_move(std::vector<double>& Z, int n,
@@ -435,7 +435,7 @@ If no core remains and paths are allowed, the walk starts at an arm of original 
 
 ## Windowed flight and per-block landing
 
-`cube_process` is the Chauvet-Tillé window. It keeps a working set $W$ of up to $k$ units that still have at least two fractional cells, takes a step, and drops units that have settled.
+`cube_process` is the Chauvet–Tillé window. It keeps a working set $W$ of up to $k$ units that still have at least two fractional cells, takes a step, and drops units that have settled.
 
 ```cpp
 static void cube_process(std::vector<double>& Z, int n, int k,
@@ -533,12 +533,12 @@ S3$cycle5 <- Z3
 
 ```{r, echo = FALSE}
 panel_labs3 <- c(
-  "Step 1: start",
-  "Step 2: unused-edge cycle, units 1-2",
-  "Step 3: unused-edge cycle; unit 1 fills",
-  "Step 4: unused-edge cycle; unit 4 enters",
-  "Step 5: unused-edge cycle; unit 4 fills",
-  "Step 6: leftover 4-cycle, not a path"
+  "Step 1 — start",
+  "Step 2 — unused-edge cycle, units 1–2",
+  "Step 3 — unused-edge cycle; unit 1 fills",
+  "Step 4 — unused-edge cycle; unit 4 enters",
+  "Step 5 — unused-edge cycle; unit 4 fills",
+  "Step 6 — leftover 4-cycle, not a path"
 )
 walk3_args <- list(
   states = S3,
@@ -553,7 +553,7 @@ walk3_args <- list(
 <tr>
 <td class="walk-text">
 
-**Step 1: start.** All twelve cells are still open. Column targets are $2$, $1$, and $1$. The working window fills with units 1, 2, and 3: the first three units that still have at least two fractional cells. Three such units on three arms force a cycle: at least six edges on at most six nodes is not a forest. No move has been drawn yet.
+**Step 1 — start.** All twelve cells are still open. Column targets are $2$, $1$, and $1$. The working window fills with units 1, 2, and 3 — the first three units that still have at least two fractional cells. Three such units on three arms force a cycle: at least six edges on at most six nodes is not a forest. No move has been drawn yet.
 
 </td>
 <td class="walk-fig">
@@ -567,7 +567,7 @@ do.call(cube_tile_plot, c(walk3_args, list(which = 1)))
 <tr>
 <td class="walk-text">
 
-**Step 2: unused-edge cycle on units 1-2, arms 1-2.** Still open: all four units. The first unused edges on the 2-core close on units 1 and 2 and arms 1 and 2. That is the same fair bet as the pivotal pair, now along a cycle: even cells $(1,1)$ and $(2,2)$ go up and odd cells $(2,1)$ and $(1,2)$ go down (or the reverse). Plus lands with the odd cells at $0$; minus goes the other way. The largest plus step is $\delta_+=0.4$ (the odd cells' mass); the largest minus step is $\delta_-=0.2$. Plus has probability $\delta_-/(\delta_++\delta_-)=0.2/0.6=1/3$. Imagine we happened to choose plus. Then $0.4$ leaves each odd cell (that was all of their mass) and the even cells rise by $0.4$. Every row total and every column total is unchanged.
+**Step 2 — unused-edge cycle on units 1–2, arms 1–2.** Still open: all four units. The first unused edges on the 2-core close on units 1 and 2 and arms 1 and 2. That is the same fair bet as the pivotal pair, now along a cycle: even cells $(1,1)$ and $(2,2)$ go up and odd cells $(2,1)$ and $(1,2)$ go down (or the reverse). Plus lands with the odd cells at $0$; minus goes the other way. The largest plus step is $\delta_+=0.4$ (the odd cells' mass); the largest minus step is $\delta_-=0.2$. Plus has probability $\delta_-/(\delta_++\delta_-)=0.2/0.6=1/3$. Imagine we happened to choose plus. Then $0.4$ leaves each odd cell — that was all of their mass — and the even cells rise by $0.4$. Every row total and every column total is unchanged.
 
 </td>
 <td class="walk-fig">
@@ -581,7 +581,7 @@ do.call(cube_tile_plot, c(walk3_args, list(which = 2)))
 <tr>
 <td class="walk-text">
 
-**Step 3: unused-edge cycle; unit 1 fills.** Still open: unit 1 (arm 1 at $0.6$ and arm 3 at $0.4$) and units 2-4. The walk now closes on units 1, 3, and 2 and all three arms. Again $\delta_+=0.4$, $\delta_-=0.2$, so plus has probability $1/3$. Imagine we happened to choose plus. Then $0.4$ fills unit 1's arm-1 cell (the gap from $0.6$ to $1$) and crosses out its arm-3 cell. Unit 1 drops from the window. Unit 4 enters.
+**Step 3 — unused-edge cycle; unit 1 fills.** Still open: unit 1 (arm 1 at $0.6$ and arm 3 at $0.4$) and units 2–4. The walk now closes on units 1, 3, and 2 and all three arms. Again $\delta_+=0.4$, $\delta_-=0.2$, so plus has probability $1/3$. Imagine we happened to choose plus. Then $0.4$ fills unit 1's arm-1 cell (the gap from $0.6$ to $1$) and crosses out its arm-3 cell. Unit 1 drops from the window. Unit 4 enters.
 
 </td>
 <td class="walk-fig">
@@ -595,7 +595,7 @@ do.call(cube_tile_plot, c(walk3_args, list(which = 3)))
 <tr>
 <td class="walk-text">
 
-**Step 4: unused-edge cycle; unit 4's arm-2 cell hits 0.** Still open: units 2, 3, and 4. The cycle is on units 3 and 4 and arms 1 and 2. Plus takes a step of $\delta_+=0.1$; minus a step of $\delta_-=0.6$. Plus has probability $0.6/(0.1+0.6)\approx 0.86$. Imagine we happened to choose plus. Then unit 4's arm-2 cell is crossed out (that was all of its mass). Column totals are still untouched.
+**Step 4 — unused-edge cycle; unit 4's arm-2 cell hits 0.** Still open: units 2, 3, and 4. The cycle is on units 3 and 4 and arms 1 and 2. Plus takes a step of $\delta_+=0.1$; minus a step of $\delta_-=0.6$. Plus has probability $0.6/(0.1+0.6)\approx 0.86$. Imagine we happened to choose plus. Then unit 4's arm-2 cell is crossed out (that was all of its mass). Column totals are still untouched.
 
 </td>
 <td class="walk-fig">
@@ -609,7 +609,7 @@ do.call(cube_tile_plot, c(walk3_args, list(which = 4)))
 <tr>
 <td class="walk-text">
 
-**Step 5: unused-edge cycle; unit 4 fills.** Still open: units 2, 3, and 4 (unit 4 still has arm 1 at $0.9$ and arm 3 at $0.1$). Plus would step $\delta_+=0.7$; minus $\delta_-=0.1$. Plus has probability $0.1/(0.7+0.1)=0.125$. Imagine we happened to choose minus. Then $0.1$ fills unit 4's arm-1 cell and crosses out its arm-3 cell. Unit 4 is assigned to arm 1. Arm 1's column is now the integer $2$.
+**Step 5 — unused-edge cycle; unit 4 fills.** Still open: units 2, 3, and 4 (unit 4 still has arm 1 at $0.9$ and arm 3 at $0.1$). Plus would step $\delta_+=0.7$; minus $\delta_-=0.1$. Plus has probability $0.1/(0.7+0.1)=0.125$. Imagine we happened to choose minus. Then $0.1$ fills unit 4's arm-1 cell and crosses out its arm-3 cell. Unit 4 is assigned to arm 1. Arm 1's column is now the integer $2$.
 
 </td>
 <td class="walk-fig">
@@ -623,7 +623,7 @@ do.call(cube_tile_plot, c(walk3_args, list(which = 5)))
 <tr>
 <td class="walk-text">
 
-**Step 6: leftover 4-cycle, not a path.** Still open: units 2 and 3 on arms 2 and 3. That graph is a 4-cycle (every vertex has degree 2), so the 2-core is nonempty and we still take a cycle, not a landing path. Plus fills the even cells $(2,2)$ and $(3,3)$; minus does the reverse. Here $\delta_+=0.8$ and $\delta_-=0.2$, so plus has probability $0.2/(0.8+0.2)=0.2$. Imagine we happened to choose plus. Those even cells fill and the odd cells are crossed out. Arms are $(1,2,3,1)$. Counts are $(2,1,1)$. A path would appear only if the 2-core were empty and a column were still fractional. That is the two-unit design with rows $(0.5,0.3,0.2)$ and targets $1$, $0.6$, and $0.4$: two cycles, then a path on the leftover unit between the two arms that are still fractional. Here every target is an integer, so flight finishes.
+**Step 6 — leftover 4-cycle, not a path.** Still open: units 2 and 3 on arms 2 and 3. That graph is a 4-cycle — every vertex has degree 2 — so the 2-core is nonempty and we still take a cycle, not a landing path. Plus fills the even cells $(2,2)$ and $(3,3)$; minus does the reverse. Here $\delta_+=0.8$ and $\delta_-=0.2$, so plus has probability $0.2/(0.8+0.2)=0.2$. Imagine we happened to choose plus. Those even cells fill and the odd cells are crossed out. Arms are $(1,2,3,1)$. Counts are $(2,1,1)$. A path would appear only if the 2-core were empty and a column were still fractional. That is the two-unit design with rows $(0.5,0.3,0.2)$ and targets $1$, $0.6$, and $0.4$: two cycles, then a path on the leftover unit between the two arms that are still fractional. Here every target is an integer, so flight finishes.
 
 </td>
 <td class="walk-fig">
@@ -664,7 +664,7 @@ The shares sit near the supplied chances, and every draw has a single winner.
 
 ## Two districts of three
 
-This example is the motivating blocked design from Section 1. The cross-tabulation of north and south treated counts has mass only on $(1,2)$ and $(2,1)$.
+This is the motivating blocked design from Section 1. The cross-tabulation of north and south treated counts has mass only on $(1,2)$ and $(2,1)$.
 
 ```{r}
 districts <- rep(c("north", "south"), each = 3)
@@ -768,7 +768,7 @@ table(clusters, z)
 
 Six clusters, probabilities summing to 3: three clusters treated. Eighteen units, of which the treated number depends on which clusters were drawn.
 
-Blocks and clusters combine. Every cluster must sit inside one block. The tight counts are then treated clusters within each block, and, with two arms, overall as well.
+Blocks and clusters combine. Every cluster must sit inside one block. The tight counts are then treated clusters within each block, and — with two arms — overall as well.
 
 ```{r}
 set.seed(9)
@@ -908,7 +908,7 @@ Z <- replicate(2000, as.integer(as.character(
 table(colSums(Z == 1))
 ```
 
-Arm 1's overall count is not confined to $\{1,2\}$. That coupling is feasible (Hamilton's method would give each arm to exactly two of the three blocks), and this implementation does not do it when $k>2$.
+Arm 1's overall count is not confined to $\{1,2\}$. That coupling is feasible — Hamilton's method would give each arm to exactly two of the three blocks — and this implementation does not do it when $k>2$.
 
 There is no residual condition if the rows of `prob_unit_each` do not sum to 1. There is no interpretation of a probability greater than 1 as an expected count. Both are refused, as in Section 4.
 
@@ -922,10 +922,10 @@ The takeaway is practical. Use `balanced_ra()` when probabilities vary across un
 
 # References
 
-Deville, J.-C. and Tillé, Y. (1998). Unequal probability sampling without replacement through a splitting method. *Biometrika* 85(1), 89-101. <https://doi.org/10.1093/biomet/85.1.89>
+Deville, J.-C. and Tillé, Y. (1998). Unequal probability sampling without replacement through a splitting method. *Biometrika* 85(1), 89–101. <https://doi.org/10.1093/biomet/85.1.89>
 
-Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube method. *Biometrika* 91(4), 893-912. <https://doi.org/10.1093/biomet/91.4.893>
+Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube method. *Biometrika* 91(4), 893–912. <https://doi.org/10.1093/biomet/91.4.893>
 
-Deville, J.-C. and Tillé, Y. (2005). Variance approximation under balanced sampling. *Journal of Statistical Planning and Inference* 128(2), 569-591. <https://doi.org/10.1016/j.jspi.2003.11.011>
+Deville, J.-C. and Tillé, Y. (2005). Variance approximation under balanced sampling. *Journal of Statistical Planning and Inference* 128(2), 569–591. <https://doi.org/10.1016/j.jspi.2003.11.011>
 
-Chauvet, G. and Tillé, Y. (2006). A fast algorithm for balanced sampling. *Computational Statistics* 21(1), 53-62. <https://doi.org/10.1007/s00180-006-0250-2>
+Chauvet, G. and Tillé, Y. (2006). A fast algorithm for balanced sampling. *Computational Statistics* 21(1), 53–62. <https://doi.org/10.1007/s00180-006-0250-2>
