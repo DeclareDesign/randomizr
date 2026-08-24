@@ -13,19 +13,17 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE)
 
 ## Written with AI, and checked accordingly
 
-randomizr 2.0.1 was written by Alexander Coppock working with Claude (Anthropic), across design, implementation, tests and documentation, with `balanced_ra()` and cube-on-X contributed by Macartan Humphreys.
+randomizr 2.0.1 was written by Alexander Coppock working with Claude (Anthropic), across design, implementation, tests and documentation, with contributions to `balanced_ra()` and cube-on-X by Macartan Humphreys working with Cursor (various models).
 
-The guarantee offered here is not that every line of code has been vouched for. It is that the package can be shown to do what it says: the table below states each promise in words and then measures it, live, in this document. Every function reproduces randomizr 1.0.1's draws for a given seed as well, with one documented exception covering `strata_rs()` and `strata_and_cluster_rs()`. That is checked separately, in `tests/testthat/test_stream_compat.R`, against output recorded from an installed 1.0.1.
+While we have reviewed the code base for 2.0.1, we did not write it. The guarantee offered here then is not that every line of code has been vouched for. It is that the package can be shown to do what it says: the table below states each promise in words and then measures it, live, in this document. Every function reproduces randomizr 1.0.1's draws for a given seed as well, with one documented exception covering `strata_rs()` and `strata_and_cluster_rs()`. That is checked separately, in `tests/testthat/test_stream_compat.R`, against output recorded from an installed 1.0.1. The package contains many additional tests in `tests/testthat`.
 
 ## What a guarantee looks like here
 
-A random assignment function makes two kinds of promise, and they are checked in two different ways.
+A random assignment function makes two kinds of promise and we check these in  different ways.
 
-**An exact promise holds on every draw or it is broken.** That exactly `m` units are treated, that no cluster is split across conditions, that every block gets its stated count. There is no tolerance to set: the check runs the design a few thousand times and counts the draws on which the property holds. Anything short of all of them is a failure.
+**An exact promise holds on every draw or it is broken.** For example, that exactly `m` units are treated, that no cluster is split across conditions, that every block gets its stated count. There is no tolerance to set: the check runs the design a few thousand times and checks that the property holds every time.
 
-**A probability promise is about a long-run average, so it can only be checked against sampling error.** That each unit is treated with probability 0.25 does not mean any particular set of draws will show exactly 0.25. With `sims` draws, a single unit's estimated probability has a standard error of `sqrt(p(1-p)/sims)`, and the check asks whether every unit sits within five of those of its target. Five is chosen so that a correct package essentially never fails the check by chance, while a wrong marginal probability, which would be off by a systematic amount rather than a Monte Carlo one, fails it loudly.
-
-The distinction matters for reading the table. An exact row that says anything other than "every draw" is a bug. A probability row is reporting a measurement, and the gap it prints is expected to be non-zero.
+**A probability promise is about a long-run average, so it can only be checked against sampling error.** That each unit is treated with probability 0.25 does not mean any particular set of draws will show exactly 0.25. With `sims` draws, a single unit's estimated probability has a standard error of `sqrt(p(1-p)/sims)`, and the check asks whether every unit sits within five of those of its target. Five is chosen so that a correct package essentially never fails the check by chance, while a wrong marginal probability, which would be off by a systematic amount rather than a Monte Carlo one, is still caught.
 
 ```{r}
 library(randomizr)

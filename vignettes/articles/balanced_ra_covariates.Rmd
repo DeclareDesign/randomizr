@@ -1,8 +1,8 @@
 ---
-title: "Covariate totals versus blocks"
+title: "Randomizing against continuous covariates"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Covariate totals versus blocks}
+  %\VignetteIndexEntry{Randomizing against continuous covariates}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

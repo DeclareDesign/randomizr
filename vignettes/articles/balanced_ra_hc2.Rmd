@@ -1,8 +1,8 @@
 ---
-title: "HC2 coverage under balanced assignment"
+title: "HC2 coverage following balanced_ra"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{HC2 coverage under balanced assignment}
+  %\VignetteIndexEntry{HC2 coverage following balanced_ra}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -24,7 +24,13 @@ library(estimatr)
 library(ggplot2)
 ```
 
-The answer depends on which `balanced_ra()` design is meant, and the two halves of it point in opposite directions. On the count-tight designs, where the function holds the number of treated units at the floor or the ceiling of its target, HC2 95 percent intervals cover the ATE at close to the nominal rate: the two-arm, blocked two-arm, and three-arm rates below all sit near 0.95, each from 2,000 draws, as does independent Bernoulli assignment on the same two-arm DGP. Assignment dependence is real: the mean pairwise correlation is $-0.20$ under balanced assignment and $0.00$ under simple assignment, and the treated count does not wander. That dependence does not throw HC2 off on those designs.
+Unit level assignment probabilities are not independent under  `balanced_ra`. This is also true for `complete_ra`,  `block_ra`, and other designs.
+
+Does this matter? The question is taken up in Deville  and Tillé  (2005) and others. 
+
+Here we focus on HC2 and show that the answer can depend on which `balanced_ra()` design is meant. 
+
+On the count-tight designs, for instance with blocks declared, where the function holds the number of treated units at the floor or the ceiling of its target, HC2 95 percent intervals cover the ATE at close to the nominal rate: the two-arm, blocked two-arm, and three-arm rates below all sit near 0.95, each from 2,000 draws, as does independent Bernoulli assignment on the same two-arm DGP. Assignment dependence is real: the mean pairwise correlation is $-0.20$ under balanced assignment and $0.00$ under simple assignment, and the treated count does not wander. That dependence does not throw HC2 off on those designs.
 
 On the `formula` design, where the function also holds a linear covariate total near its target, it does. Coverage there is 1.000 with a standard error about two and a half times the estimator's true sampling standard deviation. HC2 is conservative under covariate-balanced assignment, which is the price of the design rather than a defect in the estimator, and Lin adjustment repairs it only while the adjustment model is right.
 
@@ -278,3 +284,8 @@ These are the designs that were drawn: two-arm unit-varying $p$, the same design
 The note does not say that HC2 is valid for every cube design, and the `formula` result is the case that shows why the qualification is needed rather than polite. It does not speak to cluster-robust standard errors, to randomization inference, or to designs that empty an arm. Use the simulation if a design sits far from these.
 
 The takeaway is in two parts. Tight counts induce dependence, and on the count-tight designs above that is not a reason to drop HC2. Balancing a covariate induces dependence that HC2 cannot see, and there the interval is too wide by a factor the design chose to buy and the estimator cannot spend.
+
+
+# References
+
+Deville, J.-C. and Tillé, Y. (2005). Variance approximation under balanced sampling. *Journal of Statistical Planning and Inference* 128(2), 569–591. <https://doi.org/10.1016/j.jspi.2003.11.011>

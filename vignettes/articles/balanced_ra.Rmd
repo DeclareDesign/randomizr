@@ -1,8 +1,8 @@
 ---
-title: "Assignment with heterogeneous probabilities"
+title: "Introduction to balanced_ra"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Assignment with heterogeneous probabilities}
+  %\VignetteIndexEntry{Introduction to balanced_ra}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -23,13 +23,15 @@ library(randomizr)
 library(ggplot2)
 ```
 
-`balanced_ra()` assigns units to conditions when assignment probabilities vary from unit to unit, and it holds the number assigned to each condition at the floor or the ceiling of that condition's expected count. Three things hold on every draw: each unit receives exactly one condition; each unit's probability of each condition is the probability supplied; and the realized counts sit at the floor or the ceiling of their targets. With two arms and `blocks`, those tight counts are both within each block and overall. With three or more arms and `blocks`, tightness is within each block; the overall count is the sum of independent block landings and can move by more than one. Section 1 is a short demonstration. Section 2 gives the logic and states what the published papers guarantee versus what this implementation guarantees. Section 3 walks through the C++. Section 4 gives worked examples. Section 5 reports a concise validation. Section 6 lists the caveats.
+`balanced_ra()` holds the number assigned to each condition at the floor or the ceiling of that condition's expected count while respecting block and cluster structures and allowing for probabilities to vary from unit to unit. Three things hold on every draw: each unit receives exactly one condition; each unit's probability of each condition is the probability supplied; and the realized counts sit at the floor or the ceiling of their targets. With two arms and `blocks`, those tight counts are both within each block and overall. With three or more arms and `blocks`, tightness is within each block; the overall count is the sum of independent block landings and can move by more than one. 
+
+Section 1 gives a short demonstration. Section 2 gives the logic and states what the published papers guarantee versus what this implementation guarantees. Section 3 walks through the C++ implementation. Section 4 gives worked examples. Section 5 reports a concise validation. Section 6 lists the caveats.
 
 The function is **experimental**. Declare it with `declare_ra(..., ra_type = "balanced")`, by supplying `prob_unit_each`, or by supplying `formula`.
 
 # 1. Short demonstration
 
-The two-district design is a simple case that complete random assignment inside each block cannot handle on its own. Two districts of three villages, three villages to treat, equal probabilities, blocked by district: the per-district target is 1.5. Each district should receive one or two treated villages, never zero and never three, and the total should be three on every draw.
+We illustrate with a 6 unit, two-block design, uniform probabilities. This is a simple case that complete random assignment inside each block cannot handle on its own. Two districts of three villages, three villages to treat, equal probabilities, blocked by district: the per-district target is 1.5. Each district should receive one or two treated villages, never zero and never three, and the total should be three on every draw.
 
 ```{r}
 blocks <- rep(1:2, each = 3)
