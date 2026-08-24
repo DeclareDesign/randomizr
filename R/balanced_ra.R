@@ -24,12 +24,12 @@
 #' Every unit receives exactly one condition. Each unit's probability of each
 #' condition is the probability supplied. Counts are tight within each block
 #' always, and tight overall as well when there are two arms. With three or
-#' more arms and \code{blocks}, the overall count can wander; see
-#' \code{vignette("balanced_ra", package = "randomizr")}. With \code{clusters},
+#' more arms and \code{blocks}, the overall count can wander; see the
+#' "Assignment with heterogeneous probabilities" article. With \code{clusters},
 #' the tight counts are counts of clusters. With \code{formula}, first-order
 #' inclusion probabilities remain exact; covariate totals are as close as
-#' the landing phase allows. See
-#' \code{vignette("balanced_ra_covariates", package = "randomizr")}.
+#' the landing phase allows. See the "Covariate totals versus blocks"
+#' article.
 #'
 #' @section Balance when probabilities vary:
 #' The cube holds \eqn{X'Z} near \eqn{X'\pi}, which is the treated total of each
@@ -43,8 +43,8 @@
 #' \eqn{x}, and it does: the average treated-minus-control difference in
 #' \eqn{x} under \code{formula = ~ x} is the same one
 #' \code{\link{simple_ra}()} gives on the same probabilities. What the cube
-#' tightens, several-fold in the simulations in
-#' \code{vignette("balanced_ra_covariates")}, is the spread of that
+#' tightens, several-fold in the simulations in the "Covariate totals versus
+#' blocks" article, is the spread of that
 #' difference around its target, and with it the Horvitz-Thompson residual
 #' for the \eqn{x} total.
 #'
@@ -108,15 +108,14 @@
 #' This function is new in randomizr 2.0.1 and its interface may change. Declare
 #' a design with [declare_ra()] by setting \code{ra_type = "balanced"} or by
 #' supplying \code{prob_unit_each} or \code{formula}; \code{\link{conduct_ra}()}
-#' and \code{\link{obtain_condition_probabilities}()} then dispatch here. The
-#' vignette \code{vignette("balanced_ra", package = "randomizr")} has the
-#' count-tight algorithm. Cube-on-X is in
-#' \code{vignette("balanced_ra_covariates", package = "randomizr")}.
-#' Two further studies are articles on the package site rather than vignettes
-#' in the package, listed at
-#' \url{https://declaredesign.org/r/randomizr/articles/}: "HC2 coverage under
-#' balanced assignment", and "Speed of balanced_ra relative to complete and
-#' blocked assignment".
+#' and \code{\link{obtain_condition_probabilities}()} then dispatch here.
+#' Four studies of the function are articles on the package site rather than
+#' vignettes in the package, listed at
+#' \url{https://declaredesign.org/r/randomizr/articles/}: "Assignment with
+#' heterogeneous probabilities" has the count-tight algorithm, "Covariate
+#' totals versus blocks" has cube-on-X, and "HC2 coverage under balanced
+#' assignment" and "Speed of balanced_ra relative to complete and blocked
+#' assignment" are simulation studies.
 #'
 #' @param N The number of units. Optional when \code{formula} or the length of
 #'   \code{prob_unit} (or \code{blocks} or \code{clusters})

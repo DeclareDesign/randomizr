@@ -10,7 +10,7 @@ Three things hold at once, and all three are guaranteed rather than approached: 
 
 The assignment is drawn by the cube method of Deville and Tillé (2004), specialized to this problem, with three C++ kernels: a two-arm pivotal pass, a multi-arm flight-and-land, and cube-on-X. All three are linear in the number of units. Two thousand units take about a tenth of a millisecond with two conditions and about a millisecond with four, measured with a different probability drawn for every unit.
 
-`balanced_ra(formula = ~ x + B)` adds linear balancing constraints on covariates (cube-on-X): the flight keeps the treated totals of the model matrix near their expectations, with the intercept as the count constraint. Two-arm only; `blocks` and `prob_unit_each` cannot be combined with it. See `vignette("balanced_ra_covariates")`.
+`balanced_ra(formula = ~ x + B)` adds linear balancing constraints on covariates (cube-on-X): the flight keeps the treated totals of the model matrix near their expectations, with the intercept as the count constraint. Two-arm only; `blocks` and `prob_unit_each` cannot be combined with it. See the "Covariate totals versus blocks" article.
 
 The probability arguments follow the package's convention: `prob` is the one-number slot, `prob_unit` the one-per-unit slot (a single number is refused, except at `N = 1`), and `prob_unit_each` the one-row-per-unit matrix; supply exactly one. `num_arms` or `conditions` without probabilities expand to equal-probability balanced assignment, and condition naming follows `complete_ra()`: two arms are 0 and 1 unless `num_arms` is supplied explicitly. The default is `prob = 0.5`, so `balanced_ra(4)` is complete assignment of four units.
 
@@ -84,7 +84,7 @@ The random sampling (RS) family has always been a two-condition special case of 
 
 `Depends: R (>= 3.6.0)`, raised from 3.5.0 because the C++ kernels draw through `R_unif_index()`, which R provides from 3.6.0.
 
-The package ships four vignettes: the introduction, an algorithms tour, and two on `balanced_ra()` (the count-tight walk-through and cube-on-X). Two further studies are articles on the package site rather than vignettes in the package: "HC2 coverage under balanced assignment" and "Speed of balanced_ra relative to complete and blocked assignment", at https://declaredesign.org/r/randomizr/articles/ once the site rebuilds from this release.
+The package ships one vignette, the introduction. Everything on `balanced_ra()` is an article on the package site rather than a vignette in the package: "Assignment with heterogeneous probabilities" (the count-tight walk-through), "Covariate totals versus blocks" (cube-on-X), "HC2 coverage under balanced assignment", and "Speed of balanced_ra relative to complete and blocked assignment", at https://declaredesign.org/r/randomizr/articles/ once the site rebuilds from this release.
 
 ## Compatibility
 
