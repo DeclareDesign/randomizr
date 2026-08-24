@@ -10,7 +10,7 @@
 |collate  |en_US.UTF-8                                         |
 |ctype    |en_US.UTF-8                                         |
 |tz       |America/Chicago                                     |
-|date     |2026-08-21                                          |
+|date     |2026-08-23                                          |
 |pandoc   |3.9.0.2 @ /opt/homebrew/bin/pandoc                  |
 |quarto   |1.10.18 @ /Users/alexandercoppock/.local/bin/quarto |
 
@@ -18,7 +18,7 @@
 
 |package   |old   |new   |Δ  |
 |:---------|:-----|:-----|:--|
-|randomizr |1.0.1 |2.0.0 |*  |
+|randomizr |1.0.1 |2.0.1 |*  |
 |Rcpp      |NA    |1.1.2 |*  |
 
 # Revdeps
