@@ -2,15 +2,15 @@
 
 This release is a major internal restructuring plus one new capability, described here relative to randomizr 1.0.1, the version it replaces on CRAN. No exported function, argument, return type, S3 class, or object field carried by 1.0.1 is removed, renamed, or reordered. New arguments were added to `declare_ra()`, `conduct_ra()` and `obtain_condition_probabilities()` (`prob_unit_each` after `prob_each`; `ra_type` and `formula` before `permutation_matrix`; `data` last), so a caller passing `block_m` or later arguments by position must name them; `block_ra()` gains two arguments documented as internal (`.block_int`, `.N_per_block`). The package exports 31 objects against 1.0.1's 29, the two additions being `balanced_ra()` and `balanced_ra_probabilities()`.
 
-## New: assignment with heterogeneous probabilities (experimental)
+## New: assignment with tight targets (experimental)
 
-`balanced_ra()` and `balanced_ra_probabilities()` assign units when the probability of assignment varies from unit to unit, holding the number assigned to each condition as close to its target as arithmetic allows. They fill the gap between `simple_ra()`, which honors unit-varying probabilities but lets the number treated wander, and `complete_ra()`, which fixes the number treated but requires every unit to share the same probability.
+`balanced_ra()` and `balanced_ra_probabilities()` draw assignment with tight targets: condition counts at the floor or ceiling of what the probabilities imply, and, with `formula`, covariate totals too, while each unit's probability stays exact. That is useful when probabilities vary across units, and also when they do not. With unit-varying probabilities they fill the gap between `simple_ra()`, which honors those probabilities but lets the number treated wander, and `complete_ra()`, which fixes the number treated but requires every unit to share the same probability.
 
 Three things hold at once, and all three are guaranteed rather than approached: every unit receives exactly one condition; each unit's probability of each condition is exactly the probability supplied; and each condition's count is the floor or the ceiling of its expected count. With `blocks`, counts are tight within each block, and two-arm designs are tight overall as well, because leftovers are paired across blocks; with three or more arms the overall count can wander. `clusters` assigns whole groups together, in which case the tight counts are counts of clusters, and `blocks` and `clusters` may be used at the same time.
 
 The assignment is drawn by the cube method of Deville and Tillé (2004), specialized to this problem, with three C++ kernels: a two-arm pivotal pass, a multi-arm flight-and-land, and cube-on-X. All three are linear in the number of units. Two thousand units take about a tenth of a millisecond with two conditions and about a millisecond with four, measured with a different probability drawn for every unit.
 
-`balanced_ra(formula = ~ x + B)` adds linear balancing constraints on covariates (cube-on-X): the flight keeps the treated totals of the model matrix near their expectations, with the intercept as the count constraint. Two-arm only; `blocks` and `prob_unit_each` cannot be combined with it. See the "Covariate totals versus blocks" article.
+`balanced_ra(formula = ~ x + B)` adds linear balancing constraints on covariates (cube-on-X): the flight keeps the treated totals of the model matrix near their expectations, with the intercept as the count constraint. Two-arm only; `blocks` and `prob_unit_each` cannot be combined with it. See the "Randomizing against continuous covariates" article.
 
 The probability arguments follow the package's convention: `prob` is the one-number slot, `prob_unit` the one-per-unit slot (a single number is refused, except at `N = 1`), and `prob_unit_each` the one-row-per-unit matrix; supply exactly one. `num_arms` or `conditions` without probabilities expand to equal-probability balanced assignment, and condition naming follows `complete_ra()`: two arms are 0 and 1 unless `num_arms` is supplied explicitly. The default is `prob = 0.5`, so `balanced_ra(4)` is complete assignment of four units.
 
@@ -84,7 +84,7 @@ The random sampling (RS) family has always been a two-condition special case of 
 
 `Depends: R (>= 3.6.0)`, raised from 3.5.0 because the C++ kernels draw through `R_unif_index()`, which R provides from 3.6.0.
 
-The package ships one vignette, the introduction. Everything on `balanced_ra()` is an article on the package site rather than a vignette in the package: "Assignment with heterogeneous probabilities" (the count-tight walk-through), "Covariate totals versus blocks" (cube-on-X), "HC2 coverage under balanced assignment", and "Speed of balanced_ra relative to complete and blocked assignment", at https://declaredesign.org/r/randomizr/articles/ once the site rebuilds from this release.
+The package ships one vignette, the introduction. Everything on `balanced_ra()` is an article on the package site rather than a vignette in the package: "Introduction to balanced_ra" (the count-tight walk-through), "Randomizing against continuous covariates" (cube-on-X), "HC2 coverage following balanced_ra", and "Speed of balanced_ra relative to complete and blocked assignment", at https://declaredesign.org/r/randomizr/articles/ once the site rebuilds from this release.
 
 ## Compatibility
 

@@ -170,7 +170,7 @@ declare_ra(clusters = clusters, blocks = blocks)
 declare_ra(clusters = clusters, blocks = blocks, prob_each = c(0.2, 0.5, 0.3))
 
 
-# Balanced assignment (heterogeneous probabilities, tight counts).
+# Balanced assignment (tight counts; probabilities may vary).
 # Opt-in: without ra_type or prob_unit_each this remains complete assignment.
 
 p <- c(0.2, 0.4, 0.6, 0.8, 0.5, 0.5)

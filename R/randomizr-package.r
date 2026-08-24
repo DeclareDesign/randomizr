@@ -31,9 +31,9 @@
 #'   \item [cluster_ra()] assigns whole groups together, for interventions that
 #'     cannot be delivered to individuals.
 #'   \item [block_and_cluster_ra()] does both at once.
-#'   \item [balanced_ra()] honors unit-varying probabilities and holds
-#'     condition counts at the floor or ceiling of their targets. Pass
-#'     \code{formula} to add cube-on-X covariate totals.
+#'   \item [balanced_ra()] holds condition counts (and, with \code{formula},
+#'     covariate totals) at their targets while keeping each unit's
+#'     probability exact.
 #'   \item [declare_ra()] describes a design once so it can be reused by
 #'     [conduct_ra()] to draw assignments and by
 #'     [obtain_condition_probabilities()] to recover the probabilities.

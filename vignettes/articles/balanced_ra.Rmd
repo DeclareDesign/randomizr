@@ -23,7 +23,7 @@ library(randomizr)
 library(ggplot2)
 ```
 
-`balanced_ra()` holds the number assigned to each condition at the floor or the ceiling of that condition's expected count while respecting block and cluster structures and allowing for probabilities to vary from unit to unit. Three things hold on every draw: each unit receives exactly one condition; each unit's probability of each condition is the probability supplied; and the realized counts sit at the floor or the ceiling of their targets. With two arms and `blocks`, those tight counts are both within each block and overall. With three or more arms and `blocks`, tightness is within each block; the overall count is the sum of independent block landings and can move by more than one. 
+`balanced_ra()` holds realized assignment on target: the number assigned to each condition at the floor or the ceiling of that condition's expected count, with exact assignment probabilities. It respects block and cluster structures; probabilities may vary from unit to unit; and `formula` adds covariate totals as further targets. Three things hold on every draw: each unit receives exactly one condition; each unit's probability of each condition is the probability supplied; and the realized counts sit at the floor or the ceiling of their targets. With two arms and `blocks`, those tight counts are both within each block and overall. With three or more arms and `blocks`, tightness is within each block; the overall count is the sum of independent block landings and can move by more than one. 
 
 Section 1 gives a short demonstration. Section 2 gives the logic and states what the published papers guarantee versus what this implementation guarantees. Section 3 walks through the C++ implementation. Section 4 gives worked examples. Section 5 reports a concise validation. Section 6 lists the caveats.
 
@@ -916,11 +916,11 @@ There is no residual condition if the rows of `prob_unit_each` do not sum to 1. 
 
 `check_inputs = FALSE` skips those checks. It is for simulation loops whose probabilities have already been verified. It is not a way to pass illegal designs.
 
-HC2 coverage under these designs, and timings against the specialized assignment functions, are covered by two further articles: "HC2 coverage under balanced assignment" and "Speed of balanced_ra relative to complete and blocked assignment", both listed at <https://declaredesign.org/r/randomizr/articles/>.
+HC2 coverage under these designs, and timings against the specialized assignment functions, are covered by two further articles: "HC2 coverage following balanced_ra" and "Speed of balanced_ra relative to complete and blocked assignment", both listed at <https://declaredesign.org/r/randomizr/articles/>.
 
-The default path holds assignment *counts* against their targets. That is not the same as balancing a continuous covariate. Pass `formula` to run cube-on-X on a model matrix; `blocks` tightens counts within discrete groups. The two are different constraints. The function refuses both at once. See the "Covariate totals versus blocks" article.
+The default path holds assignment *counts* against their targets. That is not the same as balancing a continuous covariate. Pass `formula` to run cube-on-X on a model matrix; `blocks` tightens counts within discrete groups. The two are different constraints. The function refuses both at once. See the "Randomizing against continuous covariates" article.
 
-The takeaway is practical. Use `balanced_ra()` when probabilities vary across units and the assigned counts should stay as close to their targets as arithmetic allows. Trust overall tightness without blocks, and both overall and within-block tightness with two arms. Do not trust overall tightness with three or more arms and `blocks`.
+The takeaway is practical. Use `balanced_ra()` when realized assignment should stay on target: condition counts at the floor or ceiling of what the probabilities imply, and, with `formula`, covariate totals too. That includes unit-varying probabilities, where `complete_ra()` does not apply, and constant probabilities, where leftover pairing keeps two-arm blocked counts tight overall as well as within each block. Trust overall tightness without blocks, and both overall and within-block tightness with two arms. Do not trust overall tightness with three or more arms and `blocks`.
 
 # References
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/balanced_ra.R
 \name{balanced_ra_probabilities}
 \alias{balanced_ra_probabilities}
-\title{Probabilities of assignment: heterogeneous-probability random assignment}
+\title{Probabilities of assignment: Balanced Random Assignment}
 \usage{
 balanced_ra_probabilities(
   N = NULL,
@@ -30,10 +30,9 @@ complete assignment of four units. Supply exactly one of \code{prob},
 
 \item{prob_unit}{A numeric vector of length N giving each unit's probability
 of assignment to treatment, for a two-arm design. Unlike elsewhere in
-randomizr these need not be equal across units; varying them is the point
-of this function. A single number is refused, since that is what
-\code{prob} is for. Supply exactly one of \code{prob}, \code{prob_unit}
-and \code{prob_unit_each}. (optional)}
+randomizr these need not be equal across units. A single number is refused,
+since that is what \code{prob} is for. Supply exactly one of \code{prob},
+\code{prob_unit} and \code{prob_unit_each}. (optional)}
 
 \item{prob_unit_each}{A numeric matrix with one row per unit and one column
 per condition, giving each unit's probability of assignment to each

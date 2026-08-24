@@ -2,7 +2,7 @@
 % Please edit documentation in R/balanced_ra.R
 \name{balanced_ra}
 \alias{balanced_ra}
-\title{Random assignment with heterogeneous probabilities}
+\title{Random assignment with tight targets}
 \usage{
 balanced_ra(
   N = NULL,
@@ -31,10 +31,9 @@ complete assignment of four units. Supply exactly one of \code{prob},
 
 \item{prob_unit}{A numeric vector of length N giving each unit's probability
 of assignment to treatment, for a two-arm design. Unlike elsewhere in
-randomizr these need not be equal across units; varying them is the point
-of this function. A single number is refused, since that is what
-\code{prob} is for. Supply exactly one of \code{prob}, \code{prob_unit}
-and \code{prob_unit_each}. (optional)}
+randomizr these need not be equal across units. A single number is refused,
+since that is what \code{prob} is for. Supply exactly one of \code{prob},
+\code{prob_unit} and \code{prob_unit_each}. (optional)}
 
 \item{prob_unit_each}{A numeric matrix with one row per unit and one column
 per condition, giving each unit's probability of assignment to each
@@ -77,14 +76,20 @@ A vector of length N giving the condition of each unit. As in
   case a factor ordered by \code{conditions}; a factor in a multi-arm design.
 }
 \description{
-\strong{Experimental.} \code{balanced_ra} assigns units to conditions when the
-probability of assignment varies from unit to unit, holding the number
-assigned to each condition as close to its target as arithmetic allows. It
-fills the gap between [simple_ra()], which honors unit-varying probabilities
-but lets the number treated wander, and [complete_ra()], which fixes the
-number treated but requires every unit to share the same probability.
+\strong{Experimental.} \code{balanced_ra} draws random assignment with tight
+targets: condition counts at the floor or ceiling of what the probabilities
+imply, and, with \code{formula}, covariate totals too. Each unit's probability stays
+exact. That is useful when probabilities vary across units, and also when
+they do not: leftover pairing keeps two-arm blocked counts tight overall as
+well as within each block, and cube-on-X balances a continuous covariate
+without binning it.
 }
 \details{
+With unit-varying probabilities it fills the gap between [simple_ra()], which
+honors those probabilities but lets the number treated wander, and
+[complete_ra()], which fixes the number treated but requires every unit to
+share the same probability.
+
 The "balanced" in the name is balanced sampling in the sense of Deville and
 Tillé (2004). With the default arguments the realized counts are held
 against their targets. Pass \code{formula} to add linear balancing
@@ -104,11 +109,11 @@ Every unit receives exactly one condition. Each unit's probability of each
 condition is the probability supplied. Counts are tight within each block
 always, and tight overall as well when there are two arms. With three or
 more arms and \code{blocks}, the overall count can wander; see the
-"Assignment with heterogeneous probabilities" article. With \code{clusters},
+"Introduction to balanced_ra" article. With \code{clusters},
 the tight counts are counts of clusters. With \code{formula}, first-order
 inclusion probabilities remain exact; covariate totals are as close as
-the landing phase allows. See the "Covariate totals versus blocks"
-article.
+the landing phase allows. See the "Randomizing against continuous
+covariates" article.
 }
 
 \section{Balance when probabilities vary}{
@@ -124,8 +129,8 @@ treated more often, so the treated group ought to have the higher mean of
 \eqn{x}, and it does: the average treated-minus-control difference in
 \eqn{x} under \code{formula = ~ x} is the same one
 \code{\link{simple_ra}()} gives on the same probabilities. What the cube
-tightens, several-fold in the simulations in the "Covariate totals versus
-blocks" article, is the spread of that
+tightens, several-fold in the simulations in the "Randomizing against
+continuous covariates" article, is the spread of that
 difference around its target, and with it the Horvitz-Thompson residual
 for the \eqn{x} total.
 
@@ -198,10 +203,10 @@ supplying \code{prob_unit_each} or \code{formula}; \code{\link{conduct_ra}()}
 and \code{\link{obtain_condition_probabilities}()} then dispatch here.
 Four studies of the function are articles on the package site rather than
 vignettes in the package, listed at
-\url{https://declaredesign.org/r/randomizr/articles/}: "Assignment with
-heterogeneous probabilities" has the count-tight algorithm, "Covariate
-totals versus blocks" has cube-on-X, and "HC2 coverage under balanced
-assignment" and "Speed of balanced_ra relative to complete and blocked
+\url{https://declaredesign.org/r/randomizr/articles/}: "Introduction to
+balanced_ra" has the count-tight algorithm, "Randomizing against
+continuous covariates" has cube-on-X, and "HC2 coverage following
+balanced_ra" and "Speed of balanced_ra relative to complete and blocked
 assignment" are simulation studies.
 }
 
@@ -278,6 +283,6 @@ sampling. \emph{Journal of Statistical Planning and Inference} 128(2),
 \seealso{
 \code{\link{balanced_ra_probabilities}()}, \code{\link{complete_ra}()},
   \code{\link{block_ra}()}, \code{\link{simple_ra}()},
-  the vignettes \emph{Assignment with heterogeneous probabilities} and
-  \emph{Covariate totals versus blocks}
+  the articles \emph{Introduction to balanced_ra} and
+  \emph{Randomizing against continuous covariates}
 }
