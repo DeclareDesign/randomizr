@@ -23,9 +23,9 @@ library(randomizr)
 library(ggplot2)
 ```
 
-`balanced_ra()` holds realized assignment on target: the number assigned to each condition at the floor or the ceiling of that condition's expected count, with exact assignment probabilities. It respects block and cluster structures; probabilities may vary from unit to unit; and `formula` adds covariate totals as further targets. Three things hold on every draw: each unit receives exactly one condition; each unit's probability of each condition is the probability supplied; and the realized counts sit at the floor or the ceiling of their targets. With two arms and `blocks`, those tight counts are both within each block and overall. With three or more arms and `blocks`, tightness is within each block; the overall count is the sum of independent block landings and can move by more than one. 
+`balanced_ra()` draws random assignment with tight targets: condition counts at the floor or the ceiling of what the probabilities imply, and, with `formula`, covariate totals too. Each unit's probability stays exact. It respects block and cluster structures. Probabilities may vary from unit to unit. Three things hold on every draw: each unit receives exactly one condition; each unit's probability of each condition is the probability supplied; and the realized counts sit at the floor or the ceiling of their targets. With two arms and `blocks`, those tight counts are both within each block and overall. With three or more arms and `blocks`, tightness is within each block; the overall count is the sum of independent block landings and can move by more than one.
 
-Section 1 gives a short demonstration. Section 2 gives the logic and states what the published papers guarantee versus what this implementation guarantees. Section 3 walks through the C++ implementation. Section 4 gives worked examples. Section 5 reports a concise validation. Section 6 lists the caveats.
+Section 1 is a blocked design that complete assignment cannot hit. Section 2 is a continuous covariate: four units, six assignments, and the weights `complete_ra()` and `balanced_ra()` put on them. Section 3 gives the logic and states what the published papers guarantee versus what this implementation guarantees. Section 4 walks through the C++ implementation. Section 5 gives worked examples. Section 6 reports a concise validation. Section 7 lists the caveats.
 
 The function is **experimental**. Declare it with `declare_ra(..., ra_type = "balanced")`, by supplying `prob_unit_each`, or by supplying `formula`.
 
@@ -50,9 +50,56 @@ cbind(target = .5, average = rowMeans(reps))
 table(colSums(reps[blocks == 1, ]), colSums(reps[blocks == 2, ]))
 ```
 
-The rest of the vignette explains why those counts stay tight, how the C++ does it, and where the guarantee stops.
+Section 2 is a different target: a continuous covariate. The rest of the vignette explains why the counts stay tight, how the C++ does it, and where the guarantee stops.
 
-# 2. Logic
+# 2. A continuous covariate
+
+Blocks tighten counts inside discrete groups. A continuous covariate is a different target: the treated total of $x$ should sit near what the assignment probabilities imply.
+
+Pass `formula = ~ x`. The model matrix is the balancing matrix $X$ in the cube method of [Deville and Tillé (2004)](https://doi.org/10.1093/biomet/91.4.893). The intercept is the count constraint. The $x$ column asks $\sum_i x_i Z_i$ to stay near $\sum_i x_i p_i$. `~ 0 + x` drops the intercept, and the treated count may wander. `blocks` and `formula` cannot be combined.
+
+Four units, $x = (1, 2, 3, 6)$, two assigned to treatment, $p_i = 1/2$. There are six assignments. The target treated count is 2. The target treated total of $x$ is 6. No assignment hits 6: the six pair-sums are 3, 4, 5, 7, 8, and 9.
+
+`complete_ra(N = 4, m = 2)` puts equal weight on each of those six. `balanced_ra(formula = ~ x)` does not. Both keep every unit's probability at $1/2$ and treat exactly two units on every draw. They differ in the joint distribution.
+
+```{r}
+x <- c(1, 2, 3, 6)
+pairs <- combn(4, 2)
+assign_id <- function(z) paste(which(z == 1), collapse = ",")
+
+n_draw <- 8000
+set.seed(20260822)
+Z_complete <- replicate(n_draw, complete_ra(N = 4, m = 2))
+Z_balanced <- replicate(n_draw, balanced_ra(formula = ~ x))
+
+share <- function(Z) {
+  ids <- apply(pairs, 2, paste, collapse = ",")
+  tab <- table(factor(apply(Z, 2, assign_id), levels = ids))
+  as.numeric(tab) / ncol(Z)
+}
+
+tab <- data.frame(
+  treated = apply(pairs, 2, paste, collapse = ","),
+  `x treated` = apply(pairs, 2, function(j) paste(x[j], collapse = ",")),
+  `sum x` = apply(pairs, 2, function(j) sum(x[j])),
+  complete = 1 / 6,
+  balanced = share(Z_balanced),
+  check.names = FALSE
+)
+knitr::kable(tab, digits = 3,
+             caption = "Shares of the six assignments of two treated units. `complete_ra` is uniform; `balanced_ra(formula = ~ x)` is not.")
+```
+
+```{r}
+rbind(
+  complete = c(p = mean(Z_complete), treated = mean(colSums(Z_complete))),
+  balanced = c(p = mean(Z_balanced), treated = mean(colSums(Z_balanced)))
+)
+```
+
+The cube walk reweights the six vertices. It does not put extra mass on the pair-sums nearest 6. With four units and two constraints most of the work is landing, which may drop a column of $X$. What the table shows is that the design is not complete assignment.
+
+# 3. Logic
 
 `balanced_ra()` is cube/pivotal assignment with unit-varying probabilities, on the same interface as `complete_ra()` and `block_ra()`. For two-arm blocked designs leftover pairing keeps the counts tight within each block and overall.
 
@@ -95,7 +142,7 @@ The two-arm overall-and-block result is an implementation choice, not a named th
 
 That leftover pairing does not extend to three or more arms. A block can keep several leftover units, and landing those leftovers as one global group can push a within-block arm count more than one away from its target. The implementation therefore lands each block on its own. Within-block counts stay at the floor or the ceiling. Overall counts are the sum of those independent landings. When several block remainders fall the same way, the overall count can move by more than one. Joint floor-or-ceiling at both levels is feasible — that is Hamilton's method of apportionment, applied to the block remainders — and this implementation delivers it for two arms, not for $k>2$.
 
-# 3. Code walk-through
+# 4. Code walk-through
 
 The R wrapper builds the probability matrix, then hands a shuffled unit order to C++. The shuffle is there so that the input order does not matter. Two arms and three or more arms take different functions in `src/cube.cpp`. Clusters never reach those functions as unit-level rows: they are collapsed first.
 
@@ -646,7 +693,7 @@ lapply(S3, function(M) round(M, 2))
 
 Arm counts are $(2,1,1)$. The five cycle moves preserved every total. That is flight without a landing path.
 
-# 4. Examples
+# 5. Examples
 
 Each example below is a `balanced_ra()` design. The point of each is in the paragraph that precedes the code.
 
@@ -683,7 +730,7 @@ No draw treats zero or three in a district. No draw treats two or four overall.
 
 ## Random probabilities, one treated arm
 
-Eighty units, five blocks of uneven size, probabilities drawn from the unit interval. Unit-level means should track $p$; the scatter is the check that they do. Tightness of the totals is left to Section 5.
+Eighty units, five blocks of uneven size, probabilities drawn from the unit interval. Unit-level means should track $p$; the scatter is the check that they do. Tightness of the totals is left to Section 6.
 
 ```{r}
 set.seed(3)
@@ -781,7 +828,7 @@ table(blocks, z)
 
 ## Default probability, $N$ or blocks only
 
-`balanced_ra(4)` appears in Section 5, where its treated counts match `complete_ra(N = 4)`. The same default $p=0.5$ with blocks only is complete assignment inside the implied design: five blocks of three, target $1.5$ per block, overall target $7.5$.
+`balanced_ra(4)` appears in Section 6, where its treated counts match `complete_ra(N = 4)`. The same default $p=0.5$ with blocks only is complete assignment inside the implied design: five blocks of three, target $1.5$ per block, overall target $7.5$.
 
 ```{r}
 set.seed(10)
@@ -813,9 +860,9 @@ A single shared probability does not imply $N$: with `prob` alone, supply `N`, `
 balanced_ra(prob = 0.5)
 ```
 
-# 5. Validation
+# 6. Validation
 
-The claims in Section 2 are per-draw properties plus a marginal. This section reports them on a short set of designs. Replicates are 2,000 throughout. What is shown is the largest absolute gap between an empirical share and the supplied probability, and the table of realized counts.
+The claims in Section 3 are per-draw properties plus a marginal. This section reports them on a short set of designs. Replicates are 2,000 throughout. What is shown is the largest absolute gap between an empirical share and the supplied probability, and the table of realized counts.
 
 ## Unequal probabilities, no blocks
 
@@ -851,7 +898,7 @@ The overall target is the integer 15, and every draw hits 15. Every block contri
 
 ## Three arms, no blocks: overall tight
 
-The $2 \times 3$ matrix from Section 4, now as a count check. Column targets are $0.62$, $1.13$, and $0.25$, so the tight counts are $0$ or $1$, $1$ or $2$, and $0$ or $1$.
+The $2 \times 3$ matrix from Section 5, now as a count check. Column targets are $0.62$, $1.13$, and $0.25$, so the tight counts are $0$ or $1$, $1$ or $2$, and $0$ or $1$.
 
 ```{r}
 set.seed(13)
@@ -893,7 +940,7 @@ table(colSums(replicate(1000, balanced_ra(4))))
 table(colSums(replicate(1000, complete_ra(N = 4))))
 ```
 
-# 6. Warnings / caveats
+# 7. Warnings / caveats
 
 `balanced_ra()` is cube/pivotal assignment on the same interface family as `complete_ra()` and `block_ra()`: `N`, `prob`, `prob_unit`, `blocks`, `clusters`, `conditions`, `formula`. Exclusive assignment, exact marginals, probabilities in $[0,1]$. For two-arm blocked designs leftover pairing keeps both the within-block counts and the overall count tight. Independently landing each block's leftover had let the overall count wander; that is the two-district case.
 
@@ -912,15 +959,13 @@ table(colSums(Z == 1))
 
 Arm 1's overall count is not confined to $\{1,2\}$. That coupling is feasible — Hamilton's method would give each arm to exactly two of the three blocks — and this implementation does not do it when $k>2$.
 
-There is no residual condition if the rows of `prob_unit_each` do not sum to 1. There is no interpretation of a probability greater than 1 as an expected count. Both are refused, as in Section 4.
+There is no residual condition if the rows of `prob_unit_each` do not sum to 1. There is no interpretation of a probability greater than 1 as an expected count. Both are refused, as in Section 5.
 
 `check_inputs = FALSE` skips those checks. It is for simulation loops whose probabilities have already been verified. It is not a way to pass illegal designs.
 
-HC2 coverage under these designs, and timings against the specialized assignment functions, are covered by two further articles: "HC2 coverage following balanced_ra" and "Speed of balanced_ra relative to complete and blocked assignment", both listed at <https://declaredesign.org/r/randomizr/articles/>.
+The default path holds assignment *counts* against their targets. That is not the same as balancing a continuous covariate. Pass `formula` to run cube-on-X on a model matrix, as in Section 2; `blocks` tightens counts within discrete groups. The two are different constraints. The function refuses both at once.
 
-The default path holds assignment *counts* against their targets. That is not the same as balancing a continuous covariate. Pass `formula` to run cube-on-X on a model matrix; `blocks` tightens counts within discrete groups. The two are different constraints. The function refuses both at once. See the "Randomizing against continuous covariates" article.
-
-The takeaway is practical. Use `balanced_ra()` when realized assignment should stay on target: condition counts at the floor or ceiling of what the probabilities imply, and, with `formula`, covariate totals too. That includes unit-varying probabilities, where `complete_ra()` does not apply, and constant probabilities, where leftover pairing keeps two-arm blocked counts tight overall as well as within each block. Trust overall tightness without blocks, and both overall and within-block tightness with two arms. Do not trust overall tightness with three or more arms and `blocks`.
+The takeaway is practical. Use `balanced_ra()` when realized assignment should stay tight against its targets: condition counts at the floor or ceiling of what the probabilities imply, and, with `formula`, covariate totals too. That includes unit-varying probabilities, where `complete_ra()` does not apply, and constant probabilities, where leftover pairing keeps two-arm blocked counts tight overall as well as within each block. Trust overall tightness without blocks, and both overall and within-block tightness with two arms. Do not trust overall tightness with three or more arms and `blocks`.
 
 # References
 

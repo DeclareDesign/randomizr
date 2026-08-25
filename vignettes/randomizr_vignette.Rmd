@@ -35,7 +35,7 @@ library(estimatr)
 A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage. First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a **cluster**. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of average causal effects and the uncertainty attending them may be incorrect.
 
 # A hypothetical experiment
-Throughout this vignette, we'll pretend we're conducting an experiment among the 592 individuals in the built-in `HairEyeColor` dataset. As we'll see, there are many ways to randomly assign subjects to treatments. We'll step through five common designs, each associated with one of five `randomizr` functions: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`. A sixth function, `balanced_ra()`, handles assignment with unit-varying probabilities and is covered by the articles on the package site, listed at <https://declaredesign.org/r/randomizr/articles/>.
+Throughout this vignette, we'll pretend we're conducting an experiment among the 592 individuals in the built-in `HairEyeColor` dataset. As we'll see, there are many ways to randomly assign subjects to treatments. We'll step through five common designs, each associated with one of five `randomizr` functions: `simple_ra()`, `complete_ra()`, `block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`. A sixth function, `balanced_ra()`, is experimental. It draws assignment with tight targets and is illustrated briefly after the blocked design.
 
 The dataset ships with R as a three-way contingency table (see `?HairEyeColor`); converting it to a data frame gives one row per **type** of subject, with a count of how many subjects are of that type.
 
@@ -502,6 +502,25 @@ head(table(hec$block_id, Z_blocked))
 ```
 
 A note for `blockTools` users: that package also has an assignment function. My preference is to extract the blocking variable, then conduct the assignment with `block_ra()`, so that fewer steps are required to reconstruct the random assignment or generate new random assignments for a randomization inference procedure.
+
+## Balanced random assignment
+
+`balanced_ra()` is experimental; its interface may change.
+
+Six units, two blocks of three, half assigned to treatment. `complete_ra(N = 6, m = 3)` treats three units every time, but a block can receive zero or three. That is a target complete assignment cannot hit: overall half, and one or two treated in each block.
+
+```{r echo=TRUE, results="hide"}
+blocks <- rep(1:2, each = 3)
+Z <- balanced_ra(blocks = blocks)
+table(blocks, Z)
+```
+```{r echo=FALSE}
+blocks <- rep(1:2, each = 3)
+Z <- balanced_ra(blocks = blocks)
+knitr::kable(table(blocks, Z))
+```
+
+Every draw treats three units overall and one or two in each block. Declare the design with `declare_ra(..., ra_type = "balanced")`. The [introduction article](https://declaredesign.org/r/randomizr/articles/balanced_ra.html) has the details.
 
 ## Clustered assignment
 

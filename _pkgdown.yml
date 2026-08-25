@@ -47,12 +47,6 @@ navbar:
        href: articles/randomizr_guarantees.html
      - text: Introduction to balanced_ra
        href: articles/balanced_ra.html
-     - text: Randomizing against continuous covariates
-       href: articles/balanced_ra_covariates.html
-     - text: Speed of balanced_ra relative to complete and blocked assignment
-       href: articles/balanced_ra_speed.html
-     - text: HC2 coverage following balanced_ra
-       href: articles/balanced_ra_hc2.html
 
 reference:
   - title: Random assignment

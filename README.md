@@ -15,7 +15,10 @@ coverage](https://codecov.io/gh/DeclareDesign/randomizr/graph/badge.svg)](https:
 
 **randomizr** generates random assignments for common experimental
 designs, including simple random assignment, complete random assignment,
-block random assignment, and cluster random assignment.
+block random assignment, and cluster random assignment. An additional
+function, `balanced_ra()`, is experimental: it draws assignment with
+tight targets (condition counts, and optional covariate totals) while
+keeping each unit's probability exact.
 
 ### Installing randomizr
 
@@ -32,7 +35,9 @@ to the common experimental designs listed above. You can read more about
 using each of these functions in our [reference
 library](https://declaredesign.org/r/randomizr/reference/) or by
 clicking on the function names: `simple_ra()`, `complete_ra()`,
-`block_ra()`, and `cluster_ra()`.
+`block_ra()`, and `cluster_ra()`. `balanced_ra()` is experimental; see
+the [introduction
+article](https://declaredesign.org/r/randomizr/articles/balanced_ra.html).
 
 `complete_ra()`: Under complete random assignment, we assign a fixed `m`
 units out of a population of `N` units to treatment:

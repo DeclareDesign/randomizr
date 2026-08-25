@@ -31,11 +31,10 @@
 #' condition is the probability supplied. Counts are tight within each block
 #' always, and tight overall as well when there are two arms. With three or
 #' more arms and \code{blocks}, the overall count can wander; see the
-#' "Introduction to balanced_ra" article. With \code{clusters},
+#' vignette \emph{Introduction to balanced_ra}. With \code{clusters},
 #' the tight counts are counts of clusters. With \code{formula}, first-order
 #' inclusion probabilities remain exact; covariate totals are as close as
-#' the landing phase allows. See the "Randomizing against continuous
-#' covariates" article.
+#' the landing phase allows. See that vignette.
 #'
 #' @section Balance when probabilities vary:
 #' The cube holds \eqn{X'Z} near \eqn{X'\pi}, which is the treated total of each
@@ -49,8 +48,7 @@
 #' \eqn{x}, and it does: the average treated-minus-control difference in
 #' \eqn{x} under \code{formula = ~ x} is the same one
 #' \code{\link{simple_ra}()} gives on the same probabilities. What the cube
-#' tightens, several-fold in the simulations in the "Randomizing against
-#' continuous covariates" article, is the spread of that
+#' tightens is the spread of that
 #' difference around its target, and with it the Horvitz-Thompson residual
 #' for the \eqn{x} total.
 #'
@@ -88,8 +86,7 @@
 #' variability warrants. HC2 on an unadjusted regression covered the true effect
 #' on every draw simulated at \eqn{N = 200} with a strongly prognostic \eqn{x},
 #' its average standard error more than twice the true sampling standard
-#' deviation; the article "HC2 coverage under balanced assignment" on the
-#' package site carries the simulation. Horvitz-Thompson through
+#' deviation. Horvitz-Thompson through
 #' \code{estimatr::horvitz_thompson()} runs from correct to about twice too
 #' wide, depending on how well \eqn{X} predicts the outcome; estimatr's
 #' development version (2.0.0, not yet on CRAN) warns when it is handed a
@@ -115,13 +112,8 @@
 #' a design with [declare_ra()] by setting \code{ra_type = "balanced"} or by
 #' supplying \code{prob_unit_each} or \code{formula}; \code{\link{conduct_ra}()}
 #' and \code{\link{obtain_condition_probabilities}()} then dispatch here.
-#' Four studies of the function are articles on the package site rather than
-#' vignettes in the package, listed at
-#' \url{https://declaredesign.org/r/randomizr/articles/}: "Introduction to
-#' balanced_ra" has the count-tight algorithm, "Randomizing against
-#' continuous covariates" has cube-on-X, and "HC2 coverage following
-#' balanced_ra" and "Speed of balanced_ra relative to complete and blocked
-#' assignment" are simulation studies.
+#' The vignette \emph{Introduction to balanced_ra} has the count-tight
+#' algorithm and a four-unit cube-on-X walk-through.
 #'
 #' @param N The number of units. Optional when \code{formula} or the length of
 #'   \code{prob_unit} (or \code{blocks} or \code{clusters})
@@ -186,8 +178,7 @@
 #'
 #' @seealso \code{\link{balanced_ra_probabilities}()}, \code{\link{complete_ra}()},
 #'   \code{\link{block_ra}()}, \code{\link{simple_ra}()},
-#'   the articles \emph{Introduction to balanced_ra} and
-#'   \emph{Randomizing against continuous covariates}
+#'   the vignette \emph{Introduction to balanced_ra}
 #'
 #' @examples
 #' # Four units, default probability 0.5: complete assignment of two treated.
@@ -238,9 +229,9 @@
 #' # Cube-on-X: keep the treated total of a continuous covariate near its
 #' # target. The intercept in ~ x is the count constraint. N is inferred
 #' # from the looked-up formula variables.
-#' x <- c(0, 1, 5, 6, 8, 9)
+#' x <- c(1, 2, 3, 6)
 #' Z <- balanced_ra(formula = ~ x)
-#' sum(x * Z)   # near 14.5
+#' sum(x * Z)   # near 6
 #'
 #' @export
 balanced_ra <- function(N = NULL,

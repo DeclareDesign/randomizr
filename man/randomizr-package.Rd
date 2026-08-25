@@ -23,9 +23,9 @@ what inverse-probability weights are built from.
   \item [cluster_ra()] assigns whole groups together, for interventions that
     cannot be delivered to individuals.
   \item [block_and_cluster_ra()] does both at once.
-  \item [balanced_ra()] holds condition counts (and, with \code{formula},
-    covariate totals) at their targets while keeping each unit's
-    probability exact.
+  \item [balanced_ra()] (experimental) holds condition counts (and, with
+    \code{formula}, covariate totals) at their targets while keeping
+    each unit's probability exact.
   \item [declare_ra()] describes a design once so it can be reused by
     [conduct_ra()] to draw assignments and by
     [obtain_condition_probabilities()] to recover the probabilities.
