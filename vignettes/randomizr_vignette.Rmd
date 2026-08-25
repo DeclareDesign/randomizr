@@ -505,9 +505,9 @@ A note for `blockTools` users: that package also has an assignment function. My 
 
 ## Balanced random assignment
 
-`balanced_ra()` is experimental; its interface may change.
+`balanced_ra()` is a new addition to the suite and still experimental. It is used for settings where randomization is constrained to hit tight targets.
 
-Six units, two blocks of three, half assigned to treatment. `complete_ra(N = 6, m = 3)` treats three units every time, but a block can receive zero or three. That is a target complete assignment cannot hit: overall half, and one or two treated in each block.
+To illustrate, say there are six units, two blocks of three, half assigned to treatment. `complete_ra(N = 6, m = 3)` treats three units every time, but a block can receive zero or three. `block_ra` ensures that 1 or 2 are treated in each block; but overall there is no guarantee that 3 will be treated. The twin targets of 3 overall and 1 to 2 in each block cannot be hit by either of these.
 
 ```{r echo=TRUE, results="hide"}
 blocks <- rep(1:2, each = 3)
@@ -520,7 +520,11 @@ Z <- balanced_ra(blocks = blocks)
 knitr::kable(table(blocks, Z))
 ```
 
-Every draw treats three units overall and one or two in each block. Declare the design with `declare_ra(..., ra_type = "balanced")`. The [introduction article](https://declaredesign.org/r/randomizr/articles/balanced_ra.html) has the details.
+With `balanced_ra` however we see that every draw treats three units overall and one or two in each block. Declare the design with `declare_ra(..., ra_type = "balanced")`. The [introduction article](https://declaredesign.org/r/randomizr/articles/balanced_ra.html) has the details.
+
+For a still simpler example, consider two units with target assignment probabilities of 0.6, and 0.9 and want the number assigned to be close to 0.6 + 0.9 = 1.5. This cannot be achieved by `simple_ra` or `complete_ra`, but `balanced_ra` handles it easily, in particular by making sure that the two units are never both assigned to control at the same time.
+
+
 
 ## Clustered assignment
 

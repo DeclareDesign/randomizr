@@ -11,7 +11,7 @@ title: "randomizr: Tools for random assignment and random sampling"
 [![Codecov test coverage](https://codecov.io/gh/DeclareDesign/randomizr/graph/badge.svg)](https://app.codecov.io/gh/DeclareDesign/randomizr)
 [![Replications](https://softwarecite.com/badge/randomizr)](https://softwarecite.com/package/randomizr)
 
-**randomizr** generates random assignments for common experimental designs, including simple random assignment, complete random assignment, block random assignment, and cluster random assignment. An additional function, `balanced_ra()`, is experimental: it draws assignment with tight targets (condition counts, and optional covariate totals) while keeping each unit's probability exact.
+**randomizr** generates random assignments for common experimental designs, including simple random assignment, complete random assignment, block random assignment, and cluster random assignment. A new function, `balanced_ra()`, is experimental: it draws assignment with tight targets while keeping each unit's probability exact.
 
 ### Installing randomizr
 
@@ -51,6 +51,34 @@ table(Z, clust_var)
 ```
 ```{r echo=FALSE}
 knitr::kable(table(Z, clust_var))
+```
+
+
+`block_ra()`: Under block random assignment, complete random assignment is used within blocks.
+
+```{r echo=TRUE, results="hide"}
+# This makes a cluster variable: one unit in cluster "a", two in "b"...
+block_var <- rep(letters[1:15], times = 4)
+
+Z <- block_ra(
+  blocks = block_var
+  )
+table(Z, block_var)
+```
+```{r echo=FALSE}
+knitr::kable(table(Z, block_var))
+```
+
+
+`balanced_ra()`: Under balanced assignment, units are assigned to ensure expected totals are hit tightly.
+
+```{r echo=TRUE, results="hide"}
+# This assigns exactly three of six units to treatment with either 1 assigned in block 1 and 2 in block 2 or 2 in block 1 and 1 in block 2
+set.seed(1)
+blocks <- rep(1:2, each = 3)
+
+table(blocks, balanced_ra(blocks = blocks))
+table(blocks, balanced_ra(blocks = blocks))
 ```
 
 For more information about all of **randomizr**'s functionality, please see our [online tutorial](https://declaredesign.org/r/randomizr/articles/randomizr_vignette.html)
