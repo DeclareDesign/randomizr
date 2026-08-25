@@ -15,10 +15,9 @@ coverage](https://codecov.io/gh/DeclareDesign/randomizr/graph/badge.svg)](https:
 
 **randomizr** generates random assignments for common experimental
 designs, including simple random assignment, complete random assignment,
-block random assignment, and cluster random assignment. An additional
-function, `balanced_ra()`, is experimental: it draws assignment with
-tight targets (condition counts, and optional covariate totals) while
-keeping each unit's probability exact.
+block random assignment, and cluster random assignment. A new function,
+`balanced_ra()`, is experimental: it draws assignment with tight targets
+while keeping each unit’s probability exact.
 
 ### Installing randomizr
 
@@ -35,8 +34,8 @@ to the common experimental designs listed above. You can read more about
 using each of these functions in our [reference
 library](https://declaredesign.org/r/randomizr/reference/) or by
 clicking on the function names: `simple_ra()`, `complete_ra()`,
-`block_ra()`, and `cluster_ra()`. `balanced_ra()` is experimental; see
-the [introduction
+`block_ra()`, and `cluster_ra()`. An additional experimental function,
+`balanced_ra()`, is included from version 2.01; see the [introduction
 article](https://declaredesign.org/r/randomizr/articles/balanced_ra.html).
 
 `complete_ra()`: Under complete random assignment, we assign a fixed `m`
@@ -70,9 +69,43 @@ table(Z, clust_var)
 
 |           |   a |   b |   c |   d |   e |   f |   g |   h |   i |   j |   k |   l |   m |   n |   o |
 |:----------|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|
-| control   |   0 |   2 |   0 |   4 |   0 |   0 |   0 |   0 |   9 |   0 |   0 |   0 |  13 |   0 |   0 |
-| placebo   |   0 |   0 |   0 |   0 |   0 |   6 |   0 |   8 |   0 |  10 |  11 |   0 |   0 |   0 |   0 |
-| treatment |   1 |   0 |   3 |   0 |   5 |   0 |   7 |   0 |   0 |   0 |   0 |  12 |   0 |  14 |  15 |
+| control   |   0 |   2 |   0 |   4 |   0 |   0 |   0 |   0 |   0 |   0 |  11 |   0 |  13 |   0 |   0 |
+| placebo   |   0 |   0 |   0 |   0 |   0 |   6 |   7 |   0 |   0 |   0 |   0 |  12 |   0 |  14 |   0 |
+| treatment |   1 |   0 |   3 |   0 |   5 |   0 |   0 |   8 |   9 |  10 |   0 |   0 |   0 |   0 |  15 |
+
+`block_ra()`: Under block random assignment, complete random assignment
+is used within blocks.
+
+``` r
+# This makes a cluster variable: one unit in cluster "a", two in "b"...
+block_var <- rep(letters[1:10], times = 4)
+
+Z <- block_ra(
+  blocks = block_var
+  )
+table(Z, block_var)
+```
+
+|     |   a |   b |   c |   d |   e |   f |   g |   h |   i |   j |
+|:----|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|
+| 0   |   2 |   2 |   2 |   2 |   2 |   2 |   2 |   2 |   2 |   2 |
+| 1   |   2 |   2 |   2 |   2 |   2 |   2 |   2 |   2 |   2 |   2 |
+
+`balanced_ra()`: Under balanced assignment, units are assigned to ensure
+expected totals are hit tightly.
+
+``` r
+# This assigns exactly three of six units to treatment with either 1 assigned in block 1 and 2 in block 2 or 2 in block 1 and 1 in block 2
+set.seed(1)
+blocks <- c("a", "a", "a", "b", "b", "b")
+
+table(balanced_ra(blocks = blocks), blocks)
+```
+
+|     |   a |   b |
+|:----|----:|----:|
+| 0   |   2 |   1 |
+| 1   |   1 |   2 |
 
 For more information about all of **randomizr**’s functionality, please
 see our [online
