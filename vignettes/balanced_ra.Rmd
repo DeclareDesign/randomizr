@@ -23,15 +23,15 @@ library(randomizr)
 library(ggplot2)
 ```
 
-`balanced_ra()` draws random assignment with tight targets: condition counts at the floor or the ceiling of what the probabilities imply, and, with `formula`, covariate totals too. Each unit's probability stays exact. It respects block and cluster structures. Probabilities may vary from unit to unit. Three things hold on every draw: each unit receives exactly one condition; each unit's probability of each condition is the probability supplied; and the realized counts sit at the floor or the ceiling of their targets. With two arms and `blocks`, those tight counts are both within each block and overall. With three or more arms and `blocks`, tightness is within each block; the overall count is the sum of independent block landings and can move by more than one.
+`balanced_ra()` draws random assignment with tight targets: condition counts at the floor or the ceiling of what the probabilities imply, and, with `formula`, at the floor or ceiling of covariate totals. Each unit's probability stays exact. Probabilities may vary from unit to unit and block and cluster structures are respected.  With two arms and `blocks`, those tight counts are both within each block and overall. With three or more arms and `blocks`, tightness is within each block; the overall count is the sum of independent block landings and can move by more than one.
 
-Section 1 is a blocked design that complete assignment cannot hit. Section 2 is a continuous covariate: four units, six assignments, and the weights `complete_ra()` and `balanced_ra()` put on them. Section 3 gives the logic and states what the published papers guarantee versus what this implementation guarantees. Section 4 walks through the C++ implementation. Section 5 gives worked examples. Section 6 reports a concise validation. Section 7 lists the caveats.
+Section 1 gives a simple example of a blocked design that blocked assignment cannot hit. Section 2 shows an example of randomization against a continuous covariate. Section 3 gives the logic and states what the published papers guarantee versus what this implementation guarantees. Section 4 walks through the C++ implementation. Section 5 gives worked examples. Section 6 reports a concise validation. Section 7 lists the caveats.
 
-The function is **experimental**. Declare it with `declare_ra(..., ra_type = "balanced")`, by supplying `prob_unit_each`, or by supplying `formula`.
+The function is **experimental**. Use `balanced_ra` or declare it with `declare_ra(..., ra_type = "balanced")`, by supplying `prob_unit_each`, or by supplying `formula`.
 
-# 1. Short demonstration
+# 1. Demonstration 1: Block structures and global targets
 
-We illustrate with a 6 unit, two-block design, uniform probabilities. This is a simple case that complete random assignment inside each block cannot handle on its own. Two districts of three villages, three villages to treat, equal probabilities, blocked by district: the per-district target is 1.5. Each district should receive one or two treated villages, never zero and never three, and the total should be three on every draw.
+We first illustrate with a 6 unit, two-block design, with 3 units to be assigned to treatment with uniform probabilities. This is a simple case that complete random assignment inside each block cannot handle. Two districts of three villages, three villages to treat, equal probabilities, blocked by district: the per-district target is 1.5. Each district should receive one or two treated villages, never zero and never three, and the total should be three on every draw.
 
 ```{r}
 blocks <- rep(1:2, each = 3)
@@ -50,9 +50,7 @@ cbind(target = .5, average = rowMeans(reps))
 table(colSums(reps[blocks == 1, ]), colSums(reps[blocks == 2, ]))
 ```
 
-Section 2 is a different target: a continuous covariate. The rest of the vignette explains why the counts stay tight, how the C++ does it, and where the guarantee stops.
-
-# 2. A continuous covariate
+# 2. Demonstration 2: A continuous covariate
 
 Blocks tighten counts inside discrete groups. A continuous covariate is a different target: the treated total of $x$ should sit near what the assignment probabilities imply.
 
@@ -97,7 +95,7 @@ rbind(
 )
 ```
 
-The cube walk reweights the six vertices. It does not put extra mass on the pair-sums nearest 6. With four units and two constraints most of the work is landing, which may drop a column of $X$. What the table shows is that the design is not complete assignment.
+The cube walk reweights the six vertices. It does not put extra mass on the pair-sums nearest 6. With four units and two constraints most of the work is landing, which may drop a column of $X$.
 
 # 3. Logic
 
