@@ -37,7 +37,9 @@ div.figcaption,
 }
 ```
 
-`balanced_ra()` draws a random assignment in which each unit is treated with exactly the probability you asked for, and in which the *number* of units treated is held as close to its target as arithmetic allows. Suppose you name two groups of three villages and give each a 50 percent chance of treatment. The target number treated is three. `block_ra()` would guarantee 1 or 2 per group but could not restrict the total to 3.  `balanced_ra()` lets you do so even when the chances differ from village to village.
+`balanced_ra()` draws a random assignment in which each unit is treated with exactly the probability you asked for, and in which the *number* of units treated is held as close to its target as arithmetic allows. 
+
+Suppose you have two groups of three villages and give each a 50 percent chance of treatment. The target number treated is three. But you also want the three to be spread across the blocks. So two constraints. It sounds easy enough but standard assignment methods cannot handle both easily. For instance, `block_ra()` would guarantee 1 or 2 per group but could not restrict the total to 3. `complete_ra` would ensure 3 total but not necessarily spread across blocks.  `balanced_ra()` handles both constraints, and it works even when the chances differ from village to village within each block.
 
 You can call `balanced_ra()` directly, or you can declare a design with `declare_ra()` and let `conduct_ra()` draw from it. A declaration reaches `balanced_ra()` when you set `ra_type = "balanced"`, or when you supply `prob_unit_each`, or when you supply `formula`. Section 5 shows both routes.
 
@@ -859,7 +861,7 @@ cube_bip(
 )
 ```
 
-Assume plus. Then $z=(0.75,0,0.75,0.5)$. Sum $z$ is still 2; the treated $x$-total is still 6. The next window is the three open units. An admissible $u$ is $(3,0,-5,2)$: $3-5+2=0$ and $1\cdot 3+3\cdot(-5)+6\cdot 2=0$. $\delta=1/12$ assigns unit 1 to treatment; $\delta=-1/20$ assigns unit 3 to treatment. Plus has probability $3/8$. Neither of these two steps sends a unit to 0.
+Assume we choose plus. Then $z=(0.75,0,0.75,0.5)$. Sum $z$ is still 2; the treated $x$-total is still 6. The next window is the three open units. An admissible $u$ is $(3,0,-5,2)$: $3-5+2=0$ and $1\cdot 3+3\cdot(-5)+6\cdot 2=0$. $\delta=1/12$ assigns unit 1 to treatment; $\delta=-1/20$ assigns unit 3 to treatment. Plus has probability $3/8$. Neither of these two steps sends a unit to 0.
 
 ```{r, echo=FALSE, fig.width=6.4, fig.height=4.7, fig.cap="After the first plus step. Unit 2 is assigned. Arrows are $\\delta_+ u$ with $u = (3, 0, -5, 2)$. $\\delta_+ = 1/12$; $\\delta_- = 1/20$."}
 cube_bip(
@@ -884,11 +886,11 @@ cube_bip(
 
 What remains is the count constraint alone, and the direction $u=(0,0,1,-1)$. Taking $\delta=2/3$ assigns unit 3 to treatment and unit 4 to control, for a treated $x$-total of $4$; taking $\delta=-1/3$ does the reverse, for a total of $7$. Neither hits the target of $6$.
 
-In this particular example nothing better was available: with $x = (1,2,3,6)$ and two units treated, the attainable totals are $3, 4, 5, 7, 8$ and $9$, and $6$ is simply not among them. So landing did as well as it could. That is not always the reason a target is missed, though, and the two sections that close Section 3 are the cases where a perfectly attainable target is missed anyway — Section 3.8 because the flight can stop at a fractional point from which no exact assignment is reachable, and Section 3.9 because the narrow window can commit to a direction that rules the exact assignments out.
+In this particular example nothing better was available: with $x = (1,2,3,6)$ and two units treated, the attainable totals are $3, 4, 5, 7, 8$ and $9$, and $6$ is simply not among them. So landing did what it could but couldn't do the impossible. That is not always the reason a target is missed, though, and the two sections that close Section 3 are the cases where a perfectly attainable target is missed anyway — Section 3.8 because the flight can stop at a fractional point from which no exact assignment is reachable, and Section 3.9 because the narrow window can commit to a direction that rules the exact assignments out.
 
 #### C++: the main loop
 
-The loop takes the next $q + 1$ units off the front of a queue, asks for a direction, and moves along it. Only if no direction can be found — first on the small window, then on every unit still fractional — does it give up a column.
+Here is how the code works. At any point the loop takes the next $q + 1$ units off the front of a queue, asks for a direction, and moves along it. Only if no direction can be found---first on the small window, then on every unit still fractional---does it give up a column.
 
 ```cpp
     // Step 1: the window is the first q+1 units still fractional.
@@ -987,7 +989,6 @@ Step 4 deserves a sentence, because it is the one place where the implementation
 
 We provide next a set of examples of `balanced_ra` in action. Each example draws an assignment and then checks a claim about it. A green tick means the claim held on the draws shown (a check that fails stops the vignette from building, so a tick you can see is a tick that was earned when this page was made). Sections 3.7, 3.8 and 3.9 are different: they carry a red cross, and they are there to mark claims that are **not guaranteed** and that in fact fail.
 
-One small nuisance recurs below. A multi-arm assignment comes back as a factor rather than as a number, because the conditions can have any names you like. Where the examples need arm numbers to add up, they convert with `as.integer(as.character(...))`, which reads the label off the factor and turns it back into a number.
 
 ```{r, echo=FALSE}
 claim_tick <- function(ok, claim) {
@@ -1015,7 +1016,7 @@ vertex_share <- function(Z, n = 4) {
 
 ### 3.1 One winner from unequal chances
 
-Four contestants have winning probabilities 0.50, 0.30, 0.15 and 0.05. The probabilities sum to 1, so exactly one contestant should win each time. Neither of the obvious alternatives manages this: `simple_ra()` would honour the four chances but would sometimes crown two winners and sometimes none, and `complete_ra()` would crown exactly one but would give all four an equal chance of being that one.
+Four contestants have winning probabilities 0.50, 0.30, 0.15 and 0.05. The probabilities sum to 1, so exactly one contestant should win each time. Neither of the obvious alternatives manages this: `simple_ra()` would honour the four chances but would sometimes crown two winners and sometimes none, and `complete_ra()` would crown exactly one but would require all four have an equal chance of being that one.
 
 Two things are therefore worth checking here, and the example checks both: that every draw has exactly one winner, and that each contestant wins at close to the rate asked for. The second of these is a statement about a long run of draws rather than about any one of them, so we take a hundred thousand draws. A draw of four units is cheap enough that this costs a few seconds.
 
@@ -1073,8 +1074,8 @@ P23
 colSums(P23)
 set.seed(4)
 balanced_ra(prob_unit_each = P23, conditions = 1:3)
-Z23 <- replicate(2000, as.integer(as.character(
-  balanced_ra(prob_unit_each = P23, conditions = 1:3))))
+Z23 <- replicate(2000, 
+  balanced_ra(prob_unit_each = P23, conditions = 1:3))
 table(colSums(Z23 == 2))
 ```
 
@@ -1138,14 +1139,13 @@ claim_tick(cluster_constant && all(n_treated_cl == 3),
 
 #### Clusters with a covariate
 
-`clusters` and `formula` can be combined, and it is worth being precise about what happens when they are, because the answer is not the only one that might have been chosen.
+`clusters` and `formula` can be combined. If you do this, each cluster is collapsed to a single row that stands in for it. Its probability is the probability its units share, and its covariates are the *averages* of its units' covariates. That is what makes a cluster behave like a unit: the intercept column of a model matrix is a column of ones, and averaging a column of ones leaves a column of ones, so the count constraint still reads "how many clusters are treated". Under `formula = ~ x` the balanced quantity is correspondingly the total across treated clusters of each cluster's mean of `x`, with every cluster counting once however many units it holds.
 
-Each cluster is collapsed to a single row that stands in for it. Its probability is the probability its units share, and its covariates are the *averages* of its units' covariates. That is what makes a cluster behave like a unit: the intercept column of a model matrix is a column of ones, and averaging a column of ones leaves a column of ones, so the count constraint still reads "how many clusters are treated". Under `formula = ~ x` the balanced quantity is correspondingly the total across treated clusters of each cluster's mean of `x`, with every cluster counting once however many units it holds.
-
-The alternative would have been to add the covariates up rather than average them, which would have turned the intercept column into cluster sizes and the count constraint into "how many units are treated", leaving the number of treated clusters free to wander. If unit-scale balance is what you want, weight the covariate by cluster size before passing it.
+An alternative would have been to add the covariates up rather than average them, which would have turned the intercept column into cluster sizes and the count constraint into "how many units are treated", leaving the number of treated clusters free to wander. 
 
 ```{r}
 set.seed(19)
+clusters <- rep(1:6, times = c(3, 1, 4, 2, 5, 3))
 x_cl <- c(-2, -1, 0, 1, 2, 3)[clusters]
 Z_clx <- replicate(2000, balanced_ra(prob_unit = p_cluster[clusters],
                                      clusters = clusters, formula = ~ x_cl))
@@ -1164,7 +1164,7 @@ claim_tick(
 )
 ```
 
-The number of treated units varies because the clusters have different sizes. The number of treated clusters does not.
+However, the number of treated units varies because the clusters have different sizes. The number of treated clusters does not.
 
 ### 3.6 `formula` plus `blocks`
 
@@ -1185,6 +1185,8 @@ claim_tick(
 )
 ```
 
+That is one for the future.
+
 ### 3.7 Multi-arm totals with blocks are not tight
 
 **Overall tightness is not guaranteed** with three or more arms and `blocks`. The within-block counts stay tight, as always, but the counts added up across blocks can drift, because the leftover pairing that rescues the two-arm case does not extend to more arms. The loop shown at the end of Section 2.2 is the reason: each block is worked through on its own, and nothing arranges for one block's rounding to offset another's.
@@ -1196,8 +1198,8 @@ set.seed(16)
 P_mb <- matrix(1 / 3, 6, 3)
 blocks_mb <- rep(1:3, each = 2)
 balanced_ra(prob_unit_each = P_mb, blocks = blocks_mb, conditions = 1:3)
-Z_mb <- replicate(2000, as.integer(as.character(
-  balanced_ra(prob_unit_each = P_mb, blocks = blocks_mb, conditions = 1:3))))
+Z_mb <- replicate(2000, 
+  balanced_ra(prob_unit_each = P_mb, blocks = blocks_mb, conditions = 1:3))
 table(colSums(Z_mb == 1))
 ```
 
@@ -1222,6 +1224,8 @@ claim_cross(
 ```
 
 The red cross is the point of the example. Do not read overall floor-or-ceiling tightness off a blocked multi-arm design; check it, or use two arms, where the guarantee does hold.
+
+
 
 ### 3.8 An attainable covariate total that is still missed
 
@@ -1271,7 +1275,7 @@ rbind(
 )
 ```
 
-Read those variances before drawing the wrong lesson from the red cross below. `balanced_ra(formula = ~ x)` is the *best* of the three here, comfortably better than `simple_ra()` and a little better than `complete_ra()`. The failure being demonstrated is narrower than "the design does not help": it is that the design does not deliver the exact target even when the exact target is attainable, and so cannot be relied on to.
+We see that `balanced_ra(formula = ~ x)` is the *best* of the three here, comfortably better than `simple_ra()` and a little better than `complete_ra()` in terms of variance reduction. The failure being demonstrated is not  "the design does not help" it is that the design does not deliver the exact target even when the exact target is attainable, and so cannot always be relied on to do so.^[Here is what goes wrong, traced through. Flight can come to rest at $z = (2/3, 0, 1, 1/3)$. Both constraints are satisfied at that point: the weights sum to 2, and the weighted total of $x$ is $2/3 + 3 + 4/3 = 5$, exactly the target. But units 1 and 4 are still fractional, and there is no direction left that would move them while holding both constraints, because two constraints on two remaining units pin them down completely. Landing therefore drops the $x$ column, leaving only the count. The two remaining units are then traded against each other, one going to treatment and the other to control, which sends the treated total of $x$ to either 4 or 7. The target of 5 was satisfied at the fractional point and is unreachable from it once $x$ has been given up.]
 
 ```{r, echo=FALSE, results='asis'}
 claim_tick(
@@ -1284,15 +1288,12 @@ claim_cross(
 )
 ```
 
-Here is what goes wrong, traced through. Flight can come to rest at $z = (2/3, 0, 1, 1/3)$. Both constraints are satisfied at that point: the weights sum to 2, and the weighted total of $x$ is $2/3 + 3 + 4/3 = 5$, exactly the target. But units 1 and 4 are still fractional, and there is no direction left that would move them while holding both constraints, because two constraints on two remaining units pin them down completely.
 
-Landing therefore drops the $x$ column, leaving only the count. The two remaining units are then traded against each other, one going to treatment and the other to control, which sends the treated total of $x$ to either 4 or 7. The target of 5 was satisfied at the fractional point and is unreachable from it once $x$ has been given up.
-
-### 3.9 Warning: an attainable covariate total that never appears at all
+### 3.9 An example of an attainable covariate total that never appears at all
 
 Section 3.8 missed the target often. This example misses it always, and the reason sits earlier in the algorithm.
 
-Take four units with $x = (1, 2, 2, 3)$ and $p_i = 1/2$, so two units are treated and the target treated total of $x$ is $\sum_i x_i p_i = 4$. Two assignments attain it exactly: treat the two 2's, or treat the 1 and the 3. Neither is ever drawn.
+Take four units with $x = (1, 2, 2, 3)$ and $p_i = 1/2$, so two units are treated and the target treated total of $x$ is $\sum_i x_i p_i = 4$. Two assignments attain it exactly: treat the two 2's, or treat the 1 and the 3. BUt it turns out that neither of these profiles is ever drawn.
 
 ```{r}
 x <- c(1, 2, 2, 3)
@@ -1316,17 +1317,13 @@ claim_cross(
 
 Unlike Section 3.8, this is not landing coming as close as it can. The damage is done during flight, by the narrow window.
 
-The window here holds $q + 1 = 3$ units, and the units are sorted by $x$, so the first window is the 1 and the two 2's. On those three units the constraints leave exactly one direction available, namely $u = (0, 1, -1, 0)$: trade the two 2's against each other. That trade settles both of them and it is the only move on offer, so after one step one of the two 2's is in treatment and the other is in control. Both of the assignments that would have hit 4 are ruled out at that moment — treating both 2's is now impossible, and so is treating neither. Landing then trades the 1 against the 3 on the count alone, giving a total of 3 or 5.
-
-A wider window would not have had this problem. Looking at all four units at once, the direction $u = (1, -1, -1, 1)$ respects both constraints, since $1 - 1 - 1 + 1 = 0$ and $1 - 2 - 2 + 3 = 0$, and a step of $1/2$ along it lands directly on one of the two exact assignments. That direction is available to a flight phase that considers every fractional unit, though it is one of several such directions rather than the only one, so a wider flight is not *guaranteed* to take it either. What we can say is narrow and worth stating as such: the window used here rules the exact assignments out in this example, and we make no claim that any particular implementation of the cube method will find an exactly balanced assignment whenever one exists. First-order probabilities are exact throughout, and the treated count stays tight; it is the covariate target that is missed.
+The window here holds $q + 1 = 3$ units, and the units are sorted by $x$, so the first window is the 1 and the two 2's. On those three units the constraints leave exactly one direction available, namely $u = (0, 1, -1, 0)$: trade the two 2's against each other. That trade settles both of them and it is the only move on offer, so after one step one of the two 2's is in treatment and the other is in control. Both of the assignments that would have hit 4 are ruled out at that moment — treating both 2's is now impossible, and so is treating neither. Landing then trades the 1 against the 3 on the count alone, giving a total of 3 or 5.^[A wider window would not have had this problem. Looking at all four units at once, the direction $u = (1, -1, -1, 1)$ respects both constraints, since $1 - 1 - 1 + 1 = 0$ and $1 - 2 - 2 + 3 = 0$, and a step of $1/2$ along it lands directly on one of the two exact assignments. That direction is available to a flight phase that considers every fractional unit, though it is one of several such directions rather than the only one, so a wider flight is not *guaranteed* to take it either.] What  can we say? The window used here rules the exact assignments out in this example, and we make no claim that any particular implementation of the cube method will find an exactly balanced assignment whenever one exists. First-order probabilities are exact throughout, and the treated count stays tight; it is the covariate target that is missed.
 
 ## 4. Analysing an assignment
 
-Following the general to injunction to analyze as you randomize we highlight two ways in which you should take account of the assignment scheme in your analysis.
+Following the general injunction to analyze as you randomize, we highlight two ways in which you should take account of the assignment scheme in your analysis. First, by weighting in case of non-uniform probabilities. Second, by calculating standard errors robustly.
 
-First, weighting in case of non-uniform probabilities. Second, calculate standard errors robustly.
-
-The estimator throughout this section is inverse-probability-weighted least squares with an HC2 standard error ([MacKinnon and White 1985](https://doi.org/10.1016/0304-4076(85)90158-7)), fitted with `estimatr::lm_robust()`, which is the DeclareDesign suite's companion to randomizr for this purpose. Where a covariate is adjusted for, the fit is `estimatr::lm_lin()`, which centres the covariate and interacts it with treatment in the manner of Lin (2013).
+The estimator throughout this section is inverse-probability-weighted least squares with an HC2 standard error ([MacKinnon and White 1985](https://doi.org/10.1016/0304-4076(85)90158-7)), fitted with `estimatr::lm_robust()`. Where a covariate is adjusted for, the fit is `estimatr::lm_lin()`, which centres the covariate and interacts it with treatment in the manner of Lin (2013).
 
 ```{r}
 # Draw a design many times, and compare the standard error an analyst would
@@ -1456,11 +1453,8 @@ rbind(
 )
 ```
 
-Insurance against an adjustment model you cannot specify is the clearest case for using `formula`, and it is also the case in which the reported interval understates what the design bought.
 
-`horvitz_thompson()`, estimatr's other route to an interval, does not solve this either, and for a related reason. It needs the probability that two given units are treated together, and under a cube design that quantity has no closed form, so there is nothing exact to give it. It is what Deville and Tillé (2005) approximate, and randomizr does not implement the approximation. A better interval for a covariate-balanced design is an open problem rather than a missing option.
-
-Three cautions on the above. These are the designs that were drawn and nothing more: the count-tight results cover two-arm designs with varying probabilities and their independent counterpart, and the `formula` results cover one covariate at $N = 200$. Coverage was at or above the nominal rate everywhere it was measured, which is the safe direction, but that is an observation about these simulations rather than a theorem. And none of it speaks to cluster-robust standard errors or to randomization inference.
+Three cautions on the above. These are the designs that were drawn and nothing more: the count-tight results cover two-arm designs with varying probabilities and their independent counterpart, and the `formula` results cover one covariate at $N = 200$. Coverage was at or above the nominal rate everywhere it was measured, which is the safe direction, but that is an observation about these simulations rather than a theorem. 
 
 ## 5. Declaring the design
 
@@ -1488,7 +1482,7 @@ There is one reason to prefer a declaration when a `formula` is involved. Declar
 
 ## 6. Caveats
 
-`balanced_ra()` is experimental and may change. In particular:
+`balanced_ra()` is experimental and may change. Here are things to watch out for:
 
 * Multi-arm assignment with `formula` is not implemented, and `formula` together with `blocks` is refused rather than approximated.
 
