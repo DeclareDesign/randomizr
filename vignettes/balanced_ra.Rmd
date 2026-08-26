@@ -41,7 +41,7 @@ div.figcaption,
 
 Suppose you have two groups of three villages and give each a 50 percent chance of treatment. The target number treated is three. But you also want the three to be spread across the blocks. So two constraints. It sounds easy enough but standard assignment methods cannot handle both easily. For instance, `block_ra()` would guarantee 1 or 2 per group but could not restrict the total to 3. `complete_ra` would ensure 3 total but not necessarily spread across blocks.  `balanced_ra()` handles both constraints, and it works even when the chances differ from village to village within each block.
 
-You can call `balanced_ra()` directly, or you can declare a design with `declare_ra()` and let `conduct_ra()` draw from it. A declaration reaches `balanced_ra()` when you set `ra_type = "balanced"`, or when you supply `prob_unit_each`, or when you supply `formula`. Section 5 shows both routes.
+You can call `balanced_ra()` directly, or you can declare a design with `declare_ra()` and let `conduct_ra()` draw from it. A declaration reaches `balanced_ra()` when you set `ra_type = "balanced"`, or when you supply `prob_unit_each`, or when you supply `formula`. 
 
 The function is **experimental**: it is new in randomizr 2.0.1 and its interface may still change.
 
