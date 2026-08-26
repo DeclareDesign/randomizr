@@ -25,7 +25,7 @@ library(ggplot2)
 
 `balanced_ra()` draws random assignment with tight targets: condition counts at the floor or the ceiling of what the probabilities imply, and, with `formula`, at the floor or ceiling of covariate totals. Each unit's probability stays exact. Probabilities may vary from unit to unit and block and cluster structures are respected.  With two arms and `blocks`, those tight counts are both within each block and overall. With three or more arms and `blocks`, tightness is within each block; the overall count is the sum of independent block landings and can move by more than one.
 
-Section 1 gives a simple example of a blocked design that blocked assignment cannot hit. Section 2 shows an example of randomization against a continuous covariate. Section 3 gives the logic and states what the published papers guarantee versus what this implementation guarantees. Section 4 walks through the C++ implementation. Section 5 gives worked examples. Section 6 reports a concise validation. Section 7 lists the caveats.
+Section 1 gives a blocked design that complete assignment inside each block cannot hit. Section 2 shows randomization against a continuous covariate. Section 3 names the three C++ kernels. Sections 4--6 walk through them: the two-arm pivot, the multi-arm cube, and cube-on-X. Section 7 states what this implementation guarantees. Section 8 gives further examples. Section 9 reports a concise validation. Section 10 lists the caveats.
 
 The function is **experimental**. Use `balanced_ra` or declare it with `declare_ra(..., ra_type = "balanced")`, by supplying `prob_unit_each`, or by supplying `formula`.
 
@@ -56,9 +56,9 @@ Blocks tighten counts inside discrete groups. A continuous covariate is a differ
 
 Pass `formula = ~ x`. The model matrix is the balancing matrix $X$ in the cube method of [Deville and Tillé (2004)](https://doi.org/10.1093/biomet/91.4.893). The intercept is the count constraint. The $x$ column asks $\sum_i x_i Z_i$ to stay near $\sum_i x_i p_i$. `~ 0 + x` drops the intercept, and the treated count may wander. `blocks` and `formula` cannot be combined.
 
-Four units, $x = (1, 2, 3, 6)$, two assigned to treatment, $p_i = 1/2$. There are six assignments. The target treated count is 2. The target treated total of $x$ is 6. No assignment hits 6: the six pair-sums are 3, 4, 5, 7, 8, and 9.
+Four units, $x = (1, 2, 3, 6)$, two assigned to treatment, $p_i = 1/2$. There are six assignments. The target treated count is 2. The target treated *total* of $x$ is 6 (that is $.5 \sum x = 6$). But notice that no possible assignment hits 6: the six pair-sums are 3, 4, 5, 7, 8, and 9.
 
-`complete_ra(N = 4, m = 2)` puts equal weight on each of those six. `balanced_ra(formula = ~ x)` does not. Both keep every unit's probability at $1/2$ and treat exactly two units on every draw. They differ in the joint distribution.
+`complete_ra(N = 4, m = 2)` puts equal weight on each of those six (the sum of $x$ is 6 in expectation, with large variance). `balanced_ra(formula = ~ x)` does not. Both keep every unit's probability at $1/2$ and treat exactly two units on every draw. They differ in the joint distribution.
 
 ```{r}
 x <- c(1, 2, 3, 6)
@@ -95,86 +95,329 @@ rbind(
 )
 ```
 
-The cube walk reweights the six vertices. It does not put extra mass on the pair-sums nearest 6. With four units and two constraints most of the work is landing, which may drop a column of $X$.
+The cube walk reweights the six vertices. It does not put extra mass on the pair-sums nearest 6 (rows 3 and 4). With four units and two constraints most of the work is landing, which may drop a column of $X$. Section 6 walks through those steps.
 
-# 3. Logic
+# 3. Three C++ kernels
 
-`balanced_ra()` is cube/pivotal assignment with unit-varying probabilities, on the same interface as `complete_ra()` and `block_ra()`. For two-arm blocked designs leftover pairing keeps the counts tight within each block and overall.
+R dispatches on the call. Clusters are collapsed first; the same three entries then run at cluster level.
 
-The input is an $N \times k$ matrix $\pi$ of assignment probabilities. Row $i$ sums to 1. Column $j$ sums to a target $t_j = \sum_i \pi_{ij}$. The output is a 0-1 matrix $Z$ with the same row sums, so each unit receives one condition, and with $E[Z]=\pi$. The column sums of $Z$ are required to be as close to $t$ as integer arithmetic allows: each realized count $n_j$ satisfies $n_j \in \{\lfloor t_j \rfloor, \lceil t_j \rceil\}$.
+```{r, echo = FALSE}
+knitr::kable(
+  data.frame(
+    Call = c(
+      "`balanced_ra(prob_unit = p)` or `balanced_ra(blocks = b)`",
+      "`balanced_ra(prob_unit_each = P)`",
+      "`balanced_ra(formula = ~ x)`"
+    ),
+    `C++` = c("`cube_two_arm_cpp`", "`cube_multi_cpp`", "`cube_on_x_cpp`"),
+    Does = c(
+      "Two-arm counts; leftover pairing if `blocks`",
+      "Three or more arms",
+      "Linear targets on a model matrix $X$"
+    ),
+    Paper = c(
+      "Deville and Tillé (1998), pivotal method",
+      "Deville and Tillé (2004), cube; Chauvet and Tillé (2006), window",
+      "Deville and Tillé (2004), cube; Chauvet and Tillé (2006), window"
+    ),
+    check.names = FALSE
+  ),
+  caption = "Which C++ kernel a call uses. `formula` plus `prob_unit_each` is not implemented."
+)
+```
 
-One way to picture the algorithm is as a flow on the bipartite graph of units and conditions. An edge exists where a cell is still fractional. A cycle in that graph is a closed walk that alternates between units and conditions. Pushing a constant $\delta$ forward along the even edges and backward along the odd edges leaves every row total and every column total unchanged, and a large enough $\delta$ drives at least one cell to 0 or 1. Repeat until no cycle remains.
+The three are not interchangeable. A general cube could mimic the pivot when $X$ is only the intercept, and the multi-arm walk on two columns is again the pivot. What the two-arm function adds is leftover pairing: two-arm blocked counts stay tight *inside each block and overall*. Generic landing drops a constraint and would lose one of those. Cube-on-X does not take `blocks`. Multi-arm plus `formula` is a further generalization and is not implemented.
 
-What remains is a forest. Every unit still has either no fractional cells or at least two of them: a unit with a single fractional cell would need that cell to be an integer, because its other cells are already 0 or 1 and the row sums to 1. So every leaf of the forest is a condition. A maximal path therefore runs from one condition to another. Pushing along that path preserves every row total and every interior column total; only the two conditions at the ends move. That is the landing step.
-
-Each push is a fair bet. If the largest feasible up-step is $d^{+}$ and the largest feasible down-step is $d^{-}$, the algorithm takes the up-step with probability $d^{-}/(d^{+}+d^{-})$. The current matrix is then a martingale:
-
-$$E[Z^{(t+1)} \mid Z^{(t)}] = Z^{(t)}.$$
-
-Unrolling the martingale gives $E[Z]=\pi$. The inclusion probabilities are exactly the supplied probabilities, not an approximation to them.
-
-The same degree bound that appears in dependent rounding explains the floor-or-ceiling counts. After the walk finishes, each vertex of the bipartite graph has integer degree equal to the floor or the ceiling of the fractional degree it started with. For a condition that degree is the number of units assigned to it. For a unit it is 1.
-
-## What the papers establish
-
-[Deville and Tillé (2004)](https://doi.org/10.1093/biomet/91.4.893) give the cube method for balanced sampling. The state is a vector in the unit cube. Balancing constraints are linear equalities — in survey sampling, that the Horvitz–Thompson totals of auxiliary variables match the known population totals. The *flight* phase moves in a direction that lies in the kernel of those constraints until a coordinate hits 0 or 1. The *landing* phase begins when no such direction remains, and it drops constraints until the state is a vertex. Each flight step is constructed to be a martingale, so first-order inclusion probabilities equal the supplied $\pi$. Landing may violate a dropped constraint. The paper does not claim that every balancing constraint survives all the way to the assignment.
-
-This function applies that method to a particular constraint system: the transportation polytope of nonnegative $N \times k$ matrices with row sums 1 and column sums $t$. Cycle moves are the kernel directions that preserve every row and every column. Path moves are landing. Deville and Tillé (2004) supply the martingale and the flight/landing split. They do not, by themselves, say that a blocked assignment problem will be tight both within each block and overall.
-
-[Deville and Tillé (1998)](https://doi.org/10.1093/biomet/85.1.89) give the splitting method for unequal-probability sampling without replacement. The *pivotal* method is the two-unit case: transfer mass between two units until one hits 0 or 1, with the direction chosen so that the step is a martingale and the total remains exact. With two arms the transportation graph is a forest of stars — each unit has one edge, to its own block — so every maximal path is unit–block–unit. The general cube walk collapses to the pivotal method. That is the two-arm path in the C++.
-
-[Chauvet and Tillé (2006)](https://doi.org/10.1007/s00180-006-0250-2) give a fast flight phase whose cost is linear in the population size. The device is a working window: only as many units as there are balancing constraints need to be examined at once. In this problem the window is $k$ units. A unit that is still fractional has at least two fractional cells, so $k$ such units induce at least $2k$ edges on at most $2k$ nodes, and a graph with at least as many edges as nodes is not a forest. The window therefore always contains a cycle until too few fractional units remain. That is the three-or-more-arm path, in the form this problem takes it.
-
-[Deville and Tillé (2005)](https://doi.org/10.1016/j.jspi.2003.11.011) approximate the variance of Horvitz–Thompson totals under balanced sampling, when joint inclusion probabilities have no closed form. This function does not implement those estimators.
-
-## What this implementation guarantees
-
-Every unit receives exactly one condition. Each unit's probability of each condition equals the supplied $\pi_{ij}$. Condition counts are the floor or the ceiling of the target at a stated level:
-
-- without `blocks`, the overall counts are tight;
-- with `blocks`, the within-block counts are always tight;
-- with `blocks` and two arms, the overall counts are tight as well;
-- with `clusters`, the tight counts are counts of clusters, not of units.
-
-The two-arm overall-and-block result is an implementation choice, not a named theorem that "the cube always does both." After a first pivotal pass inside each block, at most one unit per block is still fractional. A second pass pairs those leftovers as a single group. Pairing preserves their total, so the overall count stays tight, and each leftover is still sent to 0 or 1, so no block moves by more than one from its target. Independent Bernoulli rounding of each leftover would have kept each block tight and let the overall count drift by up to the number of blocks.
-
-That leftover pairing does not extend to three or more arms. A block can keep several leftover units, and landing those leftovers as one global group can push a within-block arm count more than one away from its target. The implementation therefore lands each block on its own. Within-block counts stay at the floor or the ceiling. Overall counts are the sum of those independent landings. When several block remainders fall the same way, the overall count can move by more than one. Joint floor-or-ceiling at both levels is feasible — that is Hamilton's method of apportionment, applied to the block remainders — and this implementation delivers it for two arms, not for $k>2$.
-
-# 4. Code walk-through
-
-The R wrapper builds the probability matrix, then hands a shuffled unit order to C++. The shuffle is there so that the input order does not matter. Two arms and three or more arms take different functions in `src/cube.cpp`. Clusters never reach those functions as unit-level rows: they are collapsed first.
-
-```r
-cube_assign <- function(P, blocks = NULL, tol = 1e-12) {
-  n <- nrow(P)
-  b <- if (is.null(blocks)) rep(1L, n) else as.integer(factor(blocks))
-  ord <- sample.int(n)
-  if (ncol(P) == 2L) {
-    z <- cube_two_arm_cpp(P[, 2L], b, ord, tol)
-    return(cbind(1 - z, z))
+```{r, echo=FALSE}
+along <- function(x1, y1, x2, y2, t) {
+  data.frame(x = x1 + t * (x2 - x1), y = y1 + t * (y2 - y1))
+}
+fmt_u <- function(u) {
+  lab <- paste0("u = ", ifelse(u > 0, "+", ""), u)
+  lab <- gsub("u = \\+0", "u = 0", lab)
+  gsub("u = -", "u = \u2212", lab)
+}
+fmt_abs <- function(x) {
+  # Fractions the vignette already uses; leave tenths (0.2, 0.6, 0.4) as decimals.
+  pairs <- list(
+    "1/20" = 1 / 20, "1/12" = 1 / 12, "1/6" = 1 / 6,
+    "1/4" = 1 / 4, "1/3" = 1 / 3, "5/12" = 5 / 12,
+    "1/2" = 1 / 2, "2/3" = 2 / 3
+  )
+  for (nm in names(pairs)) {
+    if (abs(x - pairs[[nm]]) < 1e-8) return(nm)
   }
-  cube_multi_cpp(P, b, ord, tol)
+  sub("\\.?0+$", "", sprintf("%.2f", x))
+}
+fmt_signed <- function(x) {
+  paste0(if (x > 0) "+" else "\u2212", fmt_abs(abs(x)))
+}
+fmt_delta_note <- function(dplus, dminus) {
+  paste0("\u03B4+ = ", fmt_abs(dplus),
+         "      \u03B4\u2212 = ", fmt_abs(dminus))
+}
+# Largest plus/minus steps with z <- z + δ u, hitting 0 or 1.
+cube_step_sizes <- function(z, u) {
+  dplus <- Inf
+  dminus <- Inf
+  for (i in seq_along(z)) {
+    if (abs(u[i]) < 1e-12) next
+    if (u[i] > 0) {
+      dplus <- min(dplus, (1 - z[i]) / u[i])
+      dminus <- min(dminus, z[i] / u[i])
+    } else {
+      dplus <- min(dplus, z[i] / (-u[i]))
+      dminus <- min(dminus, (1 - z[i]) / (-u[i]))
+    }
+  }
+  list(dplus = dplus, dminus = dminus)
+}
+walk_step_sizes <- function(P, cu, ca) {
+  dplus <- Inf
+  dminus <- Inf
+  for (e in seq_along(cu)) {
+    z <- P[cu[e], ca[e]]
+    if ((e - 1) %% 2 == 0) {
+      dplus <- min(dplus, 1 - z); dminus <- min(dminus, z)
+    } else {
+      dplus <- min(dplus, z); dminus <- min(dminus, 1 - z)
+    }
+  }
+  list(dplus = dplus, dminus = dminus)
+}
+# mass[i, j] is the plus-step transfer on that cell (δ+ u). Arrows follow its sign.
+cube_net <- function(P, mass = NULL, xval = NULL, zlab = NULL, ulab = NULL,
+                     arm_names = NULL, dplus = NULL, dminus = NULL) {
+  n <- nrow(P)
+  k <- ncol(P)
+  if (is.null(mass)) mass <- matrix(0, n, k)
+  if (is.null(arm_names)) {
+    arm_names <- if (k == 2L) c("Control", "Treat") else as.character(seq_len(k))
+  }
+  frac <- P > 1e-8 & P < 1 - 1e-8
+  open <- rowSums(frac) > 0
+  if (is.null(zlab) && k == 2L) {
+    z <- P[, 2L]
+    zlab <- ifelse(open, sprintf("z = %.2f", z),
+                   ifelse(z >= 1 - 1e-8, "z = 1", "z = 0"))
+  }
+  units <- data.frame(
+    i = seq_len(n), x = seq_len(n), y = 0,
+    open = open, kind = ifelse(open, "open", "settled"),
+    zlab = if (is.null(zlab)) "" else zlab,
+    ulab = if (is.null(ulab)) "" else ulab,
+    xlab = if (is.null(xval)) "" else paste0("x = ", xval),
+    stringsAsFactors = FALSE
+  )
+  pad <- if (n <= 2L) 0 else 0.45
+  arms <- data.frame(
+    name = arm_names,
+    x = if (k == 1L) mean(units$x) else seq(min(units$x) + pad,
+                                            max(units$x) - pad,
+                                            length.out = k),
+    y = 2.22
+  )
+  grey <- data.frame(x = numeric(0), y = numeric(0),
+                     xend = numeric(0), yend = numeric(0))
+  arr <- data.frame(x = numeric(0), y = numeric(0),
+                    xend = numeric(0), yend = numeric(0),
+                    lab = character(0), lx = numeric(0), ly = numeric(0))
+  for (i in seq_len(n)) {
+    for (j in seq_len(k)) {
+      if (!frac[i, j]) next
+      ux <- units$x[i]; uy <- 0
+      ax <- arms$x[j]; ay <- arms$y[1]
+      mval <- mass[i, j]
+      if (abs(mval) < 1e-12) {
+        grey <- rbind(grey, data.frame(x = ux, y = uy, xend = ax, yend = ay))
+      } else {
+        if (mval > 0) {
+          a <- along(ux, uy, ax, ay, 0.12); b <- along(ux, uy, ax, ay, 0.88)
+        } else {
+          a <- along(ax, ay, ux, uy, 0.12); b <- along(ax, ay, ux, uy, 0.88)
+        }
+        mid <- along(a$x, a$y, b$x, b$y, if (mval > 0) 0.36 else 0.64)
+        arr <- rbind(arr, data.frame(
+          x = a$x, y = a$y, xend = b$x, yend = b$y,
+          lab = fmt_signed(mval),
+          lx = mid$x, ly = mid$y
+        ))
+      }
+    }
+  }
+  has_u <- !is.null(ulab)
+  has_z <- !is.null(zlab)
+  has_x <- !is.null(xval)
+  has_d <- !is.null(dplus) && !is.null(dminus)
+  y_z <- -0.28
+  y_x <- if (has_z) -0.48 else -0.28
+  y_u <- -0.28 - 0.20 * (has_z + has_x)
+  y_as <- y_u - 0.22
+  y_lo <- y_as - 0.28
+  y_hi <- if (has_d) 3.08 else 2.72
+  g <- ggplot()
+  if (nrow(grey) > 0) {
+    g <- g + geom_segment(
+      data = grey, aes(x = x, y = y, xend = xend, yend = yend),
+      colour = "grey70", linewidth = 0.45
+    )
+  }
+  if (nrow(arr) > 0) {
+    g <- g + geom_segment(
+      data = arr, aes(x = x, y = y, xend = xend, yend = yend),
+      colour = "grey20", linewidth = 0.75,
+      arrow = arrow(length = grid::unit(0.15, "cm"), type = "closed")
+    ) + geom_label(
+      data = arr, aes(x = lx, y = ly, label = lab),
+      size = 2.9, fontface = "bold", linewidth = 0,
+      fill = "white", colour = "grey15",
+      label.padding = grid::unit(0.08, "lines")
+    )
+  }
+  g <- g +
+    geom_point(data = units, aes(x, y, fill = kind),
+               shape = 21, size = 7.6, colour = "grey20", stroke = 0.7) +
+    geom_text(data = units, aes(x, y, label = i),
+              size = 3.3, fontface = "bold", colour = "grey20") +
+    geom_point(data = arms, aes(x, y),
+               shape = 21, size = 8.6, fill = "grey20", colour = "grey20") +
+    geom_text(data = arms, aes(x, y = y + 0.30, label = name),
+              size = 3.4, fontface = "bold", colour = "grey20", vjust = 0)
+  if (has_d) {
+    g <- g + annotate(
+      "text", x = mean(units$x), y = 2.88,
+      label = fmt_delta_note(dplus, dminus),
+      size = 3.3, colour = "grey20", fontface = "bold"
+    )
+  }
+  if (has_z) {
+    g <- g + geom_text(
+      data = units, aes(x, y = y_z, label = zlab, colour = kind),
+      size = 3.0, vjust = 1
+    )
+  }
+  if (has_x) {
+    g <- g + geom_text(
+      data = units, aes(x, y = y_x, label = xlab, colour = kind),
+      size = 3.0, vjust = 1
+    )
+  }
+  if (has_u) {
+    g <- g + geom_text(
+      data = units, aes(x, y = y_u, label = ulab, colour = kind),
+      size = 3.1, fontface = "bold", vjust = 1
+    )
+  }
+  settled <- subset(units, !open)
+  if (nrow(settled) > 0) {
+    if (k == 2L) {
+      settled$slab <- "assigned"
+    } else {
+      hit <- max.col(P[settled$i, , drop = FALSE], ties.method = "first")
+      settled$slab <- paste0("arm ", arm_names[hit])
+    }
+    g <- g + geom_text(
+      data = settled, aes(x, y = y_as, label = slab),
+      size = 3.0, colour = "grey45", vjust = 1
+    )
+  }
+  g +
+    scale_fill_manual(values = c(open = "white", settled = "grey78"),
+                      guide = "none") +
+    scale_colour_manual(values = c(open = "grey20", settled = "grey55"),
+                        guide = "none") +
+    coord_cartesian(xlim = c(min(units$x) - 0.55, max(units$x) + 0.55),
+                    ylim = c(y_lo, y_hi), expand = FALSE, clip = "off") +
+    theme_void(base_size = 11) +
+    theme(plot.margin = margin(10, 10, 8, 8),
+          plot.background = element_rect(fill = "white", colour = NA),
+          panel.background = element_rect(fill = "white", colour = NA))
+}
+# Two-arm: plus step is z <- z + δ+ u. Control changes by −δ+ u.
+cube_bip <- function(z, u, xval = NULL, zlab = NULL, ulab = NULL,
+                     dplus = NULL, dminus = NULL) {
+  n <- length(z)
+  P <- cbind(1 - z, z)
+  ss <- cube_step_sizes(z, u)
+  if (is.null(dplus)) dplus <- ss$dplus
+  if (is.null(dminus)) dminus <- ss$dminus
+  mass <- cbind(-dplus * u, dplus * u)
+  if (is.null(ulab)) ulab <- fmt_u(u)
+  cube_net(P, mass, xval = xval, zlab = zlab, ulab = ulab,
+           dplus = dplus, dminus = dminus)
+}
+# Multi-arm: alternating kernel on (cu, ca); arrows are the plus transfer.
+cube_walk <- function(P, cu, ca, arm_names = NULL,
+                      dplus = NULL, dminus = NULL) {
+  ss <- walk_step_sizes(P, cu, ca)
+  if (is.null(dplus)) dplus <- ss$dplus
+  if (is.null(dminus)) dminus <- ss$dminus
+  mass <- matrix(0, nrow(P), ncol(P))
+  for (e in seq_along(cu)) {
+    s <- if ((e - 1) %% 2 == 0) 1 else -1
+    mass[cu[e], ca[e]] <- s * dplus
+  }
+  cube_net(P, mass, arm_names = arm_names, dplus = dplus, dminus = dminus)
 }
 ```
 
-With `clusters`, `cube_assign_clusters()` keeps one row per cluster (the first unit; probabilities are constant within a cluster by the time this is reached), assigns at that level, and expands the 0-1 rows back.
+# 4. Two-arm pivot
 
-```r
-cube_assign_clusters <- function(P, clusters, blocks = NULL, tol = 1e-12) {
-  cl <- factor(clusters)
-  first <- match(levels(cl), as.character(cl))
-  Pc <- P[first, , drop = FALSE]
-  bc <- if (is.null(blocks)) NULL else blocks[first]
-  Zc <- cube_assign(Pc, bc, tol)
-  Zc[as.integer(cl), , drop = FALSE]
-}
+`cube_two_arm_cpp` is the [pivotal method](https://doi.org/10.1093/biomet/85.1.89) of Deville and Tillé (1998). The state is a vector $z$ of treatment probabilities. The kernel comes from the count: an admissible $u$ on two open units is $(1,-1)$---intuitively whatever probability mass is added to one is subtracted from the other. Transferring mass leaves $z_i+z_j$ unchanged. The randomization is a fair bet between the two maximal steps that first hit 0 or 1. 
+
+The figures are bipartite networks. Units sit on the bottom; arms sit on top. A grey edge is a still-fractional cell, not yet being  considered for assignment. Arrows show the plus-step transfer $\delta_+ u$ on that edge (just $\pm\delta_+$ when $|u_i|=1$). The value $z$, written under a unit, is the Treat mass. Control mass is $1-z$. 
+
+## One draw: four units, target 2.3
+
+We illustrate the logic of the pivot method for a case with four units and heterogeneous probabilities that do not sum to an integer.
+
+Specifically, imagine $p = (0.2, 0.6, 0.7, 0.8)$. These probabilities sum to 2.3, and so every draw should treat 2 or 3 units. 
+
+```{r}
+p_piv <- c(0.2, 0.6, 0.7, 0.8)
+sum(p_piv)
+balanced_ra(prob_unit = p_piv)
 ```
 
-The tight counts are then counts of clusters. Clusters of unequal size give a fixed number of treated clusters and a varying number of treated units, which is how `cluster_ra()` behaves.
+The visit order will be $1,2,3,4$. In the illustration we assume the plus step is taken each time, though in practice this is random. At the end there is a residual (0.3) and the last assignment is via Bernoulli.
 
-## Two-arm pivotal pass
+The first pair consists of units 1 and 2. These have a combined mass of $0.8$. The admissible "directions of movement" that keep the sum of probabilities constant is $u=(1,-1,0,0)$. The plus coefficient is $\delta_+=\min(1-0.2,0.6)=0.6$, which assigns unit 2 to control (since $u\delta_+ = (.6, -.6)$ which would yield new position $z' = (0.2, 0.6) + (0.6, -0.6) = (0.8, 0)$). For the negative coefficient we have $\delta_-=\min(0.2,0.4)=0.2$ which assigns unit 1 to control (since the new position would be $z' = (0.2, 0.6) - (0.2, -0.2) = (0, .8)$). We will choose between these two directions, selecting plus with probability $0.2/0.8=1/4$. Note that in this case the question is which gets assigned to control, not which gets assigned to treatment, as it is possible that neither will get assigned to treatment. 
 
-`cube_pivot_pass` holds one open fractional unit per block. When a second fractional unit in that block appears, the two are a pivotal pair.
+```{r, echo=FALSE, fig.width=6.4, fig.height=4.3, fig.cap="Start. Kernel on units 1 and 2. Arrows are $\\delta_+ u$. $\\delta_+ = 0.6$ assigns unit 2 to control; $\\delta_- = 0.2$ assigns unit 1 to control."}
+cube_bip(
+  z = p_piv, u = c(1, -1, 0, 0),
+  ulab = c("u = +1", "u = \u22121", "u = 0", "u = 0")
+)
+```
+
+Assume we happened to select the plus coefficient. Then our new $z$ is $z=(0.8,0,0.7,0.8)$. Unit 1 is still open, at $0.8$, and it now pairs with unit 3. And we go again. This time  $\delta_+=0.2$ would send unit 1 to 1; $\delta_-=0.3$ would send unit 3 to 1. We choose randomly between these, selecting plus with  probability $0.3/0.5=3/5$.
+
+```{r, echo=FALSE, fig.width=6.4, fig.height=4.3, fig.cap="After the first plus step. Unit 2 is assigned. Next pair: units 1 and 3. Arrows are $\\delta_+ u$."}
+cube_bip(
+  z = c(0.8, 0, 0.7, 0.8), u = c(1, 0, -1, 0),
+  ulab = c("u = +1", "u = 0", "u = \u22121", "u = 0")
+)
+```
+
+Lets imagine again that plus was selected. Then the new $z$ vector is  $z=(1,0,0.5,0.8)$. Units 3 and 4 now form a pair. We have possibilities $\delta_+=0.5$, which sends unit 3 to 1 and unit 4 to $0.3$; and $\delta_-=0.2$ which sends unit 4 to 1. Plus has probability $0.2/0.7=2/7$.
+
+```{r, echo=FALSE, fig.width=6.4, fig.height=4.3, fig.cap="After the second plus step. Units 3 and 4 remain. $\\delta_+ = 0.5$ assigns unit 3 (leftover $z_4 = 0.3$); $\\delta_- = 0.2$ assigns unit 4."}
+cube_bip(
+  z = c(1, 0, 0.5, 0.8), u = c(0, 0, 1, -1),
+  ulab = c("u = 0", "u = 0", "u = +1", "u = \u22121")
+)
+```
+
+Assume again we randomly selected plus. Then $z=(1,0,1,0.3)$. One leftover remains, so there is no new pairing possible. We now randomly assign unit 4 with probability $0.3$. The result is that we treat either two or three units. 
+
+## Leftover pairing across blocks
+
+With `blocks`, the same pass runs inside each block and leaves at most one fractional unit per block. A second pass then pairs those leftovers as one group, so the *overall* count stays tight as well. Independent Bernoulli on each block leftover would have kept each block tight and let the overall total wander.
+
+
+## C++: `cube_pivot_pass`
+
+We see these same steps now in the `C++` function: 
 
 ```cpp
 static void cube_pivot_pass(NumericVector& z, const std::vector<int>& seq,
@@ -182,350 +425,68 @@ static void cube_pivot_pass(NumericVector& z, const std::vector<int>& seq,
   std::vector<int> open(nb + 1, -1);
   for (size_t t = 0; t < seq.size(); t++) {
     int j = seq[t];
+    // Step 1: skip assigned.
     if (z[j] <= tol || z[j] >= 1.0 - tol) continue;
     int bl = blk[j];
+    // Step 2: hold one open unit per block.
     if (open[bl] < 0) { open[bl] = j; continue; }
 
+    // Step 3: kernel pair (z_i + z_j preserved).
     int i = open[bl];
+    // Step 4: largest d+ and d-.
     double du = std::min(1.0 - z[i], z[j]);
     double dd = std::min(z[i], 1.0 - z[j]);
+    // Step 5: fair bet, then transfer.
     if (unif_rand() < dd / (du + dd)) { z[i] += du; z[j] -= du; }
     else                              { z[i] -= dd; z[j] += dd; }
 
+    // Step 6: housekeeping of open[].
     int keep = (z[i] > tol && z[i] < 1.0 - tol) ? i : j;
     open[bl] = (z[keep] > tol && z[keep] < 1.0 - tol) ? keep : -1;
   }
 }
 ```
 
-The quantities `du` and `dd` are $d^{+}$ and $d^{-}$ above. One of the two units hits 0 or 1. The survivor, if still fractional, becomes the new open unit for that block. One pass leaves at most one leftover per block.
+| Step | What the line does |
+|:----:|--------------------|
+| 1 | Units already at 0 or 1 are skipped. |
+| 2 | The first still-fractional unit in a block is held. |
+| 3 | A second fractional unit in that block is a pair. The kernel is $(1,-1)$, so $z_i+z_j$ is unchanged. |
+| 4 | $\delta_+$ and $\delta_-$ are the largest steps that hit 0 or 1. |
+| 5 | A fair bet: plus with probability $\delta_-/(\delta_++\delta_-)$, then the transfer. |
+| 6 | The unit that is still fractional stays open; otherwise that block's slot is empty. |
 
-## Two-arm leftover coupling
-
-`cube_two_arm_cpp` then collects those leftovers and, if there are at least two, runs the same pass as if they all shared a single block.
+`cube_two_arm_cpp` then pairs leftovers as if they shared a block, and Bernoulli-rounds any singleton:
 
 ```cpp
+  // Step 1: collect leftovers.
+  std::vector<int> left;
+  for (int t = 0; t < n; t++) {
+    int j = seq[t];
+    if (z[j] > tol && z[j] < 1.0 - tol) left.push_back(j);
+  }
   if (left.size() > 1) {
+    // Step 2: fake a single block.
     std::vector<int> one(n, 1);
+    // Step 3: same pivot pass (overall count stays tight).
     cube_pivot_pass(z, left, one.data(), 1, tol);
   }
+  // Step 4: Bernoulli any singleton leftover.
 ```
 
-The second pass preserves the sum of the leftovers, so the overall treated count stays at the floor or the ceiling of $\sum_i \pi_i$. Each leftover is still sent to 0 or 1, so each block stays within one of its target. Any single unit that remains after pairing is rounded with a Bernoulli draw at its current value. That last draw is still a martingale, and a single leftover cannot move the overall count by more than one.
+# 5. Multi-arm cube
 
-### One four-unit draw
+Consider now the cube method. 
 
-Two blocks of two. The probabilities sum to 2, so exactly two units are treated. The walk is on a four-by-two matrix: rows are units, columns are control $1-p$ and treatment $p$. The path below ends at $(1,0,0,1)$.
+`cube_multi_cpp` is the [cube method](https://doi.org/10.1093/biomet/91.4.893) of Deville and Tillé (2004) on the transportation polytope: an $N\times k$ matrix, row sums 1, column sums $t$. [Chauvet and Tillé (2006)](https://doi.org/10.1007/s00180-006-0250-2) supply the window of $k$ units so each step is linear in $N$.
 
-```{r}
-p4 <- c(0.2, 0.4, 0.6, 0.8)
-blocks4 <- c(1, 1, 2, 2)
-c(overall = sum(p4), setNames(tapply(p4, blocks4, sum), paste0("block", 1:2)))
-```
+A cycle in the bipartite graph of units and arms is flight: every row total and every column total is unchanged. A path is landing: only the two arms at the ends move. With two arms every maximal walk is a 4-cycle (the pivot). With three or more arms a window of $k$ still-fractional units forces a cycle until too few remain.
 
-Block 1 is the two lighter units. Its target is $0.6$, so that block receives 0 or 1, never 2. Block 2 has target $1.4$, so that block receives 1 or 2. The overall total is 2. The joint distribution of the block counts can put mass only on $(0,2)$ and $(1,1)$.
+Flight stays inside each block. Each block is then landed on its own. Overall counts can wander when $k>2$ and there are blocks. Two-arm leftover pairing does not extend: a block can keep several leftovers, and coupling them globally can push a within-block arm count more than one away from its target.
 
-Among the six assignments that treat exactly two units, five of those pairs are allowed. The sixth is $(1,1,0,0)$: both of the first two, none of the last two. A design that only tightens the overall total of 2 can draw that pattern. With these blocks it is excluded.
+The figures use the same network as Section 4: units on the bottom, arms on top, grey edges for still-fractional cells, arrows labeled with the plus-step mass $\delta_+ u$. Cell masses stay in the printed matrix, not on the edges. $\delta_+$ and $\delta_-$ sit on the figure.
 
-```{r}
-pat <- function(z) paste(z, collapse = "")
-allowed <- c("1010", "1001", "0110", "0101", "0011")
-data.frame(
-  assignment = c("1100", allowed),
-  block1 = c(2, 1, 1, 1, 1, 0),
-  block2 = c(0, 1, 1, 1, 1, 2),
-  overall = 2,
-  with_blocks = c("no", rep("yes", 5))
-)
-```
-
-```{r}
-zb <- replicate(2000, balanced_ra(blocks = blocks4, prob_unit = p4,
-                                 check_inputs = FALSE))
-zn <- replicate(2000, balanced_ra(prob_unit = p4, check_inputs = FALSE))
-c(both_first_with_blocks = mean(colSums(zb[1:2, ]) == 2),
-  both_first_no_blocks = mean(colSums(zn[1:2, ]) == 2))
-sort(table(apply(zb, 2, pat)))
-sort(table(apply(zn, 2, pat)))
-```
-
-With blocks, $(1,1,0,0)$ does not appear. Without blocks the overall total is still 2, and $(1,1,0,0)$ does appear. The first two units are never both treated once the block constraint is on.
-
-One shuffle and one sequence of uniforms produce a 0-1 assignment. The wrapper shuffles the units. This path uses the order $1,2,3,4$. The uniforms are $0.20$, $0.50$, $0.40$. Each row below is one step: the left cell is what happened; the right cell is the probability matrix after that step. A filled cell is the chosen assignment. A grey cell with an X is settled at 0. A number is still fractional. A heavier border marks the cells that moved in that step.
-
-```{r}
-pivot <- function(z, i, j, u) {
-  du <- min(1 - z[i], z[j])
-  dd <- min(z[i], 1 - z[j])
-  if (u < dd / (du + dd)) {
-    z[i] <- z[i] + du
-    z[j] <- z[j] - du
-  } else {
-    z[i] <- z[i] - dd
-    z[j] <- z[j] + dd
-  }
-  z
-}
-z <- p4
-S <- rbind(P = z)
-z <- pivot(z, 1, 2, 0.20); S <- rbind(S, "block 1: 1 with 2" = z)
-z <- pivot(z, 3, 4, 0.50); S <- rbind(S, "block 2: 3 with 4" = z)
-z <- pivot(z, 1, 3, 0.40); S <- rbind(S, "leftovers: 1 with 3" = z)
-colnames(S) <- paste0("z", 1:4)
-```
-
-```{r, echo = FALSE}
-cube_tile_plot <- function(states, panel_labs, arm_labels, unit_labels,
-                           hline = NULL, ncol = 2, text_size = 4.2,
-                           which = NULL, caption = NULL) {
-  idx <- if (is.null(which)) seq_along(states) else which
-  long <- do.call(rbind, lapply(idx, function(s) {
-    M <- states[[s]]
-    prev <- if (s == 1L) NULL else states[[s - 1L]]
-    d <- expand.grid(unit = seq_len(nrow(M)), arm = seq_len(ncol(M)),
-                     KEEP.OUT.ATTRS = FALSE)
-    d$panel <- panel_labs[[s]]
-    d$value <- M[cbind(d$unit, d$arm)]
-    d$changed <- if (is.null(prev)) FALSE else
-      abs(d$value - prev[cbind(d$unit, d$arm)]) > 1e-8
-    d
-  }))
-  long$panel <- factor(long$panel, levels = panel_labs)
-  long$arm_lab <- factor(long$arm, levels = seq_along(arm_labels),
-                         labels = arm_labels)
-  long$unit_lab <- factor(unit_labels[long$unit], levels = unit_labels)
-  long$kind <- ifelse(long$value >= 1 - 1e-8, "one",
-               ifelse(long$value <= 1e-8, "zero", "frac"))
-  long$label <- ifelse(long$kind == "one", "1",
-                ifelse(long$kind == "zero", "X",
-                       sprintf("%.1f", long$value)))
-  long$lab_col <- ifelse(long$kind == "one", "white", "grey15")
-  long$edge <- ifelse(long$changed, "moved", "same")
-  g <- ggplot(long, aes(arm_lab, unit_lab)) +
-    geom_tile(aes(fill = kind, linewidth = edge),
-              colour = "grey25", width = 0.92, height = 0.86) +
-    geom_text(aes(label = label, colour = lab_col),
-              size = text_size, fontface = "bold") +
-    scale_fill_manual(values = c(one = "grey20", zero = "grey80", frac = "white"),
-                      guide = "none") +
-    scale_colour_identity() +
-    scale_linewidth_manual(values = c(same = 0.35, moved = 1.2),
-                           guide = "none") +
-    scale_y_discrete(limits = rev) +
-    labs(x = NULL, y = NULL, caption = caption) +
-    theme_minimal(base_size = 11) +
-    theme(
-      panel.grid = element_blank(),
-      strip.text = element_text(face = "bold", hjust = 0, size = 9.5,
-                                lineheight = 1.1),
-      axis.text = element_text(colour = "grey20"),
-      plot.caption = element_text(hjust = 0, size = 8, colour = "grey30"),
-      panel.spacing = unit(0.8, "lines")
-    )
-  if (length(idx) > 1L) {
-    g <- g + facet_wrap(~ panel, ncol = ncol)
-  }
-  if (!is.null(hline)) {
-    g <- g + geom_hline(yintercept = hline, linetype = 2, colour = "grey45",
-                        linewidth = 0.4)
-  }
-  g
-}
-```
-
-```{r, echo = FALSE}
-as_P <- function(z) cbind(Control = 1 - as.numeric(z), Treat = as.numeric(z))
-states2 <- lapply(seq_len(nrow(S)), function(i) as_P(S[i, ]))
-panel_labs <- c(
-  "Step 1 — start",
-  "Step 2 — pivotal pair, block 1",
-  "Step 3 — pivotal pair, block 2",
-  "Step 4 — leftover pair across blocks"
-)
-walk2_args <- list(
-  states = states2,
-  panel_labs = panel_labs,
-  arm_labels = c("Control", "Treat"),
-  unit_labels = c("B1 · 1", "B1 · 2", "B2 · 3", "B2 · 4"),
-  hline = 2.5,
-  text_size = 3.8
-)
-```
-
-<style>
-table.cube-walk { width: 100%; border-collapse: collapse; margin: 0.6em 0 1.2em; }
-table.cube-walk td { vertical-align: top; border-bottom: 1px solid #ddd; padding: 0.7em 0.5em; }
-table.cube-walk td.walk-text { width: 58%; }
-table.cube-walk td.walk-fig { width: 42%; }
-</style>
-
-<table class="cube-walk">
-<tr>
-<td class="walk-text">
-
-**Step 1 — start.** All four units are still open (fractional). Treatment probabilities are $0.2$, $0.4$, $0.6$, and $0.8$. No pairing has been drawn yet. The pass stores unit 1 as block 1's open unit and waits for a second fractional unit in that block.
-
-</td>
-<td class="walk-fig">
-
-```{r, echo = FALSE, fig.width = 3.2, fig.height = 3.4, fig.cap = ""}
-do.call(cube_tile_plot, c(walk2_args, list(which = 1)))
-```
-
-</td>
-</tr>
-<tr>
-<td class="walk-text">
-
-**Step 2 — pivotal pair, block 1.** Units 1 and 2 are both still open and sit in the same block, so we take a *pivotal pair*: one transfer of treated mass between them that leaves the block total at $0.6$. There are two directions. Plus moves as much as possible from unit 2 onto unit 1 (landing at $0.6$ and $0$). Minus moves as much as possible the other way (landing at $0$ and $0.6$). The largest plus step that stays in $[0,1]$ is $\delta_+=\min(1-z_1,z_2)=\min(0.8,0.4)=0.4$. The largest minus step is $\delta_-=\min(z_1,1-z_2)=\min(0.2,0.6)=0.2$. The fair bet takes plus with probability $\delta_-/(\delta_++\delta_-)=0.2/0.6=1/3$, so the current probabilities are a martingale. Imagine we happened to choose plus. Then $0.4$ moves from unit 2 to unit 1: unit 2's treatment cell is crossed out (that was all of its mass) and unit 1 is raised to $0.6$. Unit 2 is settled as control. The first two units cannot both still be treated: their combined mass is only $0.6$, so this pair always drives one of them to $0$ before either can hit $1$. Minus would have settled unit 1 instead. Either way, one of the two is already out.
-
-</td>
-<td class="walk-fig">
-
-```{r, echo = FALSE, fig.width = 3.2, fig.height = 3.4, fig.cap = ""}
-do.call(cube_tile_plot, c(walk2_args, list(which = 2)))
-```
-
-</td>
-</tr>
-<tr>
-<td class="walk-text">
-
-**Step 3 — pivotal pair, block 2.** Still open: unit 1 at $0.6$ (the leftover from block 1) and both units in block 2. Unit 3 opened the block; unit 4 pairs with it. Same kind of pair: plus lands at (unit 3 to $1$, unit 4 to $0.4$); minus lands at (unit 3 to $0.4$, unit 4 to $1$). Again $\delta_+=0.4$, $\delta_-=0.2$, so plus has probability $0.2/0.6=1/3$. Imagine we happened to choose minus. Then $0.2$ moves from unit 3 to unit 4: unit 4's treatment cell fills (the gap from $0.8$ to $1$) and unit 3 is lowered to $0.4$ so the block total stays $1.4$. Unit 4 is settled as treated; unit 3 remains open.
-
-</td>
-<td class="walk-fig">
-
-```{r, echo = FALSE, fig.width = 3.2, fig.height = 3.4, fig.cap = ""}
-do.call(cube_tile_plot, c(walk2_args, list(which = 3)))
-```
-
-</td>
-</tr>
-<tr>
-<td class="walk-text">
-
-**Step 4 — leftover pair across blocks.** Still open: unit 1 at $0.6$ and unit 3 at $0.4$. Units 2 and 4 are already settled. We pair the leftovers as if they shared a block, so the same step preserves their combined total of $1$ and the overall treated count stays at $2$. Plus lands at (unit 1 to $1$, unit 3 to $0$); minus lands at (unit 1 to $0$, unit 3 to $1$). Here $\delta_+=\min(1-0.6,0.4)=0.4$ and $\delta_-=\min(0.6,1-0.4)=0.6$, so plus has probability $0.6/(0.4+0.6)=0.6$. Imagine we happened to choose plus. Then $0.4$ moves from unit 3 to unit 1: unit 1 fills and unit 3 is crossed out. Nothing remains for a Bernoulli draw. If one leftover had remained, it would be rounded by a fair coin at its current $z$.
-
-</td>
-<td class="walk-fig">
-
-```{r, echo = FALSE, fig.width = 3.2, fig.height = 3.4, fig.cap = ""}
-do.call(cube_tile_plot, c(walk2_args, list(which = 4)))
-```
-
-</td>
-</tr>
-</table>
-
-The treatment column of those four matrices is the state table.
-
-```{r}
-round(S, 2)
-```
-
-Two treated. The block counts are $(1,1)$. After the within-block pass the already-settled units contribute 1 and the leftovers sum to 1, so the second pass keeps the total at 2. Independent Bernoulli on those leftovers would have allowed totals of 1, 2, or 3. The first two units cannot both be 1: block 1's pair always zeros one of them, because their combined mass $0.6$ is less than 1. This is one path. Averaging over shuffles and the plus/minus draws recovers $p$.
-
-## Multi-arm move
-
-With three or more arms the state is the full matrix. `cube_move` takes a walk of cells — a cycle or a path — and applies the same fair bet.
-
-```cpp
-static void cube_move(std::vector<double>& Z, int n,
-                      const std::vector<int>& cu, const std::vector<int>& ca,
-                      double tol) {
-  int m = cu.size();
-  double dplus = R_PosInf, dminus = R_PosInf;
-  for (int e = 0; e < m; e++) {
-    double z = Z[cu[e] + (size_t) ca[e] * n];
-    if (e % 2 == 0) { dplus = std::min(dplus, 1.0 - z); dminus = std::min(dminus, z); }
-    else            { dplus = std::min(dplus, z); dminus = std::min(dminus, 1.0 - z); }
-  }
-  if (!R_FINITE(dplus + dminus) || dplus + dminus <= 0) return;
-
-  bool up = unif_rand() < dminus / (dplus + dminus);
-  for (int e = 0; e < m; e++) {
-    size_t ix = cu[e] + (size_t) ca[e] * n;
-    double s = (e % 2 == 0) ? 1.0 : -1.0;
-    Z[ix] += up ? s * dplus : -s * dminus;
-    if (Z[ix] < tol) Z[ix] = 0.0;
-    if (Z[ix] > 1.0 - tol) Z[ix] = 1.0;
-  }
-}
-```
-
-Consecutive cells share a node, so alternating the sign leaves every unit's row total and every interior arm's column total untouched. A cycle has no ends, so every column total is untouched as well. A path disturbs only the two arms at the ends.
-
-## Two-core versus path
-
-`cube_step` builds the bipartite graph on a working set of at most $k$ units, then strips leaves. What survives is the 2-core: every remaining vertex has degree at least 2, so a walk inside it cannot dead-end and must close. Finding a cycle whenever one exists is what keeps the arm totals exact during flight. Path moves are used only when the core is empty.
-
-```cpp
-  ws.q.clear();
-  for (int v = 0; v < nv; v++) if (ws.deg[v] == 1) ws.q.push_back(v);
-  while (!ws.q.empty()) {
-    int v = ws.q.back(); ws.q.pop_back();
-    if (ws.vdead[v] || ws.deg[v] != 1) continue;
-    ws.vdead[v] = 1;
-    for (int t = 0; t < ws.alen[v]; t++) {
-      int e = ws.adj[(size_t) v * ws.stride + t];
-      if (ws.edead[e]) continue;
-      ws.edead[e] = 1;
-      int o = (v == ws.eu[e]) ? (w + ws.ea[e]) : ws.eu[e];
-      ws.deg[v]--; ws.deg[o]--;
-      if (ws.deg[o] == 1) ws.q.push_back(o);
-    }
-  }
-```
-
-If no core remains and paths are allowed, the walk starts at an arm of original degree 1. Every unit has degree at least 2, so every leaf is an arm, and that start gives a maximal arm-to-arm path.
-
-## Windowed flight and per-block landing
-
-`cube_process` is the Chauvet–Tillé window. It keeps a working set $W$ of up to $k$ units that still have at least two fractional cells, takes a step, and drops units that have settled.
-
-```cpp
-static void cube_process(std::vector<double>& Z, int n, int k,
-                         const std::vector<int>& units, double tol,
-                         CubeWork& ws, bool allow_path) {
-  size_t ptr = 0;
-  std::vector<int> W;
-  W.reserve(k);
-  long long guard = (long long) units.size() * k + 10;
-  while (guard-- > 0) {
-    while ((int) W.size() < k && ptr < units.size()) {
-      int u = units[ptr++];
-      if (cube_nfrac(Z, n, k, u, tol) >= 2) W.push_back(u);
-    }
-    if (W.empty()) break;
-    if (!cube_step(Z, n, k, W, tol, ws, allow_path)) break;
-    std::vector<int> keep;
-    for (size_t t = 0; t < W.size(); t++) {
-      if (cube_nfrac(Z, n, k, W[t], tol) >= 2) keep.push_back(W[t]);
-    }
-    W.swap(keep);
-  }
-}
-```
-
-`cube_multi_cpp` calls that process once per block with `allow_path = true`. Flight and landing both stay inside the block. There is no second pass across leftovers.
-
-```cpp
-  // Two-arm leftover coupling does not extend: a block can keep several
-  // leftover units, and landing them as one global group can push a
-  // block-arm count more than one away from its target. Each block is
-  // therefore landed on its own. Overall tightness then follows when every
-  // block target is an integer, and may slip when several remainders land
-  // the same way.
-  for (int bl = 1; bl <= nb; bl++)
-    cube_process(Z, n, k, bu[bl], tol, ws, true);
-```
-
-That last comment is the literature-versus-code distinction in the source itself. The cube method, applied independently inside each block, does not couple overall remainders.
-
-### One four-by-three draw
-
-Four units, three arms. Column targets are $2$, $1$, and $1$, so a tight assignment is exactly those counts.
+## One draw: four units, three arms
 
 ```{r}
 P3 <- rbind(
@@ -536,9 +497,10 @@ P3 <- rbind(
 )
 P3
 colSums(P3)
+balanced_ra(prob_unit_each = P3, conditions = 1:3)
 ```
 
-The window holds three units, so the first move is a cycle. The walk below is the unused-edge walk from `cube_step`, then the fair bet from `cube_move`. An unused-edge cycle is a closed walk on the 2-core of the bipartite graph of still-open units and arms: from a starting vertex, take the first unused allowed edge, and continue until a vertex is revisited. Because every remaining vertex has degree at least 2, that walk cannot dead-end and must close. A cycle has no ends, so every row total and every column total is unchanged. A *path* would appear only if the 2-core were empty; then the walk would run from one leftover arm to another and only those two column totals would move. Order is $1,2,3,4$. This path chooses plus, plus, plus, minus, plus. The walk ends at arms $(1,2,3,1)$. The counts are $(2,1,1)$. Each row below is one step: text on the left, the matrix after that step on the right.
+Column targets are $2$, $1$, and $1$. The first window is units 1, 2, and 3. A cycle on that window preserves every total. The path below takes plus, then plus; unit 1 fills; later cycles bring in unit 4; the last move is a 4-cycle, not a path. Counts end at $(2,1,1)$.
 
 ```{r}
 cube_move <- function(Z, cu, ca, u) {
@@ -548,11 +510,9 @@ cube_move <- function(Z, cu, ca, u) {
   for (e in seq_len(m)) {
     z <- Z[cu[e], ca[e]]
     if ((e - 1) %% 2 == 0) {
-      dplus <- min(dplus, 1 - z)
-      dminus <- min(dminus, z)
+      dplus <- min(dplus, 1 - z); dminus <- min(dminus, z)
     } else {
-      dplus <- min(dplus, z)
-      dminus <- min(dminus, 1 - z)
+      dplus <- min(dplus, z); dminus <- min(dminus, 1 - z)
     }
   }
   up <- u < dminus / (dplus + dminus)
@@ -567,137 +527,158 @@ cube_move <- function(Z, cu, ca, u) {
 Z3 <- P3
 S3 <- list(start = Z3)
 Z3 <- cube_move(Z3, c(1, 2, 2, 1), c(1, 1, 2, 2), 0.20)
-S3$cycle1 <- Z3
+S3$after_first_cycle <- Z3
 Z3 <- cube_move(Z3, c(1, 3, 3, 2, 2, 1), c(1, 1, 2, 2, 3, 3), 0.20)
-S3$cycle2 <- Z3
 Z3 <- cube_move(Z3, c(3, 3, 4, 4), c(2, 1, 1, 2), 0.50)
-S3$cycle3 <- Z3
 Z3 <- cube_move(Z3, c(2, 3, 3, 4, 4, 2), c(2, 2, 1, 1, 3, 3), 0.40)
-S3$cycle4 <- Z3
 Z3 <- cube_move(Z3, c(2, 3, 3, 2), c(2, 2, 3, 3), 0.10)
-S3$cycle5 <- Z3
+S3$end <- Z3
 ```
 
-```{r, echo = FALSE}
-panel_labs3 <- c(
-  "Step 1 — start",
-  "Step 2 — unused-edge cycle, units 1–2",
-  "Step 3 — unused-edge cycle; unit 1 fills",
-  "Step 4 — unused-edge cycle; unit 4 enters",
-  "Step 5 — unused-edge cycle; unit 4 fills",
-  "Step 6 — leftover 4-cycle, not a path"
-)
-walk3_args <- list(
-  states = S3,
-  panel_labs = panel_labs3,
-  arm_labels = c("1", "2", "3"),
-  unit_labels = as.character(1:4),
-  text_size = 3.6
-)
+```{r, echo=FALSE, fig.width=6.4, fig.height=4.1, fig.cap="Start. Grey edges are still-fractional cells. Arrows are $\\delta_+ u$ on the first cycle (units 1--2, arms 1--2)."}
+cube_walk(P3, c(1, 2, 2, 1), c(1, 1, 2, 2), arm_names = c("1", "2", "3"))
 ```
 
-<table class="cube-walk">
-<tr>
-<td class="walk-text">
-
-**Step 1 — start.** All twelve cells are still open. Column targets are $2$, $1$, and $1$. The working window fills with units 1, 2, and 3 — the first three units that still have at least two fractional cells. Three such units on three arms force a cycle: at least six edges on at most six nodes is not a forest. No move has been drawn yet.
-
-</td>
-<td class="walk-fig">
-
-```{r, echo = FALSE, fig.width = 3.4, fig.height = 3.2, fig.cap = ""}
-do.call(cube_tile_plot, c(walk3_args, list(which = 1)))
+```{r, echo=FALSE, fig.width=6.4, fig.height=4.1, fig.cap="After the first plus cycle. Row and column totals are unchanged. Arrows are $\\delta_+ u$ on the next cycle, which fills unit 1."}
+cube_walk(S3$after_first_cycle, c(1, 3, 3, 2, 2, 1), c(1, 1, 2, 2, 3, 3),
+          arm_names = c("1", "2", "3"))
 ```
 
-</td>
-</tr>
-<tr>
-<td class="walk-text">
-
-**Step 2 — unused-edge cycle on units 1–2, arms 1–2.** Still open: all four units. The first unused edges on the 2-core close on units 1 and 2 and arms 1 and 2. That is the same fair bet as the pivotal pair, now along a cycle: even cells $(1,1)$ and $(2,2)$ go up and odd cells $(2,1)$ and $(1,2)$ go down (or the reverse). Plus lands with the odd cells at $0$; minus goes the other way. The largest plus step is $\delta_+=0.4$ (the odd cells' mass); the largest minus step is $\delta_-=0.2$. Plus has probability $\delta_-/(\delta_++\delta_-)=0.2/0.6=1/3$. Imagine we happened to choose plus. Then $0.4$ leaves each odd cell — that was all of their mass — and the even cells rise by $0.4$. Every row total and every column total is unchanged.
-
-</td>
-<td class="walk-fig">
-
-```{r, echo = FALSE, fig.width = 3.4, fig.height = 3.2, fig.cap = ""}
-do.call(cube_tile_plot, c(walk3_args, list(which = 2)))
+```{r, echo=FALSE, fig.width=6.4, fig.height=3.8, fig.cap="End of the walk. Arm counts (2, 1, 1). Every remaining cell is 0 or 1."}
+cube_net(S3$end, arm_names = c("1", "2", "3"))
 ```
-
-</td>
-</tr>
-<tr>
-<td class="walk-text">
-
-**Step 3 — unused-edge cycle; unit 1 fills.** Still open: unit 1 (arm 1 at $0.6$ and arm 3 at $0.4$) and units 2–4. The walk now closes on units 1, 3, and 2 and all three arms. Again $\delta_+=0.4$, $\delta_-=0.2$, so plus has probability $1/3$. Imagine we happened to choose plus. Then $0.4$ fills unit 1's arm-1 cell (the gap from $0.6$ to $1$) and crosses out its arm-3 cell. Unit 1 drops from the window. Unit 4 enters.
-
-</td>
-<td class="walk-fig">
-
-```{r, echo = FALSE, fig.width = 3.4, fig.height = 3.2, fig.cap = ""}
-do.call(cube_tile_plot, c(walk3_args, list(which = 3)))
-```
-
-</td>
-</tr>
-<tr>
-<td class="walk-text">
-
-**Step 4 — unused-edge cycle; unit 4's arm-2 cell hits 0.** Still open: units 2, 3, and 4. The cycle is on units 3 and 4 and arms 1 and 2. Plus takes a step of $\delta_+=0.1$; minus a step of $\delta_-=0.6$. Plus has probability $0.6/(0.1+0.6)\approx 0.86$. Imagine we happened to choose plus. Then unit 4's arm-2 cell is crossed out (that was all of its mass). Column totals are still untouched.
-
-</td>
-<td class="walk-fig">
-
-```{r, echo = FALSE, fig.width = 3.4, fig.height = 3.2, fig.cap = ""}
-do.call(cube_tile_plot, c(walk3_args, list(which = 4)))
-```
-
-</td>
-</tr>
-<tr>
-<td class="walk-text">
-
-**Step 5 — unused-edge cycle; unit 4 fills.** Still open: units 2, 3, and 4 (unit 4 still has arm 1 at $0.9$ and arm 3 at $0.1$). Plus would step $\delta_+=0.7$; minus $\delta_-=0.1$. Plus has probability $0.1/(0.7+0.1)=0.125$. Imagine we happened to choose minus. Then $0.1$ fills unit 4's arm-1 cell and crosses out its arm-3 cell. Unit 4 is assigned to arm 1. Arm 1's column is now the integer $2$.
-
-</td>
-<td class="walk-fig">
-
-```{r, echo = FALSE, fig.width = 3.4, fig.height = 3.2, fig.cap = ""}
-do.call(cube_tile_plot, c(walk3_args, list(which = 5)))
-```
-
-</td>
-</tr>
-<tr>
-<td class="walk-text">
-
-**Step 6 — leftover 4-cycle, not a path.** Still open: units 2 and 3 on arms 2 and 3. That graph is a 4-cycle — every vertex has degree 2 — so the 2-core is nonempty and we still take a cycle, not a landing path. Plus fills the even cells $(2,2)$ and $(3,3)$; minus does the reverse. Here $\delta_+=0.8$ and $\delta_-=0.2$, so plus has probability $0.2/(0.8+0.2)=0.2$. Imagine we happened to choose plus. Those even cells fill and the odd cells are crossed out. Arms are $(1,2,3,1)$. Counts are $(2,1,1)$. A path would appear only if the 2-core were empty and a column were still fractional. That is the two-unit design with rows $(0.5,0.3,0.2)$ and targets $1$, $0.6$, and $0.4$: two cycles, then a path on the leftover unit between the two arms that are still fractional. Here every target is an integer, so flight finishes.
-
-</td>
-<td class="walk-fig">
-
-```{r, echo = FALSE, fig.width = 3.4, fig.height = 3.2, fig.cap = ""}
-do.call(cube_tile_plot, c(walk3_args, list(which = 6)))
-```
-
-</td>
-</tr>
-</table>
-
-The six matrices are the state list.
 
 ```{r}
 lapply(S3, function(M) round(M, 2))
 ```
 
-Arm counts are $(2,1,1)$. The five cycle moves preserved every total. That is flight without a landing path.
+## C++: `cube_move` and per-block landing
 
-# 5. Examples
+The fair bet along a walk is the same as in Section 4, with alternating sign so consecutive cells that share a node cancel.
 
-Each example below is a `balanced_ra()` design. The point of each is in the paragraph that precedes the code.
+```cpp
+static void cube_move(std::vector<double>& Z, int n,
+                      const std::vector<int>& cu, const std::vector<int>& ca,
+                      double tol) {
+  int m = cu.size();
+  double dplus = R_PosInf, dminus = R_PosInf;
+  // Step 1: largest d+ and d- (alternating sign).
+  for (int e = 0; e < m; e++) {
+    double z = Z[cu[e] + (size_t) ca[e] * n];
+    if (e % 2 == 0) { dplus = std::min(dplus, 1.0 - z); dminus = std::min(dminus, z); }
+    else            { dplus = std::min(dplus, z); dminus = std::min(dminus, 1.0 - z); }
+  }
+  if (!R_FINITE(dplus + dminus) || dplus + dminus <= 0) return;
+
+  // Step 2: fair bet.
+  bool up = unif_rand() < dminus / (dplus + dminus);
+  // Step 3: apply the transfer.
+  for (int e = 0; e < m; e++) {
+    size_t ix = cu[e] + (size_t) ca[e] * n;
+    double s = (e % 2 == 0) ? 1.0 : -1.0;
+    Z[ix] += up ? s * dplus : -s * dminus;
+    if (Z[ix] < tol) Z[ix] = 0.0;
+    if (Z[ix] > 1.0 - tol) Z[ix] = 1.0;
+  }
+}
+```
+
+| Step | What the line does |
+|:----:|--------------------|
+| 1 | Walk the cycle with alternating sign. $\delta_+$ and $\delta_-$ are the largest steps that hit 0 or 1 on any cell of the walk. |
+| 2 | A fair bet: plus with probability $\delta_-/(\delta_++\delta_-)$. |
+| 3 | Add $+\delta_+$ or $-\delta_-$ times the sign of each edge. Row totals and interior column totals do not move. |
+
+`cube_process` keeps a Chauvet--Tillé window of $k$ units with at least two fractional cells. `cube_multi_cpp` calls it once per block with paths allowed (landing):
+
+```cpp
+  // Two-arm leftover coupling does not extend. Each block is landed on
+  // its own. Overall tightness may slip when several remainders land
+  // the same way.
+  for (int bl = 1; bl <= nb; bl++)
+    cube_process(Z, n, k, bu[bl], tol, ws, true);
+```
+
+# 6. Cube-on-X
+
+`cube_on_x_cpp` is the cube on a balancing matrix $X$, from `formula`. Two arms only. No `blocks`. The intercept in `~ x` is the count constraint; the $x$ column is the treated total of $x$. A flight step may move only in $\ker(X')$: $X'u=0$. The implementation uses a Chauvet--Tillé window of $q+1$ units, so with two columns the window has three units and a one-dimensional kernel. Landing decrements $q$ (drops the last column first) until a kernel vector exists.
+
+The 4-cycle $u=(1,-1)$ on two units preserves the count and *not* the $x$-total, unless those units share an $x$. That is why this is not the pivot.
+
+Units are sorted by the first non-intercept column of $X$. A coin flip then reverses that order. The walk below uses increasing $x$, no reverse.
+
+## One draw: $x=(1,2,3,6)$, $p_i=1/2$
+
+Start at $z=(1/2,1/2,1/2,1/2)$. The window is units 1, 2, and 3. The kernel direction (up to scale) is $u=(1,-2,1,0)$: $1-2+1=0$ and $1\cdot 1+2\cdot(-2)+3\cdot 1=0$. Both maximal steps have size $1/4$. Plus assigns unit 2 to control; minus assigns unit 2 to treatment.
+
+```{r, echo=FALSE, fig.width=6.4, fig.height=4.7, fig.cap="Start. Window of three units. Kernel $u = (1, -2, 1, 0)$. Arrows are $\\delta_+ u$; unit 2 moves twice as far. $\\delta_\\pm = 1/4$."}
+cube_bip(
+  z = c(0.5, 0.5, 0.5, 0.5),
+  xval = c(1, 2, 3, 6),
+  u = c(1, -2, 1, 0),
+  ulab = c("u = +1", "u = \u22122", "u = +1", "u = 0")
+)
+```
+
+Assume plus. Then $z=(0.75,0,0.75,0.5)$. Sum $z$ is still 2; the treated $x$-total is still 6. The next window is the three open units. An admissible $u$ is $(3,0,-5,2)$: $3-5+2=0$ and $1\cdot 3+3\cdot(-5)+6\cdot 2=0$. $\delta=1/12$ assigns unit 1 to treatment; $\delta=-1/20$ assigns unit 3 to treatment. Plus has probability $3/8$. Neither of these two steps sends a unit to 0.
+
+```{r, echo=FALSE, fig.width=6.4, fig.height=4.7, fig.cap="After the first plus step. Unit 2 is assigned. Arrows are $\\delta_+ u$ with $u = (3, 0, -5, 2)$. $\\delta_+ = 1/12$; $\\delta_- = 1/20$."}
+cube_bip(
+  z = c(0.75, 0, 0.75, 0.5),
+  xval = c(1, 2, 3, 6),
+  u = c(3, 0, -5, 2),
+  ulab = c("u = +3", "u = 0", "u = \u22125", "u = +2")
+)
+```
+
+Assume $\delta=1/12$. Then $z=(1,0,1/3,2/3)$. Two open units and two constraints: the kernel is $\{0\}$. A count-preserving $u_3=-u_4$ moves the $x$-total. The algorithm drops $x$.
+
+```{r, echo=FALSE, fig.width=6.4, fig.height=4.7, fig.cap="After $\\delta = 1/12$. No kernel remains on both columns, so $x$ is dropped. Arrows are the count-only landing move $\\delta_+ u$. $\\delta_+ = 2/3$; $\\delta_- = 1/3$."}
+cube_bip(
+  z = c(1, 0, 1 / 3, 2 / 3),
+  xval = c(1, 2, 3, 6),
+  u = c(0, 0, 1, -1),
+  zlab = c("z = 1", "z = 0", "z = 1/3", "z = 2/3"),
+  ulab = c("u = 0", "u = 0", "u = +1", "u = \u22121")
+)
+```
+
+What remains is the count. $u=(0,0,1,-1)$. $\delta=2/3$ assigns unit 3 to treatment and unit 4 to control (treated $x$-total $4$). $\delta=-1/3$ does the reverse (total $7$). Neither hits the target $6$. That is landing.
+
+## C++: window, kernel, drop a column
+
+```cpp
+    int w = std::min(nf, q_use + 1);
+    // kernel of X on that window, then z <- z ± δ u
+    bool moved = try_window(z, W, Xs, n, q_use, A, u, tol);
+    if (!moved) {
+      q_use--;   // drop last column of X (x before the intercept)
+      continue;
+    }
+```
+
+`try_window` finds $u\neq 0$ in $\ker(X_{\mathrm{window}}')$ and takes the same fair bet as the pivot, now on every coordinate with $u_i\neq 0$. If the small window has empty kernel it tries all remaining units before dropping a column.
+
+# 7. What this implementation guarantees
+
+Every unit receives exactly one condition. Each unit's probability of each condition equals the supplied $\pi_{ij}$. Each step is a martingale, so $E[Z]=\pi$.
+
+Condition counts are the floor or the ceiling of the target at a stated level:
+
+- without `blocks`, overall counts are tight;
+- with `blocks`, within-block counts are always tight;
+- with `blocks` and two arms, overall counts are tight as well (leftover pairing);
+- with `blocks` and three or more arms, overall counts can wander;
+- with `clusters`, the tight counts are counts of clusters;
+- with `formula`, first-order inclusion probabilities remain exact; covariate totals are as close as landing allows.
+
+Deville and Tillé (2004) supply the martingale and the flight/landing split. They do not, by themselves, say that a blocked two-arm design is tight at both levels. That is the leftover pass.
+
+# 8. Examples
 
 ## A race with unequal chances
 
-Four contestants have winning probabilities 0.50, 0.30, 0.15, and 0.05. The probabilities sum to 1, so exactly one contestant should win each time, and the winner's identity should track those chances. Simple random assignment gets the chances right and sometimes produces two winners or none. Complete random assignment produces one winner and equal chances.
+Four contestants have winning probabilities 0.50, 0.30, 0.15, and 0.05. The probabilities sum to 1, so exactly one contestant should win each time. Simple random assignment gets the chances right and sometimes produces two winners or none. Complete random assignment produces one winner and equal chances.
 
 ```{r}
 chances <- c(0.5, 0.3, 0.15, 0.05)
@@ -709,26 +690,9 @@ table(winners) / 2000
 
 The shares sit near the supplied chances, and every draw has a single winner.
 
-## Two districts of three
-
-This is the motivating blocked design from Section 1. The cross-tabulation of north and south treated counts has mass only on $(1,2)$ and $(2,1)$.
-
-```{r}
-districts <- rep(c("north", "south"), each = 3)
-set.seed(2)
-ns <- replicate(2000, {
-  z <- balanced_ra(blocks = districts)
-  c(north = sum(z[districts == "north"]),
-    south = sum(z[districts == "south"]))
-})
-table(north = ns["north", ], south = ns["south", ])
-```
-
-No draw treats zero or three in a district. No draw treats two or four overall.
-
 ## Random probabilities, one treated arm
 
-Eighty units, five blocks of uneven size, probabilities drawn from the unit interval. Unit-level means should track $p$; the scatter is the check that they do. Tightness of the totals is left to Section 6.
+Eighty units, five blocks of uneven size, probabilities drawn from the unit interval. Unit-level means should track $p$.
 
 ```{r}
 set.seed(3)
@@ -748,7 +712,7 @@ ggplot(data.frame(p, share), aes(p, share)) +
 
 ## Three arms, a tight $2 \times 3$ matrix
 
-The $2 \times 3$ matrix below has arm 2 with expected count $1.13$, so a tight assignment gives that arm 1 or 2 units every time.
+Arm 2 has expected count $1.13$, so a tight assignment gives that arm 1 or 2 units every time.
 
 ```{r}
 P <- cbind(c(0.15, 0.47), c(0.65, 0.48), c(0.20, 0.05))
@@ -760,50 +724,9 @@ table(colSums(replicate(2000,
   balanced_ra(prob_unit_each = P, conditions = 1:3) == 2)))
 ```
 
-Arm 2 receives 1 or 2 units on every draw. The first unit's condition shares sit near its row of $P$.
-
-## Four blocks, four units, equal shares
-
-A neat integer design: sixteen units, four arms, probability $1/4$, four blocks of four. Each block can receive one unit per arm, and the one-draw table does.
-
-```{r}
-set.seed(5)
-blocks <- rep(1:4, each = 4)
-P <- matrix(0.25, 16, 4)
-z <- balanced_ra(prob_unit_each = P, blocks = blocks)
-table(blocks, z)
-```
-
-## Cyclic three-by-three, tiled across two blocks
-
-Each $3 \times 3$ tile has a cyclic support: unit 1 cannot receive arm 3, unit 2 cannot receive arm 1, unit 3 cannot receive arm 2. Two blocks of six stack four such tiles. The assignment has to respect the zeros and still land each block tightly.
-
-```{r}
-set.seed(6)
-tile <- rbind(c(2/3, 1/3, 0),
-              c(0,   2/3, 1/3),
-              c(1/3, 0,   2/3))
-P <- rbind(tile, tile, tile, tile)
-blocks <- rep(1:2, each = 6)
-z <- balanced_ra(prob_unit_each = P, blocks = blocks)
-table(z, blocks)
-```
-
-## Twelve units, four blocks of three, shares 1/2, 1/4, 1/4
-
-Each block of three has targets $1.5$, $0.75$, $0.75$. Tightness inside the block means arm 1 receives 1 or 2 units and arms 2 and 3 receive 0 or 1.
-
-```{r}
-set.seed(7)
-P <- t(replicate(12, c(0.5, 0.25, 0.25)))
-blocks <- rep(1:4, each = 3)
-z <- balanced_ra(prob_unit_each = P, blocks = blocks)
-table(z, blocks)
-```
-
 ## Clusters, and blocks with clusters
 
-Whole clusters move together. The probabilities must be constant inside a cluster. The counts that are held tight are cluster counts. Unequal cluster sizes therefore fix the number of treated clusters and leave the number of treated units free to move.
+Whole clusters move together. Tight counts are cluster counts.
 
 ```{r}
 set.seed(8)
@@ -813,10 +736,6 @@ z <- balanced_ra(prob_unit = p_cluster[clusters], clusters = clusters)
 table(clusters, z)
 ```
 
-Six clusters, probabilities summing to 3: three clusters treated. Eighteen units, of which the treated number depends on which clusters were drawn.
-
-Blocks and clusters combine. Every cluster must sit inside one block. The tight counts are then treated clusters within each block, and — with two arms — overall as well.
-
 ```{r}
 set.seed(9)
 blocks <- ifelse(clusters <= 3, "east", "west")
@@ -824,18 +743,7 @@ z <- balanced_ra(prob = 0.5, clusters = clusters, blocks = blocks)
 table(blocks, z)
 ```
 
-## Default probability, $N$ or blocks only
-
-`balanced_ra(4)` appears in Section 6, where its treated counts match `complete_ra(N = 4)`. The same default $p=0.5$ with blocks only is complete assignment inside the implied design: five blocks of three, target $1.5$ per block, overall target $7.5$.
-
-```{r}
-set.seed(10)
-table(balanced_ra(blocks = rep(1:5, each = 3)))
-```
-
 ## Interface refusals
-
-Three refusals are deliberate. They are not papered over.
 
 Rows of `prob_unit_each` must sum to 1. There is no implicit residual condition 0.
 
@@ -844,27 +752,23 @@ balanced_ra(prob_unit_each = cbind(c(0.25, 0.35, 0.40),
                                   c(0.47, 0.48, 0.05)))
 ```
 
-Add the residual column if that is the design: `cbind(P, 1 - rowSums(P))`.
-
-Probabilities outside $[0,1]$ are refused. Values such as $1.2$ are not treated as expected counts.
+Probabilities outside $[0,1]$ are refused.
 
 ```{r, error=TRUE}
 balanced_ra(prob_unit = c(1.2, 0.8, 2.1, 0.9))
 ```
 
-A single shared probability does not imply $N$: with `prob` alone, supply `N`, `blocks`, or `clusters` so the number of units is known. (`prob` is the shared-probability argument; `prob_unit` is the per-unit one and refuses a single number unless $N$ is 1.)
+A single shared probability does not imply $N$: with `prob` alone, supply `N`, `blocks`, or `clusters`.
 
 ```{r, error=TRUE}
 balanced_ra(prob = 0.5)
 ```
 
-# 6. Validation
+# 9. Validation
 
-The claims in Section 3 are per-draw properties plus a marginal. This section reports them on a short set of designs. Replicates are 2,000 throughout. What is shown is the largest absolute gap between an empirical share and the supplied probability, and the table of realized counts.
+Replicates are 2,000. What is shown is the largest absolute gap between an empirical share and the supplied probability, and the table of realized counts.
 
 ## Unequal probabilities, no blocks
-
-Six units, $p=(0.2,0.4,0.6,0.8,0.5,0.5)$, target 3.
 
 ```{r}
 set.seed(11)
@@ -874,11 +778,9 @@ max(abs(rowMeans(r) - p))
 table(colSums(r))
 ```
 
-Every draw treats exactly 3. The largest unit-level error in 2,000 draws is well under one percentage point, which is Monte Carlo noise around an exact marginal.
+Every draw treats exactly 3.
 
 ## Two arms with blocks: overall and within-block
-
-Ten blocks of three, default $p=0.5$. Overall target 15. Each block target 1.5.
 
 ```{r}
 set.seed(12)
@@ -892,11 +794,9 @@ block_range
 max(abs(rowMeans(r) - 0.5))
 ```
 
-The overall target is the integer 15, and every draw hits 15. Every block contributes 1 or 2.
+Every draw hits 15. Every block contributes 1 or 2.
 
 ## Three arms, no blocks: overall tight
-
-The $2 \times 3$ matrix from Section 5, now as a count check. Column targets are $0.62$, $1.13$, and $0.25$, so the tight counts are $0$ or $1$, $1$ or $2$, and $0$ or $1$.
 
 ```{r}
 set.seed(13)
@@ -912,9 +812,7 @@ max(abs(rowMeans(Z == 1) - P[, 1]),
     abs(rowMeans(Z == 3) - P[, 3]))
 ```
 
-Arm 2 is never empty. No arm moves more than one away from its target. The unit-level shares sit near $P$.
-
-## Two-arm blocked districts, again, as a joint check
+## Two-arm blocked districts, as a joint check
 
 ```{r}
 set.seed(14)
@@ -926,11 +824,9 @@ table(north, south)
 all(colSums(r) == 3)
 ```
 
-The support is $\{(1,2),(2,1)\}$ only. Overall and within-block tightness hold together.
+The support is $\{(1,2),(2,1)\}$ only.
 
 ## Equal probabilities and `complete_ra()`
-
-When every unit has the same probability and there are no blocks, `balanced_ra()` is complete assignment. The treated counts match.
 
 ```{r}
 set.seed(15)
@@ -938,13 +834,11 @@ table(colSums(replicate(1000, balanced_ra(4))))
 table(colSums(replicate(1000, complete_ra(N = 4))))
 ```
 
-# 7. Warnings / caveats
+# 10. Warnings / caveats
 
-`balanced_ra()` is cube/pivotal assignment on the same interface family as `complete_ra()` and `block_ra()`: `N`, `prob`, `prob_unit`, `blocks`, `clusters`, `conditions`, `formula`. Exclusive assignment, exact marginals, probabilities in $[0,1]$. For two-arm blocked designs leftover pairing keeps both the within-block counts and the overall count tight. Independently landing each block's leftover had let the overall count wander; that is the two-district case.
+The function is experimental. The interface may change.
 
-The function is experimental. The interface may change. Declare a design with `declare_ra(..., ra_type = "balanced")`, by supplying `prob_unit_each`, or by supplying `formula`; `conduct_ra()` and `obtain_condition_probabilities()` then dispatch as they do for the other assignment functions.
-
-Counts are always tight within each block. With two arms they are tight overall as well. With three or more arms the blocks are landed separately, so the overall count can wander. Three blocks of two units, three arms, every probability $1/3$: each tight block gives each arm 0 or 1; the overall target is 2; the three blocks can put an arm at 0 or at 3.
+Counts are always tight within each block. With two arms they are tight overall as well. With three or more arms the blocks are landed separately, so the overall count can wander.
 
 ```{r}
 set.seed(16)
@@ -955,22 +849,20 @@ Z <- replicate(2000, as.integer(as.character(
 table(colSums(Z == 1))
 ```
 
-Arm 1's overall count is not confined to $\{1,2\}$. That coupling is feasible — Hamilton's method would give each arm to exactly two of the three blocks — and this implementation does not do it when $k>2$.
+Arm 1's overall count is not confined to $\{1,2\}$. Hamilton's method would give each arm to exactly two of the three blocks; this implementation does not when $k>2$.
 
-There is no residual condition if the rows of `prob_unit_each` do not sum to 1. There is no interpretation of a probability greater than 1 as an expected count. Both are refused, as in Section 5.
+`formula` and `blocks` cannot be combined. `formula` and `prob_unit_each` cannot be combined: multi-arm cube-on-X is not implemented.
 
-`check_inputs = FALSE` skips those checks. It is for simulation loops whose probabilities have already been verified. It is not a way to pass illegal designs.
+`check_inputs = FALSE` skips validation. It is for simulation loops whose probabilities have already been verified.
 
-The default path holds assignment *counts* against their targets. That is not the same as balancing a continuous covariate. Pass `formula` to run cube-on-X on a model matrix, as in Section 2; `blocks` tightens counts within discrete groups. The two are different constraints. The function refuses both at once.
-
-The takeaway is practical. Use `balanced_ra()` when realized assignment should stay tight against its targets: condition counts at the floor or ceiling of what the probabilities imply, and, with `formula`, covariate totals too. That includes unit-varying probabilities, where `complete_ra()` does not apply, and constant probabilities, where leftover pairing keeps two-arm blocked counts tight overall as well as within each block. Trust overall tightness without blocks, and both overall and within-block tightness with two arms. Do not trust overall tightness with three or more arms and `blocks`.
+The takeaway is practical. Use `balanced_ra()` when realized assignment should stay tight against its targets. Trust overall tightness without blocks, and both overall and within-block tightness with two arms. Do not trust overall tightness with three or more arms and `blocks`. Do not pass `formula` with `prob_unit_each`.
 
 # References
 
-Deville, J.-C. and Tillé, Y. (1998). Unequal probability sampling without replacement through a splitting method. *Biometrika* 85(1), 89–101. <https://doi.org/10.1093/biomet/85.1.89>
+Deville, J.-C. and Tillé, Y. (1998). Unequal probability sampling without replacement through a splitting method. *Biometrika* 85(1), 89--101. <https://doi.org/10.1093/biomet/85.1.89>
 
-Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube method. *Biometrika* 91(4), 893–912. <https://doi.org/10.1093/biomet/91.4.893>
+Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube method. *Biometrika* 91(4), 893--912. <https://doi.org/10.1093/biomet/91.4.893>
 
-Deville, J.-C. and Tillé, Y. (2005). Variance approximation under balanced sampling. *Journal of Statistical Planning and Inference* 128(2), 569–591. <https://doi.org/10.1016/j.jspi.2003.11.011>
+Deville, J.-C. and Tillé, Y. (2005). Variance approximation under balanced sampling. *Journal of Statistical Planning and Inference* 128(2), 569--591. <https://doi.org/10.1016/j.jspi.2003.11.011>
 
-Chauvet, G. and Tillé, Y. (2006). A fast algorithm for balanced sampling. *Computational Statistics* 21(1), 53–62. <https://doi.org/10.1007/s00180-006-0250-2>
+Chauvet, G. and Tillé, Y. (2006). A fast algorithm for balanced sampling. *Computational Statistics* 21(1), 53--62. <https://doi.org/10.1007/s00180-006-0250-2>

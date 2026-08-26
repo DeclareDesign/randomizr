@@ -48,23 +48,29 @@ static void cube_check_index(const IntegerVector& b, const IntegerVector& ord,
   }
 }
 
-// Pair fractional units that share a block id. Leaves at most one fractional
-// unit per id; does not round the leftovers.
+// Pair fractional units that share a block id (two-arm count kernel, not
+// cube-on-X). Leaves at most one fractional unit per id.
 static void cube_pivot_pass(NumericVector& z, const std::vector<int>& seq,
                             const int* blk, int nb, double tol) {
   std::vector<int> open(nb + 1, -1);
   for (size_t t = 0; t < seq.size(); t++) {
     int j = seq[t];
+    // Step 1: skip assigned.
     if (z[j] <= tol || z[j] >= 1.0 - tol) continue;
     int bl = blk[j];
+    // Step 2: hold one open unit per block.
     if (open[bl] < 0) { open[bl] = j; continue; }
 
+    // Step 3: kernel pair (z_i + z_j preserved).
     int i = open[bl];
+    // Step 4: largest d+ and d-.
     double du = std::min(1.0 - z[i], z[j]);
     double dd = std::min(z[i], 1.0 - z[j]);
+    // Step 5: fair bet, then transfer.
     if (unif_rand() < dd / (du + dd)) { z[i] += du; z[j] -= du; }
     else                              { z[i] -= dd; z[j] += dd; }
 
+    // Step 6: housekeeping of open[].
     int keep = (z[i] > tol && z[i] < 1.0 - tol) ? i : j;
     open[bl] = (z[keep] > tol && z[keep] < 1.0 - tol) ? keep : -1;
   }
@@ -83,6 +89,7 @@ NumericVector cube_two_arm_cpp(NumericVector p, IntegerVector b,
   for (int t = 0; t < n; t++) seq[t] = ord[t] - 1;
   cube_pivot_pass(z, seq, b.begin(), nb, tol);
 
+  // Step 1: collect leftovers.
   std::vector<int> left;
   left.reserve(nb);
   for (int t = 0; t < n; t++) {
@@ -90,10 +97,13 @@ NumericVector cube_two_arm_cpp(NumericVector p, IntegerVector b,
     if (z[j] > tol && z[j] < 1.0 - tol) left.push_back(j);
   }
   if (left.size() > 1) {
+    // Step 2: fake a single block.
     std::vector<int> one(n, 1);
+    // Step 3: same pivot pass (overall count stays tight).
     cube_pivot_pass(z, left, one.data(), 1, tol);
   }
 
+  // Step 4: Bernoulli any singleton leftover.
   for (int i = 0; i < n; i++) {
     if (z[i] > tol && z[i] < 1.0 - tol)
       z[i] = (unif_rand() < z[i]) ? 1.0 : 0.0;
@@ -128,6 +138,7 @@ static void cube_move(std::vector<double>& Z, int n,
                       double tol) {
   int m = cu.size();
   double dplus = R_PosInf, dminus = R_PosInf;
+  // Step 1: largest d+ and d- (alternating sign).
   for (int e = 0; e < m; e++) {
     double z = Z[cu[e] + (size_t) ca[e] * n];
     if (e % 2 == 0) { dplus = std::min(dplus, 1.0 - z); dminus = std::min(dminus, z); }
@@ -135,7 +146,9 @@ static void cube_move(std::vector<double>& Z, int n,
   }
   if (!R_FINITE(dplus + dminus) || dplus + dminus <= 0) return;
 
+  // Step 2: fair bet.
   bool up = unif_rand() < dminus / (dplus + dminus);
+  // Step 3: apply the transfer.
   for (int e = 0; e < m; e++) {
     size_t ix = cu[e] + (size_t) ca[e] * n;
     double s = (e % 2 == 0) ? 1.0 : -1.0;
@@ -176,6 +189,7 @@ static bool cube_step(std::vector<double>& Z, int n, int k,
   int w = W.size();
   int nv = w + k;
 
+  // Fractional cells are the edges of the unit-arm graph.
   int ne = 0;
   for (int a = 0; a < w; a++) {
     for (int j = 0; j < k; j++) {
@@ -194,10 +208,7 @@ static bool cube_step(std::vector<double>& Z, int n, int k,
   for (int v = 0; v < nv; v++) { ws.deg[v] = ws.deg0[v] = ws.alen[v]; ws.vdead[v] = 0; ws.seen[v] = -1; }
   for (int e = 0; e < ne; e++) { ws.edead[e] = 0; ws.used[e] = 0; }
 
-  // Strip leaves repeatedly. What survives is the 2-core, which holds every
-  // cycle, so a walk inside it cannot dead-end and must close. Finding a cycle
-  // whenever one exists is what keeps the arm totals exact: only path moves
-  // disturb them, and those are deferred to the end of the block.
+  // Step 1: strip leaves; survivors are the 2-core.
   ws.q.clear();
   for (int v = 0; v < nv; v++) if (ws.deg[v] == 1) ws.q.push_back(v);
   while (!ws.q.empty()) {
@@ -218,12 +229,12 @@ static bool cube_step(std::vector<double>& Z, int n, int k,
   bool core = false;
   for (int e = 0; e < ne; e++) if (!ws.edead[e]) { core = true; startv = ws.eu[e]; break; }
   if (core) {
+    // Step 2a: cycle on the core (flight; column totals exact).
     for (int e = 0; e < ne; e++) ws.allowed[e] = !ws.edead[e];
   } else {
     if (!allow_path) return false;
     for (int e = 0; e < ne; e++) ws.allowed[e] = 1;
-    // A forest. Every unit has degree at least two, so every leaf is an arm,
-    // and starting at one gives a maximal arm-to-arm path.
+    // Step 2b: landing path from an arm leaf.
     for (int j = 0; j < k; j++) if (ws.deg0[w + j] == 1) { startv = w + j; break; }
     if (startv < 0) startv = ws.eu[0];
   }
@@ -267,8 +278,7 @@ static int cube_nfrac(const std::vector<double>& Z, int n, int k, int u,
   return nf;
 }
 
-// Windowed cube on a list of units. allow_path = false is flight: stop when
-// the working set is a forest, leaving leftovers for a later coupled landing.
+// Chauvet-Tille window of k units. allow_path true is landing.
 static void cube_process(std::vector<double>& Z, int n, int k,
                          const std::vector<int>& units, double tol,
                          CubeWork& ws, bool allow_path) {
@@ -277,12 +287,14 @@ static void cube_process(std::vector<double>& Z, int n, int k,
   W.reserve(k);
   long long guard = (long long) units.size() * k + 10;
   while (guard-- > 0) {
+    // Fill the window with units that still have >= 2 fractional cells.
     while ((int) W.size() < k && ptr < units.size()) {
       int u = units[ptr++];
       if (cube_nfrac(Z, n, k, u, tol) >= 2) W.push_back(u);
     }
     if (W.empty()) break;
     if (!cube_step(Z, n, k, W, tol, ws, allow_path)) break;
+    // Drop units that have settled.
     std::vector<int> keep;
     for (size_t t = 0; t < W.size(); t++) {
       if (cube_nfrac(Z, n, k, W[t], tol) >= 2) keep.push_back(W[t]);
