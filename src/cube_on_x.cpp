@@ -131,7 +131,16 @@ static bool cube_on_x_step(NumericVector& z, const std::vector<int>& W,
     if (z[i] <= 0.0 || z[i] >= 1.0) frozen = true;
   }
   if (!frozen) {
-    // Numerical miss: snap the coordinate closest to a bound.
+    // The step above is sized so that at least one unit lands exactly on 0 or
+    // on 1, which is how the draw makes progress. In rare cases rounding error
+    // leaves every unit a hair short of its bound, and then nothing has been
+    // settled and the loop would spin. The unit with the least room left is
+    // therefore settled directly, by a coin weighted by the value it currently
+    // holds. That coin keeps the unit's assignment probability exactly right,
+    // because a unit sitting at z is treated with probability z either way.
+    // What it does not keep is the balancing constraint: the value it moves is
+    // not the value the constraint expected to move, so a draw that reaches
+    // this line can end up one unit away from the count the constraint implies.
     int best = W[0];
     double slack = std::min(z[best], 1.0 - z[best]);
     for (int j = 1; j < w; j++) {
@@ -178,29 +187,33 @@ NumericVector cube_on_x_cpp(NumericVector p, NumericMatrix X, double tol) {
     for (int i = 0; i < n; i++) Xs[(size_t) i + (size_t) c * n] = X(i, c) / s;
   }
 
-  // Order units by the first non-intercept column so the remainder that
-  // landing sees is a nearby-x set. Flight steps stay martingales for any
-  // order; a random reverse avoids always leaving the same tail. When the
-  // sort column is constant (~ 1, or a degenerate covariate) the sort would
-  // leave the identity order, and the window walk would then pair adjacent
-  // units deterministically: units 1 and 2 would receive opposite conditions
-  // on every draw. Marginals survive that, but the joint distribution becomes
-  // a systematic paired design nobody asked for, so a constant column gets a
-  // shuffle instead.
+  // Order units by the first column of X that is not constant, so the
+  // remainder that landing sees is a set of units with nearby values of that
+  // column. An intercept is a column of ones and so is skipped by that rule,
+  // which makes the sort column x under the usual ~ x and x1 under
+  // ~ 0 + x1 + x2. Testing for constancy rather than assuming the intercept
+  // sits in column 0 is what keeps those two cases consistent, and it is what
+  // lets balanced_ra() tell a caller to put the covariate they least trust
+  // themselves to model first in the formula.
+  //
+  // Flight steps stay martingales whatever the order, so nothing about the
+  // stated guarantees rides on this; a random reverse only avoids always
+  // leaving the same tail for landing. When every column is constant (~ 1, or
+  // a degenerate covariate) there is nothing to sort on, and keeping the
+  // identity order would make the window walk pair adjacent units
+  // deterministically: units 1 and 2 would receive opposite conditions on
+  // every draw. Marginals survive that, but the joint distribution becomes a
+  // systematic paired design nobody asked for, so that case gets a shuffle.
   std::vector<int> ord(n);
   for (int i = 0; i < n; i++) ord[i] = i;
-  int sort_col = (q >= 2) ? 1 : 0;
-  bool sort_col_constant = true;
-  if (q >= 1) {
-    double v0 = Xs[(size_t) 0 + (size_t) sort_col * n];
+  int sort_col = -1;
+  for (int c = 0; c < q && sort_col < 0; c++) {
+    double v0 = Xs[(size_t) 0 + (size_t) c * n];
     for (int i = 1; i < n; i++) {
-      if (Xs[(size_t) i + (size_t) sort_col * n] != v0) {
-        sort_col_constant = false;
-        break;
-      }
+      if (Xs[(size_t) i + (size_t) c * n] != v0) { sort_col = c; break; }
     }
   }
-  if (q >= 1 && !sort_col_constant) {
+  if (sort_col >= 0) {
     std::sort(ord.begin(), ord.end(), [&](int a, int b) {
       return Xs[(size_t) a + (size_t) sort_col * n] <
              Xs[(size_t) b + (size_t) sort_col * n];

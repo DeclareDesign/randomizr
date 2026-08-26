@@ -48,7 +48,11 @@ overall; with three or more arms the tight counts are the within-block ones. (op
 belongs to. Whole clusters are assigned together, so the probabilities must
 be the same for every unit in a cluster, and the tight counts become counts
 of clusters rather than of units. May be combined with \code{blocks}, in which
-case every cluster must sit entirely inside one block. (optional)}
+case every cluster must sit entirely inside one block. May also be combined
+with \code{formula}, in which case each cluster's covariates are the
+averages of its units' covariates, so that a cluster counts once however
+many units it holds and the treated count that is held tight remains a
+count of clusters. (optional)}
 
 \item{num_arms}{The number of treatment arms. Inferred when omitted. Supplied without any probability argument, \code{num_arms} (or \code{conditions}) of three or more expands to equal-probability assignment, as in \code{\link{complete_ra}()}. (optional)}
 
@@ -59,8 +63,9 @@ case every cluster must sit entirely inside one block. (optional)}
 count constraint; \code{~ 0 + x} drops it and the treated count may wander.
 Names are looked up where the formula was written, then in the calling
 frame, so the usual \code{dat |> mutate(Z = balanced_ra(formula = ~ x))}
-finds the column \code{x}. Two-arm only. Cannot be combined with
-\code{blocks} or \code{prob_unit_each}. (optional)}
+finds the column \code{x}. Two-arm only. May be combined with
+\code{clusters}; cannot be combined with \code{blocks} or
+\code{prob_unit_each}. (optional)}
 
 \item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1, that rows of a probability matrix sum to 1, that probabilities are constant within a cluster, and that clusters nest within blocks. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many assignments from probabilities that have already been verified. (optional)}
 
@@ -85,10 +90,10 @@ well as within each block, and cube-on-X balances a continuous covariate
 without binning it.
 }
 \details{
-With unit-varying probabilities it fills the gap between [simple_ra()], which
-honors those probabilities but lets the number treated wander, and
-[complete_ra()], which fixes the number treated but requires every unit to
-share the same probability.
+With unit-varying probabilities it fills the gap between
+\code{\link{simple_ra}()}, which honors those probabilities but lets the
+number treated wander, and \code{\link{complete_ra}()}, which fixes the
+number treated but requires every unit to share the same probability.
 
 The "balanced" in the name is balanced sampling in the sense of Deville and
 Tillé (2004). With the default arguments the realized counts are held
@@ -113,6 +118,19 @@ vignette \emph{Introduction to balanced_ra}. With \code{clusters},
 the tight counts are counts of clusters. With \code{formula}, first-order
 inclusion probabilities remain exact; covariate totals are as close as
 the landing phase allows. See that vignette.
+
+Tight counts have one exception, and it is an arithmetic one rather than a
+design one. Each step of the algorithm is sized so that at least one unit
+lands exactly on 0 or on 1. Every so often rounding error in floating-point
+arithmetic leaves every unit in that step a hair short of its bound, and the
+function then settles the unit with the least room left by a coin weighted
+by the value that unit currently holds. That coin keeps the unit's
+assignment probability exactly right, so the probability guarantee is
+untouched. It does not respect the count, so a draw that reaches this
+fallback can finish one unit away from the floor or the ceiling. We have not
+been able to make it happen: it did not arise in any of several thousand
+draws across dozens of randomly generated designs. It is documented because
+it is reachable in principle, not because it is expected in practice.
 }
 
 \section{Balance when probabilities vary}{
@@ -141,21 +159,23 @@ by. With a constant \eqn{p} the question does not arise.
 
 \section{Order of the covariates}{
 
-The flight phase sorts units by the first non-intercept column of \eqn{X} and
-works through them in a sliding window, so each step pairs units with nearby
-values of that column. The design therefore balances smooth functions of the
-first covariate and not only its linear total: in simulations at
-\eqn{N = 200} with a constant \eqn{p}, the treated-minus-control spread in
-\eqn{x^2} and \eqn{x^3} runs several times tighter than under
-\code{\link{complete_ra}()}, though how much tighter varies with the
-covariate draw, and a heavy-tailed \eqn{x} narrows the gain.
+The flight phase sorts units by the first column of \eqn{X} that is not
+constant and works through them in a sliding window, so each step pairs
+units with nearby values of that column. An intercept is a column of ones
+and so is passed over, which makes the sort column \code{x} under
+\code{~ x} and \code{x1} under \code{~ 0 + x1 + x2}. The design therefore
+balances smooth functions of that first covariate and not only its linear
+total: in simulations at \eqn{N = 200} with a constant \eqn{p}, the
+treated-minus-control spread in \eqn{x^2} and \eqn{x^3} runs several times
+tighter than under \code{\link{complete_ra}()}, though how much tighter
+varies with the covariate draw, and a heavy-tailed \eqn{x} narrows the gain.
 
-The gain is also uneven. Only the first non-intercept column drives the
-sort, so under \code{~ x1 + x2} the spread in \eqn{x_1^2} tightens while
-the spread in \eqn{x_2^2} stays about where complete assignment leaves it.
-Both linear totals are held tight. A covariate you name but
-do not put first is balanced in its own right and in nothing else, and a
-covariate you do not name at all is not balanced.
+The gain is also uneven. Only one column drives the sort, so under
+\code{~ x1 + x2} the spread in \eqn{x_1^2} tightens while the spread in
+\eqn{x_2^2} stays about where complete assignment leaves it. Both linear
+totals are held tight. A covariate you name but do not put first is
+balanced in its own right and in nothing else, and a covariate you do not
+name at all is not balanced.
 
 Sorting is a choice made here rather than a feature of the cube method, which
 constrains only the linear span of \eqn{X}. Put the covariate whose
@@ -163,39 +183,52 @@ relationship with the outcome you least trust yourself to model first in the
 formula.
 }
 
-\section{Intervals are conservative}{
+\section{Analyzing the result}{
 
-\code{formula} removes assignment variance that the usual variance estimators
-do not know about, so they report intervals wider than the true sampling
-variability warrants. HC2 on an unadjusted regression covered the true effect
-on every draw simulated at \eqn{N = 200} with a strongly prognostic \eqn{x},
-its average standard error more than twice the true sampling standard
-deviation. Horvitz-Thompson through
-\code{estimatr::horvitz_thompson()} runs from correct to about twice too
-wide, depending on how well \eqn{X} predicts the outcome; estimatr's
-development version (2.0.0, not yet on CRAN) warns when it is handed a
-declaration with a formula. Coverage stayed at or above the
-nominal rate in everything measured, so the intervals are valid. They are
-merely wasteful.
+When \eqn{p_i} varies across units, an unweighted comparison of means is not
+the average treatment effect. Weight each unit by the reciprocal of the
+probability of the condition it landed in;
+\code{\link{balanced_ra_probabilities}()} returns the matrix of
+probabilities those weights are built from, in the same form as the other
+\code{_probabilities} functions in randomizr.
 
-Covariate adjustment recovers the precision the design bought. Fitting Lin's
-estimator on the same columns returned intervals near their nominal width and
-coverage near 0.95. Adjustment does not always suffice: when the outcome was
-quadratic in \eqn{x} and the adjustment was linear in \eqn{x}, coverage
-returned to 1.000 while the sampling variance fell to about a fifth of what
-complete assignment plus the same adjustment delivered. Insurance against a
-misspecified adjustment model is the clearest case for this design, and it is
-the case in which the reported interval understates what was gained.
+Standard errors then divide into two cases, and the vignette
+\emph{Introduction to balanced_ra} measures both.
 
-An exact variance for cube assignment is not a missing feature. Joint
-inclusion probabilities have no closed form, which is what Deville and
-Tillé (2005) approximate; randomizr does not implement that approximation.
+On the count-tight designs, meaning every call that does not pass
+\code{formula}, the usual heteroskedasticity-consistent intervals behave
+about as they do after \code{\link{complete_ra}()}. Holding counts tight
+makes assignments negatively dependent across units, which is a reason to
+ask the question, but in simulation it did not move HC2 coverage
+appreciably away from its nominal rate for two-arm, blocked two-arm or
+three-arm designs.
+
+With \code{formula} it is different. The design removes assignment variance
+that the variance estimator cannot see, so the reported interval is wider
+than the estimator's true sampling variability warrants. At \eqn{N = 200}
+with a strongly prognostic \eqn{x}, HC2 on an unadjusted regression covered
+the true effect on every draw, with an average standard error well over
+twice the estimator's actual standard deviation. That is valid but wasteful:
+it discards the precision the design was chosen to buy. Fitting Lin's
+estimator on the same columns recovers most of it, and stops recovering it
+when the adjustment model is wrong, so the case for this design is
+strongest exactly where the reported interval understates the gain. Adjusting
+linearly for \eqn{x} when the outcome was quadratic in it, for instance,
+returned coverage to 1.000 with the standard error again more than twice too
+large.
+
+\code{estimatr::horvitz_thompson()} is conservative here for a related
+reason, and an exact variance is not a missing feature so much as an open
+problem: the joint inclusion probabilities of a cube design have no closed
+form. That is what Deville and Tillé (2005) approximate, and randomizr does
+not implement that approximation.
 }
 
 \section{Experimental}{
 
 This function is new in randomizr 2.0.1 and its interface may change. Declare
-a design with [declare_ra()] by setting \code{ra_type = "balanced"} or by
+a design with \code{\link{declare_ra}()} by setting
+\code{ra_type = "balanced"} or by
 supplying \code{prob_unit_each} or \code{formula}; \code{\link{conduct_ra}()}
 and \code{\link{obtain_condition_probabilities}()} then dispatch here.
 The vignette \emph{Introduction to balanced_ra} has the count-tight
@@ -254,6 +287,13 @@ table(blocks, Z)
 x <- c(1, 2, 3, 6)
 Z <- balanced_ra(formula = ~ x)
 sum(x * Z)   # near 6
+
+# Cube-on-X with clusters. Each cluster is treated as one unit carrying the
+# average of its members' covariates, so three of the six clusters are
+# treated on every draw and it is the cluster means of x that are balanced.
+x_cl <- c(-2, -1, 0, 1, 2, 3)[clusters]
+Z <- balanced_ra(prob = 0.5, clusters = clusters, formula = ~ x_cl)
+table(clusters, Z)
 
 }
 \references{

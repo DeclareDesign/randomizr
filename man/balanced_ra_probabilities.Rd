@@ -47,7 +47,11 @@ overall; with three or more arms the tight counts are the within-block ones. (op
 belongs to. Whole clusters are assigned together, so the probabilities must
 be the same for every unit in a cluster, and the tight counts become counts
 of clusters rather than of units. May be combined with \code{blocks}, in which
-case every cluster must sit entirely inside one block. (optional)}
+case every cluster must sit entirely inside one block. May also be combined
+with \code{formula}, in which case each cluster's covariates are the
+averages of its units' covariates, so that a cluster counts once however
+many units it holds and the treated count that is held tight remains a
+count of clusters. (optional)}
 
 \item{num_arms}{The number of treatment arms. Inferred when omitted. Supplied without any probability argument, \code{num_arms} (or \code{conditions}) of three or more expands to equal-probability assignment, as in \code{\link{complete_ra}()}. (optional)}
 
@@ -58,8 +62,9 @@ case every cluster must sit entirely inside one block. (optional)}
 count constraint; \code{~ 0 + x} drops it and the treated count may wander.
 Names are looked up where the formula was written, then in the calling
 frame, so the usual \code{dat |> mutate(Z = balanced_ra(formula = ~ x))}
-finds the column \code{x}. Two-arm only. Cannot be combined with
-\code{blocks} or \code{prob_unit_each}. (optional)}
+finds the column \code{x}. Two-arm only. May be combined with
+\code{clusters}; cannot be combined with \code{blocks} or
+\code{prob_unit_each}. (optional)}
 
 \item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1, that rows of a probability matrix sum to 1, that probabilities are constant within a cluster, and that clusters nest within blocks. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many assignments from probabilities that have already been verified. (optional)}
 }
@@ -69,7 +74,8 @@ A matrix of probabilities of assignment, one row per unit and one
 }
 \description{
 \strong{Experimental.} Returns the probability that each unit is assigned to
-each condition under [balanced_ra()]. Because those probabilities are supplied by
+each condition under \code{\link{balanced_ra}()}. Because those
+probabilities are supplied by
 the caller rather than derived from a design, this function mainly validates
 and normalizes them into the matrix form the other \code{_probabilities} functions
 return.
