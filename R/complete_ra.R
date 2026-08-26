@@ -1,25 +1,25 @@
 #' Complete Random Assignment
 #'
-#' complete_ra implements a random assignment procedure in which fixed numbers of units are assigned to treatment conditions. The canonical example of complete random assignment is a procedure in which exactly m of N units are assigned to treatment and N-m units are assigned to control.\cr \cr
-#' Users can set the exact number of units to assign to each condition with m or m_each. Alternatively, users can specify probabilities of assignment with prob or prob_each and complete_ra will infer the correct number of units to assign to each condition.
-#' In a two-arm design, complete_ra will either assign floor(N*prob) or ceiling(N*prob) units to treatment, choosing between these two values to ensure that the overall probability of assignment is exactly prob.
-#' In a multi-arm design, complete_ra will first assign floor(N*prob_each) units to their respective conditions, then will assign the remaining units using simple random assignment, choosing these second-stage probabilities so that the overall probabilities of assignment are exactly prob_each.\cr \cr
-#' In most cases, users should specify N and not more than one of m, m_each, prob, prob_each, or num_arms. \cr \cr
-#' If only N is specified, a two-arm trial in which N/2 units are assigned to treatment is assumed. If N is odd, either floor(N/2) units or ceiling(N/2) units will be assigned to treatment.
+#' \code{complete_ra} assigns exactly fixed numbers of units to each treatment condition. In the canonical two-arm case, exactly \code{m} of \code{N} units are assigned to treatment and \code{N-m} to control on every draw. This guarantee that the counts are fixed is the defining feature of complete random assignment, and it is what distinguishes it from simple random assignment (where counts vary from draw to draw).
 #'
+#' Researchers can specify counts directly (via \code{m} or \code{m_each}) or target probabilities (via \code{prob} or \code{prob_each}). When probabilities are specified and the implied counts are not integers, \code{complete_ra} uses stochastic rounding to ensure that the overall probability of assignment exactly equals the target. In a two-arm design, either \code{floor(N*prob)} or \code{ceiling(N*prob)} units are assigned to treatment, with the draw between these two values chosen so that \code{Pr(treatment)} equals exactly \code{prob}. In a multi-arm design, the remaining units after floor allocation are assigned using a single round of simple random assignment calibrated to hit the exact target probabilities.
 #'
-#' @param N The number of units. N must be a positive integer. (required)
-#' @param m Use for a two-arm design in which m units are assigned to treatment and N-m units are assigned to control. (optional)
-#' @param m_unit Use for a two-arm design in which exactly unique(m_unit) units are assigned to treatment and the remainder are assigned to control. m_unit must be of length N and must be the same for all units (optional)
-#' @param m_each Use for a multi-arm design in which the values of m_each determine the number of units assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many units should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)
-#' @param prob Use for a two-arm design in which either floor(N*prob) or ceiling(N*prob) units are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N*prob) units will be assigned to treatment and with probability prob, ceiling(N*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
-#' @param prob_unit Use for a two-arm design. unique(prob_unit) will be passed to the prob argument and must be the same for all units.
-#' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
-#' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
-#' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
-#' @param check_inputs logical. Defaults to TRUE.
+#' If only \code{N} is specified, a balanced two-arm trial (\code{prob = 0.5}) is assumed. When \code{N} is odd, either \code{floor(N/2)} or \code{ceiling(N/2)} units are assigned to treatment.
 #'
-#' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.
+#' @seealso \code{\link{simple_ra}()}, \code{\link{block_ra}()}, \code{\link{cluster_ra}()}, \code{\link{complete_rs}()}, \code{\link{complete_ra_probabilities}()}
+#'
+#' @param N The number of units. Must be a positive integer. (required)
+#' @param m Use for a two-arm design: exactly \code{m} units are assigned to treatment and \code{N-m} to control. (optional)
+#' @param m_unit Use for a two-arm design. \code{unique(m_unit)} units are assigned to treatment; must be the same for all units and of length N. (optional)
+#' @param m_each Use for a multi-arm design. A numeric vector giving the exact number of units assigned to each condition; must sum to N. (optional)
+#' @param prob Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. Must be between 0 and 1. One edge is deliberate: when \code{ceiling(N*prob) == N} (for instance \code{N = 3, prob = 0.9}), exactly \code{floor(N*prob)} units are treated, never all \code{N}, so the marginal probability is \code{floor(N*prob)/N}; \code{\link{complete_ra_probabilities}()} reports the probability actually used. (optional)
+#' @param prob_unit Use for a two-arm design. \code{unique(prob_unit)} will be passed to the \code{prob} argument; must be the same for all units. (optional)
+#' @param prob_each Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count assigned to each condition may differ slightly from draw to draw, but the overall probability of assignment is exactly \code{prob_each}. (optional)
+#' @param num_arms The number of treatment arms. If unspecified, determined from the other arguments. (optional)
+#' @param conditions A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)
+#' @param check_inputs Logical. Whether to verify before assigning that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that vectors are of length N, and so on. Defaults to \code{TRUE}. \code{FALSE} skips the checking only: \code{num_arms} and \code{conditions} are still derived from the other arguments, so the same call draws the same assignment either way. What goes is the verification, and an impossible design is then no longer refused. \code{block_m} larger than a block, for instance, quietly treats the whole block. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)
+#'
+#' @return A vector of length N indicating the treatment condition of each unit. Numeric in a two-arm trial; a factor (ordered by \code{conditions}) in a multi-arm trial.
 #' @export
 #'
 #' @examples
@@ -30,10 +30,10 @@
 #' Z <- complete_ra(N = 100, m = 50)
 #' table(Z)
 #' 
-#' Z <- complete_ra(N = 100, m_unit = rep(50, 100))
+#' Z <- complete_ra(N = 100, m_unit = rep(30, 100))
 #' table(Z)
 #'
-#' Z <- complete_ra(N = 100, prob = .111)
+#' Z <- complete_ra(N = 100, prob = 0.111)
 #' table(Z)
 #' 
 #' Z <- complete_ra(N = 100, prob_unit = rep(0.1, 100))
@@ -50,7 +50,7 @@
 #' Z <- complete_ra(N = 100, m_each = c(30, 30, 40))
 #' table(Z)
 #'
-#' Z <- complete_ra(N = 100, prob_each = c(.1, .2, .7))
+#' Z <- complete_ra(N = 100, prob_each = c(0.1, 0.2, 0.7))
 #' table(Z)
 #'
 #' Z <- complete_ra(N = 100, conditions = c("control", "placebo", "treatment"))
@@ -61,12 +61,15 @@
 #' Z <- complete_ra(N = 100, num_arms = 2)
 #' table(Z)
 #'
-#' # If N = m, assign with 100% probability
-#' complete_ra(N=2, m=2)
+#' # If N = m, every unit is assigned to treatment with probability 1
+#' complete_ra(N = 2, m = 2)
 #'
-#' # Up through randomizr 0.12.0, 
-#' complete_ra(N=1, m=1) # assigned with 50% probability
-#' # This behavior has been deprecated
+#' # The single-unit case works the same way: m = 1 out of N = 1 is treated
+#' # with probability 1. Up through randomizr 0.12.0 this case was instead
+#' # treated as a coin flip, so the unit was assigned to treatment only half of
+#' # the time. The change is noted here because it silently alters the
+#' # probabilities of assignment in code written against those versions.
+#' complete_ra(N = 1, m = 1)
 #'
 complete_ra <- function(N,
                         m = NULL,
@@ -78,7 +81,7 @@ complete_ra <- function(N,
                         num_arms = NULL,
                         conditions = NULL,
                         check_inputs = TRUE) {
-  if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+  if (check_inputs) .invoke_check(check_randomizr_arguments_new) else .invoke_derive()
   
     
     
@@ -114,11 +117,12 @@ complete_ra <- function(N,
         prob_fix_up <- .5
       }
       
-      if (simple_ra(1, prob_fix_up) == 0) {
-        m <- m_floor
-      } else{
-        m <- m_ceiling
-      }
+      # randomizr 1.x drew this through simple_ra(1, prob_fix_up), whose
+      # vsample() walk takes the second condition when the uniform exceeds
+      # 1 - prob_fix_up. `runif(1) < prob_fix_up` has the same distribution but
+      # the opposite decision on the same draw, which silently changed every
+      # odd-N assignment. Keep 1.x's comparison.
+      m <- if (runif(1L) > 1 - prob_fix_up) m_ceiling else m_floor
       
       assignment <-  sample(rep(conditions, c(N - m, m)))
       assignment <-
@@ -220,41 +224,52 @@ complete_ra <- function(N,
 }
 
 
-#' probabilities of assignment: Complete Random Assignment
+#' Probabilities of assignment: Complete Random Assignment
+#'
+#' Returns the probability that each unit is assigned to each condition under
+#' complete random assignment. When the implied counts are not integers the
+#' probabilities account for the stochastic rounding \code{complete_ra} uses, so
+#' they equal the target exactly rather than approximately.
+#'
+#' These are the quantities inverse-probability weights are built from: weight
+#' each unit by the reciprocal of the probability of the condition it landed in,
+#' which \code{\link{obtain_condition_probabilities}()} extracts for you.
+#'
+#' @seealso \code{\link{complete_ra}()}
 #'
 #' @inheritParams complete_ra
-#' @return A matrix of probabilities of assignment
+#' @return A matrix with N rows and one column per treatment condition, with columns named \code{prob_<condition>}. Entry (i, j) is the probability that unit i is assigned to condition j, and every row sums to 1.
 #'
 #' @examples
 #' # 2-arm designs
-#' prob_mat <- complete_ra_probabilities(N=100)
+#' prob_mat <- complete_ra_probabilities(N = 100)
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, m=50)
+#' prob_mat <- complete_ra_probabilities(N = 100, m = 50)
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, prob = .3)
+#' prob_mat <- complete_ra_probabilities(N = 100, prob = 0.3)
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, m_each = c(30, 70),
+#' prob_mat <- complete_ra_probabilities(N = 100, m_each = c(30, 70),
 #'                           conditions = c("control", "treatment"))
 #' head(prob_mat)
 #'
 #' # Multi-arm Designs
-#' prob_mat <- complete_ra_probabilities(N=100, num_arms=3)
+#' prob_mat <- complete_ra_probabilities(N = 100, num_arms = 3)
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40))
+#' prob_mat <- complete_ra_probabilities(N = 100, m_each = c(30, 30, 40))
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40),
-#'                           conditions=c("control", "placebo", "treatment"))
+#' prob_mat <- complete_ra_probabilities(N = 100, m_each = c(30, 30, 40),
+#'                           conditions = c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, conditions=c("control", "placebo", "treatment"))
+#' prob_mat <- complete_ra_probabilities(N = 100, conditions = c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
-#' prob_mat <- complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))
+#' prob_mat <- complete_ra_probabilities(N = 100, prob_each = c(0.2, 0.7, 0.1))
 #' head(prob_mat)
 #'
 #' @export
@@ -269,7 +284,7 @@ complete_ra_probabilities <- function(N,
                                       conditions = NULL,
                                       check_inputs = TRUE) {
   # Setup: obtain number of arms and conditions
-  if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+  if (check_inputs) .invoke_check(check_randomizr_arguments_new) else .invoke_derive()
   
   if (!is.null(prob_unit)) {
     unique_prob_unit <- unique(prob_unit)

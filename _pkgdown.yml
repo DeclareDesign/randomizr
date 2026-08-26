@@ -10,6 +10,10 @@ template:
 development:
   mode: auto
 
+authors:
+  sidebar:
+    roles: [aut, cre, ctb]
+
 navbar:
   right:
   - text: "Software"
@@ -37,10 +41,12 @@ navbar:
     href: reference/index.html
   - text: Articles
     menu: 
-     - text: Getting started with randomizr
+     - text: Design and Analysis of Experiments with randomizr
        href: articles/randomizr_vignette.html
-     - text: Getting started with randomizr for Stata
-       href: articles/srandomizr_vignette.html 
+     - text: What randomizr guarantees
+       href: articles/randomizr_guarantees.html
+     - text: Introduction to balanced_ra
+       href: articles/balanced_ra.html
 
 reference:
   - title: Random assignment
@@ -51,8 +57,8 @@ reference:
     - complete_ra
     - simple_ra
     - conduct_ra
-    - custom_ra
     - declare_ra
+    - balanced_ra
   
   - title: Functions for calculating probabilities of assignment
     contents:
@@ -63,7 +69,7 @@ reference:
     - block_and_cluster_ra_probabilities
     - block_ra_probabilities
     - cluster_ra_probabilities
-    - custom_ra_probabilities
+    - balanced_ra_probabilities
     - simple_ra_probabilities
     - complete_ra_probabilities
 

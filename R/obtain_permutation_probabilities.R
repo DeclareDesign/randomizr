@@ -2,26 +2,55 @@
 
 #' Obtain the probabilities of permutations
 #'
-#' @param declaration A random assignment declaration, created by \code{\link{declare_ra}}.
+#' Returns how likely each assignment in the permutation matrix was. Most
+#' designs make every possible assignment equally likely, in which case these
+#' are all the same and can be ignored. Blocked and clustered designs of unequal
+#' size do not, and there the probabilities are needed to weight the
+#' randomization distribution correctly.
 #'
-#' @return a vector of probabilities
+#' @seealso \code{\link{obtain_permutation_matrix}()},
+#'   \code{\link{obtain_num_permutations}()}
+#'
+#' @param declaration A random assignment declaration, created by \code{\link{declare_ra}()}. (required)
+#'
+#' @return A vector with one entry per possible assignment, giving the probability that the design produces that assignment. The entries sum to 1 and are in the same order as the columns of \code{\link{obtain_permutation_matrix}()}, so the two can be used together.
 #' @export
+#'
+#' @references
+#' Andrews, G. E. (1976). \emph{The Theory of Partitions}. Encyclopedia of
+#' Mathematics and its Applications, Volume 2. Reading, MA: Addison-Wesley.
 #'
 #' @examples
 #'
-#' declaration <- declare_ra(N = 5, prob_each = c(.49, .51))
-#' obtain_num_permutations(declaration)
-#' perm_probs <- obtain_permutation_probabilities(declaration)
-#' perms <- obtain_permutation_matrix(declaration)
+#' # A design in which the possible assignments are *not* equally likely: with
+#' # N = 5 and prob = 0.51, either 2 or 3 units are treated, and those two cases
+#' # do not come up equally often.
+#' declaration <- declare_ra(N = 5, prob_each = c(0.49, 0.51))
 #'
-#' # probabilities of assignment from declaration *should* match the average over all permutations
-#' true_probabilities <- declaration$probabilities_matrix[,2]
+#' obtain_num_permutations(declaration)
+#'
+#' perms <- obtain_permutation_matrix(declaration)
+#' perm_probs <- obtain_permutation_probabilities(declaration)
+#'
+#' # perms has one column per possible assignment and perm_probs has one entry
+#' # per column, in the same order
+#' dim(perms)
+#' length(perm_probs)
+#'
+#' # Each unit's probability of assignment to treatment, according to the
+#' # declaration. Recovering these from perms is the check that the two objects
+#' # line up.
+#' true_probabilities <- declaration$probabilities_matrix[, 2]
 #' true_probabilities
 #'
-#' # correctly WRONG because the perms have different probs!
+#' # The unweighted average across columns is WRONG here: it treats every
+#' # assignment as equally likely, which this design does not.
 #' rowMeans(perms)
 #'
-#' # correctly correct!
+#' # Weighting each column by how likely it is recovers the true probabilities.
+#' # The matrix product does the weighted average: row i of perms times
+#' # perm_probs sums unit i's treatment indicators weighted by column
+#' # probability, which is exactly Pr(unit i treated).
 #' perms %*% perm_probs
 #'
 obtain_permutation_probabilities <- function(declaration) {
@@ -171,6 +200,14 @@ obtain_permutation_probabilities.ra_blocked_and_clustered <-
     
     permutation_probabilities
   }
+
+obtain_permutation_probabilities.ra_balanced <- function(declaration) {
+  stop("obtain_permutation_probabilities() does not enumerate cube assignments. ",
+       "The support is not listed and the assignments are not equally likely. ",
+       "Use obtain_permutation_matrix() to draw a sample, or conduct_ra() ",
+       "inside a simulation.",
+       call. = FALSE)
+}
 
 
 

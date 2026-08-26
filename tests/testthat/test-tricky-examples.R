@@ -6,10 +6,10 @@ test_that("B <- rep(2:4,9)", {
   golden <-
     structure(
       c(3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L),
-      .Dim = c(3L,
+      dim = c(3L,
                3L),
-      .Dimnames = structure(list(B = c("2", "3", "4"), c("T1",
-                                                         "T2", "T3")), .Names = c("B", "draw")),
+      dimnames = structure(list(B = c("2", "3", "4"), c("T1",
+                                                         "T2", "T3")), names = c("B", "draw")),
       class = "table"
     )
   
@@ -136,10 +136,10 @@ test_that("B=111222222", {
   golden <-
     structure(
       c(1L, 2L, 1L, 2L, 1L, 2L),
-      .Dim = 2:3,
-      .Dimnames = structure(list(
+      dim = 2:3,
+      dimnames = structure(list(
         B = c("1", "2"), draw = c("T1", "T2", "T3")
-      ), .Names = c("B",
+      ), names = c("B",
                     "draw")),
       class = "table"
     )
@@ -173,21 +173,13 @@ test_that("balancing with block_prob_each", {
   
   
   draw <- block_ra(blocks, block_prob_each = block_prob_each)
-  
-  golden <-
-    structure(
-      c(15L, 21L, 20L, 31L, 72L, 165L, 5L, 10L, 22L),
-      .Dim = c(3L,
-               3L),
-      .Dimnames = structure(list(
-        blocks = c("A", "B", "C"),
-        draw = c("T1",
-                 "T2", "T3")
-      ), .Names = c("blocks", "draw")),
-      class = "table"
-    )
-  
-  expect_true(all (table(blocks, draw) - golden %in% -1:1))
+
+  # Each block's arm count must be the floor or the ceiling of its target.
+  # (An earlier version compared to a recorded "golden" table, but the
+  # comparison was defanged by operator precedence, and the recording itself
+  # held an impossible cell: 22 T3s in block C against a target of 20.7.)
+  target <- block_prob_each * c(51, 103, 207)
+  expect_true(all(abs(table(blocks, draw) - target) < 1))
 })
 
 

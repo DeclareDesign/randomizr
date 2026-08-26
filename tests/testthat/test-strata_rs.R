@@ -79,21 +79,21 @@ test_that("prob_unit and n_unit", {
   expect_equal(table(strata, S),
                structure(
                  c(45L, 80L, 140L, 5L, 20L, 60L),
-                 .Dim = 3:2,
-                 .Dimnames = list(strata = c("A", "B", "C"), S = c("0", "1")),
+                 dim = 3:2,
+                 dimnames = list(strata = c("A", "B", "C"), S = c("0", "1")),
                  class = "table"
                ))
   
   expect_error(
     strata_rs(strata = strata, prob_unit = rep(c(.1, .2, .3), c(200, 100, 50))),
-    "In a stratified random assignment design, `prob_unit` must be the same for all units within the same stratum."
+    "In a stratified random sampling design, `prob_unit` must be the same for all units within the same stratum."
   )
   
   
   S <- strata_rs(strata = strata, n_unit = rep(c(20, 20, 25), c(50, 100, 200)))
   
   expect_equal(table(strata, S), 
-               structure(c(30L, 80L, 175L, 20L, 20L, 25L), .Dim = 3:2, .Dimnames = list(
+               structure(c(30L, 80L, 175L, 20L, 20L, 25L), dim = 3:2, dimnames = list(
                  strata = c("A", "B", "C"), S = c("0", "1")), class = "table"))
   
   expect_error(

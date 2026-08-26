@@ -8,44 +8,38 @@ status](https://www.r-pkg.org/badges/version/randomizr)](https://cran.r-project.
 [![CRAN RStudio mirror
 downloads](https://cranlogs.r-pkg.org/badges/grand-total/randomizr?color=green)](https://r-pkg.org/pkg/randomizr)
 [![Build
-status](https://github.com/DeclareDesign/randomizr/workflows/R-CMD-check/badge.svg)](https://github.com/DeclareDesign/randomizr/actions)
-[![Code
-coverage](https://codecov.io/gh/DeclareDesign/randomizr/branch/master/graph/badge.svg?token=wwi1lF13Se)](https://codecov.io/gh/DeclareDesign/randomizr)
+status](https://github.com/DeclareDesign/randomizr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DeclareDesign/randomizr/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/DeclareDesign/randomizr/graph/badge.svg)](https://app.codecov.io/gh/DeclareDesign/randomizr)
 [![Replications](https://softwarecite.com/badge/randomizr)](https://softwarecite.com/package/randomizr)
 
-**randomizr** is designed to make conducting field, lab, survey, or
-online experiments easier by automating the random assignment process.
-Social and lab scientists conducting experiments need a process to
-assign individuals or units of observation to treatment or control
-wings. Common designs include simple random assignment, complete
-randomization, block randomization, cluster randomization, and blocked
-cluster randomization. **randomizr** automates all of these processes
-and assists scientists in doing transparent, replicable science. We
-offer **randomizr** for both
-[`R`](https://declaredesign.org/r/randomizr) and
-[`Stata`](https://declaredesign.org/stata/randomizr).
+**randomizr** generates random assignments for common experimental
+designs, including simple random assignment, complete random assignment,
+block random assignment, and cluster random assignment. A new function,
+`balanced_ra()`, is experimental: it draws assignment with tight targets
+while keeping each unit’s probability exact.
 
-### Installing randomizr for R
+### Installing randomizr
 
-Installing the latest stable version of **randomizr** in `R`:.
+Use the following to install the latest CRAN release of **randomizr**:
 
 ``` r
 install.packages("randomizr")
 ```
 
-### Getting started with randomizr for R
+### Getting started with randomizr
 
-**randomizr** has five main random assignment functions, corresponding
+**randomizr** has four main random assignment functions, corresponding
 to the common experimental designs listed above. You can read more about
 using each of these functions in our [reference
 library](https://declaredesign.org/r/randomizr/reference/) or by
 clicking on the function names: `simple_ra()`, `complete_ra()`,
-`block_ra()`, `cluster_ra()`, and `block_and_cluster_ra()`.
+`block_ra()`, and `cluster_ra()`. An additional experimental function,
+`balanced_ra()`, is included from version 2.0.1; see the [introduction
+article](https://declaredesign.org/r/randomizr/articles/balanced_ra.html).
 
-`complete_ra()` (Complete randomization) is the function that will be
-most appropriate for a large number of experimental situations: when you
-want to assign a fixed `m` units out of a population of `N` units to
-treatment:
+`complete_ra()`: Under complete random assignment, we assign a fixed `m`
+units out of a population of `N` units to treatment:
 
 ``` r
 library(randomizr)
@@ -57,9 +51,9 @@ table(Z)
 |----:|----:|
 |  50 |  50 |
 
-A more complicated design that, for example, assigns different numbers
-of clusters to three different treatments, makes use of `cluster_ra()`
-(Cluster randomization):
+`cluster_ra()`: Under cluster random assignment, whole clusters of units
+(like all the students in a classroom or everyone living in the same
+household) are assigned to treatment conditions together.
 
 ``` r
 # This makes a cluster variable: one unit in cluster "a", two in "b"...
@@ -75,27 +69,46 @@ table(Z, clust_var)
 
 |           |   a |   b |   c |   d |   e |   f |   g |   h |   i |   j |   k |   l |   m |   n |   o |
 |:----------|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|
-| control   |   1 |   0 |   0 |   0 |   0 |   0 |   0 |   0 |   9 |   0 |   0 |   0 |   0 |  14 |  15 |
-| placebo   |   0 |   0 |   3 |   0 |   5 |   0 |   7 |   0 |   0 |   0 |   0 |  12 |   0 |   0 |   0 |
-| treatment |   0 |   2 |   0 |   4 |   0 |   6 |   0 |   8 |   0 |  10 |  11 |   0 |  13 |   0 |   0 |
+| control   |   1 |   0 |   0 |   0 |   5 |   0 |   0 |   8 |   9 |   0 |   0 |   0 |   0 |   0 |   0 |
+| placebo   |   0 |   2 |   0 |   0 |   0 |   6 |   0 |   0 |   0 |   0 |  11 |   0 |  13 |   0 |   0 |
+| treatment |   0 |   0 |   3 |   4 |   0 |   0 |   7 |   0 |   0 |  10 |   0 |  12 |   0 |  14 |  15 |
+
+`block_ra()`: Under block random assignment, complete random assignment
+is used within blocks.
+
+``` r
+# This makes a cluster variable: one unit in cluster "a", two in "b"...
+block_var <- rep(letters[1:10], times = 4)
+
+Z <- block_ra(
+  blocks = block_var
+  )
+table(Z, block_var)
+```
+
+|     |   a |   b |   c |   d |   e |   f |   g |   h |   i |   j |
+|:----|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|
+| 0   |   2 |   2 |   2 |   2 |   2 |   2 |   2 |   2 |   2 |   2 |
+| 1   |   2 |   2 |   2 |   2 |   2 |   2 |   2 |   2 |   2 |   2 |
+
+`balanced_ra()`: Under balanced assignment, units are assigned to ensure
+expected totals are hit tightly.
+
+``` r
+# This assigns exactly three of six units to treatment with either 1 assigned in block 1 and 2 in block 2 or 2 in block 1 and 1 in block 2
+set.seed(1)
+blocks <- c("a", "a", "a", "b", "b", "b")
+
+table(balanced_ra(blocks = blocks), blocks)
+```
+
+|     |   a |   b |
+|:----|----:|----:|
+| 0   |   2 |   1 |
+| 1   |   1 |   2 |
 
 For more information about all of **randomizr**’s functionality, please
 see our [online
 tutorial](https://declaredesign.org/r/randomizr/articles/randomizr_vignette.html)
-
-### randomizr for Stata
-
-Installing the latest stable version of **randomizr** from ssc is easy:
-
-``` r
-ssc install randomizr
-```
-
-If you would like to install the latest development release directly
-from GitHub, run the following code:
-
-``` r
-net install randomizr, from(https://raw.githubusercontent.com/DeclareDesign/strandomizr/master/) replace
-```
 
 Happy randomizing!

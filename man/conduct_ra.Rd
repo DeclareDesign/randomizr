@@ -2,7 +2,7 @@
 % Please edit documentation in R/declare_ra.R
 \name{conduct_ra}
 \alias{conduct_ra}
-\title{Conduct a random assignment}
+\title{Conduct a Random Assignment}
 \usage{
 conduct_ra(
   declaration = NULL,
@@ -15,6 +15,7 @@ conduct_ra(
   prob = NULL,
   prob_unit = NULL,
   prob_each = NULL,
+  prob_unit_each = NULL,
   block_m = NULL,
   block_m_each = NULL,
   block_prob = NULL,
@@ -22,60 +23,87 @@ conduct_ra(
   num_arms = NULL,
   conditions = NULL,
   simple = FALSE,
+  ra_type = NULL,
+  formula = NULL,
   permutation_matrix = NULL,
-  check_inputs = TRUE
+  check_inputs = TRUE,
+  data = NULL
 )
 }
 \arguments{
-\item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
+\item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}()}. Supply either a declaration or the design arguments listed below, which are the ones \code{declare_ra()} takes: given those, \code{conduct_ra} builds a declaration internally and draws one assignment from it. (optional)}
 
-\item{N}{The number of units. N must be a positive integer. (required)}
+\item{N}{The number of units. A positive integer. Optional when
+\code{data}, \code{formula}, or the length of \code{prob_unit} (or
+\code{blocks}, or \code{clusters}) identifies N.}
 
-\item{blocks}{A vector of length N that indicates which block each unit belongs to.}
+\item{blocks}{A vector of length N indicating which block each unit belongs to, or, when \code{data} is supplied, the name of the column holding it. Supply to use blocked random assignment. (optional)}
 
-\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N indicating which cluster each unit belongs to, or, when \code{data} is supplied, the name of the column holding it. Supply to use cluster random assignment. (optional)}
 
-\item{m}{Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. In a blocked design, exactly m units in each block will be treated. (optional)}
+\item{m}{Use for a two-arm design: exactly \code{m} units (or clusters) are assigned to treatment. In a blocked design, exactly \code{m} units in each block are treated. (optional)}
 
-\item{m_unit}{Use for a two-arm trial. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks.}
+\item{m_unit}{Use for a two-arm trial. A vector of length N; a single number is refused, since that is what \code{m} is for. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. When \code{data} is supplied, names a column of it. (optional)}
 
-\item{m_each}{Use for a multi-arm design in which the values of m_each determine the number of units (or clusters) assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many units (or clusters) should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)}
+\item{m_each}{Use for a multi-arm design. A numeric vector giving the number of units (or clusters) assigned to each condition; must sum to N. (optional)}
 
-\item{prob}{Use for a two-arm design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be assigned to treatment and with probability prob, ceiling(N*prob) units (or clusters) will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)}
+\item{prob}{Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units (or clusters) are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. A single number between 0 and 1; use \code{prob_unit} to let it vary across units. (optional)}
 
-\item{prob_unit}{Use for a two arm design. Must of be of length N. Under simple random assignment, can be different for each unit or cluster.  Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks.}
+\item{prob_unit}{Use for a two-arm design. Of length N. Under simple random assignment, may differ by unit or cluster. Under complete random assignment, must be constant across units. Under blocked random assignment, must be constant within blocks. Under balanced assignment (\code{ra_type = "balanced"}), may differ by unit. A single number is refused on every path, including the balanced one: use \code{prob}. When \code{data} is supplied, names a column of it. (optional)}
 
-\item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
+\item{prob_each}{Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count in each condition may differ slightly from draw to draw, but the overall probability is exactly \code{prob_each}. Under balanced assignment the same vector is expanded to one row per unit. (optional)}
 
-\item{block_m}{Use for a two-arm design in which block_m describes the number of units to assign to treatment within each block. Note that in previous versions of randomizr, block_m behaved like block_m_each.}
+\item{prob_unit_each}{Use for balanced assignment with two or more arms. A numeric matrix with one row per unit and one column per condition, giving each unit's probability of assignment to each condition. Rows must sum to 1. Supplying this argument selects \code{\link{balanced_ra}()}. When \code{data} is supplied, build it from columns, as in \code{cbind(p_a, p_b)}. (optional)}
 
-\item{block_m_each}{Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of conditions, if specified.}
+\item{block_m}{Use for a two-arm blocked design: a vector giving the number of units to assign to treatment within each block, in the order of \code{sort(unique(blocks))}. (optional)}
 
-\item{block_prob}{Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Differs from prob in that the probability of assignment can vary across blocks.}
+\item{block_m_each}{Use for a multi-arm blocked design. A matrix with one row per block and one column per treatment arm giving the number of units assigned to each condition within each block. Rows respect the ordering of \code{sort(unique(blocks))}. (optional)}
 
-\item{block_prob_each}{Use for a multi-arm design in which the values of block_prob_each determine the probabilities of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilities of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.}
+\item{block_prob}{Use for a two-arm blocked design in which the treatment probability varies across blocks. In the order of \code{sort(unique(blocks))}. (optional)}
 
-\item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
+\item{block_prob_each}{Use for a multi-arm blocked design in which treatment probabilities vary across blocks. A matrix with one row per block and one column per arm; each row must sum to 1. (optional)}
 
-\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
+\item{num_arms}{The number of treatment arms. If unspecified, determined from the other arguments. (optional)}
 
-\item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When \code{simple = TRUE}, please do not specify m, m_each, block_m, or block_m_each. If \code{simple = TRUE}, \code{prob} and \code{prob_each} may vary by unit.}
+\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)}
 
-\item{permutation_matrix}{for custom random assignment procedures.}
+\item{simple}{Logical, defaults to \code{FALSE}. If \code{TRUE}, simple random assignment is used. Do not specify \code{m}, \code{m_each}, \code{block_m}, or \code{block_m_each} when \code{simple = TRUE}. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{ra_type}{Optional override. The only accepted value is \code{"balanced"}, which selects \code{\link{balanced_ra}()} and allows \code{prob_unit} to vary across units. Other designs are inferred from the arguments supplied; they cannot be forced with this argument. (optional)}
+
+\item{formula}{For balanced assignment. A model formula whose model matrix is the balancing matrix \eqn{X} in the cube method, e.g. \code{~ x + B}. The intercept is the count constraint. Do not also pass \code{blocks}. Supplying \code{formula} selects \code{\link{balanced_ra}()}. Two-arm only. The formula's variables are taken from \code{data} when it is supplied. They are looked up once, when the design is declared; \code{\link{conduct_ra}()} reuses the matrix built then, so a later change to those variables does not change the declared design. (optional)}
+
+\item{permutation_matrix}{For random assignment procedures that none of the other arguments can describe. A matrix with one row per unit and one column per assignment the procedure can produce, whose entries are condition names. Supplying it declares a design that draws one of those columns at random with equal probability, and the probabilities of assignment are read off the matrix by counting how often each unit appears in each condition. Build the matrix by calling your own assignment function many times and binding the results, or with \code{\link{obtain_permutation_matrix}()} for a design randomizr already knows. Ignored if \code{NULL}. (optional)}
+
+\item{check_inputs}{Logical. Whether to verify before declaring that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that block-level arguments have one entry per block, and so on. Defaults to \code{TRUE}. \code{FALSE} skips the checking only: \code{num_arms} and \code{conditions} are still derived from the other arguments. It is skipped entirely when \code{permutation_matrix} is supplied. (optional)}
+
+\item{data}{A data frame holding the design's variables. When supplied, every argument that carries one value per unit names columns of it and is looked up there and nowhere else: \code{blocks}, \code{clusters}, \code{m_unit}, \code{prob_unit}, \code{prob_unit_each}, and the variables in \code{formula}. Anything they name that is not a column is an error rather than a fall-through to the calling environment. A bare column name is the ordinary case; any expression works so long as every variable in it is a column, so \code{blocks = interaction(region, year)} and \code{prob_unit_each = cbind(p_a, p_b)} are fine and \code{blocks = df$bl} is not, because it names \code{df}. A string naming a column is also accepted. \code{N} defaults to \code{nrow(data)}. A declaration outlives the frame it was written in, so this is how to make it say exactly which variables it is built from. \code{permutation_matrix} is not resolved this way: it has one row per unit but enumerates assignments rather than describing units. When \code{data} is omitted, everything resolves in the calling environment as before. \code{data} itself is not stored in the declaration; the variables it supplies are. (optional)}
+}
+\value{
+A vector of length N giving the treatment condition of each unit,
+  numeric in a two-arm design and a factor (ordered by \code{conditions}) in
+  a multi-arm design.
 }
 \description{
-You can either give conduct_ra() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.
+\code{conduct_ra} draws one random assignment from a design. Give it a
+declaration made by \code{\link{declare_ra}()}, or describe the design inline
+with the same arguments \code{declare_ra()} takes. Declaring first pays off
+when the same design is drawn repeatedly, or when the assignment
+probabilities are needed later by \code{\link{obtain_condition_probabilities}()}.
 }
 \examples{
+# Declare the design once, then draw from it
 declaration <- declare_ra(N = 100, m_each = c(30, 30, 40))
+
 Z <- conduct_ra(declaration = declaration)
 table(Z)
 
-# equivalent to
-
+# Equivalent, and convenient for a one-off assignment: describe the design
+# inline and skip the declaration
 Z <- conduct_ra(N = 100, m_each = c(30, 30, 40))
 table(Z)
 
+}
+\seealso{
+\code{\link{declare_ra}()}, \code{\link{obtain_condition_probabilities}()}
 }

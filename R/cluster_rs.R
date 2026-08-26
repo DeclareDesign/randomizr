@@ -1,24 +1,33 @@
 #' Cluster Random Sampling
 #'
-#' cluster_rs implements a random sampling procedure in which groups of units are sampled together (as a cluster). This function conducts complete random sampling at the cluster level, unless simple = TRUE, in which case \code{\link{simple_rs}} analogues are used.
+#' \code{cluster_rs} draws whole groups of units (clusters) into the sample, so that either every unit in a cluster is sampled or none of them is. Use it when the sampling frame lists groups rather than individuals, for example when villages are drawn and then everyone in the drawn villages is interviewed. Because units come in whole clusters, the effective sample size is closer to the number of clusters than to the number of units.
 #'
-#' @param clusters A vector of length N that indicates which cluster each unit belongs to.
-#' @param n Use for a design in which n clusters are sampled. (optional)
-#' @param n_unit unique(n_unit) will be passed to \code{n}. Must be the same for all units (optional)
-#' @param prob Use for a design in which either floor(N_clusters*prob) or ceiling(N_clusters*prob) clusters are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N_clusters*prob) clusters will be sampled and with probability prob, ceiling(N_clusters*prob) clusters will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
-#' @param prob_unit unique(prob_unit) will be passed to the prob argument and must be the same for all units.
-#' @param simple logical, defaults to FALSE. If TRUE, simple random sampling of clusters. When simple = TRUE, please do not specify n.
-#' @param check_inputs logical. Defaults to TRUE.
+#' By default the clusters are drawn by complete random sampling, so a fixed number of clusters is sampled on every draw. Setting \code{simple = TRUE} draws each cluster independently instead, using \code{\link{simple_rs}()}.
 #'
-#' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
+#' @seealso \code{\link{complete_rs}()}, \code{\link{strata_and_cluster_rs}()}, \code{\link{cluster_ra}()}, \code{\link{cluster_rs_probabilities}()}
+#'
+#' @param clusters A vector of length N indicating which cluster each unit belongs to. (required)
+#' @param n Use for a design in which exactly \code{n} clusters are sampled. (optional)
+#' @param n_unit \code{unique(n_unit)} will be passed to \code{n}; must be the same for all units and of length N. (optional)
+#' @param prob Use for a design in which either \code{floor(N_clusters*prob)} or \code{ceiling(N_clusters*prob)} clusters are sampled. Which of the two is used is itself random: the ceiling is drawn with probability equal to the fractional part of \code{N_clusters*prob} and the floor otherwise, which makes each cluster's probability of inclusion exactly \code{prob}. Must be a real number between 0 and 1 inclusive. (optional)
+#' @param prob_unit \code{unique(prob_unit)} will be passed to \code{prob}; must be the same for all units and of length N. (optional)
+#' @param simple Logical, defaults to \code{FALSE}. If \code{TRUE}, clusters are drawn independently (simple random sampling of clusters), so the number of sampled clusters varies from draw to draw. Do not specify \code{n} when \code{simple = TRUE}. (optional)
+#' @param check_inputs Logical. Whether to verify before sampling that the arguments are internally consistent: that \code{n} does not exceed the number of clusters, that probabilities lie between 0 and 1, and so on. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many samples from arguments that have already been verified; declaring the design once with \code{\link{declare_rs}()} and drawing from it with \code{\link{draw_rs}()} does this for you. (optional)
+#'
+#' @return A numeric vector of length N indicating whether each unit is sampled (1) or not (0). Every unit in a cluster receives the same value.
 #' @export
 #' @examples
-#' clusters <- rep(letters, times=1:26)
+#' # Ten clusters, of sizes 1 through 10
+#' clusters <- rep(letters[1:10], times = 1:10)
 #'
 #' S <- cluster_rs(clusters = clusters)
 #' table(S, clusters)
 #'
-#' S <- cluster_rs(clusters = clusters, n = 13)
+#' S <- cluster_rs(clusters = clusters, n = 4)
+#' table(S, clusters)
+#'
+#' # Each cluster drawn independently, so the number sampled varies
+#' S <- cluster_rs(clusters = clusters, prob = 0.4, simple = TRUE)
 #' table(S, clusters)
 #'
 cluster_rs <- function(clusters = NULL,
@@ -32,16 +41,20 @@ cluster_rs <- function(clusters = NULL,
     .invoke_check(check_samplr_arguments_new)
   }
   
+  if (anyNA(clusters)) stop("`clusters` must not contain NA.", call. = FALSE)
+
   n_per_clust <- tapply(clusters, clusters, length)
   unique_clust <- names(n_per_clust)
   n_clust <- length(unique_clust)
-  
+
+  # as.vector: tapply returns a 1-D array, and handing an array to
+  # complete_rs() trips R's "recycling array" deprecation in its arithmetic.
   if (!is.null(prob_unit)) {
-    prob_unit <- tapply(prob_unit, INDEX = clusters, FUN = unique)
+    prob_unit <- as.vector(tapply(prob_unit, INDEX = clusters, FUN = unique))
   }
   
   if (!is.null(n_unit)) {
-    n_unit <- tapply(n_unit, INDEX = clusters, FUN = unique)
+    n_unit <- as.vector(tapply(n_unit, INDEX = clusters, FUN = unique))
   }
   
   if (simple) {
@@ -64,23 +77,32 @@ cluster_rs <- function(clusters = NULL,
     assignment[order(unlist(split(seq_along(clusters), clusters), FALSE, FALSE))]
   return(assignment)
 }
-#' Inclusion Probabilities: Cluster Sampling
+#' Inclusion probabilities: Cluster Sampling
+#'
+#' Returns each unit's probability of being sampled when whole clusters are
+#' drawn. Every unit in a cluster shares its cluster's probability.
+#'
+#' These are the quantities inverse-probability weights are built from: weight
+#' each sampled unit by the reciprocal of its inclusion probability, which
+#' \code{\link{obtain_inclusion_probabilities}()} extracts for you.
+#'
+#' @seealso \code{\link{cluster_rs}()}
 #'
 #' @inheritParams cluster_rs
 #'
-#' @return A vector length N indicating the probability of being sampled.
+#' @return A numeric vector of length N giving each unit's probability of being included in the sample. Every unit in a cluster shares one probability.
 #'
 #' @examples
 #'
-#' # Two Group Designs
-#' clusters <- rep(letters, times = 1:26)
+#' clusters <- rep(letters[1:10], times = 1:10)
+#'
 #' probs <- cluster_rs_probabilities(clusters = clusters)
 #' table(probs, clusters)
 #'
-#' prob_mat <- cluster_rs_probabilities(clusters = clusters, n = 10)
+#' probs <- cluster_rs_probabilities(clusters = clusters, n = 4)
 #' table(probs, clusters)
 #'
-#' prob_mat <- cluster_rs_probabilities(clusters = clusters, prob = .3)
+#' probs <- cluster_rs_probabilities(clusters = clusters, prob = 0.3)
 #' table(probs, clusters)
 #'
 #'
@@ -96,16 +118,21 @@ cluster_rs_probabilities <-
     if (check_inputs)
       .invoke_check(check_samplr_arguments_new)
     
+    if (anyNA(clusters)) stop("`clusters` must not contain NA.", call. = FALSE)
+
     n_per_clust <- tapply(clusters, clusters, length)
     unique_clust <- names(n_per_clust)
     n_clust <- length(unique_clust)
-    
-    
+
+    # as.vector, not simplify = FALSE: a list here reached is_constant() in
+    # complete_rs_probabilities() and died with "comparison of these types is
+    # not implemented", which made `prob_unit` and `n_unit` unusable end to
+    # end (probabilities, declarations, even print on the declaration).
     if (!is.null(prob_unit)) {
-      prob_unit <- tapply(prob_unit, INDEX = clusters, FUN = unique, simplify = FALSE)
+      prob_unit <- as.vector(tapply(prob_unit, INDEX = clusters, FUN = unique))
     }
     if (!is.null(n_unit)) {
-      n_unit <- tapply(n_unit, INDEX = clusters, FUN = unique, simplify = FALSE)
+      n_unit <- as.vector(tapply(n_unit, INDEX = clusters, FUN = unique))
     }
     
     if (simple) {

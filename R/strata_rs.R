@@ -1,44 +1,54 @@
 #' Stratified Random Sampling
 #'
-#' strata_rs implements a random sampling procedure in which units that are grouped into strata defined by covariates are sample using complete random sampling within stratum For example, imagine that 50 of 100 men are sampled and 75 of 200 women are sampled.
+#' \code{strata_rs} draws a sample separately within each of several groups (strata) defined by covariates, using complete random sampling inside every stratum. For example, 50 of 100 men and 75 of 200 women might be sampled. Stratifying guarantees how much of the sample comes from each group, which keeps small groups from being underrepresented by chance.
 #'
-#' @param strata A vector of length N that indicates which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)
-#' @param prob Use for a design in which either floor(N_stratum*prob) or ceiling(N_stratum*prob) units are sampled within each stratum. The probability of  being sampled is exactly prob because with probability 1-prob, floor(N_stratum*prob) units will be sampled and with probability prob, ceiling(N_stratum*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)
-#' @param prob_unit Must of be of length N. tapply(prob_unit, strata, unique) will be passed to \code{strata_prob}.
-#' @param n Use for a design in which the scalar n describes the fixed number of units to sample in each stratum. This number does not vary across strata.
-#' @param n_unit Must be of length N. tapply(m_unit, strata, unique) will be passed to \code{strata_n}.
-#' @param strata_n Use for a design in which the numeric vector strata_n describes the number of units to sample within each stratum.
-#' @param strata_prob Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.
-#' @param check_inputs logical. Defaults to TRUE.
+#' The number sampled per stratum can be left to the function, set as a common count or probability across strata (\code{n}, \code{prob}), or set stratum by stratum (\code{strata_n}, \code{strata_prob}). When the probability varies across strata the sample is not self-weighting, and \code{\link{strata_rs_probabilities}()} gives the inclusion probabilities needed to weight it.
 #'
-#' @return A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
+#' @seealso \code{\link{complete_rs}()}, \code{\link{strata_and_cluster_rs}()}, \code{\link{block_ra}()}, \code{\link{strata_rs_probabilities}()}
+#'
+#' @param strata A vector of length N indicating which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)
+#' @param prob Use for a design in which either \code{floor(N_stratum*prob)} or \code{ceiling(N_stratum*prob)} units are sampled within each stratum. Which of the two is used is itself random: the ceiling is drawn with probability equal to the fractional part of \code{N_stratum*prob} and the floor otherwise, which makes each unit's probability of inclusion exactly \code{prob}. Must be a real number between 0 and 1 inclusive. (optional)
+#' @param prob_unit Must be of length N. \code{tapply(prob_unit, strata, unique)} will be passed to \code{strata_prob}, so it must be constant within each stratum. (optional)
+#' @param n Use for a design in which the scalar \code{n} gives the fixed number of units to sample in every stratum. This count does not vary across strata. (optional)
+#' @param n_unit Must be of length N. \code{tapply(n_unit, strata, unique)} will be passed to \code{strata_n}, so it must be constant within each stratum. (optional)
+#' @param strata_n Use for a design in which the numeric vector \code{strata_n} gives the number of units to sample within each stratum. Must be as long as the number of strata, in the same order as \code{sort(unique(strata))}. (optional)
+#' @param strata_prob Use for a design in which \code{strata_prob} gives the probability of being sampled within each stratum. Must be in the same order as \code{sort(unique(strata))}. Differs from \code{prob} in that the probability of being sampled can vary across strata. (optional)
+#' @param check_inputs Logical. Whether to verify before sampling that the arguments are internally consistent: that counts do not exceed the stratum sizes, that probabilities lie between 0 and 1, that stratum-level arguments have one entry per stratum, and so on. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many samples from arguments that have already been verified; declaring the design once with \code{\link{declare_rs}()} and drawing from it with \code{\link{draw_rs}()} does this for you. (optional)
+#'
+#' @return A numeric vector of length N indicating whether each unit is sampled (1) or not (0).
 #' @export
 #'
 #' @examples
 #'
-#' strata <- rep(c("A", "B","C"), times = c(50, 100, 200))
-#' Z <- strata_rs(strata = strata)
-#' table(strata, Z)
+#' strata <- rep(c("A", "B", "C"), times = c(50, 100, 200))
 #'
-#' Z <- strata_rs(strata = strata, prob = .3)
-#' table(strata, Z)
+#' S <- strata_rs(strata = strata)
+#' table(strata, S)
 #'
-#' Z <- strata_rs(strata = strata, n = 20)
-#' table(strata, Z)
+#' # The same probability in every stratum
+#' S <- strata_rs(strata = strata, prob = 0.3)
+#' table(strata, S)
 #'
-#' Z <- strata_rs(strata = strata, strata_prob = c(.1, .2, .3))
-#' table(strata, Z)
-#' 
-#' Z <- strata_rs(strata = strata, 
-#'                prob_unit = rep(c(.1, .2, .3), times = c(50, 100, 200)))
-#' table(strata, Z)
+#' # The same count in every stratum
+#' S <- strata_rs(strata = strata, n = 20)
+#' table(strata, S)
 #'
-#' Z <- strata_rs(strata = strata, strata_n = c(20, 30, 40))
-#' table(strata, Z)
-#' 
-#' Z <- strata_rs(strata = strata, 
+#' # A different probability in each stratum, in the order of sort(unique(strata))
+#' S <- strata_rs(strata = strata, strata_prob = c(0.1, 0.2, 0.3))
+#' table(strata, S)
+#'
+#' # The same, specified unit by unit
+#' S <- strata_rs(strata = strata,
+#'                prob_unit = rep(c(0.1, 0.2, 0.3), times = c(50, 100, 200)))
+#' table(strata, S)
+#'
+#' # A different count in each stratum
+#' S <- strata_rs(strata = strata, strata_n = c(20, 30, 40))
+#' table(strata, S)
+#'
+#' S <- strata_rs(strata = strata,
 #'                n_unit = rep(c(20, 30, 40), times = c(50, 100, 200)))
-#' table(strata, Z)
+#' table(strata, S)
 #'
 #'
 strata_rs <- function(strata = NULL,
@@ -49,102 +59,47 @@ strata_rs <- function(strata = NULL,
                       strata_n = NULL,
                       strata_prob = NULL,
                       check_inputs = TRUE) {
-  if (check_inputs) {
-    .invoke_check(check_samplr_arguments_new)
-  } else{
-    N_per_stratum <- tapply(strata, strata, length)
-    attributes(N_per_stratum) <- NULL
-  }
-  
-  strata_spots <-
-    unlist(split(seq_along(strata), strata), FALSE, FALSE)
-  
-  
-  if(!is.null(prob_unit)){
-    strata_prob <- tapply(prob_unit, strata, unique)
-  }
-  
-  if(!is.null(n_unit)){
-    strata_n <- tapply(n_unit, strata, unique)
-  }
-  
-  # Setup: obtain number of arms and conditions
-  
-  if (is.null(prob) &&
-      is.null(strata_n) && is.null(strata_prob) && is.null(n)) {
-    prob <- 0.5
-  }
-  
-  # Case 1: prob is specified
-  if (!is.null(prob)) {
-    assign_list <-
-      mapply(
-        FUN = complete_rs,
-        N = N_per_stratum,
-        MoreArgs = list(prob = prob,
-                        check_inputs = FALSE),
-        SIMPLIFY = FALSE
-      )
-    
-    assignment <-
-      unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
-    return(assignment)
-  }
-  
-  # Case 2: strata_n is specified
-  
-  if (!is.null(n)) {
-    strata_n <- rep(n, length(N_per_stratum))
-  }
-  
-  if (!is.null(strata_n)) {
-    assign_list <-
-      mapply(
-        FUN = complete_rs,
-        N = N_per_stratum,
-        n = strata_n,
-        MoreArgs = list(check_inputs = FALSE),
-        SIMPLIFY = FALSE
-      )
-    
-    assignment <-
-      unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
-    return(assignment)
-  }
-  
-  # Case 3: strata_prob is specified
-  if (!is.null(strata_prob)) {
-    assign_list <-
-      mapply(
-        FUN = complete_rs,
-        N = N_per_stratum,
-        prob = strata_prob,
-        MoreArgs = list(check_inputs = FALSE),
-        SIMPLIFY = FALSE
-      )
-    
-    assignment <-
-      unlist(assign_list, FALSE, FALSE)[order(strata_spots)]
-    return(assignment)
-  }
+  if (check_inputs) .invoke_check(check_samplr_arguments_new)
+  block_ra(
+    blocks       = strata,
+    prob         = prob,
+    prob_unit    = prob_unit,
+    m            = n,
+    m_unit       = n_unit,
+    block_m      = strata_n,
+    block_prob   = strata_prob,
+    conditions   = c(0, 1),
+    num_arms     = 2L,
+    check_inputs = FALSE
+  )
 }
 
-#' Inclusion Probabilities: Stratified Random Sampling
+#' Inclusion probabilities: Stratified Random Sampling
+#'
+#' Returns each unit's probability of being sampled under stratified random
+#' sampling. Units in different strata routinely have different probabilities, and a
+#' sample drawn that way is not self-weighting.
+#'
+#' These are the quantities inverse-probability weights are built from: weight
+#' each sampled unit by the reciprocal of its inclusion probability, which
+#' \code{\link{obtain_inclusion_probabilities}()} extracts for you.
+#'
+#' @seealso \code{\link{strata_rs}()}
 #'
 #' @inheritParams strata_rs
-#' @return A vector length N indicating the probability of being sampled.
+#' @return A numeric vector of length N giving each unit's probability of being included in the sample.
 #'
 #' @examples
 #'
-#' strata <- rep(c("A", "B","C"), times = c(50, 100, 200))
-
+#' strata <- rep(c("A", "B", "C"), times = c(50, 100, 200))
+#'
 #' probs <- strata_rs_probabilities(strata = strata)
 #' table(strata, probs)
 #'
-#' probs <- strata_rs_probabilities(strata = strata, prob = .2)
+#' probs <- strata_rs_probabilities(strata = strata, prob = 0.2)
 #' table(strata, probs)
 #'
-#' probs <- strata_rs_probabilities(strata = strata, strata_prob = c(.1, .2, .3))
+#' probs <- strata_rs_probabilities(strata = strata, strata_prob = c(0.1, 0.2, 0.3))
 #' table(strata, probs)
 #'
 #' probs <- strata_rs_probabilities(strata = strata, strata_n = c(10, 40, 70))
@@ -159,73 +114,22 @@ strata_rs_probabilities <- function(strata = NULL,
                                     strata_n = NULL,
                                     strata_prob = NULL,
                                     check_inputs = TRUE) {
-  if (check_inputs) {
-    .invoke_check(check_samplr_arguments_new)
-  } else{
-    N_per_stratum <- tapply(strata, strata, length)
-    attributes(N_per_stratum) <- NULL
+  if (check_inputs) .invoke_check(check_samplr_arguments_new)
+  if (!is.null(strata_prob) && !is.numeric(strata_prob)) {
+    warning("Could not calculate sampling probabilities")
+    return(invisible(NULL))
   }
-  
-  strata_spots <-
-    unlist(split(seq_along(strata), strata), FALSE, FALSE)
-  
-  if(!is.null(prob_unit)){
-    strata_prob <- tapply(prob_unit, strata, unique)
-  }
-  
-  if(!is.null(n_unit)){
-    strata_n <- tapply(n_unit, strata, unique)
-  }
-  
-  if (is.null(prob) &&
-      is.null(strata_n) && is.null(strata_prob) && is.null(n)) {
-    prob <- 0.5
-  }
-  
-  # Case 1: prob is specified
-  if (is.numeric(prob)) {
-    prob_vec <- rep_len(prob, length(strata))
-    return(prob_vec)
-  }
-  
-  
-  # Case 2: strata_n is specified, or n is
-  if (is.numeric(n) && !is.numeric(strata_n)) {
-    strata_n <- rep_len(n, length(N_per_stratum))
-  }
-  
-  if (is.numeric(strata_n)) {
-    prob_vec_list <-
-      mapply(
-        FUN = complete_rs_probabilities,
-        N = N_per_stratum,
-        n = strata_n,
-        MoreArgs = list(prob = prob,
-                        check_inputs = FALSE),
-        SIMPLIFY = FALSE
-      )
-    
-    prob_vec <-
-      unlist(prob_vec_list, FALSE, FALSE)[order(strata_spots)]
-    return(prob_vec)
-  }
-  
-  # Case 3: strata_prob is specified
-  if (is.numeric(strata_prob)) {
-    prob_vec_list <-
-      mapply(
-        FUN = complete_rs_probabilities,
-        N = N_per_stratum,
-        prob = strata_prob,
-        MoreArgs = list(check_inputs = FALSE),
-        SIMPLIFY = FALSE
-      )
-    
-    prob_vec <-
-      unlist(prob_vec_list, FALSE, FALSE)[order(strata_spots)]
-    return(prob_vec)
-  }
-  
-  warning("Could not calculate sampling probabilities")
-  invisible(NULL)
+  prob_mat <- block_ra_probabilities(
+    blocks       = strata,
+    prob         = prob,
+    prob_unit    = prob_unit,
+    m            = n,
+    m_unit       = n_unit,
+    block_m      = strata_n,
+    block_prob   = strata_prob,
+    conditions   = c(0, 1),
+    num_arms     = 2L,
+    check_inputs = FALSE
+  )
+  prob_mat[, "prob_1"]
 }

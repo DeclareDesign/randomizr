@@ -145,7 +145,7 @@ test_that("_each",{
   d <- declare_rs(strata = strata, n_unit = rep(c(20, 20, 25), c(50, 100, 200)))
   
   expect_equal(table(strata, draw_rs(d)), 
-               structure(c(30L, 80L, 175L, 20L, 20L, 25L), .Dim = 3:2, .Dimnames = list(
+               structure(c(30L, 80L, 175L, 20L, 20L, 25L), dim = 3:2, dimnames = list(
                  strata = c("A", "B", "C"), c("0", "1")), class = "table"))
   
   expect_error(

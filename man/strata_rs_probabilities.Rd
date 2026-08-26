@@ -2,7 +2,7 @@
 % Please edit documentation in R/strata_rs.R
 \name{strata_rs_probabilities}
 \alias{strata_rs_probabilities}
-\title{Inclusion Probabilities: Stratified Random Sampling}
+\title{Inclusion probabilities: Stratified Random Sampling}
 \usage{
 strata_rs_probabilities(
   strata = NULL,
@@ -16,41 +16,52 @@ strata_rs_probabilities(
 )
 }
 \arguments{
-\item{strata}{A vector of length N that indicates which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)}
+\item{strata}{A vector of length N indicating which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)}
 
-\item{prob}{Use for a design in which either floor(N_stratum*prob) or ceiling(N_stratum*prob) units are sampled within each stratum. The probability of  being sampled is exactly prob because with probability 1-prob, floor(N_stratum*prob) units will be sampled and with probability prob, ceiling(N_stratum*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
+\item{prob}{Use for a design in which either \code{floor(N_stratum*prob)} or \code{ceiling(N_stratum*prob)} units are sampled within each stratum. Which of the two is used is itself random: the ceiling is drawn with probability equal to the fractional part of \code{N_stratum*prob} and the floor otherwise, which makes each unit's probability of inclusion exactly \code{prob}. Must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{prob_unit}{Must of be of length N. tapply(prob_unit, strata, unique) will be passed to \code{strata_prob}.}
+\item{prob_unit}{Must be of length N. \code{tapply(prob_unit, strata, unique)} will be passed to \code{strata_prob}, so it must be constant within each stratum. (optional)}
 
-\item{n}{Use for a design in which the scalar n describes the fixed number of units to sample in each stratum. This number does not vary across strata.}
+\item{n}{Use for a design in which the scalar \code{n} gives the fixed number of units to sample in every stratum. This count does not vary across strata. (optional)}
 
-\item{n_unit}{Must be of length N. tapply(m_unit, strata, unique) will be passed to \code{strata_n}.}
+\item{n_unit}{Must be of length N. \code{tapply(n_unit, strata, unique)} will be passed to \code{strata_n}, so it must be constant within each stratum. (optional)}
 
-\item{strata_n}{Use for a design in which the numeric vector strata_n describes the number of units to sample within each stratum.}
+\item{strata_n}{Use for a design in which the numeric vector \code{strata_n} gives the number of units to sample within each stratum. Must be as long as the number of strata, in the same order as \code{sort(unique(strata))}. (optional)}
 
-\item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
+\item{strata_prob}{Use for a design in which \code{strata_prob} gives the probability of being sampled within each stratum. Must be in the same order as \code{sort(unique(strata))}. Differs from \code{prob} in that the probability of being sampled can vary across strata. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Whether to verify before sampling that the arguments are internally consistent: that counts do not exceed the stratum sizes, that probabilities lie between 0 and 1, that stratum-level arguments have one entry per stratum, and so on. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many samples from arguments that have already been verified; declaring the design once with \code{\link{declare_rs}()} and drawing from it with \code{\link{draw_rs}()} does this for you. (optional)}
 }
 \value{
-A vector length N indicating the probability of being sampled.
+A numeric vector of length N giving each unit's probability of being included in the sample.
 }
 \description{
-Inclusion Probabilities: Stratified Random Sampling
+Returns each unit's probability of being sampled under stratified random
+sampling. Units in different strata routinely have different probabilities, and a
+sample drawn that way is not self-weighting.
+}
+\details{
+These are the quantities inverse-probability weights are built from: weight
+each sampled unit by the reciprocal of its inclusion probability, which
+\code{\link{obtain_inclusion_probabilities}()} extracts for you.
 }
 \examples{
 
-strata <- rep(c("A", "B","C"), times = c(50, 100, 200))
+strata <- rep(c("A", "B", "C"), times = c(50, 100, 200))
+
 probs <- strata_rs_probabilities(strata = strata)
 table(strata, probs)
 
-probs <- strata_rs_probabilities(strata = strata, prob = .2)
+probs <- strata_rs_probabilities(strata = strata, prob = 0.2)
 table(strata, probs)
 
-probs <- strata_rs_probabilities(strata = strata, strata_prob = c(.1, .2, .3))
+probs <- strata_rs_probabilities(strata = strata, strata_prob = c(0.1, 0.2, 0.3))
 table(strata, probs)
 
 probs <- strata_rs_probabilities(strata = strata, strata_n = c(10, 40, 70))
 table(strata, probs)
 
+}
+\seealso{
+\code{\link{strata_rs}()}
 }

@@ -20,6 +20,7 @@ ra_probabilities     <-
   function(this)
     UseMethod("ra_probabilities", this)
 
+#' @export
 ra_function.default <- function(this) {
   stop("You must provide a random assignment declaration created by declare_ra().")
 }
@@ -47,6 +48,7 @@ rs_probabilities     <-
   function(this)
     UseMethod("rs_probabilities", this)
 
+#' @export
 rs_function.default <- function(this) {
   stop("You must provide an random sampling object created by declare_rs().")
 }

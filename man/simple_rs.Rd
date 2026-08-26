@@ -7,21 +7,24 @@
 simple_rs(N, prob = NULL, prob_unit = NULL, check_inputs = TRUE, simple = TRUE)
 }
 \arguments{
-\item{N}{The number of units. N must be a positive integer. (required)}
+\item{N}{The number of units in the sampling frame. Must be a positive integer. (required)}
 
-\item{prob}{prob is the probability of being sampled must be a real number between 0 and 1 inclusive, and must be of length 1. (optional)}
+\item{prob}{The probability of being sampled; must be a real number between 0 and 1 inclusive and of length 1. (optional)}
 
-\item{prob_unit}{prob is the probability of being sampled must be a real number between 0 and 1 inclusive, and must be of length N. (optional)}
+\item{prob_unit}{The probability of being sampled for each unit; must be a real number between 0 and 1 inclusive and of length N. Because units are drawn independently, this probability may differ from unit to unit. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Whether to verify before sampling that the arguments are internally consistent: that probabilities lie between 0 and 1, that vectors are of length N, and that only one of \code{prob} and \code{prob_unit} is supplied. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many samples from arguments that have already been verified; declaring the design once with \code{\link{declare_rs}()} and drawing from it with \code{\link{draw_rs}()} does this for you. (optional)}
 
-\item{simple}{logical. internal use only.}
+\item{simple}{Logical. Internal use only; leave at its default. \code{simple_rs} always draws units independently, and this argument exists so that the argument checker knows as much. (optional)}
 }
 \value{
-A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
+A numeric vector of length N indicating whether each unit is sampled (1) or not (0).
 }
 \description{
-simple_rs implements a random sampling procedure in which units are independently sampled. Because units are sampled independently, the number of units that are sampled can vary from sample to sample. For most applications in which the number of units in the sampling frame is known in advance, \code{\link{complete_rs}} is better because the number of units sampled is fixed across sampled.\cr\cr
+\code{simple_rs} draws a sample in which every unit is included or not independently of the others, as a separate coin flip. Because the draws are independent, the size of the realized sample varies from draw to draw. For most applications in which the size of the sampling frame is known in advance, \code{\link{complete_rs}()} is preferable because it fixes the number of units sampled.
+}
+\details{
+If \code{prob} is not specified, each unit is sampled with probability 0.5.
 }
 \examples{
 
@@ -31,4 +34,11 @@ table(S)
 S <- simple_rs(N = 100, prob = 0.3)
 table(S)
 
+# A probability of inclusion that varies unit by unit
+S <- simple_rs(N = 100, prob_unit = seq(0.1, 0.9, length.out = 100))
+table(S)
+
+}
+\seealso{
+\code{\link{complete_rs}()}, \code{\link{strata_rs}()}, \code{\link{simple_ra}()}, \code{\link{simple_rs_probabilities}()}
 }

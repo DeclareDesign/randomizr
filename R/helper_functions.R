@@ -4,6 +4,10 @@
 
 
 
+# `%||%` entered base R in 4.4.0. randomizr Depends on R >= 3.5.0, so define
+# the same one-liner here and use it internally (no rlang dependency).
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
 # Call check() with all formal arguments of the invoking function
 # reinsert results into that environment
 .invoke_check <- function(check) {
@@ -16,6 +20,76 @@
 }
 
 #f <- function(N,n) {.invoke_check(function(a) list(n = a[["n"]] + 1)); n}
+
+ra_conflict_args <- c(
+  "prob",
+  "prob_each",
+  "prob_unit",
+  "m",
+  "m_unit",
+  "m_each",
+  "block_prob",
+  "block_prob_each",
+  "block_m",
+  "block_m_each"
+)
+
+#' Fill in num_arms and conditions when the caller left them implicit
+#'
+#' Every assignment function needs both, and neither can be recovered from the
+#' other arguments at the point of use: which one is implied depends on which of
+#' the ten mutually exclusive design arguments was supplied, and whether it is a
+#' block argument, an each argument, or a matrix. The validator used to derive
+#' them as a side effect, which meant \code{check_inputs = FALSE} skipped the
+#' derivation along with the validation and left the function without values it
+#' cannot run without. Both paths call this now.
+#'
+#' @keywords internal
+#' @noRd
+derive_arms_and_conditions <- function(all_args) {
+  num_arms <- all_args$num_arms
+  conditions <- all_args$conditions
+
+  specified_args <- Filter(
+    Negate(is.null),
+    all_args[intersect(ra_conflict_args, names(all_args))]
+  )
+
+  if (is.null(num_arms)) {
+    num_arms <- if (!is.null(conditions)) {
+      length(conditions)
+    } else if (length(specified_args) == 0) {
+      2
+    } else {
+      arg <- names(specified_args)[1]
+      if (!grepl("_each$", arg)) {
+        2
+      } else if (!grepl("^block_", arg) && !is.matrix(specified_args[[1]])) {
+        length(specified_args[[1]])
+      } else {
+        ncol(specified_args[[1]])
+      }
+    }
+
+    if (num_arms == 2 && is.null(conditions)) conditions <- 0:1
+  }
+
+  if (is.null(conditions)) conditions <- paste0("T", seq_len(num_arms))
+
+  list(num_arms = num_arms, conditions = conditions)
+}
+
+#' Derive without validating, for check_inputs = FALSE
+#'
+#' @keywords internal
+#' @noRd
+.invoke_derive <- function() {
+  definition <- sys.function(sys.parent())
+  envir <- parent.frame(1)
+  all_args <- mget(names(formals(definition)), envir)
+  list2env(derive_arms_and_conditions(all_args), envir)
+  invisible(NULL)
+}
 
 check_randomizr_arguments_new <-
   function(all_args)
@@ -38,8 +112,18 @@ check_randomizr_arguments <-
            num_arms = NULL,
            simple = NULL,
            conditions = NULL,
+           .N_per_block = NULL,  # optional pre-computed hint from caller
            ...) {
     # N, blocks, clusters, num_arms, conditions are used generally, check them first
+    if (!is.null(blocks) && anyNA(blocks)) {
+      stop("`blocks` must not contain NA.", call. = FALSE)
+    }
+    if (!is.null(clusters) && anyNA(clusters)) {
+      stop("`clusters` must not contain NA.", call. = FALSE)
+    }
+    if (is.factor(blocks)) blocks <- droplevels(blocks)
+    if (is.factor(clusters)) clusters <- droplevels(clusters)
+
     if (!is.null(clusters)) {
       N <- length(unique(clusters))
     }
@@ -61,8 +145,8 @@ check_randomizr_arguments <-
                call. = FALSE)
         }
       } else {
-        N_per_block <- tapply(blocks, blocks, length)
-        attributes(N_per_block) <- NULL
+        N_per_block <- if (!is.null(.N_per_block)) .N_per_block
+                       else tabulate(as.integer(as.factor(blocks)))
       }
       if (is.null(N)) {
         N <- sum(N_per_block)
@@ -81,7 +165,7 @@ check_randomizr_arguments <-
       stop("N, blocks or clusters must be specified.", call. = FALSE)
     }
     
-    if (length(N) != 1 || N != floor(N) || N <= 0) {
+    if (!is.numeric(N) || length(N) != 1 || N != floor(N) || N <= 0) {
       stop("N must be a positive integer scalar.", call. = FALSE)
     }
     
@@ -98,20 +182,7 @@ check_randomizr_arguments <-
     }
     
     # Each of these should be a unique specifier, consistent with above general args
-    conflict_args <-
-      c(
-        "prob",
-        "prob_each",
-        "prob_unit",
-        "m",
-        "m_unit",
-        "m_each",
-        "block_prob",
-        "block_prob_each",
-        "block_m",
-        "block_m_each"
-      )
-    specified_args <- Filter(Negate(is.null), mget(conflict_args))
+    specified_args <- Filter(Negate(is.null), mget(ra_conflict_args))
     
     if (length(specified_args) > 1) {
       stop("Please specify only one of ",
@@ -129,7 +200,7 @@ check_randomizr_arguments <-
       
       if (isTRUE(simple) &&
           !grepl("prob", arg))
-        stop("You can't specify `", arg, "`` when simple = TRUE.", call. = FALSE)
+        stop("You can't specify `", arg, "` when simple = TRUE.", call. = FALSE)
       
       # checking num_arms and conditions consistency
       .check_ra_arg_num_arms_conditions(arg,
@@ -152,30 +223,13 @@ check_randomizr_arguments <-
     
     # learn about design
     
-    # obtain num_arms
-    
-    if (is.null(num_arms)) {
-      num_arms <- if (!is.null(conditions))
-        length(conditions)
-      else if (length(specified_args) == 0)
-        2
-      else if (!arg_each)
-        2
-      else if (!arg_block &&
-               !is.matrix(specified_args[[1]]))
-        length(specified_args[[1]])
-      else
-        ncol(specified_args[[1]])
-      
-      if (num_arms == 2 && is.null(conditions))
-        conditions <- 0:1
-    }
-    
-    # obtain conditions, wasn't set by num_arms guess
-    if (is.null(conditions)) {
-      conditions <- paste0("T", 1:num_arms)
-    }
-    
+    # specified_args is already the filtered set of design arguments, so hand it
+    # over rather than re-reading the frame.
+    design <- derive_arms_and_conditions(
+      c(list(num_arms = num_arms, conditions = conditions), specified_args)
+    )
+    num_arms <- design$num_arms
+    conditions <- design$conditions
     
     ret <- list(
       num_arms = num_arms,
@@ -305,7 +359,7 @@ check_randomizr_arguments <-
            prob_each) {
     if (any(prob_each > 1 | prob_each < 0)) {
       stop(
-        "The probabilties of assignment to any condition may not be greater than 1 or less than zero.",
+        "The probabilities of assignment to any condition may not be greater than 1 or less than zero.",
         call. = FALSE
       )
     }
@@ -549,6 +603,15 @@ check_samplr_arguments <-
            simple = NULL,
            ...) {
     
+    if (!is.null(strata) && anyNA(strata)) {
+      stop("`strata` must not contain NA.", call. = FALSE)
+    }
+    if (!is.null(clusters) && anyNA(clusters)) {
+      stop("`clusters` must not contain NA.", call. = FALSE)
+    }
+    if (is.factor(strata)) strata <- droplevels(strata)
+    if (is.factor(clusters)) clusters <- droplevels(clusters)
+
     if (!is.null(clusters)) {
       N <- length(unique(clusters))
     }
@@ -584,7 +647,7 @@ check_samplr_arguments <-
         list(N_strata = N_strata, N_per_stratum = N_per_stratum)
     }
     
-    if (length(N) != 1 || N != floor(N) || N <= 0) {
+    if (!is.numeric(N) || length(N) != 1 || N != floor(N) || N <= 0) {
       stop("N must be an integer greater than 0.", call. = FALSE)
     }
     
@@ -658,7 +721,7 @@ check_samplr_arguments <-
       # if it's strata
       if (!all(tapply(X = prob_unit, INDEX = strata, FUN = is_constant))) {
         stop(
-          "In a stratified random assignment design, `prob_unit` must be the same for all units within the same stratum.",
+          "In a stratified random sampling design, `prob_unit` must be the same for all units within the same stratum.",
           call. = FALSE
         )
       }

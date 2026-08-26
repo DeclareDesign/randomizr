@@ -16,54 +16,69 @@ simple_ra(
 )
 }
 \arguments{
-\item{N}{The number of units. N must be a positive integer. (required)}
+\item{N}{The number of units. Must be a positive integer. (required)}
 
-\item{prob}{Use for a two-arm design. prob is the probability of assignment to treatment and must be a real number between 0 and 1 inclusive and must be length 1. (optional)}
+\item{prob}{Use for a two-arm design. The probability of assignment to treatment; must be a real number between 0 and 1 and of length 1. (optional)}
 
-\item{prob_unit}{Use for a two-arm design. prob is the probability of assignment to treatment and must be a real number between 0 and 1 inclusive and must be length N. (optional)}
+\item{prob_unit}{Use for a two-arm design. The probability of assignment to treatment for each unit; must be a real number between 0 and 1 and of length N. (optional)}
 
-\item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. It may be a conditions-length vector or a N-by-conditions matrix.  (optional)}
+\item{prob_each}{Use for a multi-arm design. A numeric vector or N-by-conditions matrix giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. (optional)}
 
-\item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
+\item{num_arms}{The number of treatment arms. If unspecified, determined from the other arguments. (optional)}
 
-\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
+\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that probabilities lie between 0 and 1 and sum to 1, that vectors are of length N, that only one of \code{prob}, \code{prob_unit}, and \code{prob_each} is supplied, and so on. Defaults to \code{TRUE}. \code{FALSE} skips the checking only: \code{num_arms} and \code{conditions} are still derived from the other arguments, so the same call draws the same assignment either way. What goes is the verification, and an impossible design is then no longer refused. \code{block_m} larger than a block, for instance, quietly treats the whole block. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)}
 
-\item{simple}{logical. internal use only.}
+\item{simple}{Logical. Internal use only; leave at its default. \code{simple_ra} always assigns units independently, and this argument exists so that the argument checker knows as much. Setting it to \code{FALSE} does not change how units are assigned, but it will cause a \code{prob_unit} that varies across units to be rejected. (optional)}
 }
 \value{
-A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.
+A vector of length N indicating the treatment condition of each unit. Numeric in a two-arm trial; a factor (ordered by \code{conditions}) in a multi-arm trial.
 }
 \description{
-simple_ra implements a random assignment procedure in which units are independently assigned to treatment conditions. Because units are assigned independently, the number of units that are assigned to each condition can vary from assignment to assignment. For most experimental applications in which the number of experimental units is known in advance, \code{\link{complete_ra}} is better because the number of units assigned to each condition is fixed across assignments.\cr\cr
-In most cases, users should specify N and not more than one of prob, prob_each, or num_arms. \cr \cr
-If only N is specified, a two-arm trial with prob = 0.5 is assumed.
+\code{simple_ra} assigns units to treatment conditions independently, with each unit's assignment drawn as a separate Bernoulli trial. Because units are assigned independently, the number of units assigned to each condition varies from draw to draw. For most experimental applications in which the number of units is known in advance, \code{\link{complete_ra}()} is preferable because it fixes the counts in each condition and thereby reduces sampling variability.
+}
+\details{
+Simple random assignment is appropriate when units arrive sequentially and the total sample size is not known in advance, or when the assignment must proceed without coordinating across units. If only \code{N} is specified, a two-arm trial with \code{prob = 0.5} is assumed.
 }
 \examples{
 # Two Group Designs
 
-Z <- simple_ra(N=100)
+Z <- simple_ra(N = 100)
 table(Z)
 
-Z <- simple_ra(N=100, prob=0.5)
+Z <- simple_ra(N = 100, prob = 0.5)
 table(Z)
 
-Z <- simple_ra(N=100, prob_each = c(0.3, 0.7),
+Z <- simple_ra(N = 100, prob_each = c(0.3, 0.7),
                conditions = c("control", "treatment"))
 table(Z)
 
+# A probability of assignment that varies unit by unit
+Z <- simple_ra(N = 100, prob_unit = seq(0.1, 0.9, length.out = 100))
+table(Z)
+
+# Skipping the input checks. The checks are also what fill in defaults, so
+# conditions has to be given explicitly once they are skipped. In a
+# simulation, declare_ra() and conduct_ra() are the tidier way to check the
+# arguments once and then draw many assignments from them.
+Z <- simple_ra(N = 100, prob = 0.3, conditions = c(0, 1), check_inputs = FALSE)
+table(Z)
+
 # Multi-arm Designs
-Z <- simple_ra(N=100, num_arms=3)
+Z <- simple_ra(N = 100, num_arms = 3)
 table(Z)
 
-Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4))
+Z <- simple_ra(N = 100, prob_each = c(0.3, 0.3, 0.4))
 table(Z)
 
-Z <- simple_ra(N=100, prob_each=c(0.3, 0.3, 0.4),
-               conditions=c("control", "placebo", "treatment"))
+Z <- simple_ra(N = 100, prob_each = c(0.3, 0.3, 0.4),
+               conditions = c("control", "placebo", "treatment"))
 table(Z)
 
-Z <- simple_ra(N=100, conditions=c("control", "placebo", "treatment"))
+Z <- simple_ra(N = 100, conditions = c("control", "placebo", "treatment"))
 table(Z)
+}
+\seealso{
+\code{\link{complete_ra}()}, \code{\link{block_ra}()}, \code{\link{simple_rs}()}, \code{\link{simple_ra_probabilities}()}
 }

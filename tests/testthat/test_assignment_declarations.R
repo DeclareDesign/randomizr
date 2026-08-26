@@ -409,7 +409,7 @@ test_that("check errors", {
 
 test_that("check deprecations", {
   # TODO remove when below are also removed, this is just for test coverage
-  d <- declare_ra(N = 10, n = 4)
+  d <- declare_ra(N = 10, m = 4)
   expect_warning(d$ra_function())
   expect_warning(d$ra_type)
   expect_warning(d$cleaned_arguments)
@@ -430,7 +430,7 @@ test_that("obtain_condition_probabilities auto-declare", {
 
 
 test_that("print and summary", {
-  d <- declare_ra(N = 10, n = 4)
+  d <- declare_ra(N = 10, m = 4)
   expect_output(print(d))
   expect_output(summary(d))
 })
@@ -442,8 +442,8 @@ test_that("_unit",{
   expect_equal(table(blocks, conduct_ra(d)),
                structure(
                  c(45L, 80L, 140L, 5L, 20L, 60L),
-                 .Dim = 3:2,
-                 .Dimnames = list(blocks = c("A", "B", "C"), c("0", "1")),
+                 dim = 3:2,
+                 dimnames = list(blocks = c("A", "B", "C"), c("0", "1")),
                  class = "table"
                ))
   expect_error(declare_ra(blocks = blocks, prob_unit = rep(c(.1, .2, .3), c(200, 100, 50))))

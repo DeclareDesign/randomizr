@@ -2,7 +2,7 @@
 % Please edit documentation in R/complete_ra.R
 \name{complete_ra_probabilities}
 \alias{complete_ra_probabilities}
-\title{probabilities of assignment: Complete Random Assignment}
+\title{Probabilities of assignment: Complete Random Assignment}
 \usage{
 complete_ra_probabilities(
   N,
@@ -18,62 +18,73 @@ complete_ra_probabilities(
 )
 }
 \arguments{
-\item{N}{The number of units. N must be a positive integer. (required)}
+\item{N}{The number of units. Must be a positive integer. (required)}
 
-\item{m}{Use for a two-arm design in which m units are assigned to treatment and N-m units are assigned to control. (optional)}
+\item{m}{Use for a two-arm design: exactly \code{m} units are assigned to treatment and \code{N-m} to control. (optional)}
 
-\item{m_unit}{Use for a two-arm design in which exactly unique(m_unit) units are assigned to treatment and the remainder are assigned to control. m_unit must be of length N and must be the same for all units (optional)}
+\item{m_unit}{Use for a two-arm design. \code{unique(m_unit)} units are assigned to treatment; must be the same for all units and of length N. (optional)}
 
-\item{m_each}{Use for a multi-arm design in which the values of m_each determine the number of units assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many units should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)}
+\item{m_each}{Use for a multi-arm design. A numeric vector giving the exact number of units assigned to each condition; must sum to N. (optional)}
 
-\item{prob}{Use for a two-arm design in which either floor(N*prob) or ceiling(N*prob) units are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N*prob) units will be assigned to treatment and with probability prob, ceiling(N*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)}
+\item{prob}{Use for a two-arm design: either \code{floor(N*prob)} or \code{ceiling(N*prob)} units are assigned to treatment so that the marginal probability of assignment equals exactly \code{prob}. Must be between 0 and 1. One edge is deliberate: when \code{ceiling(N*prob) == N} (for instance \code{N = 3, prob = 0.9}), exactly \code{floor(N*prob)} units are treated, never all \code{N}, so the marginal probability is \code{floor(N*prob)/N}; \code{\link{complete_ra_probabilities}()} reports the probability actually used. (optional)}
 
-\item{prob_unit}{Use for a two-arm design. unique(prob_unit) will be passed to the prob argument and must be the same for all units.}
+\item{prob_unit}{Use for a two-arm design. \code{unique(prob_unit)} will be passed to the \code{prob} argument; must be the same for all units. (optional)}
 
-\item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
+\item{prob_each}{Use for a multi-arm design. A numeric vector giving the probability of assignment to each condition; entries must be nonnegative and sum to 1. Due to integer rounding the exact count assigned to each condition may differ slightly from draw to draw, but the overall probability of assignment is exactly \code{prob_each}. (optional)}
 
-\item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
+\item{num_arms}{The number of treatment arms. If unspecified, determined from the other arguments. (optional)}
 
-\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
+\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, groups will be named 0 and 1 in a two-arm trial and T1, T2, T3, in a multi-arm trial. A two-group design in which \code{num_arms} is set to 2 will use condition names T1 and T2. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Whether to verify before assigning that the arguments are internally consistent: that counts sum to N, that probabilities lie between 0 and 1 and sum to 1, that vectors are of length N, and so on. Defaults to \code{TRUE}. \code{FALSE} skips the checking only: \code{num_arms} and \code{conditions} are still derived from the other arguments, so the same call draws the same assignment either way. What goes is the verification, and an impossible design is then no longer refused. \code{block_m} larger than a block, for instance, quietly treats the whole block. Declaring the design once with \code{\link{declare_ra}()} and drawing from it with \code{\link{conduct_ra}()} is the usual way to avoid re-checking the same arguments in a simulation. (optional)}
 }
 \value{
-A matrix of probabilities of assignment
+A matrix with N rows and one column per treatment condition, with columns named \code{prob_<condition>}. Entry (i, j) is the probability that unit i is assigned to condition j, and every row sums to 1.
 }
 \description{
-probabilities of assignment: Complete Random Assignment
+Returns the probability that each unit is assigned to each condition under
+complete random assignment. When the implied counts are not integers the
+probabilities account for the stochastic rounding \code{complete_ra} uses, so
+they equal the target exactly rather than approximately.
+}
+\details{
+These are the quantities inverse-probability weights are built from: weight
+each unit by the reciprocal of the probability of the condition it landed in,
+which \code{\link{obtain_condition_probabilities}()} extracts for you.
 }
 \examples{
 # 2-arm designs
-prob_mat <- complete_ra_probabilities(N=100)
+prob_mat <- complete_ra_probabilities(N = 100)
 head(prob_mat)
 
-prob_mat <- complete_ra_probabilities(N=100, m=50)
+prob_mat <- complete_ra_probabilities(N = 100, m = 50)
 head(prob_mat)
 
-prob_mat <- complete_ra_probabilities(N=100, prob = .3)
+prob_mat <- complete_ra_probabilities(N = 100, prob = 0.3)
 head(prob_mat)
 
-prob_mat <- complete_ra_probabilities(N=100, m_each = c(30, 70),
+prob_mat <- complete_ra_probabilities(N = 100, m_each = c(30, 70),
                           conditions = c("control", "treatment"))
 head(prob_mat)
 
 # Multi-arm Designs
-prob_mat <- complete_ra_probabilities(N=100, num_arms=3)
+prob_mat <- complete_ra_probabilities(N = 100, num_arms = 3)
 head(prob_mat)
 
-prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40))
+prob_mat <- complete_ra_probabilities(N = 100, m_each = c(30, 30, 40))
 head(prob_mat)
 
-prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40),
-                          conditions=c("control", "placebo", "treatment"))
+prob_mat <- complete_ra_probabilities(N = 100, m_each = c(30, 30, 40),
+                          conditions = c("control", "placebo", "treatment"))
 head(prob_mat)
 
-prob_mat <- complete_ra_probabilities(N=100, conditions=c("control", "placebo", "treatment"))
+prob_mat <- complete_ra_probabilities(N = 100, conditions = c("control", "placebo", "treatment"))
 head(prob_mat)
 
-prob_mat <- complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))
+prob_mat <- complete_ra_probabilities(N = 100, prob_each = c(0.2, 0.7, 0.1))
 head(prob_mat)
 
+}
+\seealso{
+\code{\link{complete_ra}()}
 }

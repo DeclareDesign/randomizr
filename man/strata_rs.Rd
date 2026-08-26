@@ -16,53 +16,65 @@ strata_rs(
 )
 }
 \arguments{
-\item{strata}{A vector of length N that indicates which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)}
+\item{strata}{A vector of length N indicating which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)}
 
-\item{prob}{Use for a design in which either floor(N_stratum*prob) or ceiling(N_stratum*prob) units are sampled within each stratum. The probability of  being sampled is exactly prob because with probability 1-prob, floor(N_stratum*prob) units will be sampled and with probability prob, ceiling(N_stratum*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
+\item{prob}{Use for a design in which either \code{floor(N_stratum*prob)} or \code{ceiling(N_stratum*prob)} units are sampled within each stratum. Which of the two is used is itself random: the ceiling is drawn with probability equal to the fractional part of \code{N_stratum*prob} and the floor otherwise, which makes each unit's probability of inclusion exactly \code{prob}. Must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{prob_unit}{Must of be of length N. tapply(prob_unit, strata, unique) will be passed to \code{strata_prob}.}
+\item{prob_unit}{Must be of length N. \code{tapply(prob_unit, strata, unique)} will be passed to \code{strata_prob}, so it must be constant within each stratum. (optional)}
 
-\item{n}{Use for a design in which the scalar n describes the fixed number of units to sample in each stratum. This number does not vary across strata.}
+\item{n}{Use for a design in which the scalar \code{n} gives the fixed number of units to sample in every stratum. This count does not vary across strata. (optional)}
 
-\item{n_unit}{Must be of length N. tapply(m_unit, strata, unique) will be passed to \code{strata_n}.}
+\item{n_unit}{Must be of length N. \code{tapply(n_unit, strata, unique)} will be passed to \code{strata_n}, so it must be constant within each stratum. (optional)}
 
-\item{strata_n}{Use for a design in which the numeric vector strata_n describes the number of units to sample within each stratum.}
+\item{strata_n}{Use for a design in which the numeric vector \code{strata_n} gives the number of units to sample within each stratum. Must be as long as the number of strata, in the same order as \code{sort(unique(strata))}. (optional)}
 
-\item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
+\item{strata_prob}{Use for a design in which \code{strata_prob} gives the probability of being sampled within each stratum. Must be in the same order as \code{sort(unique(strata))}. Differs from \code{prob} in that the probability of being sampled can vary across strata. (optional)}
 
-\item{check_inputs}{logical. Defaults to TRUE.}
+\item{check_inputs}{Logical. Whether to verify before sampling that the arguments are internally consistent: that counts do not exceed the stratum sizes, that probabilities lie between 0 and 1, that stratum-level arguments have one entry per stratum, and so on. Defaults to \code{TRUE}. Set to \code{FALSE} to skip the checks when drawing many samples from arguments that have already been verified; declaring the design once with \code{\link{declare_rs}()} and drawing from it with \code{\link{draw_rs}()} does this for you. (optional)}
 }
 \value{
-A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
+A numeric vector of length N indicating whether each unit is sampled (1) or not (0).
 }
 \description{
-strata_rs implements a random sampling procedure in which units that are grouped into strata defined by covariates are sample using complete random sampling within stratum For example, imagine that 50 of 100 men are sampled and 75 of 200 women are sampled.
+\code{strata_rs} draws a sample separately within each of several groups (strata) defined by covariates, using complete random sampling inside every stratum. For example, 50 of 100 men and 75 of 200 women might be sampled. Stratifying guarantees how much of the sample comes from each group, which keeps small groups from being underrepresented by chance.
+}
+\details{
+The number sampled per stratum can be left to the function, set as a common count or probability across strata (\code{n}, \code{prob}), or set stratum by stratum (\code{strata_n}, \code{strata_prob}). When the probability varies across strata the sample is not self-weighting, and \code{\link{strata_rs_probabilities}()} gives the inclusion probabilities needed to weight it.
 }
 \examples{
 
-strata <- rep(c("A", "B","C"), times = c(50, 100, 200))
-Z <- strata_rs(strata = strata)
-table(strata, Z)
+strata <- rep(c("A", "B", "C"), times = c(50, 100, 200))
 
-Z <- strata_rs(strata = strata, prob = .3)
-table(strata, Z)
+S <- strata_rs(strata = strata)
+table(strata, S)
 
-Z <- strata_rs(strata = strata, n = 20)
-table(strata, Z)
+# The same probability in every stratum
+S <- strata_rs(strata = strata, prob = 0.3)
+table(strata, S)
 
-Z <- strata_rs(strata = strata, strata_prob = c(.1, .2, .3))
-table(strata, Z)
+# The same count in every stratum
+S <- strata_rs(strata = strata, n = 20)
+table(strata, S)
 
-Z <- strata_rs(strata = strata, 
-               prob_unit = rep(c(.1, .2, .3), times = c(50, 100, 200)))
-table(strata, Z)
+# A different probability in each stratum, in the order of sort(unique(strata))
+S <- strata_rs(strata = strata, strata_prob = c(0.1, 0.2, 0.3))
+table(strata, S)
 
-Z <- strata_rs(strata = strata, strata_n = c(20, 30, 40))
-table(strata, Z)
+# The same, specified unit by unit
+S <- strata_rs(strata = strata,
+               prob_unit = rep(c(0.1, 0.2, 0.3), times = c(50, 100, 200)))
+table(strata, S)
 
-Z <- strata_rs(strata = strata, 
+# A different count in each stratum
+S <- strata_rs(strata = strata, strata_n = c(20, 30, 40))
+table(strata, S)
+
+S <- strata_rs(strata = strata,
                n_unit = rep(c(20, 30, 40), times = c(50, 100, 200)))
-table(strata, Z)
+table(strata, S)
 
 
+}
+\seealso{
+\code{\link{complete_rs}()}, \code{\link{strata_and_cluster_rs}()}, \code{\link{block_ra}()}, \code{\link{strata_rs_probabilities}()}
 }

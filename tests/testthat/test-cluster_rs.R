@@ -63,10 +63,10 @@ test_that("n and simple is error", {
 
 test_that("_unit",{
   clusters <- rep(c("A", "B", "C"), c(2, 2, 2))
-  cluster_rs(clusters = clusters, n_unit = rep(1, 6))
-  expect_error(cluster_ra(clusters = clusters, m_unit = 1:6))
-  cluster_ra(clusters = clusters, prob_unit = rep(0.5, 6))
-  expect_error(cluster_ra(clusters = clusters, prob_unit = seq(0.1, 0.6, by = 0.1)))
+  expect_length(cluster_rs(clusters = clusters, n_unit = rep(1, 6)), 6L)
+  expect_error(cluster_rs(clusters = clusters, n_unit = 1:6))
+  expect_length(cluster_rs(clusters = clusters, prob_unit = rep(0.5, 6)), 6L)
+  expect_error(cluster_rs(clusters = clusters, prob_unit = seq(0.1, 0.6, by = 0.1)))
 })
 
 

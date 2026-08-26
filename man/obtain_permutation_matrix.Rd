@@ -7,15 +7,20 @@
 obtain_permutation_matrix(declaration, maximum_permutations = 10000)
 }
 \arguments{
-\item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
+\item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}()}. (required)}
 
-\item{maximum_permutations}{If the number of possible random assignments exceeds maximum_permutations, obtain_permutation_matrix will return a random sample of maximum_permutations permutations. Defaults to 10,000.}
+\item{maximum_permutations}{If the number of possible random assignments exceeds \code{maximum_permutations}, \code{obtain_permutation_matrix} returns a random sample of \code{maximum_permutations} of them instead of enumerating all of them. Defaults to 10,000. (optional)}
 }
 \value{
-a matrix of all possible (or a random sample of all possible) random assignments consistent with a declaration.
+A matrix with one row per unit and one column per assignment, whose entries are condition names. The columns are all of the assignments the declared design could produce, or a random sample of \code{maximum_permutations} of them if there are more than that. Column order carries no meaning, but it is the order \code{\link{obtain_permutation_probabilities}()} returns its probabilities in.
 }
 \description{
-Obtain Permutation Matrix from a Random Assignment Declaration
+Enumerates the assignments a design could have produced, one column per
+assignment. The matrix is the input to randomization inference, where a test
+statistic is recomputed under each column to build the distribution it would
+follow if the treatment had no effect. When a design admits more assignments
+than \code{maximum_permutations}, a random sample of them is returned
+instead, which approximates the same distribution.
 }
 \examples{
 
@@ -50,4 +55,12 @@ perms <- obtain_permutation_matrix(declaration)
 dim(perms)
 
 
+}
+\references{
+Andrews, G. E. (1976). \emph{The Theory of Partitions}. Encyclopedia of
+Mathematics and its Applications, Volume 2. Reading, MA: Addison-Wesley.
+}
+\seealso{
+\code{\link{obtain_num_permutations}()},
+  \code{\link{obtain_permutation_probabilities}()}, \code{\link{declare_ra}()}
 }
