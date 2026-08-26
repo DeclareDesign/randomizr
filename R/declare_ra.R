@@ -571,7 +571,8 @@ prepare_balanced_ra_args <- function(all_args, check_inputs,
 
   if (!is.null(all_args$formula)) {
     if (!is.null(all_args$blocks)) {
-      stop("Use B in the formula, or use blocks=, not both.", call. = FALSE)
+      stop("`formula` and `blocks` cannot both be set. Use the formula or use ",
+           "`blocks`, but not both.", call. = FALSE)
     }
     if (!is.null(all_args$prob_unit_each)) {
       stop("`formula` is not yet supported with `prob_unit_each`.",

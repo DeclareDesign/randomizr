@@ -276,9 +276,17 @@ test_that("declare_ra passes formula through to balanced_ra", {
   expect_equal(z_decl, z_direct)
   expect_true(all(z_decl %in% 0:1))
 
+  msg <- "`formula` and `blocks` cannot both be set. Use the formula or use `blocks`, but not both."
   expect_error(
     declare_ra(prob = 0.5, formula = ~ x, blocks = rep(1:3, each = 2)),
-    "Use B in the formula, or use blocks=, not both"
+    msg,
+    fixed = TRUE
+  )
+  district <- rep(1:3, each = 2)
+  expect_error(
+    declare_ra(prob = 0.5, formula = ~ x + district, blocks = district),
+    msg,
+    fixed = TRUE
   )
 })
 

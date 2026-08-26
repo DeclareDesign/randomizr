@@ -30,9 +30,17 @@ test_that("~ 0 + x lets the treated count wander", {
 
 test_that("formula and blocks together error", {
   x <- c(0, 1, 5, 6, 8, 9)
+  msg <- "`formula` and `blocks` cannot both be set. Use the formula or use `blocks`, but not both."
   expect_error(
     balanced_ra(prob = 0.5, formula = ~ x, blocks = rep(1:3, each = 2)),
-    "Use B in the formula, or use blocks=, not both"
+    msg,
+    fixed = TRUE
+  )
+  district <- rep(1:3, each = 2)
+  expect_error(
+    balanced_ra(prob = 0.5, formula = ~ x + district, blocks = district),
+    msg,
+    fixed = TRUE
   )
 })
 

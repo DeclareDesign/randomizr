@@ -70,7 +70,7 @@ knitr::kable(
       "The stage in which every move respects every constraint. Weight is only ever shifted between units, never created or destroyed.",
       "The stage reached when no move respects every constraint any more. Something then has to give: a constraint is set aside, or a last unit is settled by a coin.",
       "The table of covariates whose treated totals the design tries to hold near their targets. It is the model matrix of the `formula` you pass.",
-      "The probability that a given unit ends up in a given condition. This is exact here. The probability that two given units are treated *together* is a harder quantity, and Section 4 says what is known about it."
+      "The probability that a given unit ends up in a given condition. This is exact here."
     ),
     check.names = FALSE
   ),
@@ -192,7 +192,7 @@ Tightness of $\sum_i x_i Z_i$ is not guaranteed. So buyer beware. Section 3.9 is
 
 ### What `formula` balances, and what it does not
 
-We highlight a possibility confusion regarding what is balanced in an experimental design. 
+We highlight a possible confusion regarding what is balanced in an experimental design. 
 
 When you balance a covariate you could have one of two things in mind. The first is that the treated group and the control group should have the same average $x$, so that a simple comparison of their outcomes is not contaminated by a difference in $x$. This is in general a feature that we often hope to gain from randomization. The second is the target the cube method actually pursues: that the treated total of $x$ should come out near $\sum_i x_i p_i$, the total its assignment probabilities imply. When every unit shares the same probability, these two coincide, because splitting the units evenly is the same thing as splitting the column evenly. However when probabilities vary from unit to unit, they come apart.
 
@@ -744,7 +744,7 @@ cube_walk(S3$after_3, c(2, 3, 3, 4, 4, 2), c(2, 2, 1, 1, 3, 3),
 
 Minus is selected this time. Then $z_1=(1,0,0)$, $z_2=(0,0.2,0.8)$, $z_3=(0,0.8,0.2)$, $z_4=(1,0,0)$. Units 1 and 4 are both settled on arm 1, and what remains is a single loop on units 2 and 3 over arms 2 and 3.
 
-That last loop finishes the draw. The cells are $(2,2)$, $(3,2)$, $(3,3)$, $(2,3)$ holding $0.2$, $0.8$, $0.2$, $0.8$, so $\delta_+ = \min(0.8, 0.8, 0.8, 0.8) = 0.8$ and $\delta_- = \min(0.2, 0.2, 0.2, 0.2) = 0.2$, and plus is taken with probability $0.2/1.0$. Whichever way the bet falls, one of the two units goes to arm 2 and the other to arm 3. Adding up: unit 1 and unit 4 on arm 1, and units 2 and 3 splitting arms 2 and 3 between them. The counts are $(2, 1, 1)$, which is what the column totals asked for.
+That last loop (not shown) finishes the draw. The cells are $(2,2)$, $(3,2)$, $(3,3)$, $(2,3)$ holding $0.2$, $0.8$, $0.2$, $0.8$, so $\delta_+ = \min(0.8, 0.8, 0.8, 0.8) = 0.8$ and $\delta_- = \min(0.2, 0.2, 0.2, 0.2) = 0.2$, and plus is taken with probability $0.2/1.0$. Whichever way the bet falls, one of the two units goes to arm 2 and the other to arm 3. Adding up: unit 1 and unit 4 on arm 1, and units 2 and 3 splitting arms 2 and 3 between them. The counts are $(2, 1, 1)$, which is what the column totals asked for.
 
 #### C++: the fair bet, the window, and per-block landing
 
@@ -850,7 +850,7 @@ One further detail matters for reading Section 3.9. Units are sorted by the firs
 
 #### One draw: $x=(1,2,3,6)$, $p_i=1/2$
 
-Start at $z=(1/2,1/2,1/2,1/2)$. The window is units 1, 2, and 3. The kernel direction (up to scale) is $u=(1,-2,1,0)$: $1-2+1=0$ and $1\cdot 1+2\cdot(-2)+3\cdot 1=0$. Both maximal steps have size $1/4$. Plus assigns unit 2 to control; minus assigns unit 2 to treatment.
+Start at $z=(1/2,1/2,1/2,1/2)$. The window is units 1, 2, and 3. The kernel direction (up to scale) is $u=(1,-2,1,0)$: $1-2+1=0$ and $1\cdot 1+2\cdot(-2)+3\cdot 1=0$. Both maximal steps have size $\delta_+=\delta_-=1/4$. Plus assigns unit 2 to control; minus assigns unit 2 to treatment. Plus with probability $(1/4)/(1/4+1/4)=1/2$.
 
 ```{r, echo=FALSE, fig.width=6.4, fig.height=4.7, fig.cap="Start. Window of three units. Kernel $u = (1, -2, 1, 0)$. Arrows are $\\delta_+ u$; unit 2 moves twice as far. $\\delta_\\pm = 1/4$."}
 cube_bip(
@@ -861,7 +861,7 @@ cube_bip(
 )
 ```
 
-Assume we choose plus. Then $z=(0.75,0,0.75,0.5)$. Sum $z$ is still 2; the treated $x$-total is still 6. The next window is the three open units. An admissible $u$ is $(3,0,-5,2)$: $3-5+2=0$ and $1\cdot 3+3\cdot(-5)+6\cdot 2=0$. $\delta=1/12$ assigns unit 1 to treatment; $\delta=-1/20$ assigns unit 3 to treatment. Plus has probability $3/8$. Neither of these two steps sends a unit to 0.
+Assume plus. Then $z=(0.75,0,0.75,0.5)$. Sum $z$ is still 2; the treated $x$-total is still 6. The next window is the three open units. An admissible $u$ is $(3,0,-5,2)$: $3-5+2=0$ and $1\cdot 3+3\cdot(-5)+6\cdot 2=0$. $\delta_+=1/12$ assigns unit 1 to treatment; $\delta_-=1/20$ assigns unit 3 to treatment. Plus with probability $(1/20)/(1/12+1/20)=3/8$. Neither of these two steps sends a unit to 0.
 
 ```{r, echo=FALSE, fig.width=6.4, fig.height=4.7, fig.cap="After the first plus step. Unit 2 is assigned. Arrows are $\\delta_+ u$ with $u = (3, 0, -5, 2)$. $\\delta_+ = 1/12$; $\\delta_- = 1/20$."}
 cube_bip(
@@ -872,9 +872,9 @@ cube_bip(
 )
 ```
 
-Assume $\delta=1/12$. Then $z=(1,0,1/3,2/3)$. Only units 3 and 4 are still fractional, and there are two constraints for them to satisfy, which is one too many: two equations on two unknowns leave no freedom at all, so no direction remains. The only move available on a pair is to take from one and give to the other, which keeps the count but shifts the $x$-total by $x_3 - x_4$. The algorithm therefore gives up the $x$ column.
+Assume plus. Then $z=(1,0,1/3,2/3)$. Only units 3 and 4 are still fractional, and there are two constraints for them to satisfy, which is one too many: two equations on two unknowns leave no freedom at all, so no direction remains. The only move available on a pair is to take from one and give to the other, which keeps the count but shifts the $x$-total by $x_3 - x_4$. The algorithm therefore gives up the $x$ column.
 
-```{r, echo=FALSE, fig.width=6.4, fig.height=4.7, fig.cap="After $\\delta = 1/12$. No kernel remains on both columns, so $x$ is dropped. Arrows are the count-only landing move $\\delta_+ u$. $\\delta_+ = 2/3$; $\\delta_- = 1/3$."}
+```{r, echo=FALSE, fig.width=6.4, fig.height=4.7, fig.cap="After $\\delta_+ = 1/12$. No kernel remains on both columns, so $x$ is dropped. Arrows are the count-only landing move $\\delta_+ u$. $\\delta_+ = 2/3$; $\\delta_- = 1/3$."}
 cube_bip(
   z = c(1, 0, 1 / 3, 2 / 3),
   xval = c(1, 2, 3, 6),
@@ -884,7 +884,7 @@ cube_bip(
 )
 ```
 
-What remains is the count constraint alone, and the direction $u=(0,0,1,-1)$. Taking $\delta=2/3$ assigns unit 3 to treatment and unit 4 to control, for a treated $x$-total of $4$; taking $\delta=-1/3$ does the reverse, for a total of $7$. Neither hits the target of $6$.
+What remains is the count constraint alone, and the direction $u=(0,0,1,-1)$. $\delta_+=2/3$ assigns unit 3 to treatment and unit 4 to control, for a treated $x$-total of $4$; $\delta_-=1/3$ does the reverse, for a total of $7$. Plus with probability $(1/3)/(2/3+1/3)=1/3$. Neither hits the target of $6$.
 
 In this particular example nothing better was available: with $x = (1,2,3,6)$ and two units treated, the attainable totals are $3, 4, 5, 7, 8$ and $9$, and $6$ is simply not among them. So landing did what it could but couldn't do the impossible. That is not always the reason a target is missed, though, and the two sections that close Section 3 are the cases where a perfectly attainable target is missed anyway — Section 3.8 because the flight can stop at a fractional point from which no exact assignment is reachable, and Section 3.9 because the narrow window can commit to a direction that rules the exact assignments out.
 
@@ -1168,7 +1168,7 @@ However, the number of treated units varies because the clusters have different 
 
 ### 3.6 `formula` plus `blocks`
 
-Balancing on a covariate does not accept `blocks`. The call is refused rather than approximated, since the two devices would be pulling in different directions.
+Balancing on a covariate does not accept `blocks`. A block factor in the formula is a column of $X$, not the `blocks` argument. The call is refused rather than approximated, since the two devices would be pulling in different directions.
 
 ```{r, error=TRUE}
 x_fb <- c(1, 2, 3, 6)
@@ -1275,7 +1275,7 @@ rbind(
 )
 ```
 
-We see that `balanced_ra(formula = ~ x)` is the *best* of the three here, comfortably better than `simple_ra()` and a little better than `complete_ra()` in terms of variance reduction. The failure being demonstrated is not  "the design does not help" it is that the design does not deliver the exact target even when the exact target is attainable, and so cannot always be relied on to do so.^[Here is what goes wrong, traced through. Flight can come to rest at $z = (2/3, 0, 1, 1/3)$. Both constraints are satisfied at that point: the weights sum to 2, and the weighted total of $x$ is $2/3 + 3 + 4/3 = 5$, exactly the target. But units 1 and 4 are still fractional, and there is no direction left that would move them while holding both constraints, because two constraints on two remaining units pin them down completely. Landing therefore drops the $x$ column, leaving only the count. The two remaining units are then traded against each other, one going to treatment and the other to control, which sends the treated total of $x$ to either 4 or 7. The target of 5 was satisfied at the fractional point and is unreachable from it once $x$ has been given up.]
+We see that `balanced_ra(formula = ~ x)` is the *best* of the three here, comfortably better than `simple_ra()` and a little better than `complete_ra()` in terms of variance reduction. The failure being demonstrated is not that "the design does not help"; it is that the design does not deliver the exact target even when the exact target is attainable, and so cannot always be relied on to do so.^[Here is what goes wrong, traced through. Flight can come to rest at $z = (2/3, 0, 1, 1/3)$. Both constraints are satisfied at that point: the weights sum to 2, and the weighted total of $x$ is $2/3 + 3 + 4/3 = 5$, exactly the target. But units 1 and 4 are still fractional, and there is no direction left that would move them while holding both constraints, because two constraints on two remaining units pin them down completely. Landing therefore drops the $x$ column, leaving only the count. The two remaining units are then traded against each other, one going to treatment and the other to control, which sends the treated total of $x$ to either 4 or 7. The target of 5 was satisfied at the fractional point and is unreachable from it once $x$ has been given up.]
 
 ```{r, echo=FALSE, results='asis'}
 claim_tick(
@@ -1293,7 +1293,7 @@ claim_cross(
 
 Section 3.8 missed the target often. This example misses it always, and the reason sits earlier in the algorithm.
 
-Take four units with $x = (1, 2, 2, 3)$ and $p_i = 1/2$, so two units are treated and the target treated total of $x$ is $\sum_i x_i p_i = 4$. Two assignments attain it exactly: treat the two 2's, or treat the 1 and the 3. BUt it turns out that neither of these profiles is ever drawn.
+Take four units with $x = (1, 2, 2, 3)$ and $p_i = 1/2$, so two units are treated and the target treated total of $x$ is $\sum_i x_i p_i = 4$. Two assignments attain it exactly: treat the two 2's, or treat the 1 and the 3. But it turns out that neither of these profiles is ever drawn.
 
 ```{r}
 x <- c(1, 2, 2, 3)
@@ -1492,7 +1492,7 @@ There is one reason to prefer a declaration when a `formula` is involved. Declar
 
 * With `clusters`, each cluster is collapsed to a single row carrying the *average* of its units' covariates, so a cluster counts once however many units it holds. The count held tight is therefore the number of treated clusters, and under `formula` the balanced quantity is the total across treated clusters of each cluster's covariate mean. If you want balance at the unit scale instead, weight the covariate by cluster size before passing it.
 
-* The count guarantee has an arithmetic exception, described at the top of this vignette: a step in which floating-point rounding leaves no unit exactly on a bound falls back on settling one unit by a weighted coin, which preserves that unit's probability but not the count. We were unable to trigger it in several thousand draws across dozens of randomly generated designs.
+* The count guarantee has an arithmetic exception: a step in which floating-point rounding leaves no unit exactly on a bound falls back on settling one unit by a weighted coin, which preserves that unit's probability but not the count. We were unable to trigger it in several thousand draws across dozens of randomly generated designs.
 
 * Standard errors after a `formula` design are conservative, sometimes severely (Section 4.2). This is a property of the design rather than a defect in the estimator, and there is no exact alternative on offer.
 
@@ -1503,8 +1503,6 @@ There is one reason to prefer a declaration when a `formula` is involved. Declar
 Deville, J.-C. and Tillé, Y. (1998). Unequal probability sampling without replacement through a splitting method. *Biometrika* 85(1), 89--101. <https://doi.org/10.1093/biomet/85.1.89>
 
 Deville, J.-C. and Tillé, Y. (2004). Efficient balanced sampling: the cube method. *Biometrika* 91(4), 893--912. <https://doi.org/10.1093/biomet/91.4.893>
-
-Deville, J.-C. and Tillé, Y. (2005). Variance approximation under balanced sampling. *Journal of Statistical Planning and Inference* 128(2), 569--591. <https://doi.org/10.1016/j.jspi.2003.11.011>
 
 Chauvet, G. and Tillé, Y. (2006). A fast algorithm for balanced sampling. *Computational Statistics* 21(1), 53--62. <https://doi.org/10.1007/s00180-006-0250-2>
 
