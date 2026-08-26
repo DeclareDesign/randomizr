@@ -37,7 +37,7 @@ div.figcaption,
 }
 ```
 
-`balanced_ra()` draws a random assignment in which each unit is treated with exactly the probability you asked for, and in which the *number* of units treated is held as close to its target as arithmetic allows. Suppose you name six villages and give each a 50 percent chance of treatment. The target number treated is three. `simple_ra()` would honor the individual chances but let the number treated come out anywhere from zero to six; `complete_ra()` would fix the number at three but would insist that every village share the same chance. `balanced_ra()` gives you both at once, and it does so even when the chances differ from village to village, which is the case neither of the other two functions covers.
+`balanced_ra()` draws a random assignment in which each unit is treated with exactly the probability you asked for, and in which the *number* of units treated is held as close to its target as arithmetic allows. Suppose you name two groups of three villages and give each a 50 percent chance of treatment. The target number treated is three. `block_ra()` would guarantee 1 or 2 per group but could not restrict the total to 3.  `balanced_ra()` lets you do so even when the chances differ from village to village.
 
 You can call `balanced_ra()` directly, or you can declare a design with `declare_ra()` and let `conduct_ra()` draw from it. A declaration reaches `balanced_ra()` when you set `ra_type = "balanced"`, or when you supply `prob_unit_each`, or when you supply `formula`. Section 5 shows both routes.
 
@@ -45,7 +45,7 @@ The function is **experimental**: it is new in randomizr 2.0.1 and its interface
 
 ## Terms used in this article
 
-This article uses a set of terms from the sampling literature. The table below provides a quick reference.
+Before we start, see below for a quick guide to terms from the sampling literature used in this article.
 
 ```{r, echo = FALSE}
 knitr::kable(
@@ -78,18 +78,18 @@ knitr::kable(
 
 ## `balanced_ra` guarantees
 
-The distinctive guarantee is about counts: each condition count lands at the floor or the ceiling of the target the probabilities imply, so a target of 1.5 gives 1 or 2, and a whole-number target such as 3 is hit exactly. Two further guarantees hold whatever the arguments and need no qualification. Every unit receives exactly one condition. And each unit's probability of each condition is exactly the probability supplied, which is true because every step of the algorithm is a fair bet, and fair bets compose: the expected weight at the end of the walk is the weight it started from.
+`balanced_ra` provides tightness guarantees: Each condition count lands at the floor or the ceiling of the target the probabilities imply, so a target of 1.5 gives 1 or 2, and a whole-number target such as 3 is hit exactly. Two further guarantees hold whatever the arguments and need no qualification. Every unit receives exactly one condition. And each unit's probability of each condition is exactly the probability supplied, which is true because every step of the algorithm is a fair bet, and fair bets compose: the expected weight at the end of the walk is the weight it started from.
 
-What the count guarantee amounts to depends on the arguments, because a count can be tight at one level and loose at another.
+More generally, however, a count can be tight at one level and loose at another.
 
 - Without `blocks`, the overall count of each condition is tight.
 - With `blocks`, the count within each block is tight.
 - With `blocks` and two arms, the overall count is tight as well. Section 2.1 explains the extra step that buys this.
 - With `blocks` and three or more arms, the within-block counts are tight but the overall count can wander. Section 3.7 demonstrates this and Section 6 says why.
 - With `clusters`, whole clusters move together and the tight counts become counts of clusters rather than of units. This holds with `formula` too, because a cluster is collapsed to a single row carrying the average of its units' covariates.
-- With `formula`, each unit's probability is still exact, and the treated count is still tight as long as the formula has an intercept. What is *not* guaranteed is the covariate balance itself: the design tries to hold each column's treated total near its target and usually succeeds, but Sections 3.8 and 3.9 show two cases where it does not.
+- With `formula`, each unit's probability is still exact, and the treated count is still tight as long as the formula has an intercept. What is *not* guaranteed is the covariate balance itself: the design tries to hold each column's treated total near its target and in practice appears to do well, but Sections 3.8 and 3.9 show two cases where it does not.
 
-There is an exception to the count guarantee. Each step is sized so that at least one unit lands exactly on 0 or on 1. Very occasionally rounding error in floating-point arithmetic leaves every unit in a step a hair short of its bound, and the function then settles the unit with the least room left by a coin weighted by the value that unit is holding. That coin keeps the unit's probability exactly right, so the probability guarantee is untouched, but it does not respect the count, and a draw that reaches it can finish one unit off. We were not able to make this happen: it did not arise in any of several thousand draws across dozens of randomly generated designs. But we mention it because we believe it is reachable in principle, not because it is expected in practice.
+<!-- There is an exception to the count guarantee. Each step is sized so that at least one unit lands exactly on 0 or on 1. Very occasionally rounding error in floating-point arithmetic leaves every unit in a step a hair short of its bound, and the function then settles the unit with the least room left by a coin weighted by the value that unit is holding. That coin keeps the unit's probability exactly right, so the probability guarantee is untouched, but it does not respect the count, and a draw that reaches it can finish one unit off. We were not able to make this happen: it did not arise in any of several thousand draws across dozens of randomly generated designs. But we mention it because we believe it is reachable in principle, not because it is expected in practice. -->
 
 Section 1 demonstrates the function on two designs. Section 2 walks through the logic and the three C++ routines that implement it. Section 3 works through examples, each with a check. Section 4 is about analysing the data afterwards, which has a wrinkle. Section 5 shows the `declare_ra()` route. Section 6 collects the caveats.
 
@@ -116,7 +116,7 @@ cbind(target = .5, average = rowMeans(reps))
 table(colSums(reps[blocks == 1, ]), colSums(reps[blocks == 2, ]))
 ```
 
-It is worth seeing what `block_ra()` does with the same design, because the difference is exactly the guarantee that Section 2.1 is about. `block_ra()` also gives each district one or two treated villages, so on that count it is just as tight. But it treats the two districts independently, so their totals do not have to compensate for each other, and the overall total comes out as 2, 3 or 4.
+By comparison, `block_ra()` also gives each district one or two treated villages, so on that count it is just as tight. But it treats the two districts independently, so their totals do not have to compensate for each other, and the overall total comes out as 2, 3 or 4.
 
 ```{r}
 reps_blk <- replicate(5000, block_ra(blocks = blocks))
@@ -125,15 +125,14 @@ table(district_1 = colSums(reps_blk[blocks == 1, ]),
 table(total_treated = colSums(reps_blk))
 ```
 
-Under `balanced_ra()` the two districts are coupled: whichever district ends up with two villages, the other must end up with one.
 
 ### Balancing a covariate
 
 To randomize against a covariate `x`, or against several covariates at once, pass a formula such as `formula = ~ x`. The model matrix of that formula is the balancing matrix $X$ in the cube method of [Deville and Tillé (2004)](https://doi.org/10.1093/biomet/91.4.893), and each of its columns becomes a quantity the design tries to hold near a target. The intercept column is the count constraint, so it is the intercept that keeps the number treated tight. The `x` column asks the treated total $\sum_i x_i Z_i$ to stay near the target $\sum_i x_i p_i$. Writing `~ 0 + x` drops the intercept, in which case the covariate total is still held but the treated count is free to wander. `formula` cannot be combined with `blocks`, and it is a two-arm design only.
 
-Two things are guaranteed here: each unit's probability is exact, and the treated count is at the floor or the ceiling of $\sum_i p_i$ whenever the formula has an intercept. The covariate balance itself is a best effort rather than a promise, and Sections 3.8 and 3.9 are the two cases where the effort falls short.
+Two things are guaranteed here: each unit's probability is exact, and the treated count is at the floor or the ceiling of $\sum_i p_i$ whenever the formula has an intercept. The covariate balance itself is a best effort rather than a promise.
 
-Consider $N = 100$ units with a continuous covariate $x$ drawn from a standard normal, and probabilities $p_i$ drawn from the unit interval so that they differ from unit to unit. Note that blocking would not be a substitute here: `block_ra()` and pair blocking hold counts tight within groups, but neither will implement a different probability for every unit.
+Consider $N = 100$ units with a continuous covariate $x$ drawn from a standard normal, and probabilities $p_i$ drawn from the unit interval so that they differ from unit to unit. Note that blocking would not be a substitute here: `block_ra()` holds count tight within groups, but does not allow a different probability for every unit.
 
 ```{r}
 set.seed(1)
@@ -191,11 +190,11 @@ Tightness of $\sum_i x_i Z_i$ is not guaranteed. So buyer beware. Section 3.9 is
 
 ### What `formula` balances, and what it does not
 
-There is a trap in the example just given, and it is worth spelling out because the word "balance" invites exactly the wrong reading.
+We highlight a possibility confusion regarding what is balanced in an experimental design. 
 
-When you balance a covariate you probably have one of two things in mind. The first is that the treated group and the control group should have the same average $x$, so that a simple comparison of their outcomes is not contaminated by a difference in $x$. The second is the target the cube method actually pursues: that the treated total of $x$ should come out near $\sum_i x_i p_i$, the total its assignment probabilities imply. When every unit shares the same probability these two coincide, because splitting the units evenly is the same thing as splitting the column evenly, and `formula` then does what its name suggests. When probabilities vary from unit to unit, they come apart.
+When you balance a covariate you could have one of two things in mind. The first is that the treated group and the control group should have the same average $x$, so that a simple comparison of their outcomes is not contaminated by a difference in $x$. This is in general a feature that we often hope to gain from randomization. The second is the target the cube method actually pursues: that the treated total of $x$ should come out near $\sum_i x_i p_i$, the total its assignment probabilities imply. When every unit shares the same probability, these two coincide, because splitting the units evenly is the same thing as splitting the column evenly. However when probabilities vary from unit to unit, they come apart.
 
-Here is the intuition. Suppose the units with high $x$ are precisely the ones you decided to treat more often — perhaps $x$ measures need, and you gave the neediest villages the best chance of a programme. Then the treated group *ought* to have the higher mean of $x$. That is not imbalance to be corrected; it is the design you chose. What the cube method does is hold the treated total of $x$ close to the value your own probabilities imply, which leaves the systematic gap in place and squeezes out the draw-to-draw noise around it.
+Here is the intuition. Suppose the units with high $x$ are precisely the ones you decided to treat more often --- perhaps $x$ measures need, and you gave the neediest villages the best chance of receiving a program. Then the treated group *ought* to have the higher mean of $x$. That is not imbalance to be corrected; it is the design you chose. What the cube method does is hold the treated total of $x$ close to the value your own probabilities imply, which leaves the systematic gap in place and squeezes out the draw-to-draw noise around it.
 
 The following makes this concrete with a deliberately extreme case: $p_i$ rising from 0.1 to 0.9 in step with $x$.
 
@@ -219,16 +218,16 @@ The practical consequence is that a design with varying $p_i$ needs weighting wh
 
 ## 2. Logic
 
-The key idea used in `balanced_ra` is to randomly switch probability weights between units in ways that shift some into different treatment conditions while satisfying any provided constraints.
+The key idea used in `balanced_ra` is to randomly switch probability weights between units in ways that shift some into different treatment conditions while satisfying other provided constraints.
 
 
-For intuition, imagine we have three units who should be assigned to treatment with probability $p = (0.6, 0.7, 0.2)$. The constraint is that the expected treated count is $0.6 + 0.7 + 0.2 = 1.5$. We could imagine various shifts. For instance, shifting $0.3$ from the first unit to the second unit (bringing the second unit to $1$) or $0.4$ from the second unit to the first unit. In effect we randomize between $p' = (0.3, 1, 0.2)$ and $p'' = (1, 0.3, 0.2)$. If we choose $p'$ with probability $q=\frac{0.4}{0.3+0.4}=\frac{4}{7}$, then $p = qp'+(1-q)p''$, so the unit-level probabilities remain intact. Say we select $p'' = (1, 0.3, 0.2)$. We might then choose between $(1, 0.5, 0)$ and $(1, 0, 0.5)$; if we do the former with probability $\frac{0.3}{0.3 + 0.2}$, we again keep the unit-level probabilities intact as we move toward the target. At this stage we have one unit in treatment, one unit in control, and one unit to be decided by a coin toss.
+For intuition, imagine we have three units who should be assigned to treatment with probability $p = (0.6, 0.7, 0.2)$. The constraint is that the expected treated count is $0.6 + 0.7 + 0.2 = 1.5$. We could imagine various shifts. For instance, shifting $0.3$ from the first unit to the second unit (bringing the second unit to $1$) or $0.4$ from the second unit to the first unit (bringing the first unit to 1). If we randomly choose between these we are effectively randomizing between $p' = (0.3, 1, 0.2)$ and $p'' = (1, 0.3, 0.2)$. If we choose $p'$ with probability $q=\frac{0.4}{0.3+0.4}=\frac{4}{7}$, then $p = qp'+(1-q)p''$, so the unit-level probabilities remain intact. Say in fact that we select $p'' = (1, 0.3, 0.2)$. We might then choose between $(1, 0.5, 0)$ and $(1, 0, 0.5)$; if we do the former with probability $\frac{0.3}{0.3 + 0.2}$, we again keep the unit-level probabilities intact as we move toward a full assignment. At this stage we have one unit in treatment, one unit in control, and one unit to be decided by a coin toss.
 
-The same starting $p$ also admits a three-unit movement, in line with the cube method. A direction $u=(1, -0.5, -0.5)$ has coordinates that sum to $0$, so the treated count is preserved. The largest plus step is $\delta_+=0.4$ and lands at $(1, 0.5, 0)$; the largest minus step is $\delta_-=0.6$ and lands at $(0, 1, 0.5)$. A fair bet takes the plus step with probability $0.6/(0.4+0.6)=0.6$. More than two units move, but the martingale idea is the same as in the pair case.
+The same starting $p$ also admits a three-unit movement, in line with the cube method. A direction $u=(1, -0.5, -0.5)$ has coordinates that sum to $0$, so the treated count is preserved. The largest plus step is $\delta_+=0.4$ and lands at $(1, 0.5, 0)$; the largest minus step is $\delta_-=0.6$ and lands at $(0, 1, 0.5)$. A fair bet takes the plus step with probability $0.6/(0.4+0.6)=0.6$. So here there are more than two units moving, but the martingale idea is the same as in the pair case.
 
-The functions use essentially this logic, now with a broader set of constraints. At each step a direction $u$ is found that respects every constraint still in force, meaning that shifting weight along $u$ leaves each of those constraints exactly where it was. (In the language of linear algebra, $u$ lies in the kernel of the constraint matrix; the glossary above translates.) The randomization is then a fair bet between the two largest steps along $u$, one in each direction, each stopping where the first unit reaches 0 or 1. This stage is the *flight*.
+The functions use essentially this logic, now with a broader set of constraints. At each step a direction $u$ is found that respects every constraint still in force, meaning that shifting weight along $u$ leaves each of those constraints exactly where it was. (In the language of linear algebra, $u$ lies in the 'kernel' of the constraint matrix.) The randomization is then a fair bet between the two largest steps along $u$, one in each direction, each stopping where the first unit reaches 0 or 1. This stage is the *flight*.
 
-Sooner or later no such direction remains, and the design has to give something up. That stage is the *landing*, and what it gives up depends on the design. With two arms and no covariates, at most one unit is left fractional and it is settled by a coin. With three or more arms, the walk is allowed to run along a path instead of a closed loop, which lets two arm totals move. With a `formula`, one column of $X$ is set aside so that a direction exists again — always the last column first, so that the intercept, and with it the count constraint, is the last thing to go.
+Sooner or later no such direction remains, and the design has to give something up. That stage is the *landing*. What it gives up depends on the design. With two arms and no covariates, at most one unit is left fractional and it is settled by a coin. With three or more arms, the walk is allowed to run along a path instead of a closed loop, which lets two arm totals move. With a `formula`, one column of $X$ is set aside so that a direction exists again --- last column first, so that the intercept, and with it the count constraint, is the last thing to go.
 
 ### Three C++ implementations
 

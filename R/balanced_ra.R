@@ -2,7 +2,7 @@
 #'
 #' \strong{Experimental.} \code{balanced_ra} draws random assignment with tight
 #' targets: condition counts at the floor or ceiling of what the probabilities
-#' imply, and, with \code{formula}, covariate totals too. Each unit's probability stays
+#' imply. Each unit's probability stays
 #' exact. That is useful when probabilities vary across units, and also when
 #' they do not: leftover pairing keeps two-arm blocked counts tight overall as
 #' well as within each block, and cube-on-X balances a continuous covariate
