@@ -35,7 +35,7 @@ using each of these functions in our [reference
 library](https://declaredesign.org/r/randomizr/reference/) or by
 clicking on the function names: `simple_ra()`, `complete_ra()`,
 `block_ra()`, and `cluster_ra()`. An additional experimental function,
-`balanced_ra()`, is included from version 2.01; see the [introduction
+`balanced_ra()`, is included from version 2.0.1; see the [introduction
 article](https://declaredesign.org/r/randomizr/articles/balanced_ra.html).
 
 `complete_ra()`: Under complete random assignment, we assign a fixed `m`

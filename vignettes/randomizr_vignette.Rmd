@@ -520,7 +520,7 @@ Z <- balanced_ra(blocks = blocks)
 knitr::kable(table(blocks, Z))
 ```
 
-With `balanced_ra` however we see that every draw treats three units overall and one or two in each block. Declare the design with `declare_ra(..., ra_type = "balanced")`. The [introduction article](https://declaredesign.org/r/randomizr/articles/balanced_ra.html) has the details.
+With `balanced_ra` however we see that every draw treats three units overall and one or two in each block. Declare the design with `declare_ra(..., ra_type = "balanced")`. The [balanced_ra vignette](balanced_ra.html) has the details.
 
 For a still simpler example, consider two units with target assignment probabilities of 0.6, and 0.9 and want the number assigned to be close to 0.6 + 0.9 = 1.5. This cannot be achieved by `simple_ra` or `complete_ra`, but `balanced_ra` handles it easily, in particular by making sure that the two units are never both assigned to control at the same time.
 
