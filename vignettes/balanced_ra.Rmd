@@ -254,13 +254,13 @@ knitr::kable(
     ),
     check.names = FALSE
   ),
-  caption = "Which C++ implementation a call uses. `formula` plus `prob_unit_each` is not implemented."
+  caption = "Which C++ implementation a call uses."
 )
 ```
 
 The three routines are related but not interchangeable. Run the general cube with $X$ equal to the intercept alone and it would reproduce the pivot; run the multi-arm walk with two arms and it would reproduce the pivot too. What the dedicated two-arm routine adds is the leftover pairing described in Section 2.1, and that is why two-arm blocked counts come out tight *both inside each block and overall*. A generic landing gives up a constraint instead, and would lose one of those two properties.
 
-The listings that follow are lightly abridged from the source: comments have been added or reworded to match the surrounding prose, and a few lines that only handle bookkeeping or degenerate inputs have been cut. The logic and the arithmetic are as they appear in `src/cube.cpp` and `src/cube_on_x.cpp`, which are worth reading directly if you want the unabridged version.
+The listings that follow are lightly abridged from the source. The logic and the arithmetic are as they appear in `src/cube.cpp` and `src/cube_on_x.cpp`.
 
 ```{r, echo=FALSE}
 along <- function(x1, y1, x2, y2, t) {
@@ -649,11 +649,9 @@ That gives the two stages their concrete meaning here.
 - If the walk closes into a **loop**, or *cycle*, which is the term the figures below use, every node it visits is entered and left, so every unit's row total and every arm's column total survives untouched. This is flight.
 - If the walk cannot close and instead runs from one end to another, the two ends are visited only once. Every unit in the middle is fine, and the two arms at the ends are the ones whose totals move. This is landing.
 
-A useful fact makes this tidy. A unit whose row sums to exactly 1 cannot have exactly one fractional cell, since that lone cell would have to make up an integer by itself. So every unit sits on either zero edges or at least two, which means the loose ends of any walk are always arms, never units. [Chauvet and Tillé (2006)](https://doi.org/10.1007/s00180-006-0250-2) then supply the trick that makes this fast: rather than searching the whole network, keep a window of just $k$ units with fractional cells. Such a window always contains a loop, so a move can always be found by looking at $k$ units instead of at all of them. Each move touches at most $k$ units regardless of how many there are in total, which is what makes a whole draw take time proportional to $N$ rather than to $N^2$.
+A useful fact makes this tidy. A unit whose row sums to exactly 1 cannot have exactly one fractional cell, since that lone cell would have to make up an integer by itself. So every unit sits on either zero edges or at least two, which means the loose ends of any walk are always arms, never units. [Chauvet and Tillé (2006)](https://doi.org/10.1007/s00180-006-0250-2) then supply the trick that makes this fast: rather than searching the whole network, keep a window of just $k$ units with fractional cells. 
 
 When `blocks` are supplied, each block is worked through separately from start to finish, flight and landing together. Within a block the counts therefore come out tight. The overall counts across blocks are a different matter: the leftover pairing that rescues the two-arm case does not extend here, because a block can finish with several fractional units rather than one, and coupling those across blocks could push a *within*-block arm count more than one away from its target. Section 3.7 shows the overall count wandering as a result.
-
-One point of vocabulary, in case you read the source alongside this. The network just described has units on one side and *arms* on the other. The comments in `src/cube.cpp` describing the two-arm routine talk about a different network, with units on one side and *blocks* on the other, in which no loop can exist at all. Both statements are true of their own network, and they do not contradict each other. Note also that the two-arm case never actually reaches `cube_multi_cpp`, since `balanced_ra()` routes it to the faster dedicated routine, so the discussion here is about three or more arms throughout.
 
 The figures use the same conventions as Section 2.1: units along the bottom, arms along the top, grey edges for fractional cells that this move does not touch, and arrows labelled with the transfer $\delta_+ u$ that the plus step would make. Under each unit, $z$ is now that unit's whole row of $Z$, one number per arm, and $u$ is the corresponding row of the direction, which is all zeros if the unit is not on this walk. The two step sizes $\delta_+$ and $\delta_-$ are printed at the top of each figure.
 
@@ -844,7 +842,7 @@ The third routine, `cube_on_x_cpp`, runs the cube method on the balancing matrix
 
 A move may only go in a direction $u$ that leaves both columns undisturbed, which written out means $X'u = 0$ — for the intercept column, $\sum_i u_i = 0$, and for the $x$ column, $\sum_i x_i u_i = 0$. With $q$ columns the routine takes a window of $q + 1$ units, since $q$ constraints on $q + 1$ unknowns always leave at least one direction free. So under `~ x` the window has three units. When landing is reached the routine reduces $q$ by one, dropping the last column of $X$ first, until a direction exists again; the intercept, and with it the count, is therefore the last constraint to be given up.
 
-This is genuinely a different algorithm from the pivot of Section 2.1, not a re-labelling of it. The pivot's move takes weight from one unit and gives it to another, $u = (1, -1)$ on a pair. That leaves the count alone, since the two changes cancel, but it moves the total of $x$ by $x_i - x_j$, which is zero only if the pair happens to share a value of $x$. Holding both constraints at once needs at least three units, which is exactly why the window is $q + 1$ rather than 2.
+Compare with the pivot approach. The pivot's move takes weight from one unit and gives it to another, $u = (1, -1)$ on a pair. That leaves the count alone, since the two changes cancel, but it moves the total of $x$ by $x_i - x_j$, which is zero only if the pair so happens to share a value of $x$. Holding both constraints at once needs at least three units, which is exactly why the window is $q + 1$ rather than 2.
 
 One further detail matters for reading Section 3.9. Units are sorted by the first column of $X$ that is not constant — usually the covariate, since an intercept is constant — and a coin flip then decides whether to read that order forwards or backwards. The sort is a choice made in this implementation rather than a requirement of the cube method, and it is there so that landing is left with units whose covariate values are close together. The walk below assumes increasing $x$ and no reversal.
 
