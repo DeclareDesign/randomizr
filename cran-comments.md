@@ -4,13 +4,16 @@ Major version. Nothing is removed or renamed: every exported function,
 argument, return type, S3 class and object field carried by 1.0.1 is present,
 so existing code continues to work. The package exports 31 objects against
 1.0.1's 29, the two additions being `balanced_ra()` and
-`balanced_ra_probabilities()`, documented as experimental. They assign units
-when the probability of assignment varies from unit to unit, which neither
-`simple_ra()` nor `complete_ra()` covers. `declare_ra()`, `conduct_ra()` and
-`obtain_condition_probabilities()` gain arguments (`prob_unit_each`,
-`ra_type`, `formula`, `data`), inserted mid-list, so only callers passing
-`block_m` or later arguments by position are affected; none of the reverse
-dependencies does.
+`balanced_ra_probabilities()`, documented as experimental. They draw
+assignment with tight targets: each condition's count lands at the floor or
+ceiling of what the probabilities imply while each unit's probability stays
+exact. That covers assignment when the probability varies from unit to unit,
+which neither `simple_ra()` nor `complete_ra()` handles, and through a
+`formula` argument it also holds covariate totals near their targets.
+`declare_ra()`, `conduct_ra()` and `obtain_condition_probabilities()` gain
+arguments (`prob_unit_each`, `ra_type`, `formula`, `data`), inserted mid-list,
+so only callers passing `block_m` or later arguments by position are affected;
+none of the reverse dependencies does.
 
 The rest of the changes are internal: blocked assignment moves into C++, the
 random sampling functions are unified with their random assignment
@@ -36,13 +39,15 @@ plain C only. `Depends` rises to R (>= 3.6.0) for `R_unif_index()`.
 
 ## Test environments
 
-* local macOS (R release)
+* local macOS 26.5 (aarch64), R 4.6.0
 * GitHub Actions: macOS release; Windows release; ubuntu devel, release, oldrel-1
 * win-builder (devel, release)
 
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes
+
+The package ships three vignettes. Rebuilding them takes about 50 seconds.
 
 ## Reverse dependencies
 
