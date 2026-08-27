@@ -11,7 +11,6 @@ downloads](https://cranlogs.r-pkg.org/badges/grand-total/randomizr?color=green)]
 status](https://github.com/DeclareDesign/randomizr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DeclareDesign/randomizr/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/DeclareDesign/randomizr/graph/badge.svg)](https://app.codecov.io/gh/DeclareDesign/randomizr)
-[![Replications](https://softwarecite.com/badge/randomizr)](https://softwarecite.com/package/randomizr)
 
 **randomizr** generates random assignments for common experimental
 designs, including simple random assignment, complete random assignment,
