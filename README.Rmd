@@ -85,3 +85,7 @@ knitr::kable(table(balanced_ra(blocks = blocks), blocks))
 For more information about all of **randomizr**'s functionality, please see our [online tutorial](https://declaredesign.org/r/randomizr/articles/randomizr_vignette.html)
 
 Happy randomizing!
+
+### AI statement
+
+randomizr 2.0.1 has been built from the ground up with considerable support from Claude and other AI models, including in writing code and documentation. The codebase and documentation build on architecture developed by humans in earlier versions of randomizr, and humans also generated multiple tests for all major parts of the codebase. So while we have reviewed the codebase for 2.0.1, we did not write it. The guarantee offered for the package, then, is not that every line of code has been vouched for. Rather, it is that the package can be shown, through repeated testing, to do what it says it does. For specifics on randomizr guarantees, see <https://declaredesign.org/r/randomizr/articles/randomizr_guarantees.html> and the tests in the randomizr testthat codebase.
