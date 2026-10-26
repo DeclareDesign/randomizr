@@ -86,8 +86,7 @@ strata_rs <- function(strata = NULL,
 
 # block_ra() never rounds a block's count up to the whole block, which keeps
 # every block's control arm nonempty. Sampling has no second arm to protect,
-# so a stratum whose count block_ra() rounds down to N_s - 1 (to 0 for a
-# one-unit stratum) is instead taken
+# so a stratum whose count block_ra() rounds down to N_s - 1 is instead taken
 # whole with probability equal to the fractional part of N_s * prob. Mixing
 # the whole stratum with block_ra()'s N_s - 1 draw makes inclusion exactly
 # prob, and the extra draw comes after block_ra()'s, so seeds for designs
@@ -108,7 +107,7 @@ strata_rs <- function(strata = NULL,
     stratum = as.integer(strata),
     prob = prob,
     frac = Np - floor(Np),
-    rounded_down = ceiling(Np) == N_s & floor(Np) < Np
+    rounded_down = N_s > 1 & ceiling(Np) == N_s & floor(Np) < Np
   )
 }
 

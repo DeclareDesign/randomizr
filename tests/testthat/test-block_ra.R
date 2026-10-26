@@ -256,3 +256,22 @@ test_that("types OK",{
 })
 
 
+
+test_that("a one-unit block with block_prob strictly between 0 and 1 is treated with probability block_prob", {
+  blocks <- rep(c("a", "b"), c(1, 6))
+  set.seed(343)
+  Z <- replicate(10000, block_ra(blocks = blocks, block_prob = c(0.3, 0.5)))
+  expect_equal(mean(Z[1, ]), 0.3, tolerance = 0.03)
+  expect_true(all(colSums(Z[2:7, ]) == 3))
+  set.seed(343)
+  Z <- replicate(10000, block_and_cluster_ra(blocks = blocks, clusters = 1:7, block_prob = c(0.3, 0.5))[1])
+  expect_equal(mean(Z), 0.3, tolerance = 0.03)
+})
+
+test_that("the one-unit-block correction leaves other blocked designs' draws unchanged", {
+  blocks <- rep(c("a", "b", "c"), c(5, 8, 3))
+  set.seed(343)
+  Z <- block_ra(blocks = blocks, block_prob = c(0.3, 0.5, 0.9))
+  # Recorded under randomizr 2.0.1, before the correction.
+  expect_equal(Z, c(0L, 0L, 0L, 1L, 0L, 1L, 0L, 0L, 1L, 1L, 1L, 0L, 0L, 0L, 1L, 1L))
+})
