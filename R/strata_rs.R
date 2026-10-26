@@ -63,7 +63,7 @@ strata_rs <- function(strata = NULL,
                       strata_prob = NULL,
                       check_inputs = TRUE) {
   if (check_inputs) .invoke_check(check_samplr_arguments_new)
-  block_ra(
+  S <- block_ra(
     blocks       = strata,
     prob         = prob,
     prob_unit    = prob_unit,
@@ -74,6 +74,41 @@ strata_rs <- function(strata = NULL,
     conditions   = c(0, 1),
     num_arms     = 2L,
     check_inputs = FALSE
+  )
+  if (.strata_rs_uses_block_prob(n, n_unit, strata_n, prob_unit, strata_prob)) {
+    r <- .strata_rs_rounded_down(strata, prob_unit, strata_prob)
+    for (s in which(r$rounded_down)) {
+      if (runif(1L) < r$frac[s]) S[r$stratum == s] <- 1
+    }
+  }
+  S
+}
+
+# block_ra() never rounds a block's count up to the whole block, which keeps
+# every block's control arm nonempty. Sampling has no second arm to protect,
+# so a stratum whose count block_ra() rounds down to N_s - 1 (to 0 for a
+# one-unit stratum) is instead taken
+# whole with probability equal to the fractional part of N_s * prob. Mixing
+# the whole stratum with block_ra()'s N_s - 1 draw makes inclusion exactly
+# prob, and the extra draw comes after block_ra()'s, so seeds for designs
+# that never hit the case are unchanged. block_ra() reaches the rule only
+# through block_prob, which prob_unit and strata_prob become; a scalar prob
+# takes another branch that already rounds up.
+.strata_rs_uses_block_prob <- function(n, n_unit, strata_n, prob_unit, strata_prob) {
+  is.null(n) && is.null(n_unit) && is.null(strata_n) &&
+    (!is.null(prob_unit) || is.numeric(strata_prob))
+}
+
+.strata_rs_rounded_down <- function(strata, prob_unit, strata_prob) {
+  strata <- droplevels(as.factor(strata))
+  prob <- if (!is.null(prob_unit)) as.numeric(tapply(prob_unit, strata, unique)) else strata_prob
+  N_s <- tabulate(as.integer(strata))
+  Np <- N_s * prob
+  list(
+    stratum = as.integer(strata),
+    prob = prob,
+    frac = Np - floor(Np),
+    rounded_down = ceiling(Np) == N_s & floor(Np) < Np
   )
 }
 
@@ -134,5 +169,11 @@ strata_rs_probabilities <- function(strata = NULL,
     num_arms     = 2L,
     check_inputs = FALSE
   )
-  prob_mat[, "prob_1"]
+  probs <- prob_mat[, "prob_1"]
+  if (.strata_rs_uses_block_prob(n, n_unit, strata_n, prob_unit, strata_prob)) {
+    r <- .strata_rs_rounded_down(strata, prob_unit, strata_prob)
+    hit <- r$rounded_down[r$stratum]
+    probs[hit] <- r$prob[r$stratum][hit]
+  }
+  probs
 }

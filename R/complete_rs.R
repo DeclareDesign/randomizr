@@ -8,7 +8,7 @@
 #'
 #'
 #' @section Terminology:
-#' The name follows \code{\link{complete_ra}()}, as the \code{_rs} functions follow their random assignment counterparts. With a whole-number \code{n}, every subset of size \code{n} is equally likely, which the survey sampling literature calls simple random sampling without replacement (SRSWOR; Lohr 2022, \emph{Sampling: Design and Analysis}, 3rd ed.; Särndal, Swensson, and Wretman 1992, \emph{Model Assisted Survey Sampling}). When \code{N*prob} is not a whole number, the design is a mixture of SRSWOR of size \code{floor(N*prob)} and SRSWOR of size \code{ceiling(N*prob)}; if the ceiling equals \code{N}, the floor is always used.
+#' The name follows \code{\link{complete_ra}()}, as the \code{_rs} functions follow their random assignment counterparts. With a whole-number \code{n}, every subset of size \code{n} is equally likely, which the survey sampling literature calls simple random sampling without replacement (SRSWOR; Lohr 2022, \emph{Sampling: Design and Analysis}, 3rd ed.; Särndal, Swensson, and Wretman 1992, \emph{Model Assisted Survey Sampling}). When \code{N*prob} is not a whole number, the design is a mixture of SRSWOR of size \code{floor(N*prob)} and SRSWOR of size \code{ceiling(N*prob)}, including when the ceiling is \code{N} itself.
 #'
 #' @seealso \code{\link{simple_rs}()}, \code{\link{strata_rs}()}, \code{\link{cluster_rs}()}, \code{\link{complete_ra}()}, \code{\link{complete_rs_probabilities}()}
 #'
@@ -84,8 +84,10 @@ complete_rs <- function(N,
     n_dn <- floor(Np)
     n_up <- ceiling(Np)
     
-    # If rounding doesn't matter or rounds up to 100% use n_dn except when N=1
-    n <- if (n_up == n_dn || (N > 1 && n_up == N)) {
+    # Unlike complete_ra(), which keeps a unit out of treatment by never
+    # rounding up to N, sampling has no second arm to protect: rounding up to
+    # the whole frame is allowed, so inclusion is exactly prob.
+    n <- if (n_up == n_dn) {
       n_dn
     } else  {
       n_dn + sample(0:1, 1, prob = abs(1:0 - (Np - n_dn)))
@@ -151,8 +153,7 @@ complete_rs_probabilities <- function(N,
     #n / max(N,2) # 0,1=> 0, 1,1 => 1/2
     n / N
   } else if (is.numeric(prob)) {
-    ifelse(N > 1 && ceiling(N * prob) == N,
-           floor(N * prob) / N, prob)
+    prob
   } else {
     .5
   }

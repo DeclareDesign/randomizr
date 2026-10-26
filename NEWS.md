@@ -1,5 +1,7 @@
 # randomizr (development version)
 
+* `complete_rs()`, `cluster_rs()`, `strata_rs()`, and `strata_and_cluster_rs()` now reach the requested inclusion probability when rounding up would take the whole frame, stratum, or set of clusters. They had inherited `complete_ra()`'s rule of never rounding up to N, which keeps a control arm nonempty under assignment but has no purpose under sampling: `complete_rs(N = 10, prob = 0.95)` always sampled 9 units, for inclusion of 0.90, and a one-unit stratum with `strata_prob = 0.3` was never sampled. The `_probabilities()` functions report the corrected values. Draws for designs that never hit the case are unchanged (#99).
+
 * The documentation of `simple_rs()`, `complete_rs()`, `strata_rs()`, `cluster_rs()`, and `strata_and_cluster_rs()` gains a "Terminology" section giving the names the survey sampling literature uses for each design (Bernoulli and Poisson sampling, simple random sampling without replacement, stratified and cluster sampling). Function names are unchanged. See #99.
 
 # randomizr 2.0.1

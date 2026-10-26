@@ -103,3 +103,21 @@ test_that("prob_unit and n_unit", {
   
 })
 
+
+test_that("strata_rs rounds a stratum up to its whole size when the ceiling of N_s*prob is N_s", {
+  strata <- rep(c("a", "b", "c"), c(4, 10, 1))
+  probs <- c(0.9, 0.5, 0.3)
+  expect_equal(
+    strata_rs_probabilities(strata = strata, strata_prob = probs),
+    rep(probs, c(4, 10, 1))
+  )
+  expect_equal(
+    strata_rs_probabilities(strata = strata, prob_unit = rep(probs, c(4, 10, 1))),
+    rep(probs, c(4, 10, 1))
+  )
+  set.seed(343)
+  S <- replicate(10000, strata_rs(strata = strata, strata_prob = probs))
+  realized <- tapply(rowMeans(S), strata, mean)
+  expect_equal(as.numeric(realized), probs, tolerance = 0.02)
+  expect_setequal(unique(colSums(S[1:4, ])), c(3, 4))
+})
