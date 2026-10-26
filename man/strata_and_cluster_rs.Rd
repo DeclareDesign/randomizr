@@ -50,6 +50,11 @@ buys some of it back by fixing how many clusters come from each stratum.
 Clusters must nest within strata: every unit in a cluster has to belong to
 the same stratum.
 }
+\section{Terminology}{
+
+The name follows \code{\link{block_and_cluster_ra}()}, as the \code{_rs} functions follow their random assignment counterparts. In the survey sampling literature this design is stratified one-stage cluster sampling: stratified simple random sampling without replacement (stratified SRSWOR) of clusters, with every unit in a sampled cluster included (Lohr 2022, \emph{Sampling: Design and Analysis}, 3rd ed.; Särndal, Swensson, and Wretman 1992, \emph{Model Assisted Survey Sampling}).
+}
+
 \examples{
 # Twelve clusters, of sizes 1 through 12, nested in four strata of three
 clusters <- rep(letters[1:12], times = 1:12)

@@ -4,6 +4,9 @@
 #'
 #' By default the clusters are drawn by complete random sampling, so a fixed number of clusters is sampled on every draw. Setting \code{simple = TRUE} draws each cluster independently instead, using \code{\link{simple_rs}()}.
 #'
+#' @section Terminology:
+#' The name follows \code{\link{cluster_ra}()}, as the \code{_rs} functions follow their random assignment counterparts. In the survey sampling literature this design is one-stage cluster sampling: simple random sampling without replacement (SRSWOR) of clusters, with every unit in a sampled cluster included (Lohr 2022, \emph{Sampling: Design and Analysis}, 3rd ed.; Särndal, Swensson, and Wretman 1992, \emph{Model Assisted Survey Sampling}). With \code{simple = TRUE} the clusters are instead drawn by Bernoulli sampling (Poisson sampling if probabilities differ by cluster).
+#'
 #' @seealso \code{\link{complete_rs}()}, \code{\link{strata_and_cluster_rs}()}, \code{\link{cluster_ra}()}, \code{\link{cluster_rs_probabilities}()}
 #'
 #' @param clusters A vector of length N indicating which cluster each unit belongs to. (required)

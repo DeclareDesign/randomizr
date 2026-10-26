@@ -38,6 +38,11 @@ A numeric vector of length N indicating whether each unit is sampled (1) or not 
 \details{
 By default the clusters are drawn by complete random sampling, so a fixed number of clusters is sampled on every draw. Setting \code{simple = TRUE} draws each cluster independently instead, using \code{\link{simple_rs}()}.
 }
+\section{Terminology}{
+
+The name follows \code{\link{cluster_ra}()}, as the \code{_rs} functions follow their random assignment counterparts. In the survey sampling literature this design is one-stage cluster sampling: simple random sampling without replacement (SRSWOR) of clusters, with every unit in a sampled cluster included (Lohr 2022, \emph{Sampling: Design and Analysis}, 3rd ed.; Särndal, Swensson, and Wretman 1992, \emph{Model Assisted Survey Sampling}). With \code{simple = TRUE} the clusters are instead drawn by Bernoulli sampling (Poisson sampling if probabilities differ by cluster).
+}
+
 \examples{
 # Ten clusters, of sizes 1 through 10
 clusters <- rep(letters[1:10], times = 1:10)

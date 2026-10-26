@@ -1,3 +1,7 @@
+# randomizr (development version)
+
+* The documentation of `simple_rs()`, `complete_rs()`, `strata_rs()`, `cluster_rs()`, and `strata_and_cluster_rs()` gains a "Terminology" section giving the names the survey sampling literature uses for each design (Bernoulli and Poisson sampling, simple random sampling without replacement, stratified and cluster sampling). Function names are unchanged. See #99.
+
 # randomizr 2.0.1
 
 This release is a major internal restructuring plus one new capability, described here relative to randomizr 1.0.1, the version it replaces on CRAN. No exported function, argument, return type, S3 class, or object field carried by 1.0.1 is removed, renamed, or reordered. New arguments were added to `declare_ra()`, `conduct_ra()` and `obtain_condition_probabilities()` (`prob_unit_each` after `prob_each`; `ra_type` and `formula` before `permutation_matrix`; `data` last), so a caller passing `block_m` or later arguments by position must name them; `block_ra()` gains two arguments documented as internal (`.block_int`, `.N_per_block`). The package exports 31 objects against 1.0.1's 29, the two additions being `balanced_ra()` and `balanced_ra_probabilities()`.

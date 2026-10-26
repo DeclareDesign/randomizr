@@ -4,6 +4,9 @@
 #'
 #' The number sampled per stratum can be left to the function, set as a common count or probability across strata (\code{n}, \code{prob}), or set stratum by stratum (\code{strata_n}, \code{strata_prob}). When the probability varies across strata the sample is not self-weighting, and \code{\link{strata_rs_probabilities}()} gives the inclusion probabilities needed to weight it.
 #'
+#' @section Terminology:
+#' The name follows \code{\link{block_ra}()}, as the \code{_rs} functions follow their random assignment counterparts. In the survey sampling literature this design is stratified simple random sampling without replacement (stratified SRSWOR; Lohr 2022, \emph{Sampling: Design and Analysis}, 3rd ed.; Särndal, Swensson, and Wretman 1992, \emph{Model Assisted Survey Sampling}). Strata are sampled independently. When \code{N_stratum*prob} is not a whole number, a stratum's sample size is a mixture of the floor and the ceiling, as in \code{\link{complete_rs}()}.
+#'
 #' @seealso \code{\link{complete_rs}()}, \code{\link{strata_and_cluster_rs}()}, \code{\link{block_ra}()}, \code{\link{strata_rs_probabilities}()}
 #'
 #' @param strata A vector of length N indicating which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)

@@ -4,6 +4,9 @@
 #'
 #' If \code{prob} is not specified, each unit is sampled with probability 0.5.
 #'
+#' @section Terminology:
+#' The name follows \code{\link{simple_ra}()}, as the \code{_rs} functions follow their random assignment counterparts. In the survey sampling literature, independent draws like these are called Bernoulli sampling when \code{prob} is constant and Poisson sampling when \code{prob_unit} varies by unit (Lohr 2022, \emph{Sampling: Design and Analysis}, 3rd ed.; Särndal, Swensson, and Wretman 1992, \emph{Model Assisted Survey Sampling}). The sample size is random, and each unit's inclusion probability is exactly the probability supplied.
+#'
 #' @seealso \code{\link{complete_rs}()}, \code{\link{strata_rs}()}, \code{\link{simple_ra}()}, \code{\link{simple_rs_probabilities}()}
 #'
 #' @param N The number of units in the sampling frame. Must be a positive integer. (required)

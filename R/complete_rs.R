@@ -7,6 +7,9 @@
 #' If only \code{N} is specified, half the units are sampled. When \code{N} is odd, either \code{floor(N/2)} or \code{ceiling(N/2)} units are sampled.
 #'
 #'
+#' @section Terminology:
+#' The name follows \code{\link{complete_ra}()}, as the \code{_rs} functions follow their random assignment counterparts. With a whole-number \code{n}, every subset of size \code{n} is equally likely, which the survey sampling literature calls simple random sampling without replacement (SRSWOR; Lohr 2022, \emph{Sampling: Design and Analysis}, 3rd ed.; Särndal, Swensson, and Wretman 1992, \emph{Model Assisted Survey Sampling}). When \code{N*prob} is not a whole number, the design is a mixture of SRSWOR of size \code{floor(N*prob)} and SRSWOR of size \code{ceiling(N*prob)}; if the ceiling equals \code{N}, the floor is always used.
+#'
 #' @seealso \code{\link{simple_rs}()}, \code{\link{strata_rs}()}, \code{\link{cluster_rs}()}, \code{\link{complete_ra}()}, \code{\link{complete_rs_probabilities}()}
 #'
 #' @param N The number of units in the sampling frame. Must be a positive integer. (required)
