@@ -151,6 +151,12 @@ complete_ra <- function(N,
       if (m_ceiling == N) {
         m <- m_floor
         assignment <- sample(rep(conditions, c(N - m, m)))
+        # Rounding down keeps a control unit when N > 1. With N = 1 it left the
+        # unit in control on every draw, although its probability is prob. The
+        # coin is drawn after the permutation, so no other design's stream moves.
+        if (N == 1 && m_floor < N * prob && runif(1L) < prob) {
+          assignment <- conditions[2]
+        }
         assignment <-
           clean_condition_names(assignment, conditions)
         return(assignment)

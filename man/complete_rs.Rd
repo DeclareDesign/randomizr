@@ -37,6 +37,11 @@ Set the number of units to sample directly with \code{n}, or give a target proba
 
 If only \code{N} is specified, half the units are sampled. When \code{N} is odd, either \code{floor(N/2)} or \code{ceiling(N/2)} units are sampled.
 }
+\section{Terminology}{
+
+The name follows \code{\link{complete_ra}()}, as the \code{_rs} functions follow their random assignment counterparts. With a whole-number \code{n}, every subset of size \code{n} is equally likely, which the survey sampling literature calls simple random sampling without replacement (SRSWOR; Lohr 2022, \emph{Sampling: Design and Analysis}, 3rd ed.; Särndal, Swensson, and Wretman 1992, \emph{Model Assisted Survey Sampling}). When \code{N*prob} is not a whole number, the design is a mixture of SRSWOR of size \code{floor(N*prob)} and SRSWOR of size \code{ceiling(N*prob)}, including when the ceiling is \code{N} itself.
+}
+
 \examples{
 S <- complete_rs(N = 100)
 table(S)

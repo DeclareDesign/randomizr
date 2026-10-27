@@ -84,3 +84,11 @@ test_that("_unit",{
   expect_error(complete_rs(100, n_unit = rep(c(40, 50), c(50, 50))))
   
 })
+
+test_that("complete_rs rounds up to the whole frame when the ceiling of N*prob is N", {
+  expect_equal(complete_rs_probabilities(N = 10, prob = 0.95), rep(0.95, 10))
+  set.seed(343)
+  sizes <- replicate(4000, sum(complete_rs(N = 10, prob = 0.95)))
+  expect_setequal(unique(sizes), c(9, 10))
+  expect_equal(mean(sizes == 10), 0.5, tolerance = 0.05)
+})

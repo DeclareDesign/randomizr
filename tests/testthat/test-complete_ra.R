@@ -210,3 +210,13 @@ test_that("issue 90 is OK", {
 })
 
 
+
+test_that("a single unit with prob strictly between 0 and 1 is treated with probability prob", {
+  set.seed(343)
+  Z <- replicate(10000, complete_ra(N = 1, prob = 0.3))
+  expect_equal(mean(Z), 0.3, tolerance = 0.03)
+  expect_equal(unname(complete_ra_probabilities(N = 1, prob = 0.3)[1, "prob_1"]), 0.3)
+  set.seed(343)
+  Z <- replicate(10000, cluster_ra(clusters = rep(1, 4), prob = 0.3)[1])
+  expect_equal(mean(Z), 0.3, tolerance = 0.03)
+})

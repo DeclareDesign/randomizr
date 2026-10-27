@@ -163,6 +163,15 @@ block_ra <- function(blocks = NULL,
       m_per_b <- integer(G)
     }
     raw        <- block_assign_cpp(block_int, m_per_b, prob_v, mode)
+    # The kernel follows complete_ra() in never rounding a block's count up to
+    # the whole block, so a one-unit block with block_prob strictly between 0
+    # and 1 was never treated. Its coin is drawn after the kernel's draws, so
+    # designs without such a block keep their streams.
+    if (mode == 2L) {
+      for (b in which(N_per_block == 1L & prob_v > 0 & prob_v < 1)) {
+        if (runif(1L) < prob_v[b]) raw[block_int == b] <- 1L
+      }
+    }
     cond       <- if (!is.null(conditions)) conditions else c(0L, 1L)
     assignment <- cond[raw + 1L]
     return(clean_condition_names(assignment, conditions))

@@ -1,3 +1,11 @@
+# randomizr (development version)
+
+* `complete_ra()`, `cluster_ra()`, `block_ra()`, and `block_and_cluster_ra()` now treat a lone unit (or lone cluster, or one-unit block) with its stated probability. Given `prob` or `block_prob` strictly between 0 and 1, such a unit was left in control on every draw, while the `_probabilities()` functions reported the stated probability. Designs with more than one unit per block keep their exact draws: the correcting coin is drawn after the existing ones, and only when the case arises.
+
+* `complete_rs()`, `cluster_rs()`, `strata_rs()`, and `strata_and_cluster_rs()` now reach the requested inclusion probability when rounding up would take the whole frame, stratum, or set of clusters. They had inherited `complete_ra()`'s rule of never rounding up to N, which keeps a control arm nonempty under assignment but has no purpose under sampling: `complete_rs(N = 10, prob = 0.95)` always sampled 9 units, for inclusion of 0.90, and a one-unit stratum with `strata_prob = 0.3` was never sampled. The `_probabilities()` functions report the corrected values. Draws for designs that never hit the case are unchanged (#99).
+
+* The documentation of `simple_rs()`, `complete_rs()`, `strata_rs()`, `cluster_rs()`, and `strata_and_cluster_rs()` gains a "Terminology" section giving the names the survey sampling literature uses for each design (Bernoulli and Poisson sampling, simple random sampling without replacement, stratified and cluster sampling). Function names are unchanged. See #99.
+
 # randomizr 2.0.1
 
 This release is a major internal restructuring plus one new capability, described here relative to randomizr 1.0.1, the version it replaces on CRAN. No exported function, argument, return type, S3 class, or object field carried by 1.0.1 is removed, renamed, or reordered. New arguments were added to `declare_ra()`, `conduct_ra()` and `obtain_condition_probabilities()` (`prob_unit_each` after `prob_each`; `ra_type` and `formula` before `permutation_matrix`; `data` last), so a caller passing `block_m` or later arguments by position must name them; `block_ra()` gains two arguments documented as internal (`.block_int`, `.N_per_block`). The package exports 31 objects against 1.0.1's 29, the two additions being `balanced_ra()` and `balanced_ra_probabilities()`.
